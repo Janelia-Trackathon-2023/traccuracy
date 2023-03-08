@@ -8,7 +8,7 @@ from skimage.measure import regionprops_table
 from tifffile import imread
 
 from cell_tracking_metrics.tracking_data import TrackingData
-from cell_tracking_metrics.tracking_graph import TrackGraph
+from cell_tracking_metrics.tracking_graph import TrackingGraph
 
 
 def load_tiffs(data_dir):
@@ -194,6 +194,6 @@ def load_ctc_data(data_dir, track_path):
 
     G = ctc_to_graph(tracks, detections)
 
-    data = TrackingData(TrackGraph(G), segmentation=masks)
+    data = TrackingData(TrackingGraph(G), segmentation=masks)
 
     return data

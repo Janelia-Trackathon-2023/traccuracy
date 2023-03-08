@@ -1,4 +1,4 @@
-class TrackGraph:
+class TrackingGraph:
     """Wrapper around networkx graphs.
 
     with additional functionality such as getting the position of a node.
