@@ -1,7 +1,17 @@
 # https://peps.python.org/pep-0517/
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
-build-backend = "hatchling.build"
+# requires = ["hatchling", "hatch-vcs"]
+build-backend = "setuptools.build_meta"
+requires = [
+    "wheel",
+    "setuptools>=40.8.0",
+    "setuptools_scm",
+    "numpy==1.17.3; python_version=='3.8'",
+    "numpy==1.19.3; python_version=='3.9'",
+    "numpy==1.21.3; python_version=='3.10'",
+    "numpy==1.23.2; python_version=='3.11'",
+    "Cython>=0.28.0"
+]
 
 # https://peps.python.org/pep-0621/
 [project]
@@ -26,6 +36,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
+    "cython>=0.28.0",
     "numpy",
     "networkx",
     "pandas",
@@ -53,6 +64,15 @@ dev = [
 homepage = "https://github.com/DragaDoncila/cell_tracking_metrics"
 repository = "https://github.com/DragaDoncila/cell_tracking_metrics"
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ['src'] #  list of folders that contain packages
+include = ['cell_tracking_metrics*']
+
+[tool.setuptools_scm] # Necessary to enable setuptools_scm for dynamic versioning from tags
+
 # same as console_scripts entry point
 # [project.scripts]
 # spam-cli = "spam:main_cli"
@@ -63,8 +83,8 @@ repository = "https://github.com/DragaDoncila/cell_tracking_metrics"
 # tomatoes = "spam:main_tomatoes"
 
 # https://hatch.pypa.io/latest/config/metadata/
-[tool.hatch.version]
-source = "vcs"
+# [tool.hatch.version]
+# source = "vcs"
 
 # https://hatch.pypa.io/latest/config/build/#file-selection
 # [tool.hatch.build.targets.sdist]
@@ -157,3 +177,18 @@ pretty = true
 #     ".ruff_cache/**/*",
 #     "tests/**/*",
 # ]
+
+[tool.cibuildwheel]
+# Skip 32-bit builds & PyPy wheels on all platforms
+skip = ["*-win32", "*-manylinux_i686", "pp*", "*musllinux*"]
+test-requires = "pytest"
+test-command = 'pytest "{project}/tests" -v'
+test-extras = ["test"]
+manylinux-x86_64-image = "manylinux_2_24"
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
+repair-wheel-command = [
+    "DYLD_LIBRARY_PATH=$REPAIR_LIBRARY_PATH delocate-listdeps {wheel}",
+    "DYLD_LIBRARY_PATH=$REPAIR_LIBRARY_PATH delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}",
+]
