@@ -74,6 +74,40 @@ class TrackingGraph:
         self.start_frame = min(self.nodes_by_frame.keys())
         self.end_frame = max(self.nodes_by_frame.keys()) + 1
 
+    def nodes(self, limit_to=None):
+        """Get all the nodes in the graph, along with their attributes.
+        Args:
+            limit_to (list[hashable], optional): Limit returned dictionary
+                to nodes with the provided ids. Defaults to None.
+                Will raise KeyError if any of these node_ids are not present.
+
+        Returns:
+            dict[hashable, dict]: A dictionary from node ids to node attributes
+        """
+        nodes = self.graph.nodes.items()
+        if limit_to is None:
+            return nodes
+        else:
+            limited_nodes = {_id: data for _id, data in nodes if _id in limit_to}
+            return limited_nodes
+
+    def edges(self, limit_to=None):
+        """Get all the edges in the graph, along with their attributes.
+        Args:
+            limit_to (list[tuple[hashable]], optional): Limit returned dictionary
+                to edges with the provided ids. Defaults to None.
+                Will raise KeyError if any of these edge ids are not present.
+
+        Returns:
+            dict[tuple[hashable], dict]: A dictionary from edge ids to edge attributes
+        """
+        edges = self.graph.edges.items()
+        if limit_to is None:
+            return edges
+        else:
+            limited_edges = {_id: data for _id, data in edges if _id in limit_to}
+            return limited_edges
+
     def get_nodes_in_frame(self, frame):
         """Get the node ids of all nodes in the given frame.
 
@@ -101,7 +135,7 @@ class TrackingGraph:
         """
         return [self.graph.nodes[node_id][key] for key in self.location_keys]
 
-    def get_nodes_with_attribute(self, attr, criterion=None, start_nodes=None):
+    def get_nodes_with_attribute(self, attr, criterion=None, limit_to=None):
         """Get the node_ids of all nodes who have an attribute, optionally
         limiting to nodes whose value at that attribute meet a given criteria.
 
@@ -114,18 +148,20 @@ class TrackingGraph:
             criterion ((any)->bool, optional): A function that takes a value and returns
                 a boolean. If provided, nodes will only be returned if the value at
                 node[attr] meets this criterion. Defaults to None.
-            start_nodes (graph.nodes, optional): If provided the function will iterate
-                over these nodes. Otherwise defaults to self.graph.nodes
+            limit_to (list[hashable], optional): If provided the function will only
+                return node ids in this list. Will raise KeyError if ids provided here
+                are not present.
 
         Returns:
             list of hashable: A list of node_ids which have the given attribute
-                (and optionally have values at that attribute that meet the given criterion.)
+                (and optionally have values at that attribute that meet the given criterion,
+                and/or are in the list of node ids.)
         """
-        if not start_nodes:
-            start_nodes = self.graph.nodes.keys()
+        if not limit_to:
+            limit_to = self.graph.nodes.keys()
 
         nodes = []
-        for node in start_nodes:
+        for node in limit_to:
             attributes = self.graph.nodes[node]
             if attr in attributes.keys():
                 if criterion is None or criterion(attributes[attr]):

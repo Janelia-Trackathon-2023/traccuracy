@@ -105,12 +105,12 @@ def match_iou_2d(gt, pred, threshold=0.6, label_key="segmentation_id"):
             gt_node = G_gt.get_nodes_with_attribute(
                 label_key,
                 criterion=lambda x: x == gt_id,  # noqa
-                start_nodes=G_gt.get_nodes_in_frame(t),
+                limit_to=G_gt.get_nodes_in_frame(t),
             )[0]
             pred_node = G_pred.get_nodes_with_attribute(
                 label_key,
                 criterion=lambda x: x == pred_id,  # noqa
-                start_nodes=G_pred.get_nodes_in_frame(t),
+                limit_to=G_pred.get_nodes_in_frame(t),
             )[0]
             mapper.append((gt_node, pred_node))
 
