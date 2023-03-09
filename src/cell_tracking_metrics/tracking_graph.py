@@ -35,7 +35,7 @@ class TrackingGraph:
             Keys used to access the location of the cell in space.
     """
 
-    def __init__(self, graph, frame_key="t", location_keys=["x", "y"]):
+    def __init__(self, graph, frame_key="t", location_keys=("x", "y")):
         """A directed graph representing a tracking solution where edges go forward in time.
 
         Args:
@@ -43,9 +43,9 @@ class TrackingGraph:
                 where edges go forward in time.
             frame_key (str, optional): The key on each node in graph that contains the time frame
                 of the node. Every node must have a value stored at this key. Defaults to 't'.
-            location_keys (list, optional): The list of keys on each node in graph
+            location_keys (tuple, optional): The list of keys on each node in graph
                 that contains the spatial location of the node. Every node
-                must have a value stored at each of these keys. Defaults to ['x', 'y'].
+                must have a value stored at each of these keys. Defaults to ('x', 'y').
         """
         self.graph = graph
         self.frame_key = frame_key
@@ -101,7 +101,7 @@ class TrackingGraph:
         """
         return [self.graph.nodes[node_id][key] for key in self.location_keys]
 
-    def get_nodes_with_attribute(self, attr, criterion=None):
+    def get_nodes_with_attribute(self, attr, criterion=None, start_nodes=None):
         """Get the node_ids of all nodes who have an attribute, optionally
         limiting to nodes whose value at that attribute meet a given criteria.
 
@@ -114,13 +114,19 @@ class TrackingGraph:
             criterion ((any)->bool, optional): A function that takes a value and returns
                 a boolean. If provided, nodes will only be returned if the value at
                 node[attr] meets this criterion. Defaults to None.
+            start_nodes (graph.nodes, optional): If provided the function will iterate
+                over these nodes. Otherwise defaults to self.graph.nodes
 
         Returns:
             list of hashable: A list of node_ids which have the given attribute
                 (and optionally have values at that attribute that meet the given criterion.)
         """
+        if not start_nodes:
+            start_nodes = self.graph.nodes.keys()
+
         nodes = []
-        for node, attributes in self.graph.nodes.items():
+        for node in start_nodes:
+            attributes = self.graph.nodes[node]
             if attr in attributes.keys():
                 if criterion is None or criterion(attributes[attr]):
                     nodes.append(node)

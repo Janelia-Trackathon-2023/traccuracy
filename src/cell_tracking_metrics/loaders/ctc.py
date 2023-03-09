@@ -32,8 +32,6 @@ def load_tiffs(data_dir):
         ims.append(imread(f))
 
     mov = np.stack(ims)
-    # Add channel axis
-    mov = np.expand_dims(mov, axis=-1)
     return mov
 
 
