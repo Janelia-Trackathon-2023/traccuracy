@@ -86,7 +86,7 @@ class TrackingGraph:
         """
         nodes = self.graph.nodes.items()
         if limit_to is None:
-            return nodes
+            return dict(nodes)
         else:
             limited_nodes = {_id: data for _id, data in nodes if _id in limit_to}
             return limited_nodes
@@ -103,7 +103,7 @@ class TrackingGraph:
         """
         edges = self.graph.edges.items()
         if limit_to is None:
-            return edges
+            return dict(edges)
         else:
             limited_edges = {_id: data for _id, data in edges if _id in limit_to}
             return limited_edges
