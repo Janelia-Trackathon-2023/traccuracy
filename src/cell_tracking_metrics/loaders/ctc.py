@@ -15,15 +15,12 @@ def load_tiffs(data_dir):
     """Load a directory of individual frames into a stack.
 
     Args:
-    ----
         data_dir (Path): Path to directory of tiff files
 
     Raises:
-    ------
         FileNotFoundError: No tif files found in data_dir
 
     Returns:
-    -------
         np.array: 4D array with dims TYXC
     """
     files = np.sort(glob.glob(f"{data_dir}/*.tif*"))
@@ -44,12 +41,10 @@ def _detections_from_image(stack, idx):
     """Return the unique track label, centroid and time for each track vertex.
 
     Args:
-    ----
         stack (np.ndarray): Stack of masks
         idx (int): Index of the image to calculate the centroids and track labels
 
     Returns:
-    -------
         pd.DataFrame: The dataframe of track data for one time step (specified by idx)
     """
     props = regionprops_table(
@@ -63,11 +58,9 @@ def get_node_attributes(masks):
     """Calculates x,y,z,t,label for each detection in a movie.
 
     Args:
-    ----
         masks (np.ndarray): Set of masks with time in the first axis
 
     Returns:
-    -------
         pd.DataFrame: Dataframe with one detection per row. Columns
             segmentation_id, x, y, z, t
     """
@@ -89,17 +82,14 @@ def ctc_to_graph(df, detections):
     """Create a Graph from DataFrame of CTC info with node attributes.
 
     Args:
-    ----
         data (pd.DataFrame): DataFrame of CTC-style info
         detections (pd.DataFrame): Dataframe from get_node_attributes with position
             and segmentation label for each cell detection
 
     Returns:
-    -------
         networkx.Graph: Graph representation of the CTC data.
 
     Raises:
-    ------
         ValueError: If the Parent_ID is not in any previous frames.
     """
     edges = []
@@ -173,15 +163,12 @@ def load_ctc_data(data_dir, track_path):
     """Read the CTC track file and create a Graph.
 
     Args:
-    ----
         path (str): Path to the CTC text file.
 
     Returns:
-    -------
         networkx.Graph: Graph representation of the ISBI data.
 
     Raises:
-    ------
         ValueError: If the Parent_ID is not in any previous frames.
     """
     names = ["Cell_ID", "Start", "End", "Parent_ID"]

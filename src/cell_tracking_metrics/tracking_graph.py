@@ -23,17 +23,16 @@ class TrackingGraph:
     although non-spatiotemporal attributes of nodes and edges can be modified freely.
 
     Attributes
-    ----------
-    start_frame: int, the first frame with a node in the graph
-    end_frame: int, the end of the span of frames containing nodes
-        (one frame after the last frame that contains a node)
-    nodes_by_frame: dict of int -> node_id
-        Maps from frames to all node ids in that frame
-    frame_key: str
-        The name of the node attribute that corresponds to the frame of
-        the node. Defaults to "t".
-    location_keys: list of str
-        Keys used to access the location of the cell in space.
+        start_frame: int, the first frame with a node in the graph
+        end_frame: int, the end of the span of frames containing nodes
+            (one frame after the last frame that contains a node)
+        nodes_by_frame: dict of int -> node_id
+            Maps from frames to all node ids in that frame
+        frame_key: str
+            The name of the node attribute that corresponds to the frame of
+            the node. Defaults to "t".
+        location_keys: list of str
+            Keys used to access the location of the cell in space.
     """
 
     def __init__(self, graph, frame_key="t", location_keys=["x", "y"]):

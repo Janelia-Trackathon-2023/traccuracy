@@ -6,13 +6,11 @@ of a ground truth and predicted tracking solution.
 Each matching function has the following spec:
 
 Args:
-----
     ground_truth (TrackingData): The ground truth or reference tracking solution
     prediction (TrackingData): A generated tracking solution to be compared
         with the ground truth
 
 Returns:
--------
     list[(gt_node_id, pred_node_id)]: A list of pairs of node_ids, where the first node_id
         refers to a node in ground_truth.tracking_graph, and the second node_id
         refers to a node in prediction.tracking_graph. There is no restriction

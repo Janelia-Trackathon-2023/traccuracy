@@ -4,7 +4,6 @@ class TrackingData:
         with valid tracks. Can contain a numpy-like segmentation.
 
         Args:
-        ----
             tracking_graph (TrackingGraph): A TrackGraph that contains
                 nodes indicating cell detections and edges indicating links between
                 detections over time.
