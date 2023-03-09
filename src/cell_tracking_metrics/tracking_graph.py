@@ -140,13 +140,12 @@ class TrackingGraph:
         """
         return [node for node, degree in self.graph.out_degree() if degree >= 2]
 
-    def get_parents(self, node):
-        """Get all parent nodes of the given node.
+    def get_preds(self, node):
+        """Get all predecessors of the given node.
 
-        A parent node is any node from a previous time point that has an edge to
-        the given node. A division is not necessary for a node to be considered a parent.
-        In a case where merges are not allowed, each node will have a maximum of
-        one parent.
+        A predecessor node is any node from a previous time point that has an edge to
+        the given node. In a case where merges are not allowed, each node will have a
+        maximum of one predecessor.
 
         Args:
             node (hashable): A node id
@@ -155,15 +154,14 @@ class TrackingGraph:
             list of hashable: A list of node ids containing all nodes that
                 have an edge to the given node.
         """
-        return [parent for parent, _ in self.graph.in_edges(node)]
+        return [pred for pred, _ in self.graph.in_edges(node)]
 
-    def get_children(self, node):
-        """Get all child nodes of the given node.
+    def get_succs(self, node):
+        """Get all successor nodes of the given node.
 
-        A child node is any node from a later time point that has an edge
-        from the given node. A division is not necessary for a node to be
-        considered a child. In a case where divisions are not allowed,
-        a node will have a maximum of one child.
+        A successor node is any node from a later time point that has an edge
+        from the given node.  In a case where divisions are not allowed,
+        a node will have a maximum of one successor.
 
         Args:
             node (hashable): A node id
@@ -172,7 +170,7 @@ class TrackingGraph:
             list of hashable: A list of node ids containing all nodes that have
                 an edge from the given node.
         """
-        return [child for _, child in self.graph.out_edges(node)]
+        return [succ for _, succ in self.graph.out_edges(node)]
 
     def get_connected_components(self):
         """Get a list of TrackingGraphs, each corresponding to one track
@@ -194,44 +192,44 @@ class TrackingGraph:
             for g in nx.weakly_connected_components(graph)
         ]
 
-    def get_attributes(self, _id):
-        """Get the attribute dictionary of a node or an edge.
-        If the id passed in is a tuple, it is assumed to refer to an edge.
-        Otherwise, it is assumed to refer to a node.
-        If the id is not found in the graph, a KeyError will be raised.
-
-        Args:
-            _id (tuple of hashable, or hashable): The node id (hashable)
-                or edge (2-tuple of hashable) id to get the attributes for.
-
-        Returns:
-            dict: A dictionary of key-value pairs for all the attributes of the node/edge,
-                including frame and location for nodes.
-        """
-        if isinstance(_id, tuple):
-            return self.graph.edges[_id]
-        else:
-            return self.graph.nodes[_id]
-
-    def set_attribute(self, _id, key, value):
-        """Set a key/value pair in the attribute dictionary for the node or edge specified by _id.
-        If the id passed in is a tuple, it is assumed to refer to an edge.
-        Otherwise, it is assumed to refer to a node.
-        If the id is not found in the graph, a KeyError will be raised.
+    def set_node_attribute(self, ids, key, value):
+        """Set a key/value pair in the attribute dictionary for the node or nodes
+        specified by ids. If an id is not found in the graph, a KeyError will be raised.
         If the key already exists, the existing value will be overwritten.
 
         Args:
-            _id (typle of hashable, or hashable): The node id (hashable)
-                or edge (2-tuple of hashable) id to set the attributes for.
+            ids (hashable | list[hashable]): The node id or list of node ids
+                to set the attribute for.
             key (string): The name of the attribute to set.
             value (any): The value of the attribute to set.
         """
-        if isinstance(_id, tuple):
-            self.graph.edges[_id][key] = value
-        else:
-            if key == self.frame_key or key in self.location_keys:
-                raise ValueError(
-                    "Cannot change node attributes storing time frame or location. "
-                    f"(node: {_id}, key: {key})"
-                )
+        if not isinstance(ids, list):
+            ids = [ids]
+        if key == self.frame_key or key in self.location_keys:
+            raise ValueError(
+                "Cannot change node attributes storing time frame or location. "
+                f"(key: {key})"
+            )
+        for _id in ids:
             self.graph.nodes[_id][key] = value
+
+    def set_edge_attribute(self, ids, key, value):
+        """Set a key/value pair in the attribute dictionary for the edge or edges
+        specified by ids. If an id is not found in the graph, a KeyError will be raised.
+        If the key already exists, the existing value will be overwritten.
+
+        Args:
+            ids (tuple(hashable) | list[tuple(hashable)]): The edge id or list of edge ids
+                to set the attribute for. Edge ids are a 2-tuple of node ids.
+            key (string): The name of the attribute to set.
+            value (any): The value of the attribute to set.
+        """
+        if not isinstance(ids, list):
+            ids = [ids]
+        if key == self.frame_key or key in self.location_keys:
+            raise ValueError(
+                "Cannot change node attributes storing time frame or location. "
+                f"(key: {key})"
+            )
+        for _id in ids:
+            self.graph.edges[_id][key] = value
