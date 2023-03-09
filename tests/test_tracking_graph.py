@@ -122,22 +122,35 @@ def test_get_nodes_with_attribute(simple_graph):
         "1_3",
         "1_4",
     ]
+    assert simple_graph.get_nodes_with_attribute(
+        "x", criterion=lambda x: x > 1, limit_to=["1_3"]
+    ) == [
+        "1_3",
+    ]
+    assert (
+        simple_graph.get_nodes_with_attribute(
+            "x", criterion=lambda x: x > 1, limit_to=["1_5"]
+        )
+        == []
+    )
+    with pytest.raises(KeyError):
+        simple_graph.get_nodes_with_attribute("x", limit_to=["5"])
 
 
 def test_get_divisions(complex_graph):
     assert complex_graph.get_divisions() == ["1_1", "2_2"]
 
 
-def test_get_parents(simple_graph):
-    assert simple_graph.get_parents("1_0") == []
-    assert simple_graph.get_parents("1_1") == ["1_0"]
-    assert simple_graph.get_parents("1_2") == ["1_1"]
+def test_get_preds(simple_graph):
+    assert simple_graph.get_preds("1_0") == []
+    assert simple_graph.get_preds("1_1") == ["1_0"]
+    assert simple_graph.get_preds("1_2") == ["1_1"]
 
 
-def test_get_children(simple_graph):
-    assert simple_graph.get_children("1_0") == ["1_1"]
-    assert simple_graph.get_children("1_1") == ["1_2", "1_3"]
-    assert simple_graph.get_children("1_2") == []
+def test_get_succs(simple_graph):
+    assert simple_graph.get_succs("1_0") == ["1_1"]
+    assert simple_graph.get_succs("1_1") == ["1_2", "1_3"]
+    assert simple_graph.get_succs("1_2") == []
 
 
 def test_get_connected_components(complex_graph, nx_comp1, nx_comp2):
@@ -155,9 +168,9 @@ def test_get_connected_components(complex_graph, nx_comp1, nx_comp2):
     assert track2.graph.edges == nx_comp2.edges
 
 
-def test_get_and_set_attributes(simple_graph):
-    assert simple_graph.get_attributes("1_0") == {"id": "1_0", "t": 0, "y": 1, "x": 1}
-    assert simple_graph.get_attributes("1_1") == {
+def test_get_and_set_node_attributes(simple_graph):
+    assert simple_graph.nodes["1_0"] == {"id": "1_0", "t": 0, "y": 1, "x": 1}
+    assert simple_graph.nodes["1_1"] == {
         "id": "1_1",
         "t": 1,
         "y": 1,
@@ -165,8 +178,8 @@ def test_get_and_set_attributes(simple_graph):
         "division": True,
     }
 
-    simple_graph.set_attribute("1_0", "flag", False)
-    assert simple_graph.get_attributes("1_0") == {
+    simple_graph.set_node_attribute("1_0", "flag", False)
+    assert simple_graph.nodes["1_0"] == {
         "id": "1_0",
         "t": 0,
         "y": 1,
@@ -174,4 +187,18 @@ def test_get_and_set_attributes(simple_graph):
         "flag": False,
     }
     with pytest.raises(ValueError):
-        simple_graph.set_attribute("1_0", "x", 2)
+        simple_graph.set_node_attribute("1_0", "x", 2)
+
+
+def test_get_and_set_edge_attributes(simple_graph):
+    assert simple_graph.edges[("1_0", "1_1")] == {"id": "1_0", "t": 0, "y": 1, "x": 1}
+    assert simple_graph.edges[("1_0", "1_1")] == {"source": "1_0", "target": "1_1"}
+
+    simple_graph.set_edge_attribute(("1_0", "1_1"), "flag", False)
+    assert simple_graph.edges[("1_0", "1_1")] == {
+        "source": "1_0",
+        "target": "1_1",
+        "flag": False,
+    }
+    with pytest.raises(ValueError):
+        simple_graph.set_edge_attribute(("1_0", "1_1"), "x", 2)
