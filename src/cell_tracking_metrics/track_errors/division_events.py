@@ -28,6 +28,7 @@ class DivisionEvents:
     """
 
     gt_divisions: Optional[int] = None
+    tp_divisions: Optional[int] = None
     fp_divisions: Optional[int] = None
     fn_divisions: Optional[int] = None
     frame_buffer: int = 0
