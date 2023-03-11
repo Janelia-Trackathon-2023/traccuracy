@@ -98,8 +98,8 @@ def compute_overlap_3D(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray
 try:
     import numba
 except ImportError:
-    import warnings
     import os
+    import warnings
 
     if not os.getenv("NO_JIT_WARNING", False):
         warnings.warn(
@@ -120,14 +120,14 @@ else:
 
     # variables that appear in the body of each function
     common_locals = {
-        "N": numba.uint,
-        "K": numba.uint,
+        "N": numba.uint64,
+        "K": numba.uint64,
         "overlaps": numba.types.Array(numba.float64, 2, "C"),
         "iw": numba.float64,
         "ih": numba.float64,
         "ua": numba.float64,
-        "n": numba.uint,
-        "k": numba.uint,
+        "n": numba.uint64,
+        "k": numba.uint64,
     }
 
     compute_overlap = numba.njit(
