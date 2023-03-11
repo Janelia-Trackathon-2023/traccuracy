@@ -56,9 +56,6 @@ def test_ctc_single_nodes():
         {"segmentation_id": 5, "x": 1, "y": 1, "z": 2, "t": 3},
     ]
     df = pd.DataFrame(data)
-    G = ctc.ctc_to_graph(
-        df, 
-        pd.DataFrame.from_records(detections)
-    )
+    G = ctc.ctc_to_graph(df, pd.DataFrame.from_records(detections))
     # This should raise an error if there are no times for single nodes
-    track_graph = TrackingGraph(G)
+    TrackingGraph(G)
