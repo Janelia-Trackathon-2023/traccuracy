@@ -23,7 +23,7 @@ jobs:
         python -m pip install -e .[docs]
 
     - name: Build docs
-      run: sphinx-build -b html docs/source _build
+      run: sphinx-build -b html docs/source docs/_build
 
     - name: Deploy to github pages
       uses: peaceiris/actions-gh-pages@v3.5.9
