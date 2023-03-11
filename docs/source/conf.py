@@ -82,7 +82,7 @@ autodoc_mock_imports = [
     "scipy",
     "numpy",
     "skimage",
-    "cython",
+    "numba",
     "networkx",
     "pandas",
     "tifffile",
