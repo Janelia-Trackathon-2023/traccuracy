@@ -5,7 +5,10 @@ import numpy as np
 from skimage.measure import regionprops
 from tqdm import tqdm
 
-from cell_tracking_metrics.matchers.compute_overlap import compute_overlap
+from cell_tracking_metrics.matchers.compute_overlap import (
+    compute_overlap,
+    compute_overlap_3D,
+)
 from cell_tracking_metrics.tracking_data import TrackingData
 
 
@@ -197,7 +200,12 @@ def get_overlapping_bounding_boxes(gt_frame, res_frame):
         [int(res_prop.label) for res_prop in res_props], dtype=np.uint16
     )
 
-    overlaps = compute_overlap(gt_boxes, res_boxes)  # has the form [gt_bbox, res_bbox]
+    if gt_frame.ndim == 3:
+        overlaps = compute_overlap_3D(gt_boxes, res_boxes)
+    else:
+        overlaps = compute_overlap(
+            gt_boxes, res_boxes
+        )  # has the form [gt_bbox, res_bbox]
 
     # Find the bboxes that have overlap at all (ind_ corresponds to box number - starting at 0)
     ind_gt, ind_res = np.nonzero(overlaps)
