@@ -127,7 +127,6 @@ def get_succ_by_t(G, node, delta_frames):
     Returns:
         hashable: Node id of successor
     """
-    print("start node", node)
     for _ in range(delta_frames):
         nodes = G.get_succs(node)
         # Exit if there are no successors another division
@@ -153,7 +152,8 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
         n_frames (int): Number of frames to include in the frame buffer
 
     Returns:
-        DivisionEvents: Corrected counts of gt_divisions, tp_divisions, fp_divisions and fn_divisions
+        DivisionEvents: Corrected counts of gt_divisions, tp_divisions, fp_divisions
+            and fn_divisions
     """
 
     if not isinstance(G_gt, TrackingGraph) or not isinstance(G_pred, TrackingGraph):
@@ -178,22 +178,18 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
 
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
-        print(fp_node, fn_node)
         correct = False
         t_fp = G_pred.graph.nodes[fp_node][frame_key]
         t_fn = G_gt.graph.nodes[fn_node][frame_key]
 
         # Move on if nodes are not within frame buffer or within same frame
         if abs(t_fp - t_fn) > n_frames or t_fp == t_fn:
-            print("not in buffer")
             continue
 
         # False positive in pred occurs before false negative in gt
         if t_fp < t_fn:
-            print("fp before fn")
             # Check if fp node matches prececessor of fn
-            fn_pred = get_pred_by_t(G_gt, fn_node, t_fn - t_fp, frame_key=frame_key)
-            print("fn_pred", fn_pred)
+            fn_pred = get_pred_by_t(G_gt, fn_node, t_fn - t_fp)
             # Check if the match exists
             if (fn_pred, fp_node) not in mapper:
                 # Match does not exist so divisions cannot match
@@ -201,7 +197,7 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
 
             # Check if daughters match
             fp_succ = [
-                get_succ_by_t(G_pred, node, 1 + t_fn - t_fp, frame_key=frame_key)
+                get_succ_by_t(G_pred, node, t_fn - t_fp)
                 for node in G_pred.get_succs(fp_node)
             ]
             fn_succ = G_gt.get_succs(fn_node)
@@ -213,26 +209,19 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
             correct = True
         # False negative in gt occurs before false positive in pred
         else:
-            print("fn before fp")
             # Check if fp node matches fn predecessor
-            fp_pred = get_pred_by_t(
-                G_pred, fp_node, 1 + t_fp - t_fn, frame_key=frame_key
-            )
-            print("fp pred", fp_pred)
+            fp_pred = get_pred_by_t(G_pred, fp_node, t_fp - t_fn)
             # Check if match exists
             if (fn_node, fp_pred) not in mapper:
-                print("not in mapper")
                 # Match does not exist so divisions cannot match
                 continue
 
             # Check if daughters match
             fn_succ = [
-                get_succ_by_t(G_gt, node, t_fp - t_fn, frame_key=frame_key)
+                get_succ_by_t(G_gt, node, t_fp - t_fn)
                 for node in G_gt.get_succs(fn_node)
             ]
             fp_succ = G_pred.get_succs(fp_node)
-            print("fp_succ", fp_succ)
-            print("fn succ", fn_succ)
             if Counter(fp_succ) != Counter(fn_succ):
                 # Daughters don't match so division cannot match
                 continue

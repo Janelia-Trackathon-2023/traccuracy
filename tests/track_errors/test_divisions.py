@@ -154,11 +154,13 @@ def get_division_graphs():
 
     G2 = nx.DiGraph()
     G2.add_edge("1_0", "1_1")
-    G2.add_edge("1_1", "1_2")
-    G2.add_edge("1_2", "2_2")
+    # Divide to generate 2 lineage
+    G2.add_edge("1_1", "2_2")
     G2.add_edge("2_2", "2_3")
     G2.add_edge("2_3", "2_4")
+    # Divide to generate 3 lineage
     G2.add_edge("1_1", "3_2")
+    G2.add_edge("3_2", "3_3")
     G2.add_edge("3_3", "3_4")
 
     attrs = {}
@@ -175,14 +177,14 @@ def test_get_succ_by_t():
     _, G2, _ = get_division_graphs()
     G2 = TrackingGraph(G2)
 
-    # Find 2 frames back correctly
+    # Find 2 frames forward correctly
     start_node = "2_2"
     delta_t = 2
     end_node = "2_4"
     node = get_succ_by_t(G2, start_node, delta_t)
     assert node == end_node
 
-    # 3 frames back returns None
+    # 3 frames forward returns None
     start_node = "2_2"
     delta_t = 3
     end_node = None
@@ -190,24 +192,45 @@ def test_get_succ_by_t():
     assert node == end_node
 
 
-def test_correct_shifted_divisions():
-    # Early division in gt
-    G_pred, G_gt, mapper = get_division_graphs()
-    G_gt.nodes["1_1"]["is_fn_division"] = True
-    G_pred.nodes["1_3"]["is_fp_division"] = True
+class Test_correct_shifted_divisions:
+    def test_no_change(self):
+        # Early division in gt
+        G_pred, G_gt, mapper = get_division_graphs()
+        G_gt.nodes["1_1"]["is_fn_division"] = True
+        G_pred.nodes["1_3"]["is_fp_division"] = True
 
-    # buffer of 1, no change
-    counts = correct_shifted_divisions(
-        TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=1
-    )
-    assert len(counts.fp_divisions) == 1
-    assert len(counts.fn_divisions) == 1
-    assert len(counts.tp_divisions) == 0
+        # buffer of 1, no change
+        counts = correct_shifted_divisions(
+            TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=1
+        )
+        assert len(counts.fp_divisions) == 1
+        assert len(counts.fn_divisions) == 1
+        assert len(counts.tp_divisions) == 0
 
-    # buffer of 3, corrections
-    counts = correct_shifted_divisions(
-        TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=3
-    )
-    assert len(counts.tp_divisions) == 1
-    assert len(counts.fp_divisions) == 0
-    assert len(counts.fn_divisions) == 0
+    def test_fn_early(self):
+        # Early division in gt
+        G_pred, G_gt, mapper = get_division_graphs()
+        G_gt.nodes["1_1"]["is_fn_division"] = True
+        G_pred.nodes["1_3"]["is_fp_division"] = True
+
+        # buffer of 3, corrections
+        counts = correct_shifted_divisions(
+            TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=3
+        )
+        assert len(counts.tp_divisions) == 1
+        assert len(counts.fp_divisions) == 0
+        assert len(counts.fn_divisions) == 0
+
+    def test_fp_early(self):
+        # Early division in pred
+        G_gt, G_pred, mapper = get_division_graphs()
+        G_pred.nodes["1_1"]["is_fp_division"] = True
+        G_gt.nodes["1_3"]["is_fn_division"] = True
+
+        # buffer of 3, corrections
+        counts = correct_shifted_divisions(
+            TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=3
+        )
+        assert len(counts.tp_divisions) == 1
+        assert len(counts.fp_divisions) == 0
+        assert len(counts.fn_divisions) == 0
