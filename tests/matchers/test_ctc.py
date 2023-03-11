@@ -1,39 +1,19 @@
+from cell_tracking_metrics.matchers.ctc import get_node_matching_map, match_ctc
+from cell_tracking_metrics.tracking_data import TrackingData
+from cell_tracking_metrics.tracking_graph import TrackingGraph
+from .test_utils import get_annotated_movie
 import networkx as nx
 import numpy as np
 import pytest
-from .test_utils import get_annotated_image, get_annotated_movie
-from cell_tracking_metrics.matchers.iou import match_iou_2d, match_nodes
-from cell_tracking_metrics.tracking_data import TrackingData
-from cell_tracking_metrics.tracking_graph import TrackingGraph
-
-
-def test_match_nodes():
-    # Check shape error
-    bad_shape = (2, 10, 10)
-    with pytest.raises(ValueError):
-        match_nodes(np.zeros(bad_shape), np.zeros(bad_shape))
-
-    # creat dummy image to test against
-    num_labels = 5
-    y1 = get_annotated_image(img_size=256, num_labels=num_labels, seed=1)
-    # test same movie
-    gtcells, rescells = match_nodes(y1, y1)
-    for gt_cell, res_cell in zip(gtcells, rescells):
-        assert gt_cell == res_cell
-
-    # test different movies (no assertions about matching)
-    y2 = get_annotated_image(img_size=256, num_labels=num_labels, seed=10)
-    gtcells, rescells = match_nodes(y1, y2)
-
 
 def test_match_iou_2d():
     # Bad input
     with pytest.raises(ValueError):
-        match_iou_2d("not tracking data", "not tracking data")
+        match_ctc("not tracking data", "not tracking data")
 
     # shapes don't match
     with pytest.raises(ValueError):
-        match_iou_2d(
+        match_ctc(
             TrackingData(
                 tracking_graph=nx.DiGraph(), segmentation=np.zeros((5, 10, 10))
             ),
@@ -62,7 +42,7 @@ def test_match_iou_2d():
 
     G = TrackingGraph(G)
 
-    mapper = match_iou_2d(
+    mapper = match_ctc(
         TrackingData(tracking_graph=G, segmentation=movie),
         TrackingData(tracking_graph=G, segmentation=movie),
     )
@@ -73,3 +53,33 @@ def test_match_iou_2d():
     # gt and pred node should be the same
     for pair in mapper:
         assert pair[0] == pair[1]
+
+def test_get_node_matching_map():
+    comp_ids = [3, 7, 10]
+    gt_ids = [4, 12, 14, 15]
+    mtrix = np.zeros((3, 4), dtype=np.uint8)
+    mtrix[0, 1] = 1
+    mtrix[0, 3] = 1
+    mtrix[1, 2] = 1
+    mtrix_dict = {0: {"det": mtrix, "comp_ids": comp_ids, "gt_ids": gt_ids}}
+    matching = get_node_matching_map(mtrix_dict)
+    assert matching == [(12, 3), (15, 3), (14, 7)]
+
+
+def test_get_node_matching_map_multiple_frames():
+    comp_ids = [3, 7, 10]
+    gt_ids = [4, 12, 14, 15]
+    mtrix = np.zeros((3, 4), dtype=np.uint8)
+    mtrix[0, 1] = 1
+    mtrix[0, 3] = 1
+    mtrix[1, 2] = 1
+
+    mtrix2 = np.zeros((3, 4), dtype=np.uint8)
+    mtrix2[1, 1] = 1
+    mtrix2[2, 0] = 1
+    mtrix_dict = {
+        0: {"det": mtrix, "comp_ids": comp_ids, "gt_ids": gt_ids},
+        1: {"det": mtrix2, "comp_ids": comp_ids, "gt_ids": gt_ids},
+    }
+    matching = get_node_matching_map(mtrix_dict)
+    assert matching == [(12, 3), (15, 3), (14, 7), (12, 7), (4, 10)]

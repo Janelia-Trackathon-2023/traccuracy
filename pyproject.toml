@@ -41,7 +41,8 @@ dependencies = [
     "networkx",
     "pandas",
     "tifffile",
-    "scikit-image"
+    "scikit-image",
+    "tqdm"
 ]
 
 # extras

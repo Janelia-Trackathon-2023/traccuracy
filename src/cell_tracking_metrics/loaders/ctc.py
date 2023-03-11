@@ -73,6 +73,8 @@ def get_node_attributes(masks):
             "centroid-0": "x",
         }
     )
+    data_df['segmentation_id'] = data_df['segmentation_id'].astype(int)
+    data_df['t'] = data_df['t'].astype(int)
     return data_df
 
 
@@ -140,7 +142,10 @@ def ctc_to_graph(df, detections):
     detections = detections.set_index("node_id")
 
     attributes = {}
-    for i, row in detections.iterrows():
+    for row in detections.itertuples():
+        row = row._asdict()
+        i = row['Index']
+        del row['Index']
         attributes[i] = row
 
     # Create graph
@@ -148,11 +153,11 @@ def ctc_to_graph(df, detections):
     G = nx.from_pandas_edgelist(
         edges, source="source", target="target", create_using=nx.DiGraph
     )
-    nx.set_node_attributes(G, attributes)
 
     # Add all isolates to graph
     for cell_id in single_nodes:
         G.add_node(cell_id)
+    nx.set_node_attributes(G, attributes)
 
     return G
 
