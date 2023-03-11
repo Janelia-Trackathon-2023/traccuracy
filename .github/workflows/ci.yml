@@ -47,8 +47,8 @@ jobs:
       # - name: Coverage
       #   uses: codecov/codecov-action@v3
 
-  deploy:
-    name: Deploy
+  deploy_sdist:
+    name: Deploy sdist
     needs: test
     if: success() && startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
@@ -61,20 +61,60 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: install
+      - name: build sdist
         run: |
           git tag
           pip install -U pip build twine
-          python -m build
+          python -m build --sdist
           twine check dist/*
           ls -lh dist
 
-      - name: Build and publish
-        run: twine upload dist/*
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.TWINE_API_KEY }}
+      # - name: Upload to PyPI
+      #   run: twine upload dist/*
+      #   env:
+      #     TWINE_USERNAME: __token__
+      #     TWINE_PASSWORD: ${{ secrets.TWINE_API_KEY }}
 
-      - uses: softprops/action-gh-release@v1
+      # - uses: softprops/action-gh-release@v1
+      #   with:
+      #     generate_release_notes: true
+
+  deploy_wheels:
+    # if: startsWith(github.event.ref, 'refs/tags/v')
+    name: deploy wheels (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            name: linux-x86_64
+          - os: windows-2019
+            name: windows-amd64
+          - os: macos-11
+            name: macos-x86_64
+            macos_arch: "x86_64"
+          - os: macos-11
+            name: macos-arm64
+            macos_arch: "arm64"
+    
+    steps:
+      - uses: actions/checkout@v3
         with:
-          generate_release_notes: true
+          fetch-depth: 0
+
+      - name: Build wheels via cibuildwheel
+        uses: pypa/cibuildwheel@v2.12.1
+        env:
+          CIBW_ARCHS_MACOS: "${{ matrix.macos_arch }}"
+
+      - name: Upload wheels as workflow artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.name }}-wheels
+          path: ./wheelhouse/*.whl
+
+      # - name: Upload wheels to PyPI via Twine
+      #   env:
+      #     TWINE_PASSWORD: ${{ secrets.TWINE_API_KEY }}
+      #   run: pipx run twine upload --verbose -u '__token__' wheelhouse/*.whl
