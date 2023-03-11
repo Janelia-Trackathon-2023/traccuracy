@@ -1,6 +1,11 @@
 import networkx as nx
 import pytest
-from cell_tracking_metrics.track_errors.divisions import classify_divisions
+from cell_tracking_metrics.track_errors.divisions import (
+    classify_divisions,
+    correct_shifted_divisions,
+    get_pred_by_t,
+    get_succ_by_t,
+)
 from cell_tracking_metrics.tracking_graph import TrackingGraph
 
 
@@ -41,9 +46,9 @@ def test_classify_divisions_tp(G):
     counts, G_gt, G_pred = classify_divisions(
         TrackingGraph(G), TrackingGraph(G), mapper
     )
-    assert counts.tp_divisions == 1
-    assert counts.fn_divisions == 0
-    assert counts.fp_divisions == 0
+    assert len(counts.tp_divisions) == 1
+    assert len(counts.fn_divisions) == 0
+    assert len(counts.fp_divisions) == 0
     assert "is_tp_division" in G_gt.nodes()["2_2"]
     assert "is_tp_division" in G_pred.nodes()["2_2"]
 
@@ -66,9 +71,9 @@ def test_classify_divisions_fp(G):
     counts, G_gt, G_pred = classify_divisions(
         TrackingGraph(G), TrackingGraph(H), mapper
     )
-    assert counts.fp_divisions == 1
-    assert counts.tp_divisions == 1
-    assert counts.fn_divisions == 0
+    assert len(counts.fp_divisions) == 1
+    assert len(counts.tp_divisions) == 1
+    assert len(counts.fn_divisions) == 0
     assert "is_fp_division" in G_pred.nodes()["1_2"]
 
 
@@ -85,7 +90,124 @@ def test_classify_divisions_fn(G):
     counts, G_gt, G_pred = classify_divisions(
         TrackingGraph(G), TrackingGraph(H), mapper
     )
-    assert counts.fp_divisions == 0
-    assert counts.tp_divisions == 0
-    assert counts.fn_divisions == 1
+    assert len(counts.fp_divisions) == 0
+    assert len(counts.tp_divisions) == 0
+    assert len(counts.fn_divisions) == 1
     assert "is_fn_division" in G_gt.nodes()["2_2"]
+
+
+@pytest.fixture
+def straight_graph():
+    G = nx.DiGraph()
+    for t in range(2, 10):
+        G.add_edge(f"1_{t}", f"1_{t+1}")
+
+    # Set node attributes
+    attrs = {}
+    for node in G.nodes:
+        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
+    nx.set_node_attributes(G, attrs)
+
+    return G
+
+
+def test_get_pred_by_t(straight_graph):
+    # Linear graph with node id 1 from frame 2-10
+    G = TrackingGraph(straight_graph)
+
+    # Predecessor available
+    start_frame = 10
+    target_frame = 5
+    node = get_pred_by_t(G, f"1_{start_frame}", start_frame - target_frame)
+    assert node == f"1_{target_frame}"
+
+    # Predecessor does not exist
+    start_frame = 10
+    target_frame = 1
+    node = get_pred_by_t(G, f"1_{start_frame}", start_frame - target_frame)
+    assert node is None
+
+
+def get_division_graphs():
+    """
+    G1
+                                2_4
+    1_0 -- 1_1 -- 1_2 -- 1_3 -<
+                                3_4
+    G2
+                  2_2 -- 2_3 -- 2_4
+    1_0 -- 1_1 -<
+                  3_2 -- 3_3 -- 3_4
+    """
+
+    G1 = nx.DiGraph()
+    G1.add_edge("1_0", "1_1")
+    G1.add_edge("1_1", "1_2")
+    G1.add_edge("1_2", "1_3")
+    G1.add_edge("1_3", "2_4")
+    G1.add_edge("1_3", "3_4")
+
+    attrs = {}
+    for node in G1.nodes:
+        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
+    nx.set_node_attributes(G1, attrs)
+
+    G2 = nx.DiGraph()
+    G2.add_edge("1_0", "1_1")
+    G2.add_edge("1_1", "1_2")
+    G2.add_edge("1_2", "2_2")
+    G2.add_edge("2_2", "2_3")
+    G2.add_edge("2_3", "2_4")
+    G2.add_edge("1_1", "3_2")
+    G2.add_edge("3_3", "3_4")
+
+    attrs = {}
+    for node in G2.nodes:
+        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
+    nx.set_node_attributes(G2, attrs)
+
+    mapper = [("1_0", "1_0"), ("1_1", "1_1"), ("2_4", "2_4"), ("3_4", "3_4")]
+
+    return G1, G2, mapper
+
+
+def test_get_succ_by_t():
+    _, G2, _ = get_division_graphs()
+    G2 = TrackingGraph(G2)
+
+    # Find 2 frames back correctly
+    start_node = "2_2"
+    delta_t = 2
+    end_node = "2_4"
+    node = get_succ_by_t(G2, start_node, delta_t)
+    assert node == end_node
+
+    # 3 frames back returns None
+    start_node = "2_2"
+    delta_t = 3
+    end_node = None
+    node = get_succ_by_t(G2, start_node, delta_t)
+    assert node == end_node
+
+
+def test_correct_shifted_divisions():
+    # Early division in gt
+    G_pred, G_gt, mapper = get_division_graphs()
+    G_gt.nodes["1_1"]["is_fn_division"] = True
+    G_pred.nodes["1_3"]["is_fp_division"] = True
+
+    # buffer of 1, no change
+    counts = correct_shifted_divisions(
+        TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=1
+    )
+    assert len(counts.fp_divisions) == 1
+    assert len(counts.fn_divisions) == 1
+    assert len(counts.tp_divisions) == 0
+
+    # buffer of 3, corrections
+    counts = correct_shifted_divisions(
+        TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=3
+    )
+    assert len(counts.tp_divisions) == 1
+    assert len(counts.fp_divisions) == 0
+    assert len(counts.fn_divisions) == 0
