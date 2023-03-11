@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import pytest
 import skimage as sk
-from cell_tracking_metrics.matchers.iou import match_iou_2d, match_nodes
+from cell_tracking_metrics.matchers.iou import _match_nodes, match_iou_2d
 from cell_tracking_metrics.tracking_data import TrackingData
 from cell_tracking_metrics.tracking_graph import TrackingGraph
 
@@ -81,23 +81,23 @@ def get_annotated_movie(
     return y.astype("int32")
 
 
-def test_match_nodes():
+def test__match_nodes():
     # Check shape error
     bad_shape = (2, 10, 10)
     with pytest.raises(ValueError):
-        match_nodes(np.zeros(bad_shape), np.zeros(bad_shape))
+        _match_nodes(np.zeros(bad_shape), np.zeros(bad_shape))
 
     # creat dummy image to test against
     num_labels = 5
     y1 = get_annotated_image(img_size=256, num_labels=num_labels, seed=1)
     # test same movie
-    gtcells, rescells = match_nodes(y1, y1)
+    gtcells, rescells = _match_nodes(y1, y1)
     for gt_cell, res_cell in zip(gtcells, rescells):
         assert gt_cell == res_cell
 
     # test different movies (no assertions about matching)
     y2 = get_annotated_image(img_size=256, num_labels=num_labels, seed=10)
-    gtcells, rescells = match_nodes(y1, y2)
+    gtcells, rescells = _match_nodes(y1, y2)
 
 
 def test_match_iou_2d():

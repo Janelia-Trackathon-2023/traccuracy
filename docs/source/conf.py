@@ -48,6 +48,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosectionlabel",
+    "m2r2",
 ]
 
 napoleon_google_docstring = True
@@ -82,7 +83,7 @@ autodoc_mock_imports = [
     "scipy",
     "numpy",
     "skimage",
-    "cython",
+    "numba",
     "networkx",
     "pandas",
     "tifffile",

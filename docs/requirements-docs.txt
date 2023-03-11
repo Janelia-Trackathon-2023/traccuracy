@@ -1,3 +1,0 @@
-mock
-Sphinx<6
-sphinx-rtd-theme

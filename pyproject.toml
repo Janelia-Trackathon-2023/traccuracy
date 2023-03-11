@@ -2,16 +2,8 @@
 [build-system]
 # requires = ["hatchling", "hatch-vcs"]
 build-backend = "setuptools.build_meta"
-requires = [
-    "wheel",
-    "setuptools>=40.8.0",
-    "setuptools_scm",
-    "numpy==1.17.3; python_version=='3.8'",
-    "numpy==1.19.3; python_version=='3.9'",
-    "numpy==1.21.3; python_version=='3.10'",
-    "numpy==1.23.2; python_version=='3.11'",
-    "Cython>=0.28.0"
-]
+requires = ["wheel", "setuptools>=40.8.0", "setuptools_scm"]
+
 
 # https://peps.python.org/pep-0621/
 [project]
@@ -36,12 +28,13 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "cython>=0.28.0",
     "numpy",
     "networkx",
     "pandas",
     "tifffile",
-    "scikit-image"
+    "scikit-image",
+    # numba technically optional, will still work without it
+    "numba; python_version != '3.11'",
 ]
 
 # extras
@@ -62,7 +55,8 @@ dev = [
 docs = [
     "mock",
     "Sphinx<6",
-    "sphinx-rtd-theme"
+    "sphinx-rtd-theme",
+    "m2r2"
 ]
 
 [project.urls]
@@ -144,7 +138,10 @@ convention = "google"
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["tests"]
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    "ignore:Numba not installed, falling back to slower:UserWarning",
+]
 
 # https://mypy.readthedocs.io/en/stable/config_file.html
 [tool.mypy]
@@ -182,18 +179,3 @@ pretty = true
 #     ".ruff_cache/**/*",
 #     "tests/**/*",
 # ]
-
-[tool.cibuildwheel]
-# Skip 32-bit builds & PyPy wheels on all platforms
-skip = ["*-win32", "*-manylinux_i686", "pp*", "*musllinux*"]
-test-requires = "pytest"
-test-command = 'pytest "{project}/tests" -v'
-test-extras = ["test"]
-manylinux-x86_64-image = "manylinux_2_24"
-
-[tool.cibuildwheel.macos]
-archs = ["x86_64", "arm64"]
-repair-wheel-command = [
-    "DYLD_LIBRARY_PATH=$REPAIR_LIBRARY_PATH delocate-listdeps {wheel}",
-    "DYLD_LIBRARY_PATH=$REPAIR_LIBRARY_PATH delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}",
-]
