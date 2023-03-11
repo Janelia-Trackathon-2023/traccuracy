@@ -5,7 +5,7 @@ from cell_tracking_metrics.matchers.compute_overlap import compute_overlap
 from cell_tracking_metrics.tracking_data import TrackingData
 
 
-def match_nodes(gt, res, threshold=1):
+def _match_nodes(gt, res, threshold=1):
     """Identify overlapping objects according to IoU and a threshold for minimum overlap.
 
     QUESTION: Does this rely on sequential segmentation labels
@@ -63,7 +63,7 @@ def match_iou_2d(gt, pred, threshold=0.6, label_key="segmentation_id"):
 
     This can return more than one match for any node
     Assumes that within a frame, each object has a unique segmentation label
-        and that the label is recorded on each node using label_key
+    and that the label is recorded on each node using label_key
     Currently only supports 2d+t
 
     Args:
@@ -97,7 +97,7 @@ def match_iou_2d(gt, pred, threshold=0.6, label_key="segmentation_id"):
     for i, t in enumerate(
         range(gt.tracking_graph.start_frame, gt.tracking_graph.end_frame)
     ):
-        matches = match_nodes(mask_gt[i], mask_pred[i])
+        matches = _match_nodes(mask_gt[i], mask_pred[i])
 
         # Construct node id tuple for each match
         for gt_id, pred_id in zip(*matches):
