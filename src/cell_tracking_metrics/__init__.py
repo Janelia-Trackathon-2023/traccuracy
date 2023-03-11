@@ -10,4 +10,4 @@ __author__ = "Track Gals"
 __email__ = "draga.doncilapop1@monash.edu"
 
 
-all = ["TrackingData", "TrackingGraph"]
+__all__ = ["TrackingData", "TrackingGraph"]
