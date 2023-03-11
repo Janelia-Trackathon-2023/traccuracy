@@ -76,6 +76,7 @@ class TrackingGraph:
 
     def nodes(self, limit_to=None):
         """Get all the nodes in the graph, along with their attributes.
+
         Args:
             limit_to (list[hashable], optional): Limit returned dictionary
                 to nodes with the provided ids. Defaults to None.
@@ -93,6 +94,7 @@ class TrackingGraph:
 
     def edges(self, limit_to=None):
         """Get all the edges in the graph, along with their attributes.
+
         Args:
             limit_to (list[tuple[hashable]], optional): Limit returned dictionary
                 to edges with the provided ids. Defaults to None.
