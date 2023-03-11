@@ -1,10 +1,11 @@
 import networkx as nx
 import numpy as np
 import pytest
-from .test_utils import get_annotated_image, get_annotated_movie
 from cell_tracking_metrics.matchers.iou import _match_nodes, match_iou_2d
 from cell_tracking_metrics.tracking_data import TrackingData
 from cell_tracking_metrics.tracking_graph import TrackingGraph
+
+from .test_utils import get_annotated_image, get_annotated_movie
 
 
 def test_match_nodes():

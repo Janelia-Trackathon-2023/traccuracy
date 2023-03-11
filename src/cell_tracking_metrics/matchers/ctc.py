@@ -1,3 +1,5 @@
+from typing import Dict
+
 import networkx as nx
 import numpy as np
 from skimage.measure import regionprops
@@ -6,13 +8,14 @@ from tqdm import tqdm
 from cell_tracking_metrics.matchers.compute_overlap import compute_overlap
 from cell_tracking_metrics.tracking_data import TrackingData
 
+
 def match_ctc(gt, pred, label_key="segmentation_id"):
     """Match graph nodes based on measure used in cell tracking challenge benchmarking.
 
-    A computed marker (segmentation) is matched to a reference marker if the computed 
+    A computed marker (segmentation) is matched to a reference marker if the computed
     marker covers a majority of the reference marker.
 
-    Each reference marker can therefore only be matched to one computed marker, but 
+    Each reference marker can therefore only be matched to one computed marker, but
     multiple reference markers can be assigned to a single computed marker.
 
     See https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0144959
@@ -21,7 +24,7 @@ def match_ctc(gt, pred, label_key="segmentation_id"):
     Args:
         gt (TrackingData): Tracking data object containing graph and segmentations
         pred (TrackingData): Tracking data object containing graph and segmentations
-        label_key (str, optional): Key for the segmentation label attribute on each node. 
+        label_key (str, optional): Key for the segmentation label attribute on each node.
         Defaults to "segmentation_id".
 
     Returns:
@@ -36,8 +39,6 @@ def match_ctc(gt, pred, label_key="segmentation_id"):
             "Input data must be a TrackingData object with a graph and segmentations"
         )
 
-    mapper = []
-
     G_gt, mask_gt = gt.tracking_graph, gt.segmentation
     G_pred, mask_pred = pred.tracking_graph, pred.segmentation
 
@@ -47,7 +48,10 @@ def match_ctc(gt, pred, label_key="segmentation_id"):
     det_matrices = {}
     # Get overlaps for each frame
     for i, t in enumerate(
-        tqdm(range(gt.tracking_graph.start_frame, gt.tracking_graph.end_frame), desc='Matching frames')
+        tqdm(
+            range(gt.tracking_graph.start_frame, gt.tracking_graph.end_frame),
+            desc="Matching frames",
+        )
     ):
         gt_frame = mask_gt[i]
         res_frame = mask_pred[i]
@@ -55,18 +59,44 @@ def match_ctc(gt, pred, label_key="segmentation_id"):
         pred_frame_nodes = pred.tracking_graph.nodes_by_frame[t]
 
         # get the labels for this frame
-        gt_labels = dict(filter(lambda item: item[0] in gt_frame_nodes, nx.get_node_attributes(G_gt.graph, label_key).items()))
-        pred_labels = dict(filter(lambda item: item[0] in pred_frame_nodes, nx.get_node_attributes(G_pred.graph, label_key).items()))
-        
+        gt_labels = dict(
+            filter(
+                lambda item: item[0] in gt_frame_nodes,
+                nx.get_node_attributes(G_gt.graph, label_key).items(),
+            )
+        )
+        pred_labels = dict(
+            filter(
+                lambda item: item[0] in pred_frame_nodes,
+                nx.get_node_attributes(G_pred.graph, label_key).items(),
+            )
+        )
+
         # make dictionary from label to ID so we know where in matrix to assign matches
         gt_label_to_id = {v: (k, i) for i, (k, v) in enumerate(gt_labels.items())}
         pred_label_to_id = {v: (k, i) for i, (k, v) in enumerate(pred_labels.items())}
-        frame_det_matrix = np.zeros((len(pred_frame_nodes), len(gt_frame_nodes)), dtype=np.uint8)
-        overlapping_gt_labels, overlapping_res_labels = get_overlapping_bounding_boxes(gt_frame, res_frame)
-        populate_det_matrix(frame_det_matrix, gt_frame, res_frame, overlapping_gt_labels, overlapping_res_labels, gt_label_to_id, pred_label_to_id)
-        
-        ordered_gt_node_ids = [v[0] for v in sorted(gt_label_to_id.values(), key = lambda x: x[1])]
-        ordered_comp_node_ids = [v[0] for v in sorted(pred_label_to_id.values(), key = lambda x: x[1])]
+        frame_det_matrix = np.zeros(
+            (len(pred_frame_nodes), len(gt_frame_nodes)), dtype=np.uint8
+        )
+        overlapping_gt_labels, overlapping_res_labels = get_overlapping_bounding_boxes(
+            gt_frame, res_frame
+        )
+        populate_det_matrix(
+            frame_det_matrix,
+            gt_frame,
+            res_frame,
+            overlapping_gt_labels,
+            overlapping_res_labels,
+            gt_label_to_id,
+            pred_label_to_id,
+        )
+
+        ordered_gt_node_ids = [
+            v[0] for v in sorted(gt_label_to_id.values(), key=lambda x: x[1])
+        ]
+        ordered_comp_node_ids = [
+            v[0] for v in sorted(pred_label_to_id.values(), key=lambda x: x[1])
+        ]
 
         det_matrices[t] = {
             "det": frame_det_matrix,
@@ -77,7 +107,16 @@ def match_ctc(gt, pred, label_key="segmentation_id"):
     matching = get_node_matching_map(det_matrices)
     return matching
 
-def populate_det_matrix(frame_matrix, gt_frame, pred_frame, gt_labels, res_labels, gt_label_to_id, res_label_to_id):
+
+def populate_det_matrix(
+    frame_matrix,
+    gt_frame,
+    pred_frame,
+    gt_labels,
+    res_labels,
+    gt_label_to_id,
+    res_label_to_id,
+):
     for i in range(len(gt_labels)):
         gt_label = gt_labels[i]
         res_label = res_labels[i]
@@ -88,6 +127,7 @@ def populate_det_matrix(frame_matrix, gt_frame, pred_frame, gt_labels, res_label
             pred_idx = res_label_to_id[res_label][1]
             gt_idx = gt_label_to_id[gt_label][1]
             frame_matrix[pred_idx, gt_idx] = is_match
+
 
 def get_node_matching_map(detection_matrices: "Dict"):
     """Return list of tuples of (gt_id, comp_id) for all matched nodes
@@ -114,7 +154,8 @@ def get_node_matching_map(detection_matrices: "Dict"):
         matched_nodes.extend(list(zip(gt_node_ids, comp_node_ids)))
     return matched_nodes
 
-def detection_test(gt_blob: "np.ndarray", comp_blob: "np.ndarray") -> bool:
+
+def detection_test(gt_blob: "np.ndarray", comp_blob: "np.ndarray") -> int:
     """Check if computed marker overlaps majority of the reference marker.
 
     Given a reference marker and computer marker in original coordinates,
@@ -140,16 +181,21 @@ def detection_test(gt_blob: "np.ndarray", comp_blob: "np.ndarray") -> bool:
     comp_blob_matches_gt_blob = int(np.sum(intersection) > 0.5 * n_gt_pixels)
     return comp_blob_matches_gt_blob
 
+
 def get_overlapping_bounding_boxes(gt_frame, res_frame):
     gt_props = regionprops(gt_frame.astype(np.uint16))
     gt_boxes = [np.array(gt_prop.bbox) for gt_prop in gt_props]
     gt_boxes = np.array(gt_boxes).astype(np.float64)
-    gt_box_labels = np.asarray([int(gt_prop.label) for gt_prop in gt_props], dtype=np.uint16)
+    gt_box_labels = np.asarray(
+        [int(gt_prop.label) for gt_prop in gt_props], dtype=np.uint16
+    )
 
     res_props = regionprops(res_frame.astype(np.uint16))
     res_boxes = [np.array(res_prop.bbox) for res_prop in res_props]
     res_boxes = np.array(res_boxes).astype(np.float64)
-    res_box_labels = np.asarray([int(res_prop.label) for res_prop in res_props], dtype=np.uint16)
+    res_box_labels = np.asarray(
+        [int(res_prop.label) for res_prop in res_props], dtype=np.uint16
+    )
 
     overlaps = compute_overlap(gt_boxes, res_boxes)  # has the form [gt_bbox, res_bbox]
 
@@ -162,13 +208,13 @@ def get_overlapping_bounding_boxes(gt_frame, res_frame):
     return overlapping_gt_labels, overlapping_res_labels
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     from cell_tracking_metrics.loaders.ctc import load_ctc_data
+
     gt_dir = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA"
-    gt_track_pth = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt"
+    gt_track_pth = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt"  # noqa
     res_dir = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_RES"
-    res_track_pth = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_RES/res_track.txt"
+    res_track_pth = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_RES/res_track.txt"  # noqa
     gt_data = load_ctc_data(gt_dir, gt_track_pth)
     res_data = load_ctc_data(res_dir, res_track_pth)
     mapping = match_ctc(gt_data, res_data)

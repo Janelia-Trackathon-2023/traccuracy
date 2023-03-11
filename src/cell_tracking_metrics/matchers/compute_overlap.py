@@ -108,7 +108,6 @@ except ImportError:
             "variable NO_JIT_WARNING=1 to disable this warning."
         )
 else:
-
     # compute_overlap 2d and 3d have the same signature
     signature = [
         "f8[:,::1](f8[:,::1], f8[:,::1])",

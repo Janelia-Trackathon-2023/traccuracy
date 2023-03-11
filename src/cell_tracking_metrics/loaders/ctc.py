@@ -73,8 +73,8 @@ def get_node_attributes(masks):
             "centroid-0": "x",
         }
     )
-    data_df['segmentation_id'] = data_df['segmentation_id'].astype(int)
-    data_df['t'] = data_df['t'].astype(int)
+    data_df["segmentation_id"] = data_df["segmentation_id"].astype(int)
+    data_df["t"] = data_df["t"].astype(int)
     return data_df
 
 
@@ -144,8 +144,8 @@ def ctc_to_graph(df, detections):
     attributes = {}
     for row in detections.itertuples():
         row = row._asdict()
-        i = row['Index']
-        del row['Index']
+        i = row["Index"]
+        del row["Index"]
         attributes[i] = row
 
     # Create graph

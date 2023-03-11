@@ -1,10 +1,12 @@
-from cell_tracking_metrics.matchers.ctc import get_node_matching_map, match_ctc
-from cell_tracking_metrics.tracking_data import TrackingData
-from cell_tracking_metrics.tracking_graph import TrackingGraph
-from .test_utils import get_annotated_movie
 import networkx as nx
 import numpy as np
 import pytest
+from cell_tracking_metrics.matchers.ctc import get_node_matching_map, match_ctc
+from cell_tracking_metrics.tracking_data import TrackingData
+from cell_tracking_metrics.tracking_graph import TrackingGraph
+
+from .test_utils import get_annotated_movie
+
 
 def test_match_iou_2d():
     # Bad input
@@ -53,6 +55,7 @@ def test_match_iou_2d():
     # gt and pred node should be the same
     for pair in mapper:
         assert pair[0] == pair[1]
+
 
 def test_get_node_matching_map():
     comp_ids = [3, 7, 10]
