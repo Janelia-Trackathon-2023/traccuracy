@@ -157,7 +157,6 @@ def ctc_to_graph(df, detections):
     # Add all isolates to graph
     for cell_id in single_nodes:
         G.add_node(cell_id)
-    nx.set_node_attributes(G, attributes)
 
     nx.set_node_attributes(G, attributes)
 
