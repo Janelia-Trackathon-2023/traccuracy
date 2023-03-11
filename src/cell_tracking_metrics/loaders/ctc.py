@@ -159,6 +159,8 @@ def ctc_to_graph(df, detections):
         G.add_node(cell_id)
     nx.set_node_attributes(G, attributes)
 
+    nx.set_node_attributes(G, attributes)
+
     return G
 
 
