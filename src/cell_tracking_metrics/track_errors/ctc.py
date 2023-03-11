@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 import networkx as nx
 import numpy as np
+from tqdm import tqdm
 
 from cell_tracking_metrics.track_errors.track_events import TrackEvents
 
@@ -69,7 +70,7 @@ def get_vertex_errors(
     nx.set_node_attributes(comp_graph, False, "is_ns")
     nx.set_node_attributes(gt_graph, False, "is_fn")
 
-    for t in sorted(detection_matrices.keys()):
+    for t in tqdm(sorted(detection_matrices.keys()), "Evaluating frame nodes"):
         mtrix = detection_matrices[t]["det"]
         comp_ids = detection_matrices[t]["comp_ids"]
         gt_ids = detection_matrices[t]["gt_ids"]
@@ -116,7 +117,7 @@ def assign_edge_errors(gt_graph, comp_graph, node_mapping):
     nx.set_edge_attributes(gt_graph, False, "is_fn")
 
     # fp edges - edges in induced_graph that aren't in gt_graph
-    for edge in induced_graph.edges:
+    for edge in tqdm(induced_graph.edges, "Evaluating edges"):
         source, target = edge[0], edge[1]
         source_gt_id = list(filter(lambda mp: mp[1] == source, node_mapping))[0][0]
         target_gt_id = list(filter(lambda mp: mp[1] == target, node_mapping))[0][0]
@@ -162,5 +163,5 @@ def get_comp_subgraph(comp_graph: "nx.Graph") -> "nx.Graph":
         Subgraph of comp_graph with only TP vertices and their incident edges
     """
     tp_nodes = [node for node in comp_graph.nodes if comp_graph.nodes[node]["is_tp"]]
-    induced_graph = nx.Graph(comp_graph.subgraph(tp_nodes).copy())
+    induced_graph = nx.DiGraph(comp_graph.subgraph(tp_nodes).copy())
     return induced_graph

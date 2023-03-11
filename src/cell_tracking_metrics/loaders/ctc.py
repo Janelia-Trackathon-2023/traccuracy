@@ -113,6 +113,7 @@ def ctc_to_graph(df, detections):
                 {
                     "source": cellids[0:-1],
                     "target": cellids[1:],
+                    "is_parent": [False for _ in range(len(cellids) - 1)],
                 }
             )
         )
@@ -131,7 +132,9 @@ def ctc_to_graph(df, detections):
 
         target = "{}_{}".format(row["Cell_ID"], row["Start"])
 
-        edges.append(pd.DataFrame({"source": [source], "target": [target]}))
+        edges.append(
+            pd.DataFrame({"source": [source], "target": [target], "is_parent": [True]})
+        )
 
     # Store position attributes on nodes
     detections["node_id"] = (
@@ -150,8 +153,9 @@ def ctc_to_graph(df, detections):
 
     # Create graph
     edges = pd.concat(edges)
+    edges["is_parent"] = edges["is_parent"].astype(bool)
     G = nx.from_pandas_edgelist(
-        edges, source="source", target="target", create_using=nx.DiGraph
+        edges, source="source", target="target", create_using=nx.DiGraph, edge_attr=True
     )
 
     # Add all isolates to graph

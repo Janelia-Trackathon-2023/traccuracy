@@ -106,7 +106,7 @@ def match_ctc(gt, pred, label_key="segmentation_id"):
             "comp_ids": ordered_comp_node_ids,
             "gt_ids": ordered_gt_node_ids,
         }
-    pred._det_matrices = det_matrices
+    pred.tracking_graph._det_matrices = det_matrices
     matching = get_node_matching_map(det_matrices)
     return matching
 
@@ -218,6 +218,7 @@ def get_overlapping_bounding_boxes(gt_frame, res_frame):
 
 if __name__ == "__main__":
     from cell_tracking_metrics.loaders.ctc import load_ctc_data
+    from cell_tracking_metrics.track_errors.ctc import evaluate_ctc_events
 
     gt_dir = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA"
     gt_track_pth = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt"  # noqa
@@ -226,3 +227,7 @@ if __name__ == "__main__":
     gt_data = load_ctc_data(gt_dir, gt_track_pth)
     res_data = load_ctc_data(res_dir, res_track_pth)
     mapping = match_ctc(gt_data, res_data)
+    t_events = evaluate_ctc_events(
+        gt_data.tracking_graph, res_data.tracking_graph, mapping
+    )
+    print(t_events)
