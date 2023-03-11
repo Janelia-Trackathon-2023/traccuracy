@@ -1,10 +1,11 @@
 import networkx as nx
 import pytest
 from cell_tracking_metrics.track_errors.divisions import (
+    _get_pred_by_t,
+    _get_succ_by_t,
     classify_divisions,
     correct_shifted_divisions,
-    get_pred_by_t,
-    get_succ_by_t,
+    evaluate_division_performance,
 )
 from cell_tracking_metrics.tracking_graph import TrackingGraph
 
@@ -111,20 +112,20 @@ def straight_graph():
     return G
 
 
-def test_get_pred_by_t(straight_graph):
+def test__get_pred_by_t(straight_graph):
     # Linear graph with node id 1 from frame 2-10
     G = TrackingGraph(straight_graph)
 
     # Predecessor available
     start_frame = 10
     target_frame = 5
-    node = get_pred_by_t(G, f"1_{start_frame}", start_frame - target_frame)
+    node = _get_pred_by_t(G, f"1_{start_frame}", start_frame - target_frame)
     assert node == f"1_{target_frame}"
 
     # Predecessor does not exist
     start_frame = 10
     target_frame = 1
-    node = get_pred_by_t(G, f"1_{start_frame}", start_frame - target_frame)
+    node = _get_pred_by_t(G, f"1_{start_frame}", start_frame - target_frame)
     assert node is None
 
 
@@ -173,7 +174,7 @@ def get_division_graphs():
     return G1, G2, mapper
 
 
-def test_get_succ_by_t():
+def test__get_succ_by_t():
     _, G2, _ = get_division_graphs()
     G2 = TrackingGraph(G2)
 
@@ -181,14 +182,14 @@ def test_get_succ_by_t():
     start_node = "2_2"
     delta_t = 2
     end_node = "2_4"
-    node = get_succ_by_t(G2, start_node, delta_t)
+    node = _get_succ_by_t(G2, start_node, delta_t)
     assert node == end_node
 
     # 3 frames forward returns None
     start_node = "2_2"
     delta_t = 3
     end_node = None
-    node = get_succ_by_t(G2, start_node, delta_t)
+    node = _get_succ_by_t(G2, start_node, delta_t)
     assert node == end_node
 
 
@@ -234,3 +235,25 @@ class Test_correct_shifted_divisions:
         assert len(counts.tp_divisions) == 1
         assert len(counts.fp_divisions) == 0
         assert len(counts.fn_divisions) == 0
+
+
+def test_evaluate_division_performance():
+    G_gt, G_pred, mapper = get_division_graphs()
+    frame_buffer = (0, 1, 2)
+
+    events = evaluate_division_performance(
+        TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, frame_buffer=frame_buffer
+    )
+
+    for e in events:
+        assert e.frame_buffer in frame_buffer
+        if e.frame_buffer in (0, 1):
+            # No corrections
+            assert len(e.tp_divisions) == 0
+            assert len(e.fp_divisions) == 1
+            assert len(e.fn_divisions) == 1
+        else:
+            # Correction
+            assert len(e.tp_divisions) == 1
+            assert len(e.fp_divisions) == 0
+            assert len(e.fn_divisions) == 0

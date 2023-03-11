@@ -56,7 +56,7 @@ def classify_divisions(G_gt, G_pred, mapper):
         pred_node = _find_gt_node_matches(gt_node)
         # No matching node so division missed
         if pred_node is None:
-            counts.fn_division.append(gt_node)
+            counts.fn_divisions.append(gt_node)
             G_gt.set_node_attribute(gt_node, "is_fn_division", True)
         # Check if the division has the corret daughters
         else:
@@ -87,7 +87,7 @@ def classify_divisions(G_gt, G_pred, mapper):
     return counts, G_gt, G_pred
 
 
-def get_pred_by_t(G, node, delta_frames):
+def _get_pred_by_t(G, node, delta_frames):
     """For a given graph and node, traverses back by predecessor until target_frame
 
     Args:
@@ -114,7 +114,7 @@ def get_pred_by_t(G, node, delta_frames):
     return node
 
 
-def get_succ_by_t(G, node, delta_frames):
+def _get_succ_by_t(G, node, delta_frames):
     """For a given node, find the successors after delta frames
 
     If a division event is discovered, returns None
@@ -174,6 +174,7 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
         fp_divisions=fp_divs,
         fn_divisions=fn_divs,
         tp_divisions=G_gt.get_nodes_with_attribute("is_tp_division"),
+        frame_buffer=n_frames,
     )
 
     # Compare all pairs of fp and fn
@@ -189,7 +190,7 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
         # False positive in pred occurs before false negative in gt
         if t_fp < t_fn:
             # Check if fp node matches prececessor of fn
-            fn_pred = get_pred_by_t(G_gt, fn_node, t_fn - t_fp)
+            fn_pred = _get_pred_by_t(G_gt, fn_node, t_fn - t_fp)
             # Check if the match exists
             if (fn_pred, fp_node) not in mapper:
                 # Match does not exist so divisions cannot match
@@ -197,7 +198,7 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
 
             # Check if daughters match
             fp_succ = [
-                get_succ_by_t(G_pred, node, t_fn - t_fp)
+                _get_succ_by_t(G_pred, node, t_fn - t_fp)
                 for node in G_pred.get_succs(fp_node)
             ]
             fn_succ = G_gt.get_succs(fn_node)
@@ -210,7 +211,7 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
         # False negative in gt occurs before false positive in pred
         else:
             # Check if fp node matches fn predecessor
-            fp_pred = get_pred_by_t(G_pred, fp_node, t_fp - t_fn)
+            fp_pred = _get_pred_by_t(G_pred, fp_node, t_fp - t_fn)
             # Check if match exists
             if (fn_node, fp_pred) not in mapper:
                 # Match does not exist so divisions cannot match
@@ -218,7 +219,7 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
 
             # Check if daughters match
             fn_succ = [
-                get_succ_by_t(G_gt, node, t_fp - t_fn)
+                _get_succ_by_t(G_gt, node, t_fp - t_fn)
                 for node in G_gt.get_succs(fn_node)
             ]
             fp_succ = G_pred.get_succs(fp_node)
@@ -238,3 +239,41 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
             counts.tp_divisions.append(fn_node)
 
     return counts
+
+
+def evaluate_division_performance(
+    G_gt, G_pred, mapper, frame_key="t", frame_buffer=(0)
+):
+    """Classify division errors and correct shifted divisions according to frame_buffer
+    One DivisionEvent object will be returned for each value in frame_buffer
+
+    Args:
+        G_gt (TrackingGraph): TrackingGraph of GT data
+        G_pred (TrackingGraph): TrackingGraph of pred data
+        mapper ([(gt_node, pred_node)]): List of tuples with pairs of gt and pred nodes
+        frame_key (str, optional): _description_. Defaults to 't'.
+        frame_buffer (tuple, optional): Tuple of integers. Value used as n_frames
+            to tolerate in correct_shifted_divisions. Defaults to (0).
+
+    Returns:
+        list[DivisionEvents]: List of one DivisionEvent object per value in frame_buffer
+    """
+
+    events = []
+
+    # Baseline division classification
+    event, G_gt, G_pred = classify_divisions(G_gt, G_pred, mapper)
+    events.append(event)
+
+    # Correct shifted divisions for each nonzero value in frame_buffer
+    for delta in frame_buffer:
+        # Skip 0 because we used that in baseline classification
+        if delta == 0:
+            continue
+
+        event = correct_shifted_divisions(
+            G_gt, G_pred, mapper, n_frames=delta, frame_key=frame_key
+        )
+        events.append(event)
+
+    return events
