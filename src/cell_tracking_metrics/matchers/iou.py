@@ -63,7 +63,7 @@ def match_iou_2d(gt, pred, threshold=0.6, label_key="segmentation_id"):
 
     This can return more than one match for any node
     Assumes that within a frame, each object has a unique segmentation label
-        and that the label is recorded on each node using label_key
+    and that the label is recorded on each node using label_key
     Currently only supports 2d+t
 
     Args:
