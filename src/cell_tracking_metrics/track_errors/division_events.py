@@ -17,7 +17,9 @@ class DivisionEvents:
         fn_divisions (list): The number of divisions in the ground truth graph
             that are not matched to a division in the predicted graph.
             Defaults to None.
-        tp_divisions (list):
+        tp_divisions (list): The number of divisions in the ground truth graph
+            that are correctly identified in the predicted graph.
+            Defaults to None.
         frame_buffer (int): A predicted division can be matched with a ground
             truth division within this many frames. Defaults to 0.
 

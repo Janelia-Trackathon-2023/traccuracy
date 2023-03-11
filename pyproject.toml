@@ -62,7 +62,8 @@ dev = [
 docs = [
     "mock",
     "Sphinx<6",
-    "sphinx-rtd-theme"
+    "sphinx-rtd-theme",
+    "m2r2"
 ]
 
 [project.urls]

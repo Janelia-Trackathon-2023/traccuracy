@@ -18,3 +18,10 @@ track\_events
 .. automodule:: cell_tracking_metrics.track_errors.track_events
    :members:
    :undoc-members:
+
+divisions
+---------
+
+.. automodule:: cell_tracking_metrics.track_errors.divisions
+   :members:
+   :undoc-members:

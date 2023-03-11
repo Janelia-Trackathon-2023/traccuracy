@@ -1,3 +1,37 @@
+"""This submodule classifies division erros in tracking graphs
+
+Each division is classifed as one of the following:
+- true positive
+- false positive
+- false negative
+
+These functions require two `TrackingGraph` objects and a mapper between
+nodes in the two graphs. Divisions are identified as correct if both the parent
+and daughter nodes match between the GT and predicted graph.
+
+Temporal tolerance for correct divisions is implemented to allow for cases in
+which the exact frame that a division event occurs is somewhat arbitrary due to
+a high frame rate or variable segmentation or detection. Consider the following
+graphs as an example::
+    G1
+                                2_4
+    1_0 -- 1_1 -- 1_2 -- 1_3 -<
+                                3_4
+    G2
+                  2_2 -- 2_3 -- 2_4
+    1_0 -- 1_1 -<
+                  3_2 -- 3_3 -- 3_4
+
+After classifying basic division errors, we consider all false positive and false
+negative divisions. If a pair of errors occurs within the specified frame buffer,
+the pair is considered a true positive division if the parent nodes and daughter
+nodes match. We determine the "parent node" of the late division, e.g. node 1_3 in
+graph G1, by traversing back along the graph until we find the node in the same frame
+as the parent node of the early division. We repeat the process for finding daughters
+of the early division, by advancing along the graph to find nodes in the same frame
+as the late division daughters.
+"""
+
 import itertools
 from collections import Counter
 
@@ -12,8 +46,8 @@ def classify_divisions(G_gt, G_pred, mapper):
     This function only works on node mappers that are one-to-one
 
     Args:
-        G_gt (TrackingGraph): TrackingGraph of GT data
-        G_pred (TrackingGraph): TrackingGraph of pred data
+        G_gt (TrackingGraph): `TrackingGraph` of GT data
+        G_pred (TrackingGraph): `TrackingGraph` of pred data
         mapper ([(gt_node, pred_node)]): List of tuples with pairs of gt and pred nodes
 
     Raises:
