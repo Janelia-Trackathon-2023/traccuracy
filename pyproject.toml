@@ -59,6 +59,11 @@ dev = [
     "rich",
     "ruff",
 ]
+docs = [
+    "mock",
+    "Sphinx<6",
+    "sphinx-rtd-theme"
+]
 
 [project.urls]
 homepage = "https://github.com/DragaDoncila/cell_tracking_metrics"
