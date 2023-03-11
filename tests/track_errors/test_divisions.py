@@ -5,7 +5,7 @@ from cell_tracking_metrics.track_errors.divisions import (
     _get_succ_by_t,
     classify_divisions,
     correct_shifted_divisions,
-    evaluate_division_performance,
+    evaluate_division_events,
 )
 from cell_tracking_metrics.tracking_graph import TrackingGraph
 
@@ -237,11 +237,11 @@ class Test_correct_shifted_divisions:
         assert len(counts.fn_divisions) == 0
 
 
-def test_evaluate_division_performance():
+def test_evaluate_division_events():
     G_gt, G_pred, mapper = get_division_graphs()
     frame_buffer = (0, 1, 2)
 
-    events = evaluate_division_performance(
+    events = evaluate_division_events(
         TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, frame_buffer=frame_buffer
     )
 

@@ -275,9 +275,7 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
     return counts
 
 
-def evaluate_division_performance(
-    G_gt, G_pred, mapper, frame_key="t", frame_buffer=(0)
-):
+def evaluate_division_events(G_gt, G_pred, mapper, frame_key="t", frame_buffer=(0)):
     """Classify division errors and correct shifted divisions according to frame_buffer
     One DivisionEvent object will be returned for each value in frame_buffer
 
