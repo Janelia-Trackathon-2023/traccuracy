@@ -25,6 +25,7 @@ def _match_nodes(gt, res, threshold=1):
         raise ValueError("gt and res must be 2d arrays")
 
     iou = np.zeros((np.max(gt) + 1, np.max(res) + 1))
+
     overlapping_gt_labels, overlapping_res_labels = get_labels_with_overlap(gt, res)
 
     for index in range(len(overlapping_gt_labels)):
