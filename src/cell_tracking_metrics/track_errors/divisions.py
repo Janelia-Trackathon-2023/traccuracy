@@ -171,7 +171,7 @@ def _get_succ_by_t(G, node, delta_frames):
     return node
 
 
-def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
+def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
     """Allows for divisions to occur within a frame buffer and still be correct
 
     This implementation asserts that the parent lineages and daughter lineages must match.
@@ -214,8 +214,8 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
         correct = False
-        t_fp = G_pred.graph.nodes[fp_node][frame_key]
-        t_fn = G_gt.graph.nodes[fn_node][frame_key]
+        t_fp = G_pred.graph.nodes[fp_node][G_pred.frame_key]
+        t_fn = G_gt.graph.nodes[fn_node][G_gt.frame_key]
 
         # Move on if nodes are not within frame buffer or within same frame
         if abs(t_fp - t_fn) > n_frames or t_fp == t_fn:
@@ -275,7 +275,7 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
     return counts
 
 
-def evaluate_division_events(G_gt, G_pred, mapper, frame_key="t", frame_buffer=(0)):
+def evaluate_division_events(G_gt, G_pred, mapper, frame_buffer=(0)):
     """Classify division errors and correct shifted divisions according to frame_buffer
     One DivisionEvent object will be returned for each value in frame_buffer
 
@@ -283,7 +283,6 @@ def evaluate_division_events(G_gt, G_pred, mapper, frame_key="t", frame_buffer=(
         G_gt (TrackingGraph): TrackingGraph of GT data
         G_pred (TrackingGraph): TrackingGraph of pred data
         mapper ([(gt_node, pred_node)]): List of tuples with pairs of gt and pred nodes
-        frame_key (str, optional): _description_. Defaults to 't'.
         frame_buffer (tuple, optional): Tuple of integers. Value used as n_frames
             to tolerate in correct_shifted_divisions. Defaults to (0).
 
@@ -303,9 +302,7 @@ def evaluate_division_events(G_gt, G_pred, mapper, frame_key="t", frame_buffer=(
         if delta == 0:
             continue
 
-        event = correct_shifted_divisions(
-            G_gt, G_pred, mapper, n_frames=delta, frame_key=frame_key
-        )
+        event = correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=delta)
         events.append(event)
 
     return events
