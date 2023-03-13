@@ -2,12 +2,10 @@ from typing import Dict
 
 import networkx as nx
 import numpy as np
-from skimage.measure import regionprops
 from tqdm import tqdm
 
 from cell_tracking_metrics.matchers.compute_overlap import (
-    compute_overlap,
-    compute_overlap_3D,
+    get_overlapping_bounding_boxes,
 )
 from cell_tracking_metrics.tracking_data import TrackingData
 
@@ -183,37 +181,6 @@ def detection_test(gt_blob: "np.ndarray", comp_blob: "np.ndarray") -> int:
     intersection = np.logical_and(gt_blob, comp_blob)
     comp_blob_matches_gt_blob = int(np.sum(intersection) > 0.5 * n_gt_pixels)
     return comp_blob_matches_gt_blob
-
-
-def get_overlapping_bounding_boxes(gt_frame, res_frame):
-    gt_props = regionprops(gt_frame.astype(np.uint16))
-    gt_boxes = [np.array(gt_prop.bbox) for gt_prop in gt_props]
-    gt_boxes = np.array(gt_boxes).astype(np.float64)
-    gt_box_labels = np.asarray(
-        [int(gt_prop.label) for gt_prop in gt_props], dtype=np.uint16
-    )
-
-    res_props = regionprops(res_frame.astype(np.uint16))
-    res_boxes = [np.array(res_prop.bbox) for res_prop in res_props]
-    res_boxes = np.array(res_boxes).astype(np.float64)
-    res_box_labels = np.asarray(
-        [int(res_prop.label) for res_prop in res_props], dtype=np.uint16
-    )
-
-    if gt_frame.ndim == 3:
-        overlaps = compute_overlap_3D(gt_boxes, res_boxes)
-    else:
-        overlaps = compute_overlap(
-            gt_boxes, res_boxes
-        )  # has the form [gt_bbox, res_bbox]
-
-    # Find the bboxes that have overlap at all (ind_ corresponds to box number - starting at 0)
-    ind_gt, ind_res = np.nonzero(overlaps)
-    ind_gt = np.asarray(ind_gt, dtype=np.uint16)
-    ind_res = np.asarray(ind_res, dtype=np.uint16)
-    overlapping_gt_labels = gt_box_labels[ind_gt]
-    overlapping_res_labels = res_box_labels[ind_res]
-    return overlapping_gt_labels, overlapping_res_labels
 
 
 if __name__ == "__main__":

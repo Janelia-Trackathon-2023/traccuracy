@@ -1,7 +1,8 @@
 import numpy as np
-from skimage.measure import regionprops
 
-from cell_tracking_metrics.matchers.compute_overlap import compute_overlap
+from cell_tracking_metrics.matchers.compute_overlap import (
+    get_overlapping_bounding_boxes,
+)
 from cell_tracking_metrics.tracking_data import TrackingData
 
 
@@ -24,25 +25,13 @@ def _match_nodes(gt, res, threshold=1):
         raise ValueError("gt and res must be 2d arrays")
 
     iou = np.zeros((np.max(gt) + 1, np.max(res) + 1))
+    overlapping_gt_labels, overlapping_res_labels = get_overlapping_bounding_boxes(
+        gt, res
+    )
 
-    gt_props = regionprops(gt.astype("int"))
-    gt_boxes = [np.array(gt_prop.bbox) for gt_prop in gt_props]
-    gt_boxes = np.array(gt_boxes).astype("double")
-    gt_box_labels = [int(gt_prop.label) for gt_prop in gt_props]
-
-    res_props = regionprops(res.astype("int"))
-    res_boxes = [np.array(res_prop.bbox) for res_prop in res_props]
-    res_boxes = np.array(res_boxes).astype("double")
-    res_box_labels = [int(res_prop.label) for res_prop in res_props]
-
-    overlaps = compute_overlap(gt_boxes, res_boxes)  # has the form [gt_bbox, res_bbox]
-
-    # Find the bboxes that have overlap at all (ind_ corresponds to box number - starting at 0)
-    ind_gt, ind_res = np.nonzero(overlaps)
-
-    for index in range(ind_gt.shape[0]):
-        iou_gt_idx = gt_box_labels[ind_gt[index]]
-        iou_res_idx = res_box_labels[ind_res[index]]
+    for index in range(len(overlapping_gt_labels)):
+        iou_gt_idx = overlapping_gt_labels[index]
+        iou_res_idx = overlapping_res_labels[index]
         intersection = np.logical_and(gt == iou_gt_idx, res == iou_res_idx)
         union = np.logical_or(gt == iou_gt_idx, res == iou_res_idx)
         iou[iou_gt_idx, iou_res_idx] = intersection.sum() / union.sum()

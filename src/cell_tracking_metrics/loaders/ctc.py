@@ -113,7 +113,7 @@ def ctc_to_graph(df, detections):
                 {
                     "source": cellids[0:-1],
                     "target": cellids[1:],
-                    "is_parent": [False for _ in range(len(cellids) - 1)],
+                    "is_parent": [0 for _ in range(len(cellids) - 1)],
                 }
             )
         )
@@ -133,7 +133,7 @@ def ctc_to_graph(df, detections):
         target = "{}_{}".format(row["Cell_ID"], row["Start"])
 
         edges.append(
-            pd.DataFrame({"source": [source], "target": [target], "is_parent": [True]})
+            pd.DataFrame({"source": [source], "target": [target], "is_parent": [1]})
         )
 
     # Store position attributes on nodes
