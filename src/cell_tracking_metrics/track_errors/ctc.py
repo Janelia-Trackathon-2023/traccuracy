@@ -12,14 +12,11 @@ if TYPE_CHECKING:
     from cell_tracking_metrics.tracking_graph import TrackingGraph
 
 
-def evaluate_ctc_events(G_gt: "TrackingGraph", G_pred: "TrackingGraph", mapper):
-    if not hasattr(G_pred, "_det_matrices"):
-        raise NotImplementedError(
-            "Error counting for CTC metrics requires a TrackingGraph matched with `match_ctc`."
-        )
+def evaluate_ctc_events(
+    G_gt: "TrackingGraph", G_pred: "TrackingGraph", mapper, det_matrices
+):
     gt_nx_graph = G_gt.graph
     pred_nx_graph = G_pred.graph
-    det_matrices = G_pred._det_matrices
     get_vertex_errors(gt_nx_graph, pred_nx_graph, det_matrices)
     assign_edge_errors(gt_nx_graph, pred_nx_graph, mapper)
 
