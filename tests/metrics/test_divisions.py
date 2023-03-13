@@ -1,11 +1,11 @@
 import networkx as nx
 import pytest
-from cell_tracking_metrics.track_errors.divisions import (
+from cell_tracking_metrics.metrics.divisions import (
+    _classify_divisions,
+    _correct_shifted_divisions,
+    _evaluate_division_events,
     _get_pred_by_t,
     _get_succ_by_t,
-    classify_divisions,
-    correct_shifted_divisions,
-    evaluate_division_events,
 )
 from cell_tracking_metrics.tracking_graph import TrackingGraph
 
@@ -44,7 +44,7 @@ def test_classify_divisions_tp(G):
     mapper = [(n, n) for n in G.nodes]
 
     # Test true positive
-    counts, G_gt, G_pred = classify_divisions(
+    counts, G_gt, G_pred = _classify_divisions(
         TrackingGraph(G), TrackingGraph(G), mapper
     )
     assert len(counts.tp_divisions) == 1
@@ -69,7 +69,7 @@ def test_classify_divisions_fp(G):
     nx.set_node_attributes(H, {"5_3": {"t": 3, "x": 0, "y": 0}})
     mapper = [(n, n) for n in H.nodes]
 
-    counts, G_gt, G_pred = classify_divisions(
+    counts, G_gt, G_pred = _classify_divisions(
         TrackingGraph(G), TrackingGraph(H), mapper
     )
     assert len(counts.fp_divisions) == 1
@@ -88,7 +88,7 @@ def test_classify_divisions_fn(G):
     H.remove_nodes_from(["3_3", "4_3"])
     mapper = [(n, n) for n in H.nodes]
 
-    counts, G_gt, G_pred = classify_divisions(
+    counts, G_gt, G_pred = _classify_divisions(
         TrackingGraph(G), TrackingGraph(H), mapper
     )
     assert len(counts.fp_divisions) == 0
@@ -201,7 +201,7 @@ class Test_correct_shifted_divisions:
         G_pred.nodes["1_3"]["is_fp_division"] = True
 
         # buffer of 1, no change
-        counts = correct_shifted_divisions(
+        counts = _correct_shifted_divisions(
             TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=1
         )
         assert len(counts.fp_divisions) == 1
@@ -215,7 +215,7 @@ class Test_correct_shifted_divisions:
         G_pred.nodes["1_3"]["is_fp_division"] = True
 
         # buffer of 3, corrections
-        counts = correct_shifted_divisions(
+        counts = _correct_shifted_divisions(
             TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=3
         )
         assert len(counts.tp_divisions) == 1
@@ -229,7 +229,7 @@ class Test_correct_shifted_divisions:
         G_gt.nodes["1_3"]["is_fn_division"] = True
 
         # buffer of 3, corrections
-        counts = correct_shifted_divisions(
+        counts = _correct_shifted_divisions(
             TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=3
         )
         assert len(counts.tp_divisions) == 1
@@ -241,7 +241,7 @@ def test_evaluate_division_events():
     G_gt, G_pred, mapper = get_division_graphs()
     frame_buffer = (0, 1, 2)
 
-    events = evaluate_division_events(
+    events = _evaluate_division_events(
         TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, frame_buffer=frame_buffer
     )
 
