@@ -35,7 +35,13 @@ class TrackingGraph:
             Keys used to access the location of the cell in space.
     """
 
-    def __init__(self, graph, frame_key="t", location_keys=("x", "y")):
+    def __init__(
+        self,
+        graph,
+        frame_key="t",
+        label_key="segmentation_id",
+        location_keys=("x", "y"),
+    ):
         """A directed graph representing a tracking solution where edges go forward in time.
 
         Args:
@@ -43,12 +49,15 @@ class TrackingGraph:
                 where edges go forward in time.
             frame_key (str, optional): The key on each node in graph that contains the time frame
                 of the node. Every node must have a value stored at this key. Defaults to 't'.
+            label_key (str, optional): The key on each node that denotes the pixel value of
+                the node in the segmentation
             location_keys (tuple, optional): The list of keys on each node in graph
                 that contains the spatial location of the node. Every node
                 must have a value stored at each of these keys. Defaults to ('x', 'y').
         """
         self.graph = graph
         self.frame_key = frame_key
+        self.label_key = label_key
         self.location_keys = location_keys
 
         # construct a dictionary from frames to node ids for easy lookup
