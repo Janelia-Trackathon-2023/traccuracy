@@ -10,6 +10,16 @@ from skimage.measure import regionprops
 
 
 def get_labels_with_overlap(gt_frame, res_frame):
+    """Get all labels IDs in gt_frame and res_frame whose bounding boxes
+    overlap.
+
+    Args:
+        gt_frame (np.ndarray): ground truth segmentation for a single frame
+        res_frame (np.ndarray): result segmentation for a given frame
+
+    Returns:
+        Tuple[List[int], List[int]]: overlapping gt labels and result labels
+    """
     gt_props = regionprops(gt_frame.astype(np.uint16))
     gt_boxes = [np.array(gt_prop.bbox) for gt_prop in gt_props]
     gt_boxes = np.array(gt_boxes).astype(np.float64)
