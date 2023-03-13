@@ -54,3 +54,28 @@ class DivisionEvents:
             self.fn_divisions = []
 
         self.frame_buffer = frame_buffer
+
+    @property
+    def gt_division_count(self):
+        return len(self.gt_divisions)
+
+    @property
+    def tp_division_count(self):
+        return len(self.tp_divisions)
+
+    @property
+    def fp_division_count(self):
+        return len(self.fp_divisions)
+
+    @property
+    def fn_division_count(self):
+        return len(self.fn_divisions)
+
+    @property
+    def count_dict(self):
+        return {
+            'Total GT Divisions': self.gt_division_count,
+            'True Positive Divisions': self.tp_division_count,
+            'False Positive Divisions': self.fp_division_count,
+            'False Negative Divisions': self.fn_division_count
+        }
