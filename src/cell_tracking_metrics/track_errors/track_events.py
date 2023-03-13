@@ -64,3 +64,29 @@ class TrackEvents:
         if frame_buffer not in self.division_counts:
             return None
         return self.division_counts[frame_buffer]
+    
+    def add_events(self, name, value, fail_if_none=False):
+        """Add value to the event with the given name.
+        By default, None is considered to be equivalent to 0.
+        If you want this operation to fail if the event with the 
+        given name was not computed, set fail_if_none to True.
+
+        Args:
+            name (str): The name of the event. Will work for any attributes of this object,
+                otherwise raises AttributeError.
+            value (int): The number to add to the current value.
+            fail_if_none (bool): Raise ValueError if either the
+                current value or the provided value is None. Defaults to False.
+        """
+        current_value = getattr(self, name)
+        if value is None:
+            if fail_if_none:
+                raise ValueError(f"Provided None value but fail_if_none=True")
+            else:
+                value = 0
+        if current_value is None:
+            if fail_if_none:
+                raise ValueError(f"Current value for event {name} is None but fail_if_none=True")
+            else:
+                current_value = 0
+        setattr(self, name, current_value + value)
