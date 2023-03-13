@@ -1,21 +1,21 @@
 import networkx as nx
 import numpy as np
 import pytest
-from cell_tracking_metrics.matchers.ctc import get_node_matching_map, match_ctc
+from cell_tracking_metrics.matchers.ctc import CTCMatched, get_node_matching_map
 from cell_tracking_metrics.tracking_data import TrackingData
 from cell_tracking_metrics.tracking_graph import TrackingGraph
 
 from .test_utils import get_annotated_movie
 
 
-def test_match_iou_2d():
+def test_match_ctc():
     # Bad input
     with pytest.raises(ValueError):
-        match_ctc("not tracking data", "not tracking data")
+        CTCMatched("not tracking data", "not tracking data")
 
     # shapes don't match
     with pytest.raises(ValueError):
-        match_ctc(
+        CTCMatched(
             TrackingData(
                 tracking_graph=nx.DiGraph(), segmentation=np.zeros((5, 10, 10))
             ),
@@ -44,17 +44,20 @@ def test_match_iou_2d():
 
     G = TrackingGraph(G)
 
-    mapper = match_ctc(
+    matched = CTCMatched(
         TrackingData(tracking_graph=G, segmentation=movie),
         TrackingData(tracking_graph=G, segmentation=movie),
     )
 
     # Check for correct number of pairs
-    assert len(mapper) == n_frames * n_labels
+    assert len(matched.mapping) == n_frames * n_labels
 
     # gt and pred node should be the same
-    for pair in mapper:
+    for pair in matched.mapping:
         assert pair[0] == pair[1]
+
+    # there should be something saved in detection matrices
+    assert matched._det_matrices
 
 
 def test_get_node_matching_map():

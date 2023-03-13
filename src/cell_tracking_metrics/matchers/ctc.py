@@ -13,105 +13,109 @@ from cell_tracking_metrics.tracking_data import TrackingData
 
 class CTCMatched(Matched):
     def compute_mapping(self):
-        pass
+        mapping, det_matrices = self._match_ctc()
+        self._det_matrices = det_matrices
+        return mapping
 
+    def _match_ctc(self):
+        """Match graph nodes based on measure used in cell tracking challenge benchmarking.
 
-def match_ctc(gt, pred, label_key="segmentation_id"):
-    """Match graph nodes based on measure used in cell tracking challenge benchmarking.
+        A computed marker (segmentation) is matched to a reference marker if the computed
+        marker covers a majority of the reference marker.
 
-    A computed marker (segmentation) is matched to a reference marker if the computed
-    marker covers a majority of the reference marker.
+        Each reference marker can therefore only be matched to one computed marker, but
+        multiple reference markers can be assigned to a single computed marker.
 
-    Each reference marker can therefore only be matched to one computed marker, but
-    multiple reference markers can be assigned to a single computed marker.
+        See https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0144959
+        for complete details.
 
-    See https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0144959
-    for complete details.
+        Returns:
+            list[(gt_node, pred_node)]: list of tuples where each tuple contains a gt node
+            and pred node
+            dict: dictionary containing detection_matrices and mappings indexed by frame_key
 
-    Args:
-        gt (TrackingData): Tracking data object containing graph and segmentations
-        pred (TrackingData): Tracking data object containing graph and segmentations
-        label_key (str, optional): Key for the segmentation label attribute on each node.
-        Defaults to "segmentation_id".
-
-    Returns:
-        list[(gt_node, pred_node)]: list of tuples where each tuple contains a gt node and pred node
-
-    Raises:
-        ValueError: gt and pred must be a TrackingData object
-        ValueError: GT and pred segmentations must be the same shape
-    """
-    if not isinstance(gt, TrackingData) or not isinstance(pred, TrackingData):
-        raise ValueError(
-            "Input data must be a TrackingData object with a graph and segmentations"
-        )
-
-    G_gt, mask_gt = gt.tracking_graph, gt.segmentation
-    G_pred, mask_pred = pred.tracking_graph, pred.segmentation
-
-    if mask_gt.shape != mask_pred.shape:
-        raise ValueError("Segmentation shapes must match between gt and pred")
-
-    det_matrices = {}
-    # Get overlaps for each frame
-    for i, t in enumerate(
-        tqdm(
-            range(gt.tracking_graph.start_frame, gt.tracking_graph.end_frame),
-            desc="Matching frames",
-        )
-    ):
-        gt_frame = mask_gt[i]
-        res_frame = mask_pred[i]
-        gt_frame_nodes = gt.tracking_graph.nodes_by_frame[t]
-        pred_frame_nodes = pred.tracking_graph.nodes_by_frame[t]
-
-        # get the labels for this frame
-        gt_labels = dict(
-            filter(
-                lambda item: item[0] in gt_frame_nodes,
-                nx.get_node_attributes(G_gt.graph, label_key).items(),
+        Raises:
+            ValueError: gt and pred must be a TrackingData object
+            ValueError: GT and pred segmentations must be the same shape
+        """
+        if not isinstance(self.gt_data, TrackingData) or not isinstance(
+            self.pred_data, TrackingData
+        ):
+            raise ValueError(
+                "Input data must be a TrackingData object with a graph and segmentations"
             )
-        )
-        pred_labels = dict(
-            filter(
-                lambda item: item[0] in pred_frame_nodes,
-                nx.get_node_attributes(G_pred.graph, label_key).items(),
+        gt = self.gt_data
+        pred = self.pred_data
+        label_key = self.gt_data.tracking_graph.label_key
+
+        G_gt, mask_gt = gt.tracking_graph, gt.segmentation
+        G_pred, mask_pred = pred.tracking_graph, pred.segmentation
+
+        if mask_gt.shape != mask_pred.shape:
+            raise ValueError("Segmentation shapes must match between gt and pred")
+
+        det_matrices = {}
+        # Get overlaps for each frame
+        for i, t in enumerate(
+            tqdm(
+                range(gt.tracking_graph.start_frame, gt.tracking_graph.end_frame),
+                desc="Matching frames",
             )
-        )
+        ):
+            gt_frame = mask_gt[i]
+            res_frame = mask_pred[i]
+            gt_frame_nodes = gt.tracking_graph.nodes_by_frame[t]
+            pred_frame_nodes = pred.tracking_graph.nodes_by_frame[t]
 
-        # make dictionary from label to ID so we know where in matrix to assign matches
-        gt_label_to_id = {v: (k, i) for i, (k, v) in enumerate(gt_labels.items())}
-        pred_label_to_id = {v: (k, i) for i, (k, v) in enumerate(pred_labels.items())}
-        frame_det_matrix = np.zeros(
-            (len(pred_frame_nodes), len(gt_frame_nodes)), dtype=np.uint8
-        )
-        overlapping_gt_labels, overlapping_res_labels = get_labels_with_overlap(
-            gt_frame, res_frame
-        )
-        populate_det_matrix(
-            frame_det_matrix,
-            gt_frame,
-            res_frame,
-            overlapping_gt_labels,
-            overlapping_res_labels,
-            gt_label_to_id,
-            pred_label_to_id,
-        )
+            # get the labels for this frame
+            gt_labels = dict(
+                filter(
+                    lambda item: item[0] in gt_frame_nodes,
+                    nx.get_node_attributes(G_gt.graph, label_key).items(),
+                )
+            )
+            pred_labels = dict(
+                filter(
+                    lambda item: item[0] in pred_frame_nodes,
+                    nx.get_node_attributes(G_pred.graph, label_key).items(),
+                )
+            )
 
-        ordered_gt_node_ids = [
-            v[0] for v in sorted(gt_label_to_id.values(), key=lambda x: x[1])
-        ]
-        ordered_comp_node_ids = [
-            v[0] for v in sorted(pred_label_to_id.values(), key=lambda x: x[1])
-        ]
+            # make dictionary from label to ID so we know where in matrix to assign matches
+            gt_label_to_id = {v: (k, i) for i, (k, v) in enumerate(gt_labels.items())}
+            pred_label_to_id = {
+                v: (k, i) for i, (k, v) in enumerate(pred_labels.items())
+            }
+            frame_det_matrix = np.zeros(
+                (len(pred_frame_nodes), len(gt_frame_nodes)), dtype=np.uint8
+            )
+            overlapping_gt_labels, overlapping_res_labels = get_labels_with_overlap(
+                gt_frame, res_frame
+            )
+            populate_det_matrix(
+                frame_det_matrix,
+                gt_frame,
+                res_frame,
+                overlapping_gt_labels,
+                overlapping_res_labels,
+                gt_label_to_id,
+                pred_label_to_id,
+            )
 
-        det_matrices[t] = {
-            "det": frame_det_matrix,
-            "comp_ids": ordered_comp_node_ids,
-            "gt_ids": ordered_gt_node_ids,
-        }
-    matching = get_node_matching_map(det_matrices)
-    return matching, det_matrices
+            ordered_gt_node_ids = [
+                v[0] for v in sorted(gt_label_to_id.values(), key=lambda x: x[1])
+            ]
+            ordered_comp_node_ids = [
+                v[0] for v in sorted(pred_label_to_id.values(), key=lambda x: x[1])
+            ]
+
+            det_matrices[t] = {
+                "det": frame_det_matrix,
+                "comp_ids": ordered_comp_node_ids,
+                "gt_ids": ordered_gt_node_ids,
+            }
+        matching = get_node_matching_map(det_matrices)
+        return matching, det_matrices
 
 
 def populate_det_matrix(
@@ -198,7 +202,7 @@ if __name__ == "__main__":
     res_track_pth = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_RES/res_track.txt"  # noqa
     gt_data = load_ctc_data(gt_dir, gt_track_pth)
     res_data = load_ctc_data(res_dir, res_track_pth)
-    mapping = match_ctc(gt_data, res_data)
+    mapping = CTCMatched(gt_data, res_data).mapping
     t_events = evaluate_ctc_events(
         gt_data.tracking_graph, res_data.tracking_graph, mapping
     )
