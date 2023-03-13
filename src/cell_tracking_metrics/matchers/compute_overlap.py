@@ -9,7 +9,7 @@ import numpy as np
 from skimage.measure import regionprops
 
 
-def get_overlapping_bounding_boxes(gt_frame, res_frame):
+def get_labels_with_overlap(gt_frame, res_frame):
     gt_props = regionprops(gt_frame.astype(np.uint16))
     gt_boxes = [np.array(gt_prop.bbox) for gt_prop in gt_props]
     gt_boxes = np.array(gt_boxes).astype(np.float64)

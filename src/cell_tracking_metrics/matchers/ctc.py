@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 
 from cell_tracking_metrics.matchers.compute_overlap import (
-    get_overlapping_bounding_boxes,
+    get_labels_with_overlap,
 )
 from cell_tracking_metrics.tracking_data import TrackingData
 
@@ -79,7 +79,7 @@ def match_ctc(gt, pred, label_key="segmentation_id"):
         frame_det_matrix = np.zeros(
             (len(pred_frame_nodes), len(gt_frame_nodes)), dtype=np.uint8
         )
-        overlapping_gt_labels, overlapping_res_labels = get_overlapping_bounding_boxes(
+        overlapping_gt_labels, overlapping_res_labels = get_labels_with_overlap(
             gt_frame, res_frame
         )
         populate_det_matrix(

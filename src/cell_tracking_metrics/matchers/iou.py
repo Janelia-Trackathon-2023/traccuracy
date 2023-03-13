@@ -1,7 +1,7 @@
 import numpy as np
 
 from cell_tracking_metrics.matchers.compute_overlap import (
-    get_overlapping_bounding_boxes,
+    get_labels_with_overlap,
 )
 from cell_tracking_metrics.tracking_data import TrackingData
 
@@ -25,9 +25,7 @@ def _match_nodes(gt, res, threshold=1):
         raise ValueError("gt and res must be 2d arrays")
 
     iou = np.zeros((np.max(gt) + 1, np.max(res) + 1))
-    overlapping_gt_labels, overlapping_res_labels = get_overlapping_bounding_boxes(
-        gt, res
-    )
+    overlapping_gt_labels, overlapping_res_labels = get_labels_with_overlap(gt, res)
 
     for index in range(len(overlapping_gt_labels)):
         iou_gt_idx = overlapping_gt_labels[index]
