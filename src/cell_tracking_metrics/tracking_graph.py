@@ -50,7 +50,8 @@ class TrackingGraph:
             frame_key (str, optional): The key on each node in graph that contains the time frame
                 of the node. Every node must have a value stored at this key. Defaults to 't'.
             label_key (str, optional): The key on each node that denotes the pixel value of
-                the node in the segmentation
+                the node in the segmentation. Defaults to 'segmentation_id'. Pass `None` if
+                segmentation is not available.
             location_keys (tuple, optional): The list of keys on each node in graph
                 that contains the spatial location of the node. Every node
                 must have a value stored at each of these keys. Defaults to ('x', 'y').
