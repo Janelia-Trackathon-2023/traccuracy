@@ -7,7 +7,13 @@ from tqdm import tqdm
 from cell_tracking_metrics.matchers.compute_overlap import (
     get_labels_with_overlap,
 )
+from cell_tracking_metrics.matchers.matched import Matched
 from cell_tracking_metrics.tracking_data import TrackingData
+
+
+class CTCMatched(Matched):
+    def compute_mapping(self):
+        pass
 
 
 def match_ctc(gt, pred, label_key="segmentation_id"):
@@ -104,9 +110,8 @@ def match_ctc(gt, pred, label_key="segmentation_id"):
             "comp_ids": ordered_comp_node_ids,
             "gt_ids": ordered_gt_node_ids,
         }
-    pred.tracking_graph._det_matrices = det_matrices
     matching = get_node_matching_map(det_matrices)
-    return matching
+    return matching, det_matrices
 
 
 def populate_det_matrix(
