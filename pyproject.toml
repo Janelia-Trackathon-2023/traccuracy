@@ -56,7 +56,8 @@ docs = [
     "mock",
     "Sphinx<6",
     "sphinx-rtd-theme",
-    "m2r2"
+    "m2r2",
+    "sphinx-autoapi"
 ]
 
 [project.urls]
