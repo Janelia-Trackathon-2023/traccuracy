@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING
 
-from .utils import get_relevant_kwargs, validate_matched_data
+from traccuracy.utils import get_relevant_kwargs, validate_matched_data
 
 if TYPE_CHECKING:
     from typing import Dict, List, Type
 
-    from cell_tracking_metrics.matchers.matched import Matched
-    from cell_tracking_metrics.metrics.base import Metric
-    from cell_tracking_metrics.tracking_data import TrackingData
+    from traccuracy.matchers.matched import Matched
+    from traccuracy.metrics.base import Metric
+    from traccuracy.tracking_data import TrackingData
 
 
 def run_metrics(
@@ -46,3 +46,19 @@ def run_metrics(
         result = _metric(matched, **relevant_kwargs)
         results[_metric.__name__] = result
     return results
+
+
+if __name__ == "__main__":
+    from traccuracy.loaders.ctc import load_ctc_data
+    from traccuracy.matchers import CTCMatched
+    from traccuracy.metrics import CTCMetrics, DivisionMetrics
+
+    gt_data = load_ctc_data(
+        "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA/",
+        "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt",
+    )
+    res_data = load_ctc_data(
+        "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_RES/",
+        "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_RES/res_track.txt",
+    )
+    results = run_metrics(gt_data, res_data, CTCMatched, [CTCMetrics, DivisionMetrics])
