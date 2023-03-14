@@ -35,12 +35,83 @@ as the late division daughters.
 import itertools
 from collections import Counter
 
-from cell_tracking_metrics.track_errors.division_events import DivisionEvents
-from cell_tracking_metrics.tracking_graph import TrackingGraph
-from cell_tracking_metrics.utils import find_gt_node_matches, find_pred_node_matches
+from ..track_errors.division_events import DivisionEvents
+from ..tracking_graph import TrackingGraph
+from ..utils import find_gt_node_matches, find_pred_node_matches
+from .base import Metric
 
 
-def classify_divisions(G_gt, G_pred, mapper):
+def _calculate_metrics(event: DivisionEvents):
+    try:
+        recall = event.tp_division_count / (
+            event.tp_division_count + event.fn_division_count
+        )
+    except ZeroDivisionError:
+        recall = 0
+
+    try:
+        precision = event.tp_division_count / (
+            event.tp_division_count + event.fp_division_count
+        )
+    except ZeroDivisionError:
+        precision = 0
+
+    try:
+        f1 = 2 * (recall * precision) / (recall + precision)
+    except ZeroDivisionError:
+        f1 = 0
+
+    try:
+        mbc = event.tp_division_count / (
+            event.tp_division_count + event.fn_division_count + event.fp_division_count
+        )
+    except ZeroDivisionError:
+        mbc = 0
+
+    return {
+        "Division Recall": recall,
+        "Division Precision": precision,
+        "Division F1": f1,
+        "Mitotic Branching Correctness": mbc,
+        **event.count_dict,
+    }
+
+
+class DivisionMetrics(Metric):
+    needs_one_to_one = True
+
+    def __init__(self, matched_data, frame_buffer=(0)):
+        """Classify division events and provide summary metrics
+
+        Args:
+            matched_data (Matched): Matched object for set of GT and Pred data
+                Must meet the `needs_one_to_one` critera
+            frame_buffer (tuple(int), optional): Tuple of integers. Value used as n_frames
+                to tolerate in correct_shifted_divisions. Defaults to (0).
+        """
+        self.frame_buffer = frame_buffer
+        super().__init__(matched_data)
+
+    def compute(self):
+        """Runs `_evalute_division_events` and calculates summary metrics for each frame buffer
+
+        Returns:
+            dict: Returns a nested dictionary with one dictionary per frame buffer value
+        """
+        events = _evaluate_division_events(
+            self.data.gt_data.tracking_graph,
+            self.data.pred_data.tracking_graph,
+            self.data.mapping,
+            frame_buffer=self.frame_buffer,
+        )
+
+        return {
+            f"Frame Buffer {event.frame_buffer}": _calculate_metrics(event)
+            for event in events
+        }
+
+
+def _classify_divisions(G_gt, G_pred, mapper):
     """Identify each division as a true positive, false positive or false negative
 
     This function only works on node mappers that are one-to-one
@@ -171,7 +242,7 @@ def _get_succ_by_t(G, node, delta_frames):
     return node
 
 
-def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
+def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
     """Allows for divisions to occur within a frame buffer and still be correct
 
     This implementation asserts that the parent lineages and daughter lineages must match.
@@ -214,8 +285,8 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
         correct = False
-        t_fp = G_pred.graph.nodes[fp_node][frame_key]
-        t_fn = G_gt.graph.nodes[fn_node][frame_key]
+        t_fp = G_pred.graph.nodes[fp_node][G_pred.frame_key]
+        t_fn = G_gt.graph.nodes[fn_node][G_gt.frame_key]
 
         # Move on if nodes are not within frame buffer or within same frame
         if abs(t_fp - t_fn) > n_frames or t_fp == t_fn:
@@ -275,9 +346,7 @@ def correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1, frame_key="t"):
     return counts
 
 
-def evaluate_division_performance(
-    G_gt, G_pred, mapper, frame_key="t", frame_buffer=(0)
-):
+def _evaluate_division_events(G_gt, G_pred, mapper, frame_buffer=(0)):
     """Classify division errors and correct shifted divisions according to frame_buffer
     One DivisionEvent object will be returned for each value in frame_buffer
 
@@ -285,7 +354,6 @@ def evaluate_division_performance(
         G_gt (TrackingGraph): TrackingGraph of GT data
         G_pred (TrackingGraph): TrackingGraph of pred data
         mapper ([(gt_node, pred_node)]): List of tuples with pairs of gt and pred nodes
-        frame_key (str, optional): _description_. Defaults to 't'.
         frame_buffer (tuple, optional): Tuple of integers. Value used as n_frames
             to tolerate in correct_shifted_divisions. Defaults to (0).
 
@@ -296,7 +364,7 @@ def evaluate_division_performance(
     events = []
 
     # Baseline division classification
-    event, G_gt, G_pred = classify_divisions(G_gt, G_pred, mapper)
+    event, G_gt, G_pred = _classify_divisions(G_gt, G_pred, mapper)
     events.append(event)
 
     # Correct shifted divisions for each nonzero value in frame_buffer
@@ -305,9 +373,7 @@ def evaluate_division_performance(
         if delta == 0:
             continue
 
-        event = correct_shifted_divisions(
-            G_gt, G_pred, mapper, n_frames=delta, frame_key=frame_key
-        )
+        event = _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=delta)
         events.append(event)
 
     return events
