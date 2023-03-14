@@ -1,4 +1,4 @@
-* cell_tracking_metrics version:
+* traccuracy version:
 * Python version:
 * Operating System:
 

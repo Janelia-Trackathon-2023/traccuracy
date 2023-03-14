@@ -1,8 +1,8 @@
 import networkx as nx
 import pytest
-from cell_tracking_metrics import TrackingData, TrackingGraph
-from cell_tracking_metrics.matchers import Matched
-from cell_tracking_metrics.metrics.divisions import (
+from traccuracy import TrackingData, TrackingGraph
+from traccuracy.matchers.matched import Matched
+from traccuracy.metrics.divisions import (
     DivisionMetrics,
     _classify_divisions,
     _correct_shifted_divisions,

@@ -180,6 +180,38 @@ class TrackingGraph:
                     nodes.append(node)
         return nodes
 
+    def get_edges_with_attribute(self, attr, criterion=None, limit_to=None):
+        """Get the edge_ids of all edges who have an attribute, optionally
+        limiting to edges whose value at that attribute meet a given criteria.
+
+        For example, get all edges that have an attribute called "fp",
+        or where the value for "fp" == True.
+
+        Args:
+            attr (str): the name of the attribute to search for in the edge metadata
+            criterion ((any)->bool, optional): A function that takes a value and returns
+                a boolean. If provided, edges will only be returned if the value at
+                edge[attr] meets this criterion. Defaults to None.
+            limit_to (list[hashable], optional): If provided the function will only
+                return edge ids in this list. Will raise KeyError if ids provided here
+                are not present.
+
+        Returns:
+            list of hashable: A list of edge_ids which have the given attribute
+                (and optionally have values at that attribute that meet the given criterion,
+                and/or are in the list of edge ids.)
+        """
+        if not limit_to:
+            limit_to = self.graph.edges.keys()
+
+        edges = []
+        for edge in limit_to:
+            attributes = self.graph.edges[edge]
+            if attr in attributes.keys():
+                if criterion is None or criterion(attributes[attr]):
+                    edges.append(edge)
+        return edges
+
     def get_divisions(self):
         """Get all nodes that have at least two edges pointing to the next time frame
 

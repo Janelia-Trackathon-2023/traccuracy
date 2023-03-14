@@ -1,9 +1,9 @@
 import numpy as np
 
-from cell_tracking_metrics.matchers.compute_overlap import (
+from traccuracy.matchers.compute_overlap import (
     get_labels_with_overlap,
 )
-from cell_tracking_metrics.tracking_data import TrackingData
+from traccuracy.tracking_data import TrackingData
 
 from .matched import Matched
 
