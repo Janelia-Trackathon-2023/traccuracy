@@ -12,7 +12,7 @@
 Learn more in the [documentation](https://traccuracy.readthedocs.io/en/latest/).
 
 ## Installation
-`pip install` coming soon...
+`pip install traccuracy`
 
 ## Development
 For local development, clone the repo and install in editable mode.
