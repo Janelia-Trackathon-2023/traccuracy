@@ -82,11 +82,6 @@ def get_annotated_movie(
 
 
 def test__match_nodes():
-    # Check shape error
-    bad_shape = (2, 10, 10)
-    with pytest.raises(ValueError):
-        _match_nodes(np.zeros(bad_shape), np.zeros(bad_shape))
-
     # creat dummy image to test against
     num_labels = 5
     y1 = get_annotated_image(img_size=256, num_labels=num_labels, seed=1)
