@@ -35,8 +35,8 @@ as the late division daughters.
 import itertools
 from collections import Counter
 
-from cell_tracking_metrics._tracking_graph import TrackingGraph
 from cell_tracking_metrics.track_errors.division_events import DivisionEvents
+from cell_tracking_metrics.tracking_graph import TrackingGraph
 from cell_tracking_metrics.utils import find_gt_node_matches, find_pred_node_matches
 
 

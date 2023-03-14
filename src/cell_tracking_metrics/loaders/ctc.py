@@ -7,8 +7,8 @@ import pandas as pd
 from skimage.measure import regionprops_table
 from tifffile import imread
 
-from cell_tracking_metrics._tracking_graph import TrackingGraph
 from cell_tracking_metrics.tracking_data import TrackingData
+from cell_tracking_metrics.tracking_graph import TrackingGraph
 
 
 def load_tiffs(data_dir):
