@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from skimage.measure import regionprops_table
 from tifffile import imread
+from tqdm import tqdm
 
 from traccuracy.tracking_data import TrackingData
 from traccuracy.tracking_graph import TrackingGraph
@@ -28,7 +29,7 @@ def load_tiffs(data_dir):
         raise FileNotFoundError(f"No tif files were found in {data_dir}")
 
     ims = []
-    for f in files:
+    for f in tqdm(files, "Loading TIFFs"):
         ims.append(imread(f))
 
     mov = np.stack(ims)

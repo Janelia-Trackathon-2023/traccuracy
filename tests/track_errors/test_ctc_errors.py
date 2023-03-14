@@ -1,8 +1,8 @@
 import networkx as nx
 import numpy as np
 from traccuracy.track_errors.ctc import (
-    assign_edge_errors,
     get_comp_subgraph,
+    get_edge_errors,
     get_vertex_errors,
 )
 
@@ -91,7 +91,7 @@ def test_assign_edge_errors():
     gt_g.add_edges_from(gt_edges)
     nx.set_edge_attributes(gt_g, 0, "is_intertrack_edge")
     nx.set_node_attributes(gt_g, False, "is_fn")
-    assign_edge_errors(gt_g, comp_g, mapping)
+    get_edge_errors(gt_g, comp_g, mapping)
 
     assert comp_g.edges[(3, 4)]["is_tp"]
     assert comp_g.edges[(7, 8)]["is_fp"]
@@ -123,7 +123,7 @@ def test_assign_edge_errors_semantics():
     nx.set_edge_attributes(gt_g, 0, "is_intertrack_edge")
     nx.set_node_attributes(gt_g, False, "is_fn")
     gt_g.edges[(4, 5)]["is_intertrack_edge"] = 1
-    assign_edge_errors(gt_g, comp_g, mapping)
+    get_edge_errors(gt_g, comp_g, mapping)
 
     assert comp_g.edges[(3, 4)]["is_wrong_semantic"]
     assert not comp_g.edges[(3, 4)]["is_tp"]

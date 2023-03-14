@@ -80,7 +80,7 @@ def _calculate_metrics(event: DivisionEvents):
 class DivisionMetrics(Metric):
     needs_one_to_one = True
 
-    def __init__(self, matched_data, frame_buffer=(0)):
+    def __init__(self, matched_data, frame_buffer=(0,)):
         """Classify division events and provide summary metrics
 
         Args:
