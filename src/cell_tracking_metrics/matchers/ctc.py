@@ -190,20 +190,3 @@ def detection_test(gt_blob: "np.ndarray", comp_blob: "np.ndarray") -> int:
     intersection = np.logical_and(gt_blob, comp_blob)
     comp_blob_matches_gt_blob = int(np.sum(intersection) > 0.5 * n_gt_pixels)
     return comp_blob_matches_gt_blob
-
-
-if __name__ == "__main__":
-    from cell_tracking_metrics.loaders.ctc import load_ctc_data
-    from cell_tracking_metrics.track_errors.ctc import evaluate_ctc_events
-
-    gt_dir = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA"
-    gt_track_pth = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt"  # noqa
-    res_dir = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_RES"
-    res_track_pth = "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_RES/res_track.txt"  # noqa
-    gt_data = load_ctc_data(gt_dir, gt_track_pth)
-    res_data = load_ctc_data(res_dir, res_track_pth)
-    mapping = CTCMatched(gt_data, res_data).mapping
-    t_events = evaluate_ctc_events(
-        gt_data.tracking_graph, res_data.tracking_graph, mapping
-    )
-    print(t_events)
