@@ -23,6 +23,7 @@ class Metric(ABC):
             matched_data (Matched): Matched object for set of GT and Pred data
         """
         self.data = matched_data
+        self.results = self.compute()
 
     @abstractmethod
     def compute(self) -> dict:
