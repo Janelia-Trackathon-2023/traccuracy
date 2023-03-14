@@ -1,7 +1,7 @@
 import networkx as nx
 import numpy as np
 import skimage as sk
-from cell_tracking_metrics.tracking_graph import TrackingGraph
+from traccuracy.tracking_graph import TrackingGraph
 
 
 def get_annotated_image(img_size=256, num_labels=3, sequential=True, seed=1):

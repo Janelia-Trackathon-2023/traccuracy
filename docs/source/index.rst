@@ -13,4 +13,4 @@ Welcome to Cell Tracking Metrics's documentation!
    :caption: Contents:
 
    ...
-   autoapi/cell_tracking_metrics/index
+   autoapi/traccuracy/index

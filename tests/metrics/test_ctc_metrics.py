@@ -1,7 +1,7 @@
 import networkx as nx
-from cell_tracking_metrics.matchers.ctc import CTCMatched
-from cell_tracking_metrics.metrics.ctc import CTCMetrics
-from cell_tracking_metrics.tracking_data import TrackingData
+from traccuracy.matchers.ctc import CTCMatched
+from traccuracy.metrics.ctc import CTCMetrics
+from traccuracy.tracking_data import TrackingData
 
 from tests.test_utils import get_movie_with_graph
 

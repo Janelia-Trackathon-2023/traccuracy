@@ -1,6 +1,6 @@
 import networkx as nx
 import pytest
-from cell_tracking_metrics import TrackingGraph
+from traccuracy import TrackingGraph
 
 
 @pytest.fixture

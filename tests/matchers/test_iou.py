@@ -1,8 +1,8 @@
 import networkx as nx
 import numpy as np
 import pytest
-from cell_tracking_metrics.matchers.iou import IOUMatched, _match_nodes, match_iou
-from cell_tracking_metrics.tracking_data import TrackingData
+from traccuracy.matchers.iou import IOUMatched, _match_nodes, match_iou
+from traccuracy.tracking_data import TrackingData
 
 from tests.test_utils import get_annotated_image, get_movie_with_graph
 
