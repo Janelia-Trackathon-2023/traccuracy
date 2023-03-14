@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-from cell_tracking_metrics.metrics import Metric
-from cell_tracking_metrics.track_errors.ctc import evaluate_ctc_events
+from traccuracy.metrics import Metric
+from traccuracy.track_errors.ctc import evaluate_ctc_events
 
 if TYPE_CHECKING:
     from .base import Matched

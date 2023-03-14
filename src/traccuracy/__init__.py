@@ -2,7 +2,7 @@
 from importlib.metadata import PackageNotFoundError, version
 
 try:
-    __version__ = version("cell_tracking_metrics")
+    __version__ = version("traccuracy")
 except PackageNotFoundError:
     __version__ = "uninstalled"
 

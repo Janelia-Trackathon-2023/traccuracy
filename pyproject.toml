@@ -1,19 +1,20 @@
 # https://peps.python.org/pep-0517/
 [build-system]
-# requires = ["hatchling", "hatch-vcs"]
 build-backend = "setuptools.build_meta"
 requires = ["wheel", "setuptools>=40.8.0", "setuptools_scm"]
 
 
 # https://peps.python.org/pep-0621/
 [project]
-name = "cell_tracking_metrics"
+name = "traccuracy"
 description = "package description."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "BSD 3-Clause License" }
 authors = [
-    { email = "draga.doncilapop1@monash.edu", name = "Track Gals" },
+    { email = "draga.doncilapop1@monash.edu", name = "Draga Doncila Pop" },
+    { email = "cmalinmayor@gmail.com", name = "Caroline Malin-Mayor" },
+    { email = "msschwartz21@gmail.com", name = "Morgan Schwartz"}
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -62,15 +63,16 @@ docs = [
 ]
 
 [project.urls]
-homepage = "https://github.com/DragaDoncila/cell_tracking_metrics"
-repository = "https://github.com/DragaDoncila/cell_tracking_metrics"
+homepage = "https://github.com/Janelia-Trackathon-2023/traccuracy"
+repository = "https://github.com/Janelia-Trackathon-2023/traccuracy"
+documentation = "https://traccuracy.readthedocs.io/"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ['src'] #  list of folders that contain packages
-include = ['cell_tracking_metrics*']
+include = ['traccuracy*']
 
 [tool.setuptools_scm] # Necessary to enable setuptools_scm for dynamic versioning from tags
 
@@ -82,18 +84,6 @@ include = ['cell_tracking_metrics*']
 # https://peps.python.org/pep-0621/#entry-points
 # [project.entry-points."spam.magical"]
 # tomatoes = "spam:main_tomatoes"
-
-# https://hatch.pypa.io/latest/config/metadata/
-# [tool.hatch.version]
-# source = "vcs"
-
-# https://hatch.pypa.io/latest/config/build/#file-selection
-# [tool.hatch.build.targets.sdist]
-# include = ["/src", "/tests"]
-
-# [tool.hatch.build.targets.wheel]
-# only-include = ["src"]
-# sources = ["src"]
 
 # https://github.com/charliermarsh/ruff
 [tool.ruff]

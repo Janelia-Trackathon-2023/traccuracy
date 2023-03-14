@@ -1,15 +1,15 @@
-# cell_tracking_metrics
+# traccuracy
 
-[![License](https://img.shields.io/pypi/l/cell_tracking_metrics.svg?color=green)](https://github.com/Janelia-Trackathon-2023/cell_tracking_metrics/raw/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/cell_tracking_metrics.svg?color=green)](https://pypi.org/project/cell_tracking_metrics)
-[![Python Version](https://img.shields.io/pypi/pyversions/cell_tracking_metrics.svg?color=green)](https://python.org)
-[![CI](https://github.com/Janelia-Trackathon-2023/cell_tracking_metrics/actions/workflows/ci.yml/badge.svg)](https://github.com/Janelia-Trackathon-2023/cell_tracking_metrics/actions/workflows/ci.yml)
-[![Documentation Status](https://readthedocs.org/projects/cell-tracking-metrics/badge/?version=latest)](https://cell-tracking-metrics.readthedocs.io/en/latest/?badge=latest)
+[![License](https://img.shields.io/pypi/l/traccuracy.svg?color=green)](https://github.com/Janelia-Trackathon-2023/traccuracy/raw/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/traccuracy.svg?color=green)](https://pypi.org/project/traccuracy)
+[![Python Version](https://img.shields.io/pypi/pyversions/traccuracy.svg?color=green)](https://python.org)
+[![CI](https://github.com/Janelia-Trackathon-2023/traccuracy/actions/workflows/ci.yml/badge.svg)](https://github.com/Janelia-Trackathon-2023/traccuracy/actions/workflows/ci.yml)
+[![Documentation Status](https://readthedocs.org/projects/traccuracy/badge/?version=latest)](https://traccuracy.readthedocs.io/en/latest/?badge=latest)
 
 
-`cell-tracking-metrics` provides a suite of benchmarking functions that can be used to evaluate tracking solutions against ground truth annotations. It includes the standard metrics that are calculated by the [Cell Tracking Challenge](http://celltrackingchallenge.net/evaluation-methodology/).
+`traccuracy` provides a suite of benchmarking functions that can be used to evaluate tracking solutions against ground truth annotations. It includes the standard metrics that are calculated by the [Cell Tracking Challenge](http://celltrackingchallenge.net/evaluation-methodology/).
 
-Learn more in the [documentation](https://cell-tracking-metrics.readthedocs.io/en/latest/).
+Learn more in the [documentation](https://traccuracy.readthedocs.io/en/latest/).
 
 ## Installation
 `pip install` coming soon...
@@ -17,8 +17,8 @@ Learn more in the [documentation](https://cell-tracking-metrics.readthedocs.io/e
 ## Development
 For local development, clone the repo and install in editable mode.
 ```
-git clone https://github.com/Janelia-Trackathon-2023/cell-tracking-metrics.git
-cd cell-tracking-metrics
+git clone https://github.com/Janelia-Trackathon-2023/traccuracy.git
+cd traccuracy
 pip install -e .[dev]
 ```
 
