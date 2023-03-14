@@ -1,13 +1,15 @@
 import networkx as nx
 import pytest
+from cell_tracking_metrics import TrackingData, TrackingGraph
+from cell_tracking_metrics.matchers import Matched
 from cell_tracking_metrics.metrics.divisions import (
+    DivisionMetrics,
     _classify_divisions,
     _correct_shifted_divisions,
     _evaluate_division_events,
     _get_pred_by_t,
     _get_succ_by_t,
 )
-from cell_tracking_metrics.tracking_graph import TrackingGraph
 
 
 @pytest.fixture
@@ -257,3 +259,39 @@ def test_evaluate_division_events():
             assert len(e.tp_divisions) == 1
             assert len(e.fp_divisions) == 0
             assert len(e.fn_divisions) == 0
+
+
+class DummyMatched(Matched):
+    def __init__(self, gt_data, pred_data, mapper):
+        self.mapper = mapper
+        super().__init__(gt_data, pred_data)
+
+    def compute_mapping(self):
+        return self.mapper
+
+
+def test_DivisionMetrics():
+    G_gt, G_pred, mapper = get_division_graphs()
+    matched = DummyMatched(
+        TrackingData(TrackingGraph(G_gt)),
+        TrackingData(TrackingGraph(G_pred)),
+        mapper=mapper,
+    )
+    frame_buffer = (0, 1, 2)
+
+    metrics = DivisionMetrics(matched, frame_buffer=frame_buffer)
+    results = metrics.compute()
+
+    for name, r in results.items():
+        buffer = int(name[-1:])
+        assert buffer in frame_buffer
+        if buffer in (0, 1):
+            # No corrections
+            assert r["True Positive Divisions"] == 0
+            assert r["False Positive Divisions"] == 1
+            assert r["False Negative Divisions"] == 1
+        else:
+            # Correction
+            assert r["True Positive Divisions"] == 1
+            assert r["False Positive Divisions"] == 0
+            assert r["False Negative Divisions"] == 0

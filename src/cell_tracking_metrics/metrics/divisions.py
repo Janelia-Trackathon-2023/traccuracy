@@ -41,7 +41,7 @@ from ..utils import find_gt_node_matches, find_pred_node_matches
 from .base import Metric
 
 
-def _calculate_metrics(self, event: DivisionEvents):
+def _calculate_metrics(event: DivisionEvents):
     try:
         recall = event.tp_division_count / (
             event.tp_division_count + event.fn_division_count
@@ -83,24 +83,22 @@ class DivisionMetrics(Metric):
     def __init__(self, matched_data, **kwargs):
         """Classify division events and provide summary metrics
 
-
-
         Args:
             matched_data (Matched): Matched object for set of GT and Pred data
                 Must meet the `needs_one_to_one` critera
 
         Keyword Args:
             frame_buffer (tuple(int)): Tuple of integers. Value used as n_frames
-            to tolerate in correct_shifted_divisions. Defaults to (0).
+                to tolerate in correct_shifted_divisions. Defaults to (0).
         """
         self.frame_buffer = kwargs.get("frame_buffer", (0))
         super().__init__(matched_data)
 
     def compute(self):
         events = _evaluate_division_events(
-            self.data.gt_data,
-            self.data.pred_data,
-            self.mapping,
+            self.data.gt_data.tracking_graph,
+            self.data.pred_data.tracking_graph,
+            self.data.mapping,
             frame_buffer=self.frame_buffer,
         )
 
