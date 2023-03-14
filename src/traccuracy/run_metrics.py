@@ -46,19 +46,3 @@ def run_metrics(
         result = _metric(matched, **relevant_kwargs)
         results[_metric.__name__] = result
     return results
-
-
-if __name__ == "__main__":
-    from traccuracy.loaders.ctc import load_ctc_data
-    from traccuracy.matchers import CTCMatched
-    from traccuracy.metrics import CTCMetrics, DivisionMetrics
-
-    gt_data = load_ctc_data(
-        "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA/",
-        "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt",
-    )
-    res_data = load_ctc_data(
-        "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_RES/",
-        "/home/draga/PhD/data/cell_tracking_challenge/Fluo-N2DL-HeLa/01_RES/res_track.txt",
-    )
-    results = run_metrics(gt_data, res_data, CTCMatched, [CTCMetrics, DivisionMetrics])
