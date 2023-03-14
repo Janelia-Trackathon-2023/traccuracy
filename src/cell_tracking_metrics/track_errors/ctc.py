@@ -134,6 +134,7 @@ def assign_edge_errors(gt_graph, comp_graph, node_mapping):
     for edge in gt_graph.edges:
         source, target = edge[0], edge[1]
         # this edge is adjacent to an edge we didn't detect, so it definitely is an fn
+        # TODO: assumes you've already assigned vertex errors...
         if gt_graph.nodes[source]["is_fn"] or gt_graph.nodes[target]["is_fn"]:
             gt_graph.edges[edge]["is_fn"] = True
             continue
