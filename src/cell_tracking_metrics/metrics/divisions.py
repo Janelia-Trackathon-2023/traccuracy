@@ -80,21 +80,24 @@ def _calculate_metrics(event: DivisionEvents):
 class DivisionMetrics(Metric):
     needs_one_to_one = True
 
-    def __init__(self, matched_data, **kwargs):
+    def __init__(self, matched_data, frame_buffer=(0)):
         """Classify division events and provide summary metrics
 
         Args:
             matched_data (Matched): Matched object for set of GT and Pred data
                 Must meet the `needs_one_to_one` critera
-
-        Keyword Args:
-            frame_buffer (tuple(int)): Tuple of integers. Value used as n_frames
+            frame_buffer (tuple(int), optional): Tuple of integers. Value used as n_frames
                 to tolerate in correct_shifted_divisions. Defaults to (0).
         """
-        self.frame_buffer = kwargs.get("frame_buffer", (0))
+        self.frame_buffer = frame_buffer
         super().__init__(matched_data)
 
     def compute(self):
+        """Runs `_evalute_division_events` and calculates summary metrics for each frame buffer
+
+        Returns:
+            dict: Returns a nested dictionary with one dictionary per frame buffer value
+        """
         events = _evaluate_division_events(
             self.data.gt_data.tracking_graph,
             self.data.pred_data.tracking_graph,
