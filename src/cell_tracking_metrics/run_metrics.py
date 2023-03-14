@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+from .utils import validate_matcher_choice
+
 if TYPE_CHECKING:
     from typing import Dict, List
 
@@ -33,4 +35,7 @@ def run_metrics(
         Dict: dictionary of metrics indexed by metric name. Dictionary will be
         nested for metrics that return multiple values.
     """
-    return {}
+    validate_matcher_choice(gt_data, pred_data, matcher, metrics)
+    matcher(gt_data, pred_data)
+    for _metric in metrics:
+        pass

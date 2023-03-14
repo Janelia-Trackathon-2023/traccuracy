@@ -16,3 +16,15 @@ def find_pred_node_matches(matches, pred_node):
         pred_node (hashable): pred node ID
     """
     return [pair[0] for pair in matches if pair[1] == pred_node]
+
+
+def validate_matcher_choice(gt_data, pred_data, matcher, metrics):
+    """Validate that given matcher supports requirements of each metric.
+
+    Args:
+        gt_data (TrackingData): ground truth graph and optionally segmentation
+        pred_data (TrackingData): predicted graph and optionally segmentation
+        matcher (Matched): matching class to use to create correspondence
+        metrics (List[Metric]): list of metrics to compute as class names
+    """
+    ...
