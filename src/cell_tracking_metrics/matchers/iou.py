@@ -103,6 +103,18 @@ def match_iou(gt, pred, threshold=0.6):
 
 class IOUMatched(Matched):
     def __init__(self, gt_data, pred_data, iou_threshold=0.6):
+        """Constructs a mapping between gt and pred nodes using the IoU of the segmentations
+
+        Lower values for iou_threshold will be more permissive of imperfect matches
+
+        Args:
+            gt_data (TrackingData): TrackingData for the ground truth with segmentations
+            pred_data (TrackingData): TrackingData for the prediction with segmentations
+            iou_threshold (float, optional): Minimum IoU value to assign a match. Defaults to 0.6.
+
+        Raises:
+            ValueError: Segmentation data must be provided for both gt and pred data
+        """
         self.iou_threshold = iou_threshold
 
         # Check that segmentations exist in the data
