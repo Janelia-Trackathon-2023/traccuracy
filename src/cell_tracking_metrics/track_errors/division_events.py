@@ -74,8 +74,8 @@ class DivisionEvents:
     @property
     def count_dict(self):
         return {
-            'Total GT Divisions': self.gt_division_count,
-            'True Positive Divisions': self.tp_division_count,
-            'False Positive Divisions': self.fp_division_count,
-            'False Negative Divisions': self.fn_division_count
+            "Total GT Divisions": self.gt_division_count,
+            "True Positive Divisions": self.tp_division_count,
+            "False Positive Divisions": self.fp_division_count,
+            "False Negative Divisions": self.fn_division_count,
         }
