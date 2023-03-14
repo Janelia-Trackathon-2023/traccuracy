@@ -33,6 +33,7 @@ dependencies = [
     "pandas",
     "tifffile",
     "scikit-image",
+    "tqdm",
     # numba technically optional, will still work without it
     "numba; python_version != '3.11'",
 ]

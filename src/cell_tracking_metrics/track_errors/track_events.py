@@ -64,3 +64,33 @@ class TrackEvents:
         if frame_buffer not in self.division_counts:
             return None
         return self.division_counts[frame_buffer]
+
+    @property
+    def fp_node_count(self):
+        if self.fp_nodes is not None:
+            return len(self.fp_nodes)
+
+    @property
+    def fn_node_count(self):
+        if self.fn_nodes is not None:
+            return len(self.fn_nodes)
+
+    @property
+    def nonsplit_vertices_count(self):
+        if self.nonsplit_vertices is not None:
+            return len(self.nonsplit_vertices)
+
+    @property
+    def fp_edge_count(self):
+        if self.fp_edges is not None:
+            return len(self.fp_edges)
+
+    @property
+    def fn_edge_count(self):
+        if self.fn_edges is not None:
+            return len(self.fn_edges)
+
+    @property
+    def incorrect_semantics_count(self):
+        if self.incorrect_semantics is not None:
+            return len(self.incorrect_semantics)
