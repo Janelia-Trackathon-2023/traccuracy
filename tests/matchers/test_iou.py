@@ -3,9 +3,8 @@ import numpy as np
 import pytest
 from cell_tracking_metrics.matchers.iou import IOUMatched, _match_nodes, match_iou
 from cell_tracking_metrics.tracking_data import TrackingData
-from cell_tracking_metrics.tracking_graph import TrackingGraph
 
-from .test_utils import get_annotated_image, get_annotated_movie
+from tests.test_utils import get_annotated_image, get_movie_with_graph
 
 
 def test__match_nodes():
@@ -20,33 +19,6 @@ def test__match_nodes():
     # test different movies (no assertions about matching)
     y2 = get_annotated_image(img_size=256, num_labels=num_labels, seed=10)
     gtcells, rescells = _match_nodes(y1, y2)
-
-
-def get_movie_with_graph(ndims=3, n_frames=3, n_labels=3):
-    movie = get_annotated_movie(
-        labels_per_frame=n_labels, frames=n_frames, mov_type="repeated"
-    )
-
-    # Extend to 3d if needed
-    if ndims == 4:
-        movie = np.stack([movie, movie, movie], axis=-1)
-
-    # We can assume each object is present and connected across each frame
-    G = nx.DiGraph()
-    for t in range(n_frames - 1):
-        for i in range(1, n_labels + 1):
-            G.add_edge(f"{i}_{t}", f"{i}_{t+1}")
-
-    attrs = {}
-    for t in range(n_frames):
-        for i in range(1, n_labels + 1):
-            a = {"t": t, "y": 0, "x": 0, "segmentation_id": i}
-            if ndims == 4:
-                a["z"] = 0
-            attrs[f"{i}_{t}"] = a
-    nx.set_node_attributes(G, attrs)
-
-    return TrackingGraph(G), movie
 
 
 def test_match_iou():

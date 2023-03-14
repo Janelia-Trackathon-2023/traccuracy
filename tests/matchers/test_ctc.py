@@ -5,7 +5,7 @@ from cell_tracking_metrics.matchers.ctc import CTCMatched, get_node_matching_map
 from cell_tracking_metrics.tracking_data import TrackingData
 from cell_tracking_metrics.tracking_graph import TrackingGraph
 
-from .test_utils import get_annotated_movie
+from tests.test_utils import get_annotated_movie
 
 
 def test_match_ctc():

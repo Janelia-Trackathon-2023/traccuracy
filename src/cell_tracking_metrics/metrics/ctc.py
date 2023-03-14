@@ -33,8 +33,8 @@ class AOGMMetrics(Metric):
         super().__init__(matched_data)
 
     def compute(self):
-        gt_graph = self.data.gt_data.tracking_graph.graph
-        pred_graph = self.data.pred_data.tracking_graph.graph
+        gt_graph = self.data.gt_data.tracking_graph
+        pred_graph = self.data.pred_data.tracking_graph
         mapping = self.data.mapping
         matrices = self.data._det_matrices
 
