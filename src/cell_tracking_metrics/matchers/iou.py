@@ -45,7 +45,7 @@ def _match_nodes(gt, res, threshold=1):
     return gtcells, rescells
 
 
-def match_iou_2d(gt, pred, threshold=0.6):
+def match_iou(gt, pred, threshold=0.6):
     """Identifies pairs of cells between gt and pred that have iou > threshold
 
     This can return more than one match for any node
@@ -103,8 +103,6 @@ def match_iou_2d(gt, pred, threshold=0.6):
 
 class IOUMatched(Matched):
     def __init__(self, gt_data, pred_data, iou_threshold=0.6):
-        super().__init__(gt_data, pred_data)
-
         self.iou_threshold = iou_threshold
 
         # Check that segmentations exist in the data
@@ -113,5 +111,7 @@ class IOUMatched(Matched):
                 "Segmentation data must be provided for both gt and pred data"
             )
 
+        super().__init__(gt_data, pred_data)
+
     def compute_mapping(self):
-        return match_iou_2d(self.gt_data, self.pred_data, threshold=self.iou_threshold)
+        return match_iou(self.gt_data, self.pred_data, threshold=self.iou_threshold)

@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import pytest
 import skimage as sk
-from cell_tracking_metrics.matchers.iou import _match_nodes, match_iou_2d
+from cell_tracking_metrics.matchers.iou import IOUMatched, _match_nodes, match_iou
 from cell_tracking_metrics.tracking_data import TrackingData
 from cell_tracking_metrics.tracking_graph import TrackingGraph
 
@@ -100,27 +100,14 @@ def test__match_nodes():
     gtcells, rescells = _match_nodes(y1, y2)
 
 
-def test_match_iou_2d():
-    # Bad input
-    with pytest.raises(ValueError):
-        match_iou_2d("not tracking data", "not tracking data")
-
-    # shapes don't match
-    with pytest.raises(ValueError):
-        match_iou_2d(
-            TrackingData(
-                tracking_graph=nx.DiGraph(), segmentation=np.zeros((5, 10, 10))
-            ),
-            TrackingData(
-                tracking_graph=nx.DiGraph(), segmentation=np.zeros((5, 10, 5))
-            ),
-        )
-
-    n_labels = 3
-    n_frames = 3
+def get_movie_with_graph(ndims=3, n_frames=3, n_labels=3):
     movie = get_annotated_movie(
         labels_per_frame=n_labels, frames=n_frames, mov_type="repeated"
     )
+
+    # Extend to 3d if needed
+    if ndims == 4:
+        movie = np.stack([movie, movie, movie], axis=-1)
 
     # We can assume each object is present and connected across each frame
     G = nx.DiGraph()
@@ -131,19 +118,81 @@ def test_match_iou_2d():
     attrs = {}
     for t in range(n_frames):
         for i in range(1, n_labels + 1):
-            attrs[f"{i}_{t}"] = {"t": t, "y": 0, "x": 0, "segmentation_id": i}
+            a = {"t": t, "y": 0, "x": 0, "segmentation_id": i}
+            if ndims == 4:
+                a["z"] = 0
+            attrs[f"{i}_{t}"] = a
     nx.set_node_attributes(G, attrs)
 
-    G = TrackingGraph(G)
+    return TrackingGraph(G), movie
 
-    mapper = match_iou_2d(
+
+def test_match_iou():
+    # Bad input
+    with pytest.raises(ValueError):
+        match_iou("not tracking data", "not tracking data")
+
+    # shapes don't match
+    with pytest.raises(ValueError):
+        match_iou(
+            TrackingData(
+                tracking_graph=nx.DiGraph(), segmentation=np.zeros((5, 10, 10))
+            ),
+            TrackingData(
+                tracking_graph=nx.DiGraph(), segmentation=np.zeros((5, 10, 5))
+            ),
+        )
+
+    # Test 2d data
+    n_frames = 3
+    n_labels = 3
+    G, movie = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
+    mapper = match_iou(
         TrackingData(tracking_graph=G, segmentation=movie),
         TrackingData(tracking_graph=G, segmentation=movie),
     )
 
     # Check for correct number of pairs
     assert len(mapper) == n_frames * n_labels
-
     # gt and pred node should be the same
     for pair in mapper:
         assert pair[0] == pair[1]
+
+    # Check 3d data
+    G, movie = get_movie_with_graph(ndims=4, n_frames=n_frames, n_labels=n_labels)
+    mapper = match_iou(
+        TrackingData(tracking_graph=G, segmentation=movie),
+        TrackingData(tracking_graph=G, segmentation=movie),
+    )
+
+    # Check for correct number of pairs
+    assert len(mapper) == n_frames * n_labels
+    # gt and pred node should be the same
+    for pair in mapper:
+        assert pair[0] == pair[1]
+
+
+class TestIOUMatched:
+    def test__init__(self):
+        # No segmentation
+        G, _ = get_movie_with_graph()
+        data = TrackingData(G)
+
+        with pytest.raises(ValueError):
+            IOUMatched(data, data)
+
+    def test_compute_mapping(self):
+        # Test 2d data
+        n_frames = 3
+        n_labels = 3
+        G, movie = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
+
+        matched = IOUMatched(
+            gt_data=TrackingData(G, movie), pred_data=TrackingData(G, movie)
+        )
+
+        # Check for correct number of pairs
+        assert len(matched.mapping) == n_frames * n_labels
+        # gt and pred node should be the same
+        for pair in matched.mapping:
+            assert pair[0] == pair[1]
