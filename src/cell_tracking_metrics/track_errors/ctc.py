@@ -123,8 +123,8 @@ def assign_edge_errors(gt_graph, comp_graph, node_mapping):
             comp_graph.edges[edge]["is_fp"] = True
         else:
             # check if semantics are correct
-            is_parent_gt = gt_graph.edges[expected_gt_edge]["is_parent"]
-            is_parent_comp = comp_graph.edges[edge]["is_parent"]
+            is_parent_gt = gt_graph.edges[expected_gt_edge]["is_intertrack_edge"]
+            is_parent_comp = comp_graph.edges[edge]["is_intertrack_edge"]
             if is_parent_gt != is_parent_comp:
                 comp_graph.edges[edge]["is_wrong_semantic"] = True
             else:

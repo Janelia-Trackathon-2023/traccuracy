@@ -83,13 +83,13 @@ def test_assign_edge_errors():
     comp_g.add_nodes_from(comp_ids)
     comp_g.add_edges_from(comp_edges)
     nx.set_node_attributes(comp_g, True, "is_tp")
-    nx.set_edge_attributes(comp_g, 0, "is_parent")
+    nx.set_edge_attributes(comp_g, 0, "is_intertrack_edge")
 
     gt_edges = [(4, 5), (17, 18)]
     gt_g = nx.DiGraph()
     gt_g.add_nodes_from(gt_ids)
     gt_g.add_edges_from(gt_edges)
-    nx.set_edge_attributes(gt_g, 0, "is_parent")
+    nx.set_edge_attributes(gt_g, 0, "is_intertrack_edge")
     nx.set_node_attributes(gt_g, False, "is_fn")
     assign_edge_errors(gt_g, comp_g, mapping)
 
@@ -114,15 +114,15 @@ def test_assign_edge_errors_semantics():
     comp_g.add_nodes_from(comp_ids)
     comp_g.add_edges_from(comp_edges)
     nx.set_node_attributes(comp_g, True, "is_tp")
-    nx.set_edge_attributes(comp_g, 0, "is_parent")
+    nx.set_edge_attributes(comp_g, 0, "is_intertrack_edge")
 
     gt_edges = [(4, 5), (17, 18)]
     gt_g = nx.DiGraph()
     gt_g.add_nodes_from(gt_ids)
     gt_g.add_edges_from(gt_edges)
-    nx.set_edge_attributes(gt_g, 0, "is_parent")
+    nx.set_edge_attributes(gt_g, 0, "is_intertrack_edge")
     nx.set_node_attributes(gt_g, False, "is_fn")
-    gt_g.edges[(4, 5)]["is_parent"] = 1
+    gt_g.edges[(4, 5)]["is_intertrack_edge"] = 1
     assign_edge_errors(gt_g, comp_g, mapping)
 
     assert comp_g.edges[(3, 4)]["is_wrong_semantic"]

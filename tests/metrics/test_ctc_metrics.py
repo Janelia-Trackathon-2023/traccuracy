@@ -11,7 +11,7 @@ def test_compute_mapping():
     n_frames = 3
     n_labels = 3
     G, movie = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
-    nx.set_edge_attributes(G.graph, 0, "is_parent")
+    nx.set_edge_attributes(G.graph, 0, "is_intertrack_edge")
 
     matched = CTCMatched(
         gt_data=TrackingData(G, movie), pred_data=TrackingData(G, movie)
