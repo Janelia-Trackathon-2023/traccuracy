@@ -49,12 +49,13 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.autosectionlabel",
     "m2r2",
+    "autoapi.extension",
 ]
 
 napoleon_google_docstring = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = ["../_templates"]
 
 default_role = "py:obj"
 
@@ -65,6 +66,15 @@ source_suffix = [".rst", ".md"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# -- AutoAPI configuration ---------------------------------------------------
+autoapi_dirs = ["../../src/cell_tracking_metrics"]
+
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-module-summary",
+    "imported-members",
+]
 
 # -- Options for HTML output -------------------------------------------------
 

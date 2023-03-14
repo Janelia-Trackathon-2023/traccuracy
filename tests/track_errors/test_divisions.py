@@ -1,5 +1,6 @@
 import networkx as nx
 import pytest
+from cell_tracking_metrics._tracking_graph import TrackingGraph
 from cell_tracking_metrics.track_errors.divisions import (
     _get_pred_by_t,
     _get_succ_by_t,
@@ -7,7 +8,6 @@ from cell_tracking_metrics.track_errors.divisions import (
     correct_shifted_divisions,
     evaluate_division_performance,
 )
-from cell_tracking_metrics.tracking_graph import TrackingGraph
 
 
 @pytest.fixture

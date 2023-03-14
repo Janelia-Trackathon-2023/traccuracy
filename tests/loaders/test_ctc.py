@@ -1,6 +1,6 @@
 import pandas as pd
+from cell_tracking_metrics._tracking_graph import TrackingGraph
 from cell_tracking_metrics.loaders import ctc
-from cell_tracking_metrics.tracking_graph import TrackingGraph
 
 
 def test_ctc_to_graph():

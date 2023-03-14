@@ -2,9 +2,9 @@ import networkx as nx
 import numpy as np
 import pytest
 import skimage as sk
+from cell_tracking_metrics._tracking_graph import TrackingGraph
 from cell_tracking_metrics.matchers.iou import _match_nodes, match_iou_2d
 from cell_tracking_metrics.tracking_data import TrackingData
-from cell_tracking_metrics.tracking_graph import TrackingGraph
 
 
 def get_annotated_image(img_size=256, num_labels=3, sequential=True, seed=1):

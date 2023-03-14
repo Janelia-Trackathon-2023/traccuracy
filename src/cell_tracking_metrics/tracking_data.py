@@ -1,4 +1,4 @@
-from cell_tracking_metrics.tracking_graph import TrackingGraph
+from cell_tracking_metrics._tracking_graph import TrackingGraph
 
 
 class TrackingData:

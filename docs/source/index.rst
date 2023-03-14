@@ -12,13 +12,5 @@ Welcome to Cell Tracking Metrics's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   API/cell_tracking_metrics
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   ...
+   autoapi/cell_tracking_metrics/index
