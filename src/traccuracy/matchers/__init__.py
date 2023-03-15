@@ -25,7 +25,8 @@ and edges (gt_1, gt_2) and (pred_1, pred_2) exist, they are also considered matc
 While we specify ground truth and prediction, it is possible to
 write a matching function that matches two arbitrary tracking solutions.
 """
-from .ctc import CTCMatched
-from .iou import IOUMatched
+from ._compute_overlap import get_labels_with_overlap
+from ._ctc import CTCMatched
+from ._iou import IOUMatched
 
-__all__ = ["CTCMatched", "IOUMatched"]
+__all__ = ["CTCMatched", "IOUMatched", "get_labels_with_overlap"]

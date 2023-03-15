@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING
 
-from traccuracy.metrics.base import Metric
-from traccuracy.track_errors.ctc import evaluate_ctc_events
+from traccuracy.track_errors._ctc import evaluate_ctc_events
+
+from ._base import Metric
 
 if TYPE_CHECKING:
-    from .base import Matched
+    from ._base import Matched
 
 
 class AOGMMetrics(Metric):

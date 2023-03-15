@@ -1,11 +1,9 @@
 import numpy as np
 
-from traccuracy.matchers.compute_overlap import (
-    get_labels_with_overlap,
-)
-from traccuracy.tracking_data import TrackingData
+from traccuracy._tracking_data import TrackingData
 
-from .matched import Matched
+from ._compute_overlap import get_labels_with_overlap
+from ._matched import Matched
 
 
 def _match_nodes(gt, res, threshold=1):

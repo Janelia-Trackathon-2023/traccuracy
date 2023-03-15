@@ -1,4 +1,4 @@
-from traccuracy.tracking_graph import TrackingGraph
+from traccuracy._tracking_graph import TrackingGraph
 
 
 class TrackingData:

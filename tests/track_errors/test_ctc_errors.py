@@ -1,6 +1,6 @@
 import networkx as nx
 import numpy as np
-from traccuracy.track_errors.ctc import (
+from traccuracy.track_errors._ctc import (
     get_comp_subgraph,
     get_edge_errors,
     get_vertex_errors,
