@@ -1,4 +1,7 @@
+import os
+
 import pandas as pd
+from traccuracy import TrackingData
 from traccuracy.loaders import ctc
 from traccuracy.tracking_graph import TrackingGraph
 
@@ -59,3 +62,15 @@ def test_ctc_single_nodes():
     G = ctc.ctc_to_graph(df, pd.DataFrame.from_records(detections))
     # This should raise an error if there are no times for single nodes
     TrackingGraph(G)
+
+
+def test_load_data():
+    test_dir = os.path.abspath(__file__)
+    data_dir = os.path.abspath(
+        os.path.join(test_dir, "../../../examples/sample-data/Fluo-N2DL-HeLa/01_RES/")
+    )
+    track_path = os.path.join(data_dir, "res_track.txt")
+    track_data = ctc.load_ctc_data(data_dir, track_path)
+    assert isinstance(track_data, TrackingData)
+    assert isinstance(track_data.tracking_graph, TrackingGraph)
+    assert len(track_data.segmentation) == 92
