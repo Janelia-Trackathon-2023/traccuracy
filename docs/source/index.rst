@@ -2,6 +2,14 @@
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
+   :caption: Examples:
+
+   examples/ctc
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Traccuracy API:
 
    autoapi/traccuracy/index
