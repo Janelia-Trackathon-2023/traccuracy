@@ -5,3 +5,6 @@ truth or tracking method outputs into memory as TrackingData objects.
 Each loading function must return one TrackingData object which has a
 track graph and optionally contains a corresponding segmentation.
 """
+from ._ctc import load_ctc_data
+
+__all__ = ["load_ctc_data"]

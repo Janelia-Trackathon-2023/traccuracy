@@ -1,9 +1,9 @@
 import networkx as nx
 import numpy as np
 import pytest
-from traccuracy.matchers.ctc import CTCMatched, get_node_matching_map
-from traccuracy.tracking_data import TrackingData
-from traccuracy.tracking_graph import TrackingGraph
+from traccuracy._tracking_data import TrackingData
+from traccuracy._tracking_graph import TrackingGraph
+from traccuracy.matchers._ctc import CTCMatched, get_node_matching_map
 
 from tests.test_utils import get_annotated_movie
 

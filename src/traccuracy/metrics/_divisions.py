@@ -35,10 +35,11 @@ as the late division daughters.
 import itertools
 from collections import Counter
 
-from ..track_errors.division_events import DivisionEvents
-from ..tracking_graph import TrackingGraph
-from ..utils import find_gt_node_matches, find_pred_node_matches
-from .base import Metric
+from traccuracy._tracking_graph import TrackingGraph
+from traccuracy._utils import find_gt_node_matches, find_pred_node_matches
+from traccuracy.track_errors._division_events import DivisionEvents
+
+from ._base import Metric
 
 
 def _calculate_metrics(event: DivisionEvents):

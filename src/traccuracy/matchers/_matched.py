@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ..tracking_data import TrackingData
+from traccuracy._tracking_data import TrackingData
 
 
 class Matched(ABC):

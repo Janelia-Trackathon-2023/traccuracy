@@ -7,8 +7,8 @@ from skimage.measure import regionprops_table
 from tifffile import imread
 from tqdm import tqdm
 
-from traccuracy.tracking_data import TrackingData
-from traccuracy.tracking_graph import TrackingGraph
+from traccuracy._tracking_data import TrackingData
+from traccuracy._tracking_graph import TrackingGraph
 
 
 def load_tiffs(data_dir):

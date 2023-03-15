@@ -1,5 +1,5 @@
 import pytest
-from traccuracy.metrics.ctc import (
+from traccuracy.metrics._ctc import (
     get_weighted_edge_error_sum,
     get_weighted_error_sum,
     get_weighted_vertex_error_sum,

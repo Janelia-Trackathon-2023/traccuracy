@@ -41,15 +41,17 @@ if rtd_version not in ["stable", "latest", "master"]:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx.ext.autodoc",
+    "sphinx.ext.autodoc",  # autobuild api docs
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx.ext.autosectionlabel",
-    "m2r2",
-    "autoapi.extension",
+    "m2r2",  # include md files in rst files
+    "autoapi.extension",  # autobuild api docs
+    "nbsphinx",  # add notebooks to docs
+    "nbsphinx_link",  # add notebooks to docs
 ]
 
 napoleon_google_docstring = True
@@ -68,6 +70,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- AutoAPI configuration ---------------------------------------------------
 autoapi_dirs = ["../../src/traccuracy"]
+autoapi_type = "python"
 
 autoapi_options = [
     "members",
@@ -75,6 +78,12 @@ autoapi_options = [
     "show-module-summary",
     "imported-members",
 ]
+
+# -- Nbsphinx extension ------------------------------------------------------
+
+# Disable nbsphinx extension from running notebooks
+nbsphinx_execute = "never"
+exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
 # -- Options for HTML output -------------------------------------------------
 
