@@ -50,7 +50,6 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "m2r2",  # include md files in rst files
     "autoapi.extension",  # autobuild api docs
-    "IPython.sphinxext.ipython_console_highlighting",
     "nbsphinx",  # add notebooks to docs
     "nbsphinx_link",  # add notebooks to docs
 ]

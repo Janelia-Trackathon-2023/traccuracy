@@ -62,8 +62,7 @@ docs = [
     "m2r2",
     "sphinx-autoapi",
     "nbsphinx",
-    "nbsphinx-link",
-    "ipython"
+    "nbsphinx-link"
 ]
 
 [project.urls]
