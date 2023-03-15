@@ -74,3 +74,14 @@ def test_load_data():
     assert isinstance(track_data, TrackingData)
     assert isinstance(track_data.tracking_graph, TrackingGraph)
     assert len(track_data.segmentation) == 92
+
+
+def test_load_data_no_track_path():
+    test_dir = os.path.abspath(__file__)
+    data_dir = os.path.abspath(
+        os.path.join(test_dir, "../../../examples/sample-data/Fluo-N2DL-HeLa/01_RES/")
+    )
+    track_data = ctc.load_ctc_data(data_dir)
+    assert isinstance(track_data, TrackingData)
+    assert isinstance(track_data.tracking_graph, TrackingGraph)
+    assert len(track_data.segmentation) == 92

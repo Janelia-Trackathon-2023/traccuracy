@@ -125,7 +125,7 @@ def get_edge_errors(gt_graph, comp_graph, node_mapping):
     ws_edges = []
 
     # fp edges - edges in induced_graph that aren't in gt_graph
-    for edge in tqdm(induced_graph.edges, "Evaluating edges"):
+    for edge in tqdm(induced_graph.edges, "Evaluating FP edges"):
         source, target = edge[0], edge[1]
         source_gt_id = list(filter(lambda mp: mp[1] == source, node_mapping))[0][0]
         target_gt_id = list(filter(lambda mp: mp[1] == target, node_mapping))[0][0]
@@ -144,7 +144,7 @@ def get_edge_errors(gt_graph, comp_graph, node_mapping):
                 comp_graph.edges[edge]["is_tp"] = True
 
     # fn edges - edges in gt_graph that aren't in induced graph
-    for edge in gt_graph.edges:
+    for edge in tqdm(gt_graph.edges, "Evaluating FN edges"):
         source, target = edge[0], edge[1]
         # this edge is adjacent to an edge we didn't detect, so it definitely is an fn
         # TODO: assumes you've already assigned vertex errors...

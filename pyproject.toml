@@ -68,6 +68,9 @@ homepage = "https://github.com/Janelia-Trackathon-2023/traccuracy"
 repository = "https://github.com/Janelia-Trackathon-2023/traccuracy"
 documentation = "https://traccuracy.readthedocs.io/"
 
+[project.scripts]
+traccuracy = "traccuracy.cli:main"
+
 [tool.setuptools]
 include-package-data = true
 

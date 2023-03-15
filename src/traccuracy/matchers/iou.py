@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 
 from traccuracy.matchers.compute_overlap import (
     get_labels_with_overlap,
@@ -78,9 +79,9 @@ def match_iou(gt, pred, threshold=0.6):
         raise ValueError("Segmentation shapes must match between gt and pred")
 
     # Get overlaps for each frame
-    for i, t in enumerate(
-        range(gt.tracking_graph.start_frame, gt.tracking_graph.end_frame)
-    ):
+    frame_range = range(gt.tracking_graph.start_frame, gt.tracking_graph.end_frame)
+    total = len(list(frame_range))
+    for i, t in tqdm(enumerate(frame_range), desc="Matching frames", total=total):
         matches = _match_nodes(mask_gt[i], mask_pred[i], threshold=threshold)
 
         # Construct node id tuple for each match
@@ -97,7 +98,6 @@ def match_iou(gt, pred, threshold=0.6):
                 limit_to=G_pred.get_nodes_in_frame(t),
             )[0]
             mapper.append((gt_node, pred_node))
-
     return mapper
 
 

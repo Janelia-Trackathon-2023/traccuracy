@@ -1,4 +1,5 @@
 import glob
+import os
 
 import networkx as nx
 import numpy as np
@@ -169,12 +170,13 @@ def ctc_to_graph(df, detections):
     return G
 
 
-def load_ctc_data(data_dir, track_path):
+def load_ctc_data(data_dir, track_path=None):
     """Read the CTC segmentations and track file and create TrackingData.
 
     Args:
         data_dir (str): Path to directory containing CTC tiffs.
-        track_path (str): Path to CTC track file.
+        track_path (optional, str): Path to CTC track file. If not passed,
+        finds '*_track.txt' in data_dir.
 
     Returns:
         TrackingData: Object containing segmentations and TrackingGraph.
@@ -183,6 +185,19 @@ def load_ctc_data(data_dir, track_path):
         ValueError: If the Parent_ID is not in any previous frames.
     """
     names = ["Cell_ID", "Start", "End", "Parent_ID"]
+    if not track_path:
+        track_paths = list(glob.glob(os.path.join(data_dir, "*_track.txt")))
+        if not track_paths:
+            raise ValueError(
+                f"No track_path passed and a *_track.txt file could not be found in {data_dir}"
+            )
+        if len(track_paths) > 1:
+            raise ValueError(
+                f"No track_path passed and multiple *_track.txt files found: {track_paths}."
+                + " Please pick one and pass it explicitly."
+            )
+        track_path = track_paths[0]
+
     tracks = pd.read_csv(track_path, header=None, sep=" ", names=names)
 
     masks = load_tiffs(data_dir)
