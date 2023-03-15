@@ -46,7 +46,7 @@ def get_relevant_kwargs(metric_class, kwargs):
     for param in sig.parameters.values():
         name = param.name
         is_required = (param.default is param.empty) and name != "matched_data"
-        if name in kwargs:
+        if kwargs and name in kwargs:
             relevant_kwargs[name] = kwargs[name]
         elif is_required:
             missing_args.append(name)
