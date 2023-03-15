@@ -60,7 +60,9 @@ docs = [
     "Sphinx<6",
     "sphinx-rtd-theme",
     "m2r2",
-    "sphinx-autoapi"
+    "sphinx-autoapi",
+    "nbsphinx",
+    "nbsphinx-link"
 ]
 
 [project.urls]
