@@ -6,9 +6,6 @@ try:
 except PackageNotFoundError:
     __version__ = "uninstalled"
 
-__author__ = "Track Gals"
-__email__ = "draga.doncilapop1@monash.edu"
-
 from ._run_metrics import run_metrics
 from ._tracking_data import TrackingData
 from ._tracking_graph import TrackingGraph
