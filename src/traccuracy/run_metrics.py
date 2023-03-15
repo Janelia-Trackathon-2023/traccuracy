@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from traccuracy.utils import get_relevant_kwargs, validate_matched_data
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Type
+    from typing import Dict, List, Optional, Type
 
     from traccuracy.matchers.matched import Matched
     from traccuracy.metrics.base import Metric
@@ -15,6 +15,7 @@ def run_metrics(
     pred_data: "TrackingData",
     matcher: "Type[Matched]",
     metrics: "List[Type[Metric]]",
+    matcher_kwargs: "Optional[Dict]",
     **kwargs,  # weights
 ) -> "Dict":
     """Compute given metrics on data using the given matcher.
@@ -30,12 +31,15 @@ def run_metrics(
         pred_data (TrackingData): predicted graph and optionally segmentation
         matcher (Matched): matching class to use to create correspondence
         metrics (List[Metric]): list of metrics to compute as class names
+        matcher_kwargs (optional, dict): Dictionary of keyword argument for the
+            matcher class
+        **kwargs: Any keyword args for the Metric classes
 
     Returns:
         Dict: dictionary of metrics indexed by metric name. Dictionary will be
         nested for metrics that return multiple values.
     """
-    matched = matcher(gt_data, pred_data)
+    matched = matcher(gt_data, pred_data, **matcher_kwargs)
     validate_matched_data(matched, metrics)
     metric_kwarg_dict = {
         m_class: get_relevant_kwargs(m_class, kwargs) for m_class in metrics
@@ -44,5 +48,5 @@ def run_metrics(
     for _metric in metrics:
         relevant_kwargs = metric_kwarg_dict[_metric]
         result = _metric(matched, **relevant_kwargs)
-        results[_metric.__name__] = result
+        results[_metric.__name__] = result.results
     return results
