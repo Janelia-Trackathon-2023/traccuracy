@@ -1,8 +1,8 @@
 import networkx as nx
 import pytest
 from traccuracy import TrackingData, TrackingGraph
-from traccuracy.matchers.matched import Matched
-from traccuracy.metrics.divisions import (
+from traccuracy.matchers._matched import Matched
+from traccuracy.metrics._divisions import (
     DivisionMetrics,
     _classify_divisions,
     _correct_shifted_divisions,

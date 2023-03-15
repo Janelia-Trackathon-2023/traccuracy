@@ -1,4 +1,4 @@
-from .ctc import AOGMMetrics, CTCMetrics
-from .divisions import DivisionMetrics
+from ._ctc import AOGMMetrics, CTCMetrics
+from ._divisions import DivisionMetrics
 
 __all__ = ["CTCMetrics", "DivisionMetrics", "AOGMMetrics"]

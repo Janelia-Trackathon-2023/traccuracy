@@ -4,12 +4,12 @@ import networkx as nx
 import numpy as np
 from tqdm import tqdm
 
-from traccuracy.track_errors.track_events import TrackEvents
+from ._track_events import TrackEvents
 
 if TYPE_CHECKING:
     from typing import Dict
 
-    from traccuracy.tracking_graph import TrackingGraph
+    from traccuracy._tracking_graph import TrackingGraph
 
 
 def evaluate_ctc_events(

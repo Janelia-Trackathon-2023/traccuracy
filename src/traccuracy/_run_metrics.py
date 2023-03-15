@@ -1,13 +1,13 @@
 from typing import TYPE_CHECKING
 
-from traccuracy.utils import get_relevant_kwargs, validate_matched_data
+from traccuracy._utils import get_relevant_kwargs, validate_matched_data
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Type
 
-    from traccuracy.matchers.matched import Matched
-    from traccuracy.metrics.base import Metric
-    from traccuracy.tracking_data import TrackingData
+    from traccuracy import TrackingData
+    from traccuracy.matchers._matched import Matched
+    from traccuracy.metrics._base import Metric
 
 
 def run_metrics(

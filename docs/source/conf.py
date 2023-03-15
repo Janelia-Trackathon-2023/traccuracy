@@ -71,6 +71,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- AutoAPI configuration ---------------------------------------------------
 autoapi_dirs = ["../../src/traccuracy"]
+autoapi_type = "python"
 
 autoapi_options = [
     "members",

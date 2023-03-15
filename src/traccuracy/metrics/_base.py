@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ..matchers.matched import Matched
+from ..matchers._matched import Matched
 
 
 class Metric(ABC):

@@ -4,11 +4,10 @@ import networkx as nx
 import numpy as np
 from tqdm import tqdm
 
-from traccuracy.matchers.compute_overlap import (
-    get_labels_with_overlap,
-)
-from traccuracy.matchers.matched import Matched
-from traccuracy.tracking_data import TrackingData
+from traccuracy._tracking_data import TrackingData
+
+from ._compute_overlap import get_labels_with_overlap
+from ._matched import Matched
 
 
 class CTCMatched(Matched):
