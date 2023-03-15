@@ -4,7 +4,7 @@ from typing import Optional
 import typer
 
 from traccuracy import run_metrics
-from traccuracy.loaders.ctc import load_ctc_data
+from traccuracy.loaders import load_ctc_data
 
 app = typer.Typer()
 
@@ -29,6 +29,28 @@ def run_ctc(
     loader: "str" = "ctc",
     out_path: "str" = "ctc_log.json",
 ):
+    """Run TRA and DET metric on gt and pred data using CTC matching.
+
+    If gt_track_path and pred_track_path are not passed, we find *_track.txt
+    files in the data directories. If more than one such file is present, or
+    no such files are present, an error is raised.
+
+    Results will be dumped to out_path in JSON format.
+
+    Args:
+        gt_dir (str): path to GT tiffs
+        pred_dir (str): path to prediction/RES tiffs
+        gt_track_path (Optional[str], optional): path to ctc gt track file.
+        Defaults to None.
+        pred_track_path (Optional[str], optional): path to predicted track file.
+        Defaults to None.
+        loader (str, optional): Loader to bring data into memory. Defaults to "ctc".
+        out_path (str, optional): Path to save results. Defaults to "ctc_log.json" in current
+        working directory.
+
+    Raises:
+        ValueError: if any loader besides ctc is passed.
+    """
     from traccuracy.matchers import CTCMatched
     from traccuracy.metrics import CTCMetrics
 
@@ -59,6 +81,42 @@ def run_aogm(
     edge_fn_weight: "float" = 1,
     edge_ws_weight: "float" = 1,
 ):
+    """Run general AOGM measure on gt and pred data using CTC matching.
+
+    If gt_track_path and pred_track_path are not passed, we find *_track.txt
+    files in the data directories. If more than one such file is present, or
+    no such files are present, an error is raised.
+
+    Optionally, weights for each error type can be passed.
+
+    Results will be dumped to out_path in JSON format.
+
+    Args:
+        gt_dir (str): path to GT tiffs
+        pred_dir (str): path to prediction/RES tiffs
+        gt_track_path (Optional[str], optional): path to ctc gt track file.
+        Defaults to None.
+        pred_track_path (Optional[str], optional): path to predicted track file.
+        Defaults to None.
+        loader (str, optional): Loader to bring data into memory. Defaults to "ctc".
+        out_path (str, optional): Path to save results. Defaults to "ctc_log.json" in current
+        working directory.
+        vertex_ns_weight (float, optional): Weight to assign to nonsplit vertex errors.
+        Defaults to 1.
+        vertex_fp_weight (float, optional): Weight to assign to false positive vertex errors.
+        Defaults to 1.
+        vertex_fn_weight (float, optional): Weight to assign to false negative vertex errors.
+        Defaults to 1.
+        edge_fp_weight (float, optional): Weight to assign to false positive edge errors.
+        Defaults to 1.
+        edge_fn_weight (float, optional): Weight to assign to false negative edge errors.
+        Defaults to 1.
+        edge_ws_weight (float, optional): Weight to assign to edges with incorrect semantics.
+        Defaults to 1.
+
+    Raises:
+        ValueError: if any loader besides ctc is passed.
+    """
     from traccuracy.matchers import CTCMatched
     from traccuracy.metrics import AOGMMetrics
 
@@ -93,10 +151,38 @@ def run_divisions_on_iou(
     gt_track_path: "Optional[str]" = None,
     pred_track_path: "Optional[str]" = None,
     loader: "str" = "ctc",
-    out_path: "str" = "div_log.json",
+    out_path: "str" = "div_log_iou.json",
     match_threshold: "float" = 1,
     frame_buffer: "int" = 0,
 ):
+    """Run division metrics on gt and pred data using IOU matching.
+
+    If gt_track_path and pred_track_path are not passed, we find *_track.txt
+    files in the data directories. If more than one such file is present, or
+    no such files are present, an error is raised.
+
+    Optionally, a match_threshold and frame_buffer can be passed.
+
+    Results will be dumped to out_path in JSON format.
+
+    Args:
+        gt_dir (str): path to GT tiffs
+        pred_dir (str): path to prediction/RES tiffs
+        gt_track_path (Optional[str], optional): path to ctc gt track file.
+        Defaults to None.
+        pred_track_path (Optional[str], optional): path to predicted track file.
+        Defaults to None.
+        loader (str, optional): Loader to bring data into memory. Defaults to "ctc".
+        out_path (str, optional): Path to save results. Defaults to "ctc_log.json" in current
+        working directory.
+        match_threshold (float, optional): Threshold above which the intersection over union
+        of a gt and predicted detection match. Defaults to 1 requiring exact matching.
+        frame_buffer (int, optional): Number of frames to use for division tolerance.
+        Defaults to 0. Numbers greater than 0 will produce metrics for 0...n inclusive.
+
+    Raises:
+        ValueError: if any loader besides ctc is passed.
+    """
     from traccuracy.matchers import IOUMatched
     from traccuracy.metrics import DivisionMetrics
 
@@ -131,9 +217,35 @@ def run_divisions_on_ctc(
     gt_track_path: "Optional[str]" = None,
     pred_track_path: "Optional[str]" = None,
     loader: "str" = "ctc",
-    out_path: "str" = "div_log.json",
+    out_path: "str" = "div_log_ctc.json",
     frame_buffer: "int" = 0,
 ):
+    """Run division metrics on gt and pred data using CTC matching.
+
+    If gt_track_path and pred_track_path are not passed, we find *_track.txt
+    files in the data directories. If more than one such file is present, or
+    no such files are present, an error is raised.
+
+    Optionally, a frame_buffer can be passed.
+
+    Results will be dumped to out_path in JSON format.
+
+    Args:
+        gt_dir (str): path to GT tiffs
+        pred_dir (str): path to prediction/RES tiffs
+        gt_track_path (Optional[str], optional): path to ctc gt track file.
+        Defaults to None.
+        pred_track_path (Optional[str], optional): path to predicted track file.
+        Defaults to None.
+        loader (str, optional): Loader to bring data into memory. Defaults to "ctc".
+        out_path (str, optional): Path to save results. Defaults to "ctc_log.json" in current
+        working directory.
+        frame_buffer (int, optional): Number of frames to use for division tolerance.
+        Defaults to 0. Numbers greater than 0 will produce metrics for 0...n inclusive.
+
+    Raises:
+        ValueError: if any loader besides ctc is passed.
+    """
     from traccuracy.matchers import CTCMatched
     from traccuracy.metrics import DivisionMetrics
 
