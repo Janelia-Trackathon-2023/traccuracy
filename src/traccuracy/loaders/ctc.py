@@ -120,15 +120,9 @@ def ctc_to_graph(df, detections):
 
     # Add parent-daughter connections
     for _, row in df[df["Parent_ID"] != 0].iterrows():
-        # Assume the parent is in the previous frame.
-        parent_frame = row["Start"] - 1
-        source = "{}_{}".format(row["Parent_ID"], parent_frame)
-
-        if source not in all_ids:  # parents should be in the previous frame.
-            # parent_frame = df[df['Cell_ID'] == row['Parent_id']]['End']
-            # source = '{}_{}'.format(row['Parent_ID'], parent_frame)
-            print("skipped parent {} to daughter {}".format(source, row["Cell_ID"]))
-            continue
+        # Get the parent's details
+        parent_row = df[df["Cell_ID"] == row["Parent_ID"]].iloc[0]
+        source = "{}_{}".format(parent_row["Cell_ID"], parent_row["End"])
 
         target = "{}_{}".format(row["Cell_ID"], row["Start"])
 

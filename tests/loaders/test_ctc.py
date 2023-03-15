@@ -28,8 +28,9 @@ def test_ctc_to_graph():
             assert node_id in G
 
         if d["Parent_ID"]:  # should have a division
+            parent_row= df[df["Cell_ID"]==d["Parent_ID"]].iloc[0]  # Needs to be a Series for indexing below
             daughter_id = "{}_{}".format(d["Cell_ID"], d["Start"])
-            parent_id = "{}_{}".format(d["Parent_ID"], d["Start"] - 1)
+            parent_id = "{}_{}".format(parent_row["Cell_ID"], parent_row["End"])
             if G.has_node(parent_id):
                 assert G.has_edge(parent_id, daughter_id)
             else:
