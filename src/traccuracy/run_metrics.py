@@ -15,8 +15,8 @@ def run_metrics(
     pred_data: "TrackingData",
     matcher: "Type[Matched]",
     metrics: "List[Type[Metric]]",
-    matcher_kwargs: "Optional[Dict]",
-    **kwargs,  # weights
+    matcher_kwargs: "Optional[Dict]" = None,
+    metrics_kwargs: "Optional[Dict]" = None,  # weights
 ) -> "Dict":
     """Compute given metrics on data using the given matcher.
 
@@ -33,16 +33,19 @@ def run_metrics(
         metrics (List[Metric]): list of metrics to compute as class names
         matcher_kwargs (optional, dict): Dictionary of keyword argument for the
             matcher class
-        **kwargs: Any keyword args for the Metric classes
+        metric_kwargs (optional, dict): Dictionary of any keyword args for the
+            Metric classes
 
     Returns:
         Dict: dictionary of metrics indexed by metric name. Dictionary will be
         nested for metrics that return multiple values.
     """
+    if matcher_kwargs is None:
+        matcher_kwargs = {}
     matched = matcher(gt_data, pred_data, **matcher_kwargs)
     validate_matched_data(matched, metrics)
     metric_kwarg_dict = {
-        m_class: get_relevant_kwargs(m_class, kwargs) for m_class in metrics
+        m_class: get_relevant_kwargs(m_class, metrics_kwargs) for m_class in metrics
     }
     results = {}
     for _metric in metrics:

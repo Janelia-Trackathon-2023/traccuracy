@@ -1,5 +1,4 @@
 import glob
-import os
 
 import networkx as nx
 import numpy as np
@@ -171,21 +170,20 @@ def ctc_to_graph(df, detections):
 
 
 def load_ctc_data(data_dir, track_path):
-    """Read the CTC track file and create a Graph.
+    """Read the CTC segmentations and track file and create TrackingData.
 
     Args:
-        path (str): Path to the CTC text file.
+        data_dir (str): Path to directory containing CTC tiffs.
+        track_path (str): Path to CTC track file.
 
     Returns:
-        networkx.Graph: Graph representation of the ISBI data.
+        TrackingData: Object containing segmentations and TrackingGraph.
 
     Raises:
         ValueError: If the Parent_ID is not in any previous frames.
     """
     names = ["Cell_ID", "Start", "End", "Parent_ID"]
-    tracks = pd.read_csv(
-        os.path.join(data_dir, track_path), header=None, sep=" ", names=names
-    )
+    tracks = pd.read_csv(track_path, header=None, sep=" ", names=names)
 
     masks = load_tiffs(data_dir)
     detections = get_node_attributes(masks)
