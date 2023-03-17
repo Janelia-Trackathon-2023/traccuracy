@@ -255,5 +255,8 @@ def run_divisions_on_ctc(
     print(res_str)
 
 
+typer_click_object = typer.main.get_command(app)
+
+
 def main():
     app()

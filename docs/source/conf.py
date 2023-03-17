@@ -52,6 +52,7 @@ extensions = [
     "autoapi.extension",  # autobuild api docs
     "nbsphinx",  # add notebooks to docs
     "nbsphinx_link",  # add notebooks to docs
+    "sphinx_click",  # auto document cli
 ]
 
 napoleon_google_docstring = True
@@ -78,6 +79,7 @@ autoapi_options = [
     "show-module-summary",
     "imported-members",
 ]
+autoapi_ignore = ["*/cli.py"]
 
 # -- Nbsphinx extension ------------------------------------------------------
 
