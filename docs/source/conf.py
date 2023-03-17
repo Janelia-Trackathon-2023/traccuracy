@@ -47,7 +47,6 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
-    "sphinx.ext.autosectionlabel",
     "m2r2",  # include md files in rst files
     "autoapi.extension",  # autobuild api docs
     "nbsphinx",  # add notebooks to docs
