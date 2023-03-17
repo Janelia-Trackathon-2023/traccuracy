@@ -47,6 +47,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "IPython.sphinxext.ipython_console_highlighting",  # code highlighting in notebooks
     "m2r2",  # include md files in rst files
     "autoapi.extension",  # autobuild api docs
     "nbsphinx",  # add notebooks to docs

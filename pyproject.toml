@@ -64,7 +64,8 @@ docs = [
     "sphinx-autoapi",
     "nbsphinx",
     "nbsphinx-link",
-    "sphinx-click"
+    "sphinx-click",
+    "ipython"
 ]
 
 [project.urls]
