@@ -13,3 +13,4 @@
    :caption: Traccuracy API:
 
    autoapi/traccuracy/index
+   cli

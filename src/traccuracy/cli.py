@@ -22,34 +22,29 @@ def load_all_ctc(
 
 @app.command()
 def run_ctc(
-    gt_dir: "str",
-    pred_dir: "str",
-    gt_track_path: "Optional[str]" = None,
-    pred_track_path: "Optional[str]" = None,
-    loader: "str" = "ctc",
-    out_path: "str" = "ctc_log.json",
+    gt_dir: "str" = typer.Argument(..., help="Path to GT tiffs", show_default=False),
+    pred_dir: "str" = typer.Argument(
+        ..., help="Path to prediction/RES tiffs", show_default=False
+    ),
+    gt_track_path: "Optional[str]" = typer.Option(
+        None, help="Path to ctc gt track file", show_default=False
+    ),
+    pred_track_path: "Optional[str]" = typer.Option(
+        None, help="Path to predicted track file", show_default=False
+    ),
+    loader: "str" = typer.Option("ctc", help="Loader to bring data into memory"),
+    out_path: "str" = typer.Option("ctc_log.json", help="Path to save results"),
 ):
-    """Run TRA and DET metric on gt and pred data using CTC matching.
+    """
+    Run TRA and DET metric on gt and pred data using CTC matching.
 
-    If gt_track_path and pred_track_path are not passed, we find *_track.txt
+    If --gt_track_path and --pred_track_path are not passed, we find *_track.txt
     files in the data directories. If more than one such file is present, or
     no such files are present, an error is raised.
 
-    Results will be dumped to out_path in JSON format.
+    Results will be dumped to --out_path in JSON format.
 
-    Args:
-        gt_dir (str): path to GT tiffs
-        pred_dir (str): path to prediction/RES tiffs
-        gt_track_path (Optional[str], optional): path to ctc gt track file.
-        Defaults to None.
-        pred_track_path (Optional[str], optional): path to predicted track file.
-        Defaults to None.
-        loader (str, optional): Loader to bring data into memory. Defaults to "ctc".
-        out_path (str, optional): Path to save results. Defaults to "ctc_log.json" in current
-        working directory.
-
-    Raises:
-        ValueError: if any loader besides ctc is passed.
+    Raises ValueError: if any --loader besides ctc is passed.
     """
     from traccuracy.matchers import CTCMatched
     from traccuracy.metrics import CTCMetrics
@@ -68,18 +63,36 @@ def run_ctc(
 
 @app.command()
 def run_aogm(
-    gt_dir: "str",
-    pred_dir: "str",
-    gt_track_path: "Optional[str]" = None,
-    pred_track_path: "Optional[str]" = None,
-    loader: "str" = "ctc",
-    out_path: "str" = "aogm_log.json",
-    vertex_ns_weight: "float" = 1,
-    vertex_fp_weight: "float" = 1,
-    vertex_fn_weight: "float" = 1,
-    edge_fp_weight: "float" = 1,
-    edge_fn_weight: "float" = 1,
-    edge_ws_weight: "float" = 1,
+    gt_dir: "str" = typer.Argument(..., help="Path to GT tiffs", show_default=False),
+    pred_dir: "str" = typer.Argument(
+        ..., help="Path to prediction/RES tiffs", show_default=False
+    ),
+    gt_track_path: "Optional[str]" = typer.Option(
+        None, help="Path to ctc gt track file", show_default=False
+    ),
+    pred_track_path: "Optional[str]" = typer.Option(
+        None, help="Path to predicted track file", show_default=False
+    ),
+    loader: "str" = typer.Option("ctc", help="Loader to bring data into memory"),
+    out_path: "str" = typer.Option("aogm_log.json", help="Path to save results"),
+    vertex_ns_weight: "float" = typer.Option(
+        1, help="Weight to assign to nonsplit vertex errors"
+    ),
+    vertex_fp_weight: "float" = typer.Option(
+        1, help="Weight to assign to false positive vertex errors"
+    ),
+    vertex_fn_weight: "float" = typer.Option(
+        1, help="Weight to assign to false negative vertex errors"
+    ),
+    edge_fp_weight: "float" = typer.Option(
+        1, help="Weight to assign to false positive edge errors"
+    ),
+    edge_fn_weight: "float" = typer.Option(
+        1, help="Weight to assign to false negative edge errors"
+    ),
+    edge_ws_weight: "float" = typer.Option(
+        1, help="Weight to assign to edges with incorrect semantics"
+    ),
 ):
     """Run general AOGM measure on gt and pred data using CTC matching.
 
@@ -91,31 +104,7 @@ def run_aogm(
 
     Results will be dumped to out_path in JSON format.
 
-    Args:
-        gt_dir (str): path to GT tiffs
-        pred_dir (str): path to prediction/RES tiffs
-        gt_track_path (Optional[str], optional): path to ctc gt track file.
-        Defaults to None.
-        pred_track_path (Optional[str], optional): path to predicted track file.
-        Defaults to None.
-        loader (str, optional): Loader to bring data into memory. Defaults to "ctc".
-        out_path (str, optional): Path to save results. Defaults to "ctc_log.json" in current
-        working directory.
-        vertex_ns_weight (float, optional): Weight to assign to nonsplit vertex errors.
-        Defaults to 1.
-        vertex_fp_weight (float, optional): Weight to assign to false positive vertex errors.
-        Defaults to 1.
-        vertex_fn_weight (float, optional): Weight to assign to false negative vertex errors.
-        Defaults to 1.
-        edge_fp_weight (float, optional): Weight to assign to false positive edge errors.
-        Defaults to 1.
-        edge_fn_weight (float, optional): Weight to assign to false negative edge errors.
-        Defaults to 1.
-        edge_ws_weight (float, optional): Weight to assign to edges with incorrect semantics.
-        Defaults to 1.
-
-    Raises:
-        ValueError: if any loader besides ctc is passed.
+    Raises ValueError: if any --loader besides ctc is passed.
     """
     from traccuracy.matchers import CTCMatched
     from traccuracy.metrics import AOGMMetrics
@@ -146,42 +135,40 @@ def run_aogm(
 
 @app.command()
 def run_divisions_on_iou(
-    gt_dir: "str",
-    pred_dir: "str",
-    gt_track_path: "Optional[str]" = None,
-    pred_track_path: "Optional[str]" = None,
-    loader: "str" = "ctc",
-    out_path: "str" = "div_log_iou.json",
-    match_threshold: "float" = 1,
-    frame_buffer: "int" = 0,
+    gt_dir: "str" = typer.Argument(..., help="Path to GT tiffs", show_default=False),
+    pred_dir: "str" = typer.Argument(
+        ..., help="Path to prediction/RES tiffs", show_default=False
+    ),
+    gt_track_path: "Optional[str]" = typer.Option(
+        None, help="Path to ctc gt track file", show_default=False
+    ),
+    pred_track_path: "Optional[str]" = typer.Option(
+        None, help="Path to predicted track file", show_default=False
+    ),
+    loader: "str" = typer.Option("ctc", help="Loader to bring data into memory"),
+    out_path: "str" = typer.Option("div_log_iou.json", help="Path to save results"),
+    match_threshold: "float" = typer.Option(
+        1,
+        help="Threshold above which the intersection over union of a gt and predicted"
+        " detection match. Default of 1 requires exact matching.",
+    ),
+    frame_buffer: "int" = typer.Option(
+        0,
+        help="Number of frames to use for division tolerance."
+        " Numbers greater than 0 will produce metrics for 0...n inclusive.",
+    ),
 ):
     """Run division metrics on gt and pred data using IOU matching.
 
-    If gt_track_path and pred_track_path are not passed, we find *_track.txt
+    If --gt_track_path and --pred_track_path are not passed, we find *_track.txt
     files in the data directories. If more than one such file is present, or
     no such files are present, an error is raised.
 
-    Optionally, a match_threshold and frame_buffer can be passed.
+    Optionally, a --match_threshold and --frame_buffer can be passed.
 
-    Results will be dumped to out_path in JSON format.
+    Results will be dumped to --out_path in JSON format.
 
-    Args:
-        gt_dir (str): path to GT tiffs
-        pred_dir (str): path to prediction/RES tiffs
-        gt_track_path (Optional[str], optional): path to ctc gt track file.
-        Defaults to None.
-        pred_track_path (Optional[str], optional): path to predicted track file.
-        Defaults to None.
-        loader (str, optional): Loader to bring data into memory. Defaults to "ctc".
-        out_path (str, optional): Path to save results. Defaults to "ctc_log.json" in current
-        working directory.
-        match_threshold (float, optional): Threshold above which the intersection over union
-        of a gt and predicted detection match. Defaults to 1 requiring exact matching.
-        frame_buffer (int, optional): Number of frames to use for division tolerance.
-        Defaults to 0. Numbers greater than 0 will produce metrics for 0...n inclusive.
-
-    Raises:
-        ValueError: if any loader besides ctc is passed.
+    Raises ValueError: if any --loader besides ctc is passed.
     """
     from traccuracy.matchers import IOUMatched
     from traccuracy.metrics import DivisionMetrics
@@ -212,39 +199,35 @@ def run_divisions_on_iou(
 
 @app.command()
 def run_divisions_on_ctc(
-    gt_dir: "str",
-    pred_dir: "str",
-    gt_track_path: "Optional[str]" = None,
-    pred_track_path: "Optional[str]" = None,
-    loader: "str" = "ctc",
-    out_path: "str" = "div_log_ctc.json",
-    frame_buffer: "int" = 0,
+    gt_dir: "str" = typer.Argument(..., help="Path to GT tiffs", show_default=False),
+    pred_dir: "str" = typer.Argument(
+        ..., help="Path to prediction/RES tiffs", show_default=False
+    ),
+    gt_track_path: "Optional[str]" = typer.Option(
+        None, help="Path to ctc gt track file", show_default=False
+    ),
+    pred_track_path: "Optional[str]" = typer.Option(
+        None, help="Path to predicted track file", show_default=False
+    ),
+    loader: "str" = typer.Option("ctc", help="Loader to bring data into memory"),
+    out_path: "str" = typer.Option("div_log_ctc.json", help="Path to save results"),
+    frame_buffer: "int" = typer.Option(
+        0,
+        help="Number of frames to use for division tolerance."
+        " Numbers greater than 0 will produce metrics for 0...n inclusive.",
+    ),
 ):
     """Run division metrics on gt and pred data using CTC matching.
 
-    If gt_track_path and pred_track_path are not passed, we find *_track.txt
+    If --gt_track_path and --pred_track_path are not passed, we find *_track.txt
     files in the data directories. If more than one such file is present, or
     no such files are present, an error is raised.
 
-    Optionally, a frame_buffer can be passed.
+    Optionally, a --frame_buffer can be passed.
 
-    Results will be dumped to out_path in JSON format.
+    Results will be dumped to --out_path in JSON format.
 
-    Args:
-        gt_dir (str): path to GT tiffs
-        pred_dir (str): path to prediction/RES tiffs
-        gt_track_path (Optional[str], optional): path to ctc gt track file.
-        Defaults to None.
-        pred_track_path (Optional[str], optional): path to predicted track file.
-        Defaults to None.
-        loader (str, optional): Loader to bring data into memory. Defaults to "ctc".
-        out_path (str, optional): Path to save results. Defaults to "ctc_log.json" in current
-        working directory.
-        frame_buffer (int, optional): Number of frames to use for division tolerance.
-        Defaults to 0. Numbers greater than 0 will produce metrics for 0...n inclusive.
-
-    Raises:
-        ValueError: if any loader besides ctc is passed.
+    Raises ValueError: if any --loader besides ctc is passed.
     """
     from traccuracy.matchers import CTCMatched
     from traccuracy.metrics import DivisionMetrics
@@ -270,6 +253,9 @@ def run_divisions_on_ctc(
     for frame_buffer, res_dict in result["DivisionMetrics"].items():
         res_str += f'{frame_buffer} F1: {res_dict["Division F1"]}\n'
     print(res_str)
+
+
+typer_click_object = typer.main.get_command(app)
 
 
 def main():

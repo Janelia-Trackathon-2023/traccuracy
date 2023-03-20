@@ -63,7 +63,9 @@ docs = [
     "m2r2",
     "sphinx-autoapi",
     "nbsphinx",
-    "nbsphinx-link"
+    "nbsphinx-link",
+    "sphinx-click",
+    "ipython"
 ]
 
 [project.urls]
@@ -132,6 +134,7 @@ convention = "google"
 [tool.ruff.per-file-ignores]
 "tests/*.py" = ["D", "S"]
 "setup.py" = ["D"]
+"src/traccuracy/cli.py" = ["B008"]  # Ignore typer functions in function definitions
 
 # https://docs.pytest.org/en/6.2.x/customize.html
 [tool.pytest.ini_options]

@@ -47,11 +47,12 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
-    "sphinx.ext.autosectionlabel",
+    "IPython.sphinxext.ipython_console_highlighting",  # code highlighting in notebooks
     "m2r2",  # include md files in rst files
     "autoapi.extension",  # autobuild api docs
     "nbsphinx",  # add notebooks to docs
     "nbsphinx_link",  # add notebooks to docs
+    "sphinx_click",  # auto document cli
 ]
 
 napoleon_google_docstring = True
@@ -78,6 +79,7 @@ autoapi_options = [
     "show-module-summary",
     "imported-members",
 ]
+autoapi_ignore = ["*/cli.py"]
 
 # -- Nbsphinx extension ------------------------------------------------------
 
