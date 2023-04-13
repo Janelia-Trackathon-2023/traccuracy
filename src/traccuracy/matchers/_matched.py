@@ -20,6 +20,14 @@ class Matched(ABC):
 
         self.mapping = self.compute_mapping()
 
+        # Report matching performance
+        total_gt = len(self.gt_data.tracking_graph.nodes())
+        matched_gt = len({m[0] for m in self.mapping})
+        total_pred = len(self.pred_data.tracking_graph.nodes())
+        matched_pred = len({m[1] for m in self.mapping})
+        print(f"Matched {matched_gt} out of {total_gt} ground truth nodes.")
+        print(f"Matched {matched_pred} out of {total_pred} predicted nodes.")
+
     @abstractmethod
     def compute_mapping(self):
         """Computes a mapping of nodes in gt to nodes in pred
