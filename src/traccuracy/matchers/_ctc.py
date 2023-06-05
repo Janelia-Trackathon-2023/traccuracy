@@ -45,8 +45,8 @@ class CTCMatched(Matched):
             )
         gt = self.gt_data
         pred = self.pred_data
-        label_key = self.gt_data.tracking_graph.label_key
-
+        gt_label_key = self.gt_data.tracking_graph.label_key
+        pred_label_key = self.pred_data.tracking_graph.label_key
         G_gt, mask_gt = gt.tracking_graph, gt.segmentation
         G_pred, mask_pred = pred.tracking_graph, pred.segmentation
 
@@ -70,13 +70,13 @@ class CTCMatched(Matched):
             gt_labels = dict(
                 filter(
                     lambda item: item[0] in gt_frame_nodes,
-                    nx.get_node_attributes(G_gt.graph, label_key).items(),
+                    nx.get_node_attributes(G_gt.graph, gt_label_key).items(),
                 )
             )
             pred_labels = dict(
                 filter(
                     lambda item: item[0] in pred_frame_nodes,
-                    nx.get_node_attributes(G_pred.graph, label_key).items(),
+                    nx.get_node_attributes(G_pred.graph, pred_label_key).items(),
                 )
             )
 
