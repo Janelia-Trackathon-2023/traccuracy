@@ -12,8 +12,7 @@ from ._matched import Matched
 
 class CTCMatched(Matched):
     def compute_mapping(self):
-        mapping, det_matrices = self._match_ctc()
-        self._det_matrices = det_matrices
+        mapping = self._match_ctc()
         return mapping
 
     def _match_ctc(self):
@@ -53,7 +52,7 @@ class CTCMatched(Matched):
         if mask_gt.shape != mask_pred.shape:
             raise ValueError("Segmentation shapes must match between gt and pred")
 
-        det_matrices = {}
+        mapping = []
         # Get overlaps for each frame
         for i, t in enumerate(
             tqdm(
@@ -62,7 +61,7 @@ class CTCMatched(Matched):
             )
         ):
             gt_frame = mask_gt[i]
-            res_frame = mask_pred[i]
+            pred_frame = mask_pred[i]
             gt_frame_nodes = gt.tracking_graph.nodes_by_frame[t]
             pred_frame_nodes = pred.tracking_graph.nodes_by_frame[t]
 
@@ -73,48 +72,60 @@ class CTCMatched(Matched):
                     nx.get_node_attributes(G_gt.graph, label_key).items(),
                 )
             )
+            gt_label_to_id = {v: k for k, v in gt_labels.items()}
+
             pred_labels = dict(
                 filter(
                     lambda item: item[0] in pred_frame_nodes,
                     nx.get_node_attributes(G_pred.graph, label_key).items(),
                 )
             )
+            pred_label_to_id = {v: k for k, v in pred_labels.items()}
 
             # make dictionary from label to ID so we know where in matrix to assign matches
-            gt_label_to_id = {v: (k, i) for i, (k, v) in enumerate(gt_labels.items())}
-            pred_label_to_id = {
-                v: (k, i) for i, (k, v) in enumerate(pred_labels.items())
-            }
-            frame_det_matrix = np.zeros(
-                (len(pred_frame_nodes), len(gt_frame_nodes)), dtype=np.uint8
+            # gt_label_to_id = {v: (k, i) for i, (k, v) in enumerate(gt_labels.items())}
+            # pred_label_to_id = {
+            #     v: (k, i) for i, (k, v) in enumerate(pred_labels.items())
+            # }
+            # frame_det_matrix = np.zeros(
+            #     (len(pred_frame_nodes), len(gt_frame_nodes)), dtype=np.uint8
+            # )
+            overlapping_gt_labels, overlapping_pred_labels = get_labels_with_overlap(
+                gt_frame, pred_frame
             )
-            overlapping_gt_labels, overlapping_res_labels = get_labels_with_overlap(
-                gt_frame, res_frame
-            )
-            populate_det_matrix(
-                frame_det_matrix,
-                gt_frame,
-                res_frame,
-                overlapping_gt_labels,
-                overlapping_res_labels,
-                gt_label_to_id,
-                pred_label_to_id,
-            )
+            for i in range(len(overlapping_gt_labels)):
+                gt_label = overlapping_gt_labels[i]
+                pred_label = overlapping_pred_labels[i]
+                gt_blob_mask = gt_frame == gt_label
+                comp_blob_mask = pred_frame == pred_label
+                if detection_test(gt_blob_mask, comp_blob_mask):
+                    mapping.append(
+                        (gt_label_to_id[gt_label], pred_label_to_id[pred_label])
+                    )
+            # populate_det_matrix(
+            #     frame_det_matrix,
+            #     gt_frame,
+            #     res_frame,
+            #     overlapping_gt_labels,
+            #     overlapping_res_labels,
+            #     gt_label_to_id,
+            #     pred_label_to_id,
+            # )
 
-            ordered_gt_node_ids = [
-                v[0] for v in sorted(gt_label_to_id.values(), key=lambda x: x[1])
-            ]
-            ordered_comp_node_ids = [
-                v[0] for v in sorted(pred_label_to_id.values(), key=lambda x: x[1])
-            ]
+            # ordered_gt_node_ids = [
+            #     v[0] for v in sorted(gt_label_to_id.values(), key=lambda x: x[1])
+            # ]
+            # ordered_comp_node_ids = [
+            #     v[0] for v in sorted(pred_label_to_id.values(), key=lambda x: x[1])
+            # ]
 
-            det_matrices[t] = {
-                "det": frame_det_matrix,
-                "comp_ids": ordered_comp_node_ids,
-                "gt_ids": ordered_gt_node_ids,
-            }
-        matching = get_node_matching_map(det_matrices)
-        return matching, det_matrices
+            # det_matrices[t] = {
+            #     "det": frame_det_matrix,
+            #     "comp_ids": ordered_comp_node_ids,
+            #     "gt_ids": ordered_gt_node_ids,
+            # }
+        # matching = get_node_matching_map(det_matrices)
+        return mapping
 
 
 def populate_det_matrix(
