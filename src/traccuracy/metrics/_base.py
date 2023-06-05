@@ -5,7 +5,6 @@ from ..matchers._matched import Matched
 
 class Metric(ABC):
     # Mapping criteria
-    needs_det_matrix = False
     needs_one_to_one = False
     supports_one_to_many = False
     supports_many_to_one = False

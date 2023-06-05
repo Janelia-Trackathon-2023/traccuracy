@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class AOGMMetrics(Metric):
-    needs_det_matrix = True
+    supports_many_to_one = True
 
     def __init__(
         self,
@@ -37,9 +37,8 @@ class AOGMMetrics(Metric):
         gt_graph = self.data.gt_data.tracking_graph
         pred_graph = self.data.pred_data.tracking_graph
         mapping = self.data.mapping
-        matrices = self.data._det_matrices
 
-        track_events = evaluate_ctc_events(gt_graph, pred_graph, mapping, matrices)
+        track_events = evaluate_ctc_events(gt_graph, pred_graph, mapping)
         vertex_error_counts = {
             "ns": track_events.nonsplit_vertices_count,
             "fp": track_events.fp_node_count,

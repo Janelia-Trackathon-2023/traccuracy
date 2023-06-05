@@ -1,5 +1,3 @@
-from typing import Dict
-
 import networkx as nx
 import numpy as np
 from tqdm import tqdm
@@ -30,7 +28,6 @@ class CTCMatched(Matched):
         Returns:
             list[(gt_node, pred_node)]: list of tuples where each tuple contains a gt node
             and pred node
-            dict: dictionary containing detection_matrices and mappings indexed by frame_key
 
         Raises:
             ValueError: gt and pred must be a TrackingData object
@@ -82,14 +79,6 @@ class CTCMatched(Matched):
             )
             pred_label_to_id = {v: k for k, v in pred_labels.items()}
 
-            # make dictionary from label to ID so we know where in matrix to assign matches
-            # gt_label_to_id = {v: (k, i) for i, (k, v) in enumerate(gt_labels.items())}
-            # pred_label_to_id = {
-            #     v: (k, i) for i, (k, v) in enumerate(pred_labels.items())
-            # }
-            # frame_det_matrix = np.zeros(
-            #     (len(pred_frame_nodes), len(gt_frame_nodes)), dtype=np.uint8
-            # )
             overlapping_gt_labels, overlapping_pred_labels = get_labels_with_overlap(
                 gt_frame, pred_frame
             )
@@ -102,77 +91,7 @@ class CTCMatched(Matched):
                     mapping.append(
                         (gt_label_to_id[gt_label], pred_label_to_id[pred_label])
                     )
-            # populate_det_matrix(
-            #     frame_det_matrix,
-            #     gt_frame,
-            #     res_frame,
-            #     overlapping_gt_labels,
-            #     overlapping_res_labels,
-            #     gt_label_to_id,
-            #     pred_label_to_id,
-            # )
-
-            # ordered_gt_node_ids = [
-            #     v[0] for v in sorted(gt_label_to_id.values(), key=lambda x: x[1])
-            # ]
-            # ordered_comp_node_ids = [
-            #     v[0] for v in sorted(pred_label_to_id.values(), key=lambda x: x[1])
-            # ]
-
-            # det_matrices[t] = {
-            #     "det": frame_det_matrix,
-            #     "comp_ids": ordered_comp_node_ids,
-            #     "gt_ids": ordered_gt_node_ids,
-            # }
-        # matching = get_node_matching_map(det_matrices)
         return mapping
-
-
-def populate_det_matrix(
-    frame_matrix,
-    gt_frame,
-    pred_frame,
-    gt_labels,
-    res_labels,
-    gt_label_to_id,
-    res_label_to_id,
-):
-    for i in range(len(gt_labels)):
-        gt_label = gt_labels[i]
-        res_label = res_labels[i]
-        gt_blob_mask = gt_frame == gt_label
-        comp_blob_mask = pred_frame == res_label
-        is_match = int(detection_test(gt_blob_mask, comp_blob_mask))
-        if is_match:
-            pred_idx = res_label_to_id[res_label][1]
-            gt_idx = gt_label_to_id[gt_label][1]
-            frame_matrix[pred_idx, gt_idx] = is_match
-
-
-def get_node_matching_map(detection_matrices: "Dict"):
-    """Return list of tuples of (gt_id, comp_id) for all matched nodes
-
-    Parameters
-    ----------
-    detection_matrices : Dict
-        Dictionary indexed by t holding `det`, `comp_ids` and `gt_ids`
-
-    Returns
-    -------
-    matched_nodes: List[Tuple[int, int]]
-        List of tuples (gt_node_id, comp_node_id) denoting matched nodes
-        between reference graph and computed graph
-    """
-    matched_nodes = []
-    for m_dict in detection_matrices.values():
-        matrix = m_dict["det"]
-        comp_nodes = np.asarray(m_dict["comp_ids"])
-        gt_nodes = np.asarray(m_dict["gt_ids"])
-        row_idx, col_idx = np.nonzero(matrix)
-        comp_node_ids = comp_nodes[row_idx]
-        gt_node_ids = gt_nodes[col_idx]
-        matched_nodes.extend(list(zip(gt_node_ids, comp_node_ids)))
-    return matched_nodes
 
 
 def detection_test(gt_blob: "np.ndarray", comp_blob: "np.ndarray") -> int:
