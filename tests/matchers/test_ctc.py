@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from traccuracy._tracking_data import TrackingData
 from traccuracy._tracking_graph import TrackingGraph
-from traccuracy.matchers._ctc import CTCMatched, get_node_matching_map
+from traccuracy.matchers._ctc import CTCMatched
 
 from tests.test_utils import get_annotated_movie
 
@@ -55,37 +55,3 @@ def test_match_ctc():
     # gt and pred node should be the same
     for pair in matched.mapping:
         assert pair[0] == pair[1]
-
-    # there should be something saved in detection matrices
-    assert matched._det_matrices
-
-
-def test_get_node_matching_map():
-    comp_ids = [3, 7, 10]
-    gt_ids = [4, 12, 14, 15]
-    mtrix = np.zeros((3, 4), dtype=np.uint8)
-    mtrix[0, 1] = 1
-    mtrix[0, 3] = 1
-    mtrix[1, 2] = 1
-    mtrix_dict = {0: {"det": mtrix, "comp_ids": comp_ids, "gt_ids": gt_ids}}
-    matching = get_node_matching_map(mtrix_dict)
-    assert matching == [(12, 3), (15, 3), (14, 7)]
-
-
-def test_get_node_matching_map_multiple_frames():
-    comp_ids = [3, 7, 10]
-    gt_ids = [4, 12, 14, 15]
-    mtrix = np.zeros((3, 4), dtype=np.uint8)
-    mtrix[0, 1] = 1
-    mtrix[0, 3] = 1
-    mtrix[1, 2] = 1
-
-    mtrix2 = np.zeros((3, 4), dtype=np.uint8)
-    mtrix2[1, 1] = 1
-    mtrix2[2, 0] = 1
-    mtrix_dict = {
-        0: {"det": mtrix, "comp_ids": comp_ids, "gt_ids": gt_ids},
-        1: {"det": mtrix2, "comp_ids": comp_ids, "gt_ids": gt_ids},
-    }
-    matching = get_node_matching_map(mtrix_dict)
-    assert matching == [(12, 3), (15, 3), (14, 7), (12, 7), (4, 10)]

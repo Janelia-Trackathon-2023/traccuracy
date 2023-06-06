@@ -45,11 +45,6 @@ def get_vertex_errors(
     list[(gt_node, pred_node)]: list of tuples where each tuple contains a gt node
         and pred node
     """
-    tp_count = 0
-    fp_count = 0
-    fn_count = 0
-    ns_count = 0
-
     nx.set_node_attributes(comp_graph, False, "is_tp")
     nx.set_node_attributes(comp_graph, False, "is_ns")
 
@@ -57,32 +52,45 @@ def get_vertex_errors(
     nx.set_node_attributes(comp_graph, True, "is_fp")
     nx.set_node_attributes(gt_graph, True, "is_fn")
 
-    fp_nodes: "List[str]" = []
-    fn_nodes: "List[str]" = []
-    ns_nodes: "List[str]" = []
-
+    # comp:gt is useful for ns
+    # gt:comp is always going to just be one to one so we should do comp:gt
     dict_mapping = defaultdict(list)
     for gt_id, pred_id in mapping:
-        dict_mapping[gt_id].append(pred_id)
+        dict_mapping[pred_id].append(gt_id)
 
-    for gt_id in tqdm(dict_mapping, desc="Evaluating nodes"):
-        pred_ids = dict_mapping[gt_id]
-        if len(pred_ids) == 1:
-            pid = pred_ids[0]
-            comp_graph.nodes[pid]["is_tp"] = True
-            comp_graph.nodes[pid]["is_fp"] = False
-            gt_graph.nodes[gt_id]["is_fn"] = True
-        elif len(pred_ids) > 1:
-            for pid in pred_ids:
-                comp_graph.nodes[pid]["is_ns"] = True
-                comp_graph.nodes[pid]["is_fp"] = False
-            gt_graph.nodes[gt_id]["is_fn"] = False
+    ns_count = 0
+    for pred_id in tqdm(dict_mapping, desc="Evaluating nodes"):
+        gt_ids = dict_mapping[pred_id]
+        if len(gt_ids) == 1:
+            gid = gt_ids[0]
+            comp_graph.nodes[pred_id]["is_tp"] = True
+            comp_graph.nodes[pred_id]["is_fp"] = False
+            gt_graph.nodes[gid]["is_fn"] = False
+        elif len(gt_ids) > 1:
+            comp_graph.nodes[pred_id]["is_ns"] = True
+            comp_graph.nodes[pred_id]["is_fp"] = False
+            # number of split operations that would be required to correct the vertices
+            ns_count += len(gt_ids) - 1
+            for gid in gt_ids:
+                gt_graph.nodes[gid]["is_fn"] = False
 
-    # TODO: count and get filtered lists from the graph
+    tp_nodes: "List[str]" = []
+    fp_nodes: "List[str]" = []
+    ns_nodes: "List[str]" = []
+    for nid in comp_graph.nodes:
+        node = comp_graph.nodes[nid]
+        if node["is_tp"]:
+            tp_nodes.append(nid)
+        elif node["is_fp"]:
+            fp_nodes.append(nid)
+        elif node["is_ns"]:
+            ns_nodes.append(nid)
+    fn_nodes = [node for node in gt_graph.nodes if gt_graph.nodes[node]["is_fn"]]
+
     error_counts = {
-        "tp": tp_count,
-        "fp": fp_count,
-        "fn": fn_count,
+        "tp": len(tp_nodes),
+        "fp": len(fp_nodes),
+        "fn": len(fn_nodes),
         "ns": ns_count,
         "fp_nodes": fp_nodes,
         "fn_nodes": fn_nodes,
@@ -126,7 +134,6 @@ def get_edge_errors(gt_graph, comp_graph, node_mapping):
     for edge in tqdm(gt_graph.edges, "Evaluating FN edges"):
         source, target = edge[0], edge[1]
         # this edge is adjacent to an edge we didn't detect, so it definitely is an fn
-        # TODO: assumes you've already assigned vertex errors...
         if gt_graph.nodes[source]["is_fn"] or gt_graph.nodes[target]["is_fn"]:
             gt_graph.edges[edge]["is_fn"] = True
             fn_edges.append(edge)
