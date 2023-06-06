@@ -52,8 +52,8 @@ def get_vertex_errors(
     nx.set_node_attributes(comp_graph, True, "is_fp")
     nx.set_node_attributes(gt_graph, True, "is_fn")
 
-    # comp:gt is useful for ns
-    # gt:comp is always going to just be one to one so we should do comp:gt
+    # we need to know how many computed vertices are "non-split", so we make
+    # a mapping of gt vertices to their matched comp vertices
     dict_mapping = defaultdict(list)
     for gt_id, pred_id in mapping:
         dict_mapping[pred_id].append(gt_id)
