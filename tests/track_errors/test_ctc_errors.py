@@ -13,24 +13,14 @@ def test_get_vertex_errors():
     gt_ids = [4, 12, 14, 17]
     gt_ids_2 = list(np.asarray(gt_ids) + 1)
 
-    mtrix = np.zeros((3, 4), dtype=np.uint8)
-    mtrix[0, 1] = 1
-    mtrix[0, 3] = 1
-    mtrix[1, 2] = 1
+    mapping = [(12, 3), (17, 3), (14, 7), (13, 8), (5, 11)]
 
-    mtrix2 = np.zeros((3, 4), dtype=np.uint8)
-    mtrix2[1, 1] = 1
-    mtrix2[2, 0] = 1
-    mtrix_dict = {
-        0: {"det": mtrix, "comp_ids": comp_ids, "gt_ids": gt_ids},
-        1: {"det": mtrix2, "comp_ids": comp_ids_2, "gt_ids": gt_ids_2},
-    }
     gt_g = nx.DiGraph()
     gt_g.add_nodes_from(gt_ids + gt_ids_2)
     comp_g = nx.DiGraph()
     comp_g.add_nodes_from(comp_ids + comp_ids_2)
 
-    vertex_errors = get_vertex_errors(gt_g, comp_g, mtrix_dict)
+    vertex_errors = get_vertex_errors(gt_g, comp_g, mapping)
     assert vertex_errors["ns"] == 1
     assert vertex_errors["tp"] == 3
     assert vertex_errors["fp"] == 2
