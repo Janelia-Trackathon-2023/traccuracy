@@ -24,7 +24,7 @@ def _match_nodes(gt, res, threshold=1):
     """
     iou = np.zeros((np.max(gt) + 1, np.max(res) + 1))
 
-    overlapping_gt_labels, overlapping_res_labels = get_labels_with_overlap(gt, res)
+    overlapping_gt_labels, overlapping_res_labels, _ = get_labels_with_overlap(gt, res)
 
     for index in range(len(overlapping_gt_labels)):
         iou_gt_idx = overlapping_gt_labels[index]

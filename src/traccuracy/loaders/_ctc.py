@@ -198,7 +198,7 @@ def load_ctc_data(data_dir, track_path=None):
     detections = get_node_attributes(masks)
 
     G = ctc_to_graph(tracks, detections)
-
+        
     data = TrackingData(TrackingGraph(G), segmentation=masks)
 
     return data
