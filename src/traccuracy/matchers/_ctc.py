@@ -79,11 +79,12 @@ class CTCMatched(Matched):
             )
             pred_label_to_id = {v: k for k, v in pred_labels.items()}
 
-            overlapping_gt_labels, overlapping_pred_labels, intersection = get_labels_with_overlap(
-                gt_frame, pred_frame
-            )
-            
-            
+            (
+                overlapping_gt_labels,
+                overlapping_pred_labels,
+                intersection,
+            ) = get_labels_with_overlap(gt_frame, pred_frame)
+
             for i in range(len(overlapping_gt_labels)):
                 gt_label = overlapping_gt_labels[i]
                 pred_label = overlapping_pred_labels[i]
@@ -115,10 +116,7 @@ def detection_test(gt_blob: "np.ndarray", comp_blob: "np.ndarray") -> int:
     bool
         True if computed marker majority overlaps reference marker, else False.
     """
-    
     n_gt_pixels = np.sum(gt_blob)
-    
     intersection = np.logical_and(gt_blob, comp_blob)
-    
     comp_blob_matches_gt_blob = int(np.sum(intersection) > 0.5 * n_gt_pixels)
     return comp_blob_matches_gt_blob
