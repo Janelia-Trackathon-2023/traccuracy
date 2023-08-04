@@ -29,9 +29,8 @@ def get_labels_with_overlap(gt_frame, res_frame):
         overlapping_res_labels: List[int], labels of res boxes that overlap with gt boxes
         intersections: List[float], list of (intersection gt vs res) / (gt area)
     """
-    gt_frame, res_frame = gt_frame.astype(np.uint16, copy=False), res_frame.astype(
-        np.uint16, copy=False
-    )
+    gt_frame = gt_frame.astype(np.uint16, copy=False)
+    res_frame = res_frame.astype(np.uint16, copy=False)
     gt_props = regionprops(gt_frame)
     gt_boxes = [np.array(gt_prop.bbox) for gt_prop in gt_props]
     gt_boxes = np.array(gt_boxes).astype(np.float64)
