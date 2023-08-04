@@ -8,13 +8,14 @@ Copyright (c) 2015 Microsoft
 import numpy as np
 from skimage.measure import regionprops
 
-def _union_slice(a:tuple[slice], b:tuple[slice]):
-    """ returns the union of slice tuples a and b """
+
+def _union_slice(a: tuple[slice], b: tuple[slice]):
+    """returns the union of slice tuples a and b"""
     starts = tuple(min(_a.start, _b.start) for _a, _b in zip(a, b))
     stops = tuple(max(_a.stop, _b.stop) for _a, _b in zip(a, b))
     return tuple(slice(start, stop) for start, stop in zip(starts, stops))
-    
-    
+
+
 def get_labels_with_overlap(gt_frame, res_frame):
     """Get all labels IDs in gt_frame and res_frame whose bounding boxes
     overlap.
@@ -24,11 +25,13 @@ def get_labels_with_overlap(gt_frame, res_frame):
         res_frame (np.ndarray): result segmentation for a given frame
 
     Returns:
-        overlapping_gt_labels: List[int], labels of gt boxes that overlap with res boxes 
+        overlapping_gt_labels: List[int], labels of gt boxes that overlap with res boxes
         overlapping_res_labels: List[int], labels of res boxes that overlap with gt boxes
         intersections: List[float], list of (intersection gt vs res) / (gt area)
     """
-    gt_frame, res_frame = gt_frame.astype(np.uint16, copy=False), res_frame.astype(np.uint16, copy=False)
+    gt_frame, res_frame = gt_frame.astype(np.uint16, copy=False), res_frame.astype(
+        np.uint16, copy=False
+    )
     gt_props = regionprops(gt_frame)
     gt_boxes = [np.array(gt_prop.bbox) for gt_prop in gt_props]
     gt_boxes = np.array(gt_boxes).astype(np.float64)
@@ -56,16 +59,16 @@ def get_labels_with_overlap(gt_frame, res_frame):
     ind_res = np.asarray(ind_res, dtype=np.uint16)
     overlapping_gt_labels = gt_box_labels[ind_gt]
     overlapping_res_labels = res_box_labels[ind_res]
-    
-    intersections = [] 
+
+    intersections = []
     for i, j in zip(ind_gt, ind_res):
         sslice = _union_slice(gt_props[i].slice, res_props[j].slice)
-        gt_mask = gt_frame[sslice]==gt_box_labels[i]
-        res_mask = res_frame[sslice]==res_box_labels[j]
+        gt_mask = gt_frame[sslice] == gt_box_labels[i]
+        res_mask = res_frame[sslice] == res_box_labels[j]
         area_inter = np.count_nonzero(np.logical_and(gt_mask, res_mask))
         area_gt = np.count_nonzero(gt_mask)
-        intersections.append(area_inter/area_gt)
-        
+        intersections.append(area_inter / area_gt)
+
     return overlapping_gt_labels, overlapping_res_labels, intersections
 
 
