@@ -88,6 +88,7 @@ class CTCMatched(Matched):
             for i in range(len(overlapping_gt_labels)):
                 gt_label = overlapping_gt_labels[i]
                 pred_label = overlapping_pred_labels[i]
+# CTC metrics only match comp IDs to a single GT ID if there is majority overlap
                 if intersection[i] > 0.5:
                     mapping.append(
                         (gt_label_to_id[gt_label], pred_label_to_id[pred_label])
