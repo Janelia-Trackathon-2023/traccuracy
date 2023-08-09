@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import TYPE_CHECKING
 
 import networkx as nx
+import numpy as np
 from tqdm import tqdm
 
 from ._track_events import TrackEvents
@@ -111,11 +112,16 @@ def get_edge_errors(gt_graph, comp_graph, node_mapping):
     fn_edges = []
     ws_edges = []
 
+    node_mapping_first = np.array([mp[0] for mp in node_mapping])
+    node_mapping_second = np.array([mp[1] for mp in node_mapping])
+
     # fp edges - edges in induced_graph that aren't in gt_graph
     for edge in tqdm(induced_graph.edges, "Evaluating FP edges"):
         source, target = edge[0], edge[1]
-        source_gt_id = list(filter(lambda mp: mp[1] == source, node_mapping))[0][0]
-        target_gt_id = list(filter(lambda mp: mp[1] == target, node_mapping))[0][0]
+
+        source_gt_id = node_mapping[np.where(node_mapping_second == source)[0][0]][0]
+        target_gt_id = node_mapping[np.where(node_mapping_second == target)[0][0]][0]
+
         expected_gt_edge = (source_gt_id, target_gt_id)
         if expected_gt_edge not in gt_graph.edges:
             comp_graph.edges[edge]["is_fp"] = True
@@ -139,8 +145,9 @@ def get_edge_errors(gt_graph, comp_graph, node_mapping):
             fn_edges.append(edge)
             continue
 
-        source_comp_id = list(filter(lambda mp: mp[0] == source, node_mapping))[0][1]
-        target_comp_id = list(filter(lambda mp: mp[0] == target, node_mapping))[0][1]
+        source_comp_id = node_mapping[np.where(node_mapping_first == source)[0][0]][1]
+        target_comp_id = node_mapping[np.where(node_mapping_first == target)[0][0]][1]
+
         expected_comp_edge = (source_comp_id, target_comp_id)
         if expected_comp_edge not in induced_graph.edges:
             gt_graph.edges[edge]["is_fn"] = True
