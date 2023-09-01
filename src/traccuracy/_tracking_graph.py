@@ -175,9 +175,6 @@ class TrackingGraph:
         nodes = []
         for node in limit_to:
             attributes = self.graph.nodes[node]
-            print("attributes", attributes)
-            print("attr", attr)
-            print("criterion", criterion)
             if attr in attributes.keys():
                 if criterion is None or criterion(attributes[attr]):
                     nodes.append(node)
