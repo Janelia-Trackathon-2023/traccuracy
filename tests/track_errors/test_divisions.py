@@ -1,4 +1,5 @@
 import networkx as nx
+import numpy as np
 import pytest
 from traccuracy import TrackingGraph
 from traccuracy.track_errors.divisions import (
@@ -56,6 +57,10 @@ def test_classify_divisions_tp(G):
     )
     assert "is_tp_division" in G_gt.nodes()["2_2"]
     assert "is_tp_division" in G_pred.nodes()["2_2"]
+
+    # Check division flag
+    assert G_gt.division_annotations
+    assert G_pred.division_annotations
 
 
 def test_classify_divisions_fp(G):
@@ -211,6 +216,8 @@ def test_evaluate_division_events():
     G_gt, G_pred, mapper = get_division_graphs()
     frame_buffer = (0, 1, 2)
 
-    _evaluate_division_events(
+    results = _evaluate_division_events(
         TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, frame_buffer=frame_buffer
     )
+
+    assert np.all([isinstance(k, int) for k in results.keys()])

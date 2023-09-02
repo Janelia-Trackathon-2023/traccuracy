@@ -84,6 +84,9 @@ class TrackingGraph:
         self.start_frame = min(self.nodes_by_frame.keys())
         self.end_frame = max(self.nodes_by_frame.keys()) + 1
 
+        # Record types of annotations that have been calculated
+        self.division_annotations = False
+
     def nodes(self, limit_to=None):
         """Get all the nodes in the graph, along with their attributes.
 

@@ -76,6 +76,10 @@ def _classify_divisions(G_gt, G_pred, mapper):
     # Any remaining pred divisions are false positives
     G_pred.set_node_attribute(div_pred, "is_fp_division", True)
 
+    # Set division annotation flag
+    G_gt.division_annotations = True
+    G_pred.division_annotations = True
+
     return G_gt, G_pred
 
 

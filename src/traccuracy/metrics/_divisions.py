@@ -33,24 +33,34 @@ as the late division daughters.
 """
 
 
-from traccuracy.track_errors._division_events import DivisionEvents
 from traccuracy.track_errors.divisions import _evaluate_division_events
 
 from ._base import Metric
 
 
-def _calculate_metrics(event: DivisionEvents):
-    try:
-        recall = event.tp_division_count / (
-            event.tp_division_count + event.fn_division_count
+def _calculate_metrics(G_gt, G_pred):
+    if not (G_gt.division_annotations and G_pred.division_annotations):
+        raise ValueError(
+            "Both input TrackingGraphs must have division_annotations calculated"
         )
+
+    tp_division_count = len(
+        G_gt.get_nodes_with_attribute("is_tp_division", lambda x: x)
+    )
+    fn_division_count = len(
+        G_gt.get_nodes_with_attribute("is_fn_division", lambda x: x)
+    )
+    fp_division_count = len(
+        G_pred.get_nodes_with_attribute("is_fp_division", lambda x: x)
+    )
+
+    try:
+        recall = tp_division_count / (tp_division_count + fn_division_count)
     except ZeroDivisionError:
         recall = 0
 
     try:
-        precision = event.tp_division_count / (
-            event.tp_division_count + event.fp_division_count
-        )
+        precision = tp_division_count / (tp_division_count + fp_division_count)
     except ZeroDivisionError:
         precision = 0
 
@@ -60,8 +70,8 @@ def _calculate_metrics(event: DivisionEvents):
         f1 = 0
 
     try:
-        mbc = event.tp_division_count / (
-            event.tp_division_count + event.fn_division_count + event.fp_division_count
+        mbc = tp_division_count / (
+            tp_division_count + fn_division_count + fp_division_count
         )
     except ZeroDivisionError:
         mbc = 0
@@ -71,7 +81,9 @@ def _calculate_metrics(event: DivisionEvents):
         "Division Precision": precision,
         "Division F1": f1,
         "Mitotic Branching Correctness": mbc,
-        **event.count_dict,
+        "True Positive Divisions": tp_division_count,
+        "False Positive Divisions": fp_division_count,
+        "False Negative Divisions": fn_division_count,
     }
 
 
@@ -96,7 +108,7 @@ class DivisionMetrics(Metric):
         Returns:
             dict: Returns a nested dictionary with one dictionary per frame buffer value
         """
-        events = _evaluate_division_events(
+        div_annotations = _evaluate_division_events(
             self.data.gt_data.tracking_graph,
             self.data.pred_data.tracking_graph,
             self.data.mapping,
@@ -104,6 +116,6 @@ class DivisionMetrics(Metric):
         )
 
         return {
-            f"Frame Buffer {event.frame_buffer}": _calculate_metrics(event)
-            for event in events
+            f"Frame Buffer {fb}": _calculate_metrics(G_gt, G_pred)
+            for fb, (G_gt, G_pred) in div_annotations.items()
         }
