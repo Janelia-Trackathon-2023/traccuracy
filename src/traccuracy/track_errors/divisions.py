@@ -237,7 +237,9 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
 
 def _evaluate_division_events(G_gt, G_pred, mapper, frame_buffer=(0)):
     """Classify division errors and correct shifted divisions according to frame_buffer
-    One DivisionEvent object will be returned for each value in frame_buffer
+
+    Note: A copy of G_gt and G_pred will be created for each frame_buffer other than 0.
+    For large graphs, creating copies may introduce memory problems.
 
     Args:
         G_gt (TrackingGraph): TrackingGraph of GT data
@@ -247,7 +249,9 @@ def _evaluate_division_events(G_gt, G_pred, mapper, frame_buffer=(0)):
             to tolerate in correct_shifted_divisions. Defaults to (0).
 
     Returns:
-        list[DivisionEvents]: List of one DivisionEvent object per value in frame_buffer
+        dict {frame_buffer: (G_gt, G_pred)}: A dictionary where each key corresponds to a frame
+            buffer with a tuple of the corresponding ground truth and predicted TrackingGraphs
+            after division annotations and correction by frame buffer
     """
 
     div_annotations = {}
