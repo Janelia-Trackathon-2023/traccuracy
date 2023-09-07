@@ -5,38 +5,30 @@ import numpy as np
 from tqdm import tqdm
 
 if TYPE_CHECKING:
-    from typing import List, Tuple
-
-    from traccuracy._tracking_graph import TrackingGraph
+    from traccuracy.matchers._matched import Matched
 
 
-def evaluate_ctc_events(G_gt: "TrackingGraph", G_pred: "TrackingGraph", mapper):
+def evaluate_ctc_events(matched_data: "Matched"):
     """Annotates ground truth and predicted graph with node and edge error types
 
     Annotations are made in place
     """
-    get_vertex_errors(G_gt, G_pred, mapper)
-    get_edge_errors(G_gt, G_pred, mapper)
+    get_vertex_errors(matched_data)
+    get_edge_errors(matched_data)
 
 
-def get_vertex_errors(
-    gt_graph: "TrackingGraph",
-    comp_graph: "TrackingGraph",
-    mapping: "List[Tuple[str, str]]",
-):
+def get_vertex_errors(matched_data: "Matched"):
     """Count vertex errors and assign class to each comp/gt node.
 
     Parameters
     ----------
-    gt_graph : TrackingGraph
-        Graph of ground truth tracking solution. Nodes must have label
-        attribute denoting the pixel value of the marker.
-    comp_graph : TrackingGraph
-        Graph of computed tracking solution. Nodes must have label
-        attribute denoting the pixel value of the marker.
-    list[(gt_node, pred_node)]: list of tuples where each tuple contains a gt node
-        and pred node
+    matched_data: Matched
+        Matched data object containing gt and pred graphs with their associated mapping
     """
+    comp_graph = matched_data.pred_data.tracking_graph
+    gt_graph = matched_data.gt_data.tracking_graph
+    mapping = matched_data.mapping
+
     comp_graph.set_node_attribute(list(comp_graph.nodes()), "is_tp", False)
     comp_graph.set_node_attribute(list(comp_graph.nodes()), "is_ns", False)
 
@@ -70,11 +62,11 @@ def get_vertex_errors(
     gt_graph.node_errors = True
 
 
-def get_edge_errors(
-    gt_graph: "TrackingGraph",
-    comp_graph: "TrackingGraph",
-    node_mapping: "List[Tuple[str, str]]",
-):
+def get_edge_errors(matched_data: "Matched"):
+    comp_graph = matched_data.pred_data.tracking_graph
+    gt_graph = matched_data.gt_data.tracking_graph
+    node_mapping = matched_data.mapping
+
     induced_graph = comp_graph.get_subgraph(
         comp_graph.get_nodes_with_attribute("is_tp", criterion=lambda x: x)
     ).graph

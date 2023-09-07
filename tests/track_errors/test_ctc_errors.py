@@ -1,10 +1,17 @@
 import networkx as nx
 import numpy as np
+from traccuracy._tracking_data import TrackingData
 from traccuracy._tracking_graph import TrackingGraph
+from traccuracy.matchers._matched import Matched
 from traccuracy.track_errors._ctc import (
     get_edge_errors,
     get_vertex_errors,
 )
+
+
+class DummyMatched(Matched):
+    def compute_mapping(self):
+        return []
 
 
 def test_get_vertex_errors():
@@ -36,7 +43,10 @@ def test_get_vertex_errors():
     )
     G_comp = TrackingGraph(comp_g)
 
-    get_vertex_errors(G_gt, G_comp, mapping)
+    matched_data = DummyMatched(TrackingData(G_gt), TrackingData(G_comp))
+    matched_data.mapping = mapping
+
+    get_vertex_errors(matched_data)
 
     assert len(G_comp.get_nodes_with_attribute("is_ns", lambda x: x)) == 1
     assert len(G_comp.get_nodes_with_attribute("is_tp", lambda x: x)) == 3
@@ -91,7 +101,10 @@ def test_assign_edge_errors():
     )
     G_gt = TrackingGraph(gt_g)
 
-    get_edge_errors(G_gt, G_comp, mapping)
+    matched_data = DummyMatched(TrackingData(G_gt), TrackingData(G_comp))
+    matched_data.mapping = mapping
+
+    get_edge_errors(matched_data)
 
     assert comp_g.edges[(3, 4)]["is_tp"]
     assert comp_g.edges[(7, 8)]["is_fp"]
@@ -134,7 +147,10 @@ def test_assign_edge_errors_semantics():
     )
     G_gt = TrackingGraph(gt_g)
 
-    get_edge_errors(G_gt, G_comp, mapping)
+    matched_data = DummyMatched(TrackingData(G_gt), TrackingData(G_comp))
+    matched_data.mapping = mapping
+
+    get_edge_errors(matched_data)
 
     assert comp_g.edges[(3, 4)]["is_wrong_semantic"]
     assert not comp_g.edges[(3, 4)]["is_tp"]
