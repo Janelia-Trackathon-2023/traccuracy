@@ -1,5 +1,6 @@
 import networkx as nx
 from traccuracy._tracking_data import TrackingData
+from traccuracy._tracking_graph import EdgeAttr
 from traccuracy.matchers._ctc import CTCMatched
 from traccuracy.metrics._ctc import CTCMetrics
 
@@ -11,7 +12,7 @@ def test_compute_mapping():
     n_frames = 3
     n_labels = 3
     G, movie = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
-    nx.set_edge_attributes(G.graph, 0, "is_intertrack_edge")
+    nx.set_edge_attributes(G.graph, 0, EdgeAttr.INTERTRACK_EDGE)
 
     matched = CTCMatched(
         gt_data=TrackingData(G, movie), pred_data=TrackingData(G, movie)

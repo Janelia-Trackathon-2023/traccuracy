@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-from traccuracy.track_errors._ctc import evaluate_ctc_events
-
+from .._tracking_graph import EdgeAttr, NodeAttr
+from ..track_errors._ctc import evaluate_ctc_events
 from ._base import Metric
 
 if TYPE_CHECKING:
@@ -39,34 +39,34 @@ class AOGMMetrics(Metric):
         vertex_error_counts = {
             "ns": len(
                 self.data.pred_data.tracking_graph.get_nodes_with_attribute(
-                    "is_ns", lambda x: x
+                    NodeAttr.NON_SPLIT, lambda x: x
                 )
             ),
             "fp": len(
                 self.data.pred_data.tracking_graph.get_nodes_with_attribute(
-                    "is_fp", lambda x: x
+                    NodeAttr.FALSE_POS, lambda x: x
                 )
             ),
             "fn": len(
                 self.data.gt_data.tracking_graph.get_nodes_with_attribute(
-                    "is_fn", lambda x: x
+                    NodeAttr.FALSE_NEG, lambda x: x
                 )
             ),
         }
         edge_error_counts = {
             "ws": len(
                 self.data.pred_data.tracking_graph.get_edges_with_attribute(
-                    "is_wrong_semantic", lambda x: x
+                    EdgeAttr.WRONG_SEMANTIC, lambda x: x
                 )
             ),
             "fp": len(
                 self.data.pred_data.tracking_graph.get_edges_with_attribute(
-                    "is_fp", lambda x: x
+                    EdgeAttr.FALSE_POS, lambda x: x
                 )
             ),
             "fn": len(
                 self.data.gt_data.tracking_graph.get_edges_with_attribute(
-                    "is_fn", lambda x: x
+                    EdgeAttr.FALSE_NEG, lambda x: x
                 )
             ),
         }
