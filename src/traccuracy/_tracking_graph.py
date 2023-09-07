@@ -1,19 +1,23 @@
+import enum
 import logging
-from enum import Enum
 
 import networkx as nx
 
 logger = logging.getLogger(__name__)
 
 
-class NodeAttr(Enum):
+@enum.unique
+class NodeAttr(enum.Enum):
     """An enum containing all valid attributes that can be used to
     annotate the nodes of a TrackingGraph. If new metrics require new
     annotations, they should be added here to ensure strings do not overlap and
     are standardized. Note that the user specified frame and location
     attributes are also valid node attributes that will be stored on the graph
-    and should not overlap with these values.
+    and should not overlap with these values. Additionally, if a graph already
+    has annotations using these strings before becoming a TrackGraph,
+    this will likely ruin metrics computation!
     """
+
     # True positive nodes. Valid on gt and computed graphs.
     TRUE_POS = "is_tp"
     # False positive nodes. Valid on computed graph.
@@ -30,13 +34,32 @@ class NodeAttr(Enum):
     # False negative divisions. Valid on gt graph.
     FN_DIV = "is_fn_division"
 
+    @classmethod
+    def has_value(cls, value):
+        """Check if a value is one of the enum's values.
+        This can be used to check if other graph annotation strings are
+        colliding with our reserved strings.
 
-class EdgeAttr(Enum):
+        Args:
+            value : Check if the enum contains this value.
+
+        Returns:
+            bool: True if the value is already in the enum's values,
+                false otherwise
+        """
+        return value in cls.__members__.values()
+
+
+@enum.unique
+class EdgeAttr(enum.Enum):
     """An enum containing all valid attributes that can be used to
     annotate the edges of a TrackingGraph. If new metrics require new
     annotations, they should be added here to ensure strings do not overlap and
-    are standardized.
+    are standardized. Additionally, if a graph already
+    has annotations using these strings before becoming a TrackGraph,
+    this will likely ruin metrics computation!
     """
+
     # True positive edges. Valid on gt and computed graphs.
     TRUE_POS = "is_tp"
     # False positive edges.Valid on computed graph.
@@ -86,24 +109,49 @@ class TrackingGraph:
         label_key="segmentation_id",
         location_keys=("x", "y"),
     ):
-        """A directed graph representing a tracking solution where edges go forward in time.
+        """A directed graph representing a tracking solution where edges go
+        forward in time.
+
+        If the provided graph already has annotations that are strings
+        included in NodeAttrs or EdgeAttrs, this will likely ruin
+        metric computation!
 
         Args:
-            graph (networkx.DiGraph): A directed graph representing a tracking solution
-                where edges go forward in time.
-            frame_key (str, optional): The key on each node in graph that contains the time frame
-                of the node. Every node must have a value stored at this key. Defaults to 't'.
-            label_key (str, optional): The key on each node that denotes the pixel value of
-                the node in the segmentation. Defaults to 'segmentation_id'. Pass `None` if
-                there is not a label attribute on the graph.
-            location_keys (tuple, optional): The list of keys on each node in graph
-                that contains the spatial location of the node. Every node
-                must have a value stored at each of these keys. Defaults to ('x', 'y').
+            graph (networkx.DiGraph): A directed graph representing a tracking
+                solution where edges go forward in time. If the graph already
+                has annotations that are strings included in NodeAttrs or
+                EdgeAttrs, this will likely ruin metrics computation!
+            frame_key (str, optional): The key on each node in graph that
+                contains the time frameof the node. Every node must have a
+                value stored at this key. Defaults to 't'.
+            label_key (str, optional): The key on each node that denotes the
+                pixel value of the node in the segmentation. Defaults to
+                'segmentation_id'. Pass `None` if there is not a label
+                attribute on the graph.
+            location_keys (tuple, optional): The list of keys on each node in
+                graph that contains the spatial location of the node. Every
+                node must have a value stored at each of these keys.
+                Defaults to ('x', 'y').
         """
         self.graph = graph
-        # TODO: check that these keys do not overlap with NodeAttrs
+        if NodeAttr.has_value(frame_key):
+            raise ValueError(
+                f"Specified frame key {frame_key} is reserved for graph"
+                "annotation. Please change the frame key."
+            )
         self.frame_key = frame_key
+        if label_key is not None and NodeAttr.has_value(label_key):
+            raise ValueError(
+                f"Specified label key {label_key} is reserved for graph"
+                "annotation. Please change the label key."
+            )
         self.label_key = label_key
+        for loc_key in location_keys:
+            if NodeAttr.has_value(loc_key):
+                raise ValueError(
+                    f"Specified location key {loc_key} is reserved for graph"
+                    "annotation. Please change the location key."
+                )
         self.location_keys = location_keys
 
         # construct a dictionary from frames to node ids for easy lookup

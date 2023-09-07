@@ -87,11 +87,16 @@ def test_constructor(nx_comp1):
         3: ["1_4"],
     }
 
-    # raise AssertionError if frame key not present
+    # raise AssertionError if frame key not present or overlaps with
+    # reserved values
     with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, frame_key="f")
     with pytest.raises(AssertionError):
+        TrackingGraph(nx_comp1, frame_key=NodeAttr.FALSE_NEG.value)
+    with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, location_keys=["x", "y", "z"])
+    with pytest.raises(AssertionError):
+        TrackingGraph(nx_comp1, location_keys=["x", NodeAttr.FALSE_NEG.value])
 
 
 def test_get_cells_by_frame(simple_graph):
