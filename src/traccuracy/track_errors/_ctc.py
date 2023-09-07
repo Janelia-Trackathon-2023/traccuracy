@@ -1,11 +1,8 @@
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
-import networkx as nx
 import numpy as np
 from tqdm import tqdm
-
-from ._track_events import TrackEvents
 
 if TYPE_CHECKING:
     from typing import List, Tuple
@@ -14,44 +11,38 @@ if TYPE_CHECKING:
 
 
 def evaluate_ctc_events(G_gt: "TrackingGraph", G_pred: "TrackingGraph", mapper):
-    gt_nx_graph = G_gt.graph
-    pred_nx_graph = G_pred.graph
-    node_errors = get_vertex_errors(gt_nx_graph, pred_nx_graph, mapper)
-    edge_errors = get_edge_errors(gt_nx_graph, pred_nx_graph, mapper)
+    """Annotates ground truth and predicted graph with node and edge error types
 
-    track_events = TrackEvents(
-        fp_nodes=node_errors["fp_nodes"],
-        fn_nodes=node_errors["fn_nodes"],
-        fp_edges=edge_errors["fp_edges"],
-        fn_edges=edge_errors["fn_edges"],
-        nonsplit_vertices=node_errors["ns_nodes"],
-        incorrect_semantics=edge_errors["ws_edges"],
-    )
-    return track_events
+    Annotations are made in place
+    """
+    get_vertex_errors(G_gt, G_pred, mapper)
+    get_edge_errors(G_gt, G_pred, mapper)
 
 
 def get_vertex_errors(
-    gt_graph: "nx.Graph", comp_graph: "nx.Graph", mapping: "List[Tuple[str, str]]"
+    gt_graph: "TrackingGraph",
+    comp_graph: "TrackingGraph",
+    mapping: "List[Tuple[str, str]]",
 ):
     """Count vertex errors and assign class to each comp/gt node.
 
     Parameters
     ----------
-    gt_graph : networkx.Graph
+    gt_graph : TrackingGraph
         Graph of ground truth tracking solution. Nodes must have label
         attribute denoting the pixel value of the marker.
-    comp_graph : networkx.Graph
+    comp_graph : TrackingGraph
         Graph of computed tracking solution. Nodes must have label
         attribute denoting the pixel value of the marker.
     list[(gt_node, pred_node)]: list of tuples where each tuple contains a gt node
         and pred node
     """
-    nx.set_node_attributes(comp_graph, False, "is_tp")
-    nx.set_node_attributes(comp_graph, False, "is_ns")
+    comp_graph.set_node_attribute(list(comp_graph.nodes()), "is_tp", False)
+    comp_graph.set_node_attribute(list(comp_graph.nodes()), "is_ns", False)
 
     # will flip this when we come across the vertex in the mapping
-    nx.set_node_attributes(comp_graph, True, "is_fp")
-    nx.set_node_attributes(gt_graph, True, "is_fn")
+    comp_graph.set_node_attribute(list(comp_graph.nodes()), "is_fp", True)
+    gt_graph.set_node_attribute(list(gt_graph.nodes()), "is_fn", True)
 
     # we need to know how many computed vertices are "non-split", so we make
     # a mapping of gt vertices to their matched comp vertices
@@ -64,53 +55,34 @@ def get_vertex_errors(
         gt_ids = dict_mapping[pred_id]
         if len(gt_ids) == 1:
             gid = gt_ids[0]
-            comp_graph.nodes[pred_id]["is_tp"] = True
-            comp_graph.nodes[pred_id]["is_fp"] = False
-            gt_graph.nodes[gid]["is_fn"] = False
+            comp_graph.set_node_attribute(pred_id, "is_tp", True)
+            comp_graph.set_node_attribute(pred_id, "is_fp", False)
+            gt_graph.set_node_attribute(gid, "is_fn", False)
         elif len(gt_ids) > 1:
-            comp_graph.nodes[pred_id]["is_ns"] = True
-            comp_graph.nodes[pred_id]["is_fp"] = False
+            comp_graph.set_node_attribute(pred_id, "is_ns", True)
+            comp_graph.set_node_attribute(pred_id, "is_fp", False)
             # number of split operations that would be required to correct the vertices
             ns_count += len(gt_ids) - 1
-            for gid in gt_ids:
-                gt_graph.nodes[gid]["is_fn"] = False
+            gt_graph.set_node_attribute(gt_ids, "is_fn", False)
 
-    tp_nodes: "List[str]" = []
-    fp_nodes: "List[str]" = []
-    ns_nodes: "List[str]" = []
-    for nid in comp_graph.nodes:
-        node = comp_graph.nodes[nid]
-        if node["is_tp"]:
-            tp_nodes.append(nid)
-        elif node["is_fp"]:
-            fp_nodes.append(nid)
-        elif node["is_ns"]:
-            ns_nodes.append(nid)
-    fn_nodes = [node for node in gt_graph.nodes if gt_graph.nodes[node]["is_fn"]]
-
-    error_counts = {
-        "tp": len(tp_nodes),
-        "fp": len(fp_nodes),
-        "fn": len(fn_nodes),
-        "ns": ns_count,
-        "fp_nodes": fp_nodes,
-        "fn_nodes": fn_nodes,
-        "ns_nodes": ns_nodes,
-    }
-    return error_counts
+    # Record presence of annotations on the TrackingGraph
+    comp_graph.node_errors = True
+    gt_graph.node_errors = True
 
 
-def get_edge_errors(gt_graph, comp_graph, node_mapping):
-    induced_graph = get_comp_subgraph(comp_graph)
+def get_edge_errors(
+    gt_graph: "TrackingGraph",
+    comp_graph: "TrackingGraph",
+    node_mapping: "List[Tuple[str, str]]",
+):
+    induced_graph = comp_graph.get_subgraph(
+        comp_graph.get_nodes_with_attribute("is_tp", criterion=lambda x: x)
+    ).graph
 
-    nx.set_edge_attributes(comp_graph, False, "is_fp")
-    nx.set_edge_attributes(comp_graph, False, "is_tp")
-    nx.set_edge_attributes(comp_graph, False, "is_wrong_semantic")
-    nx.set_edge_attributes(gt_graph, False, "is_fn")
-
-    fp_edges = []
-    fn_edges = []
-    ws_edges = []
+    comp_graph.set_edge_attribute(list(comp_graph.edges()), "is_fp", False)
+    comp_graph.set_edge_attribute(list(comp_graph.edges()), "is_tp", False)
+    comp_graph.set_edge_attribute(list(comp_graph.edges()), "is_wrong_semantic", False)
+    gt_graph.set_edge_attribute(list(gt_graph.edges()), "is_fn", False)
 
     node_mapping_first = np.array([mp[0] for mp in node_mapping])
     node_mapping_second = np.array([mp[1] for mp in node_mapping])
@@ -123,26 +95,23 @@ def get_edge_errors(gt_graph, comp_graph, node_mapping):
         target_gt_id = node_mapping[np.where(node_mapping_second == target)[0][0]][0]
 
         expected_gt_edge = (source_gt_id, target_gt_id)
-        if expected_gt_edge not in gt_graph.edges:
-            comp_graph.edges[edge]["is_fp"] = True
-            fp_edges.append(edge)
+        if expected_gt_edge not in gt_graph.edges():
+            comp_graph.set_edge_attribute(edge, "is_fp", True)
         else:
             # check if semantics are correct
-            is_parent_gt = gt_graph.edges[expected_gt_edge]["is_intertrack_edge"]
-            is_parent_comp = comp_graph.edges[edge]["is_intertrack_edge"]
+            is_parent_gt = gt_graph.edges()[expected_gt_edge]["is_intertrack_edge"]
+            is_parent_comp = comp_graph.edges()[edge]["is_intertrack_edge"]
             if is_parent_gt != is_parent_comp:
-                comp_graph.edges[edge]["is_wrong_semantic"] = True
-                ws_edges.append(edge)
+                comp_graph.set_edge_attribute(edge, "is_wrong_semantic", True)
             else:
-                comp_graph.edges[edge]["is_tp"] = True
+                comp_graph.set_edge_attribute(edge, "is_tp", True)
 
     # fn edges - edges in gt_graph that aren't in induced graph
-    for edge in tqdm(gt_graph.edges, "Evaluating FN edges"):
+    for edge in tqdm(gt_graph.edges(), "Evaluating FN edges"):
         source, target = edge[0], edge[1]
         # this edge is adjacent to an edge we didn't detect, so it definitely is an fn
-        if gt_graph.nodes[source]["is_fn"] or gt_graph.nodes[target]["is_fn"]:
-            gt_graph.edges[edge]["is_fn"] = True
-            fn_edges.append(edge)
+        if gt_graph.nodes()[source]["is_fn"] or gt_graph.nodes()[target]["is_fn"]:
+            gt_graph.set_edge_attribute(edge, "is_fn", True)
             continue
 
         source_comp_id = node_mapping[np.where(node_mapping_first == source)[0][0]][1]
@@ -150,26 +119,7 @@ def get_edge_errors(gt_graph, comp_graph, node_mapping):
 
         expected_comp_edge = (source_comp_id, target_comp_id)
         if expected_comp_edge not in induced_graph.edges:
-            gt_graph.edges[edge]["is_fn"] = True
-            fn_edges.append(edge)
+            gt_graph.set_edge_attribute(edge, "is_fn", True)
 
-    return {"fp_edges": fp_edges, "fn_edges": fn_edges, "ws_edges": ws_edges}
-
-
-def get_comp_subgraph(comp_graph: "nx.Graph") -> "nx.Graph":
-    """Return computed graph subgraph of TP vertices and their incident edges.
-
-    Parameters
-    ----------
-    comp_graph : networkx.Graph
-        Graph of computed tracking solution. Nodes must have label
-        attribute denoting the pixel value of the marker.
-
-    Returns
-    -------
-    induced_graph : networkx.Graph
-        Subgraph of comp_graph with only TP vertices and their incident edges
-    """
-    tp_nodes = [node for node in comp_graph.nodes if comp_graph.nodes[node]["is_tp"]]
-    induced_graph = nx.DiGraph(comp_graph.subgraph(tp_nodes).copy())
-    return induced_graph
+    gt_graph.edge_errors = True
+    comp_graph.edge_errors = True
