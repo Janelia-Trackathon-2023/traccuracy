@@ -11,6 +11,8 @@ def _classify_divisions(G_gt, G_pred, mapper):
 
     This function only works on node mappers that are one-to-one
 
+    G_gt and G_pred are modified in place and therefore not returned
+
     Args:
         G_gt (TrackingGraph): `TrackingGraph` of GT data
         G_pred (TrackingGraph): `TrackingGraph` of pred data
@@ -19,10 +21,6 @@ def _classify_divisions(G_gt, G_pred, mapper):
     Raises:
         TypeError: G_gt and G_pred must be TrackingGraph objects
         ValueError: mapper must contain a one-to-one mapping of nodes
-
-    Returns:
-        TrackingGraph: G_gt with division annotations
-        TrackingGraph: G_pred with division annotations
     """
     if not isinstance(G_gt, TrackingGraph) or not isinstance(G_pred, TrackingGraph):
         raise TypeError("G_gt and G_pred must be TrackingGraph objects")
@@ -79,8 +77,6 @@ def _classify_divisions(G_gt, G_pred, mapper):
     # Set division annotation flag
     G_gt.division_annotations = True
     G_pred.division_annotations = True
-
-    return G_gt, G_pred
 
 
 def _get_pred_by_t(G, node, delta_frames):
@@ -140,7 +136,7 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
     Matching is determined based on the provided mapper
     Does not support merges
 
-    Copies G_gt and G_pred before modifying node annotations and rteturns the new versions
+    Copies G_gt and G_pred before modifying node annotations and returns the new versions
 
     Args:
         G_gt (TrackingGraph): GT tracking graph with FN division annotations
@@ -150,8 +146,8 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
         n_frames (int): Number of frames to include in the frame buffer
 
     Returns:
-        DivisionEvents: Corrected counts of gt_divisions, tp_divisions, fp_divisions
-            and fn_divisions
+        TrackingGraph: Copy of G_gt with division annotations
+        TrackingGraph: Copy of G_pred with division annotations
     """
 
     if not isinstance(G_gt, TrackingGraph) or not isinstance(G_pred, TrackingGraph):
