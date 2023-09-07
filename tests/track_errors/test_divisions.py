@@ -1,7 +1,7 @@
 import networkx as nx
 import numpy as np
 import pytest
-from traccuracy import TrackingGraph
+from traccuracy import NodeAttr, TrackingGraph
 from traccuracy.track_errors.divisions import (
     _classify_divisions,
     _correct_shifted_divisions,
@@ -45,18 +45,18 @@ def G():
 def test_classify_divisions_tp(G):
     # Define mapper assuming all nodes match
     mapper = [(n, n) for n in G.nodes]
+    G_gt = TrackingGraph(G.copy())
+    G_pred = TrackingGraph(G.copy())
 
     # Test true positive
-    G_gt, G_pred = _classify_divisions(TrackingGraph(G), TrackingGraph(G), mapper)
+    _classify_divisions(G_gt, G_pred, mapper)
 
+    assert len(G_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x is True)) == 0
     assert (
-        len(G_gt.get_nodes_with_attribute("is_fn_division", lambda x: x is True)) == 0
+        len(G_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x is True)) == 0
     )
-    assert (
-        len(G_pred.get_nodes_with_attribute("is_fp_division", lambda x: x is True)) == 0
-    )
-    assert "is_tp_division" in G_gt.nodes()["2_2"]
-    assert "is_tp_division" in G_pred.nodes()["2_2"]
+    assert NodeAttr.TP_DIV in G_gt.nodes()["2_2"]
+    assert NodeAttr.TP_DIV in G_pred.nodes()["2_2"]
 
     # Check division flag
     assert G_gt.division_annotations
@@ -78,14 +78,15 @@ def test_classify_divisions_fp(G):
     nx.set_node_attributes(H, {"5_3": {"t": 3, "x": 0, "y": 0}})
     mapper = [(n, n) for n in H.nodes]
 
-    G_gt, G_pred = _classify_divisions(TrackingGraph(G), TrackingGraph(H), mapper)
+    G_gt = TrackingGraph(G)
+    G_pred = TrackingGraph(H)
 
-    assert (
-        len(G_gt.get_nodes_with_attribute("is_fn_division", lambda x: x is True)) == 0
-    )
-    assert "is_fp_division" in G_pred.nodes()["1_2"]
-    assert "is_tp_division" in G_gt.nodes()["2_2"]
-    assert "is_tp_division" in G_pred.nodes()["2_2"]
+    _classify_divisions(G_gt, G_pred, mapper)
+
+    assert len(G_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x is True)) == 0
+    assert NodeAttr.FP_DIV in G_pred.nodes()["1_2"]
+    assert NodeAttr.TP_DIV in G_gt.nodes()["2_2"]
+    assert NodeAttr.TP_DIV in G_pred.nodes()["2_2"]
 
 
 def test_classify_divisions_fn(G):
@@ -98,15 +99,16 @@ def test_classify_divisions_fn(G):
     H.remove_nodes_from(["3_3", "4_3"])
     mapper = [(n, n) for n in H.nodes]
 
-    G_gt, G_pred = _classify_divisions(TrackingGraph(G), TrackingGraph(H), mapper)
+    G_gt = TrackingGraph(G)
+    G_pred = TrackingGraph(H)
+
+    _classify_divisions(G_gt, G_pred, mapper)
 
     assert (
-        len(G_pred.get_nodes_with_attribute("is_fp_division", lambda x: x is True)) == 0
+        len(G_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x is True)) == 0
     )
-    assert (
-        len(G_gt.get_nodes_with_attribute("is_tp_division", lambda x: x is True)) == 0
-    )
-    assert "is_fn_division" in G_gt.nodes()["2_2"]
+    assert len(G_gt.get_nodes_with_attribute(NodeAttr.TP_DIV, lambda x: x is True)) == 0
+    assert NodeAttr.FN_DIV in G_gt.nodes()["2_2"]
 
 
 @pytest.fixture
@@ -164,52 +166,52 @@ class Test_correct_shifted_divisions:
     def test_no_change(self):
         # Early division in gt
         G_pred, G_gt, mapper = get_division_graphs()
-        G_gt.nodes["1_1"]["is_fn_division"] = True
-        G_pred.nodes["1_3"]["is_fp_division"] = True
+        G_gt.nodes["1_1"][NodeAttr.FN_DIV] = True
+        G_pred.nodes["1_3"][NodeAttr.FP_DIV] = True
 
         # buffer of 1, no change
         nG_gt, nG_pred = _correct_shifted_divisions(
             TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=1
         )
 
-        assert nG_pred.nodes()["1_3"]["is_fp_division"] is True
-        assert nG_gt.nodes()["1_1"]["is_fn_division"] is True
+        assert nG_pred.nodes()["1_3"][NodeAttr.FP_DIV] is True
+        assert nG_gt.nodes()["1_1"][NodeAttr.FN_DIV] is True
         assert (
-            len(nG_gt.get_nodes_with_attribute("is_tp_division", lambda x: x is True))
+            len(nG_gt.get_nodes_with_attribute(NodeAttr.TP_DIV, lambda x: x is True))
             == 0
         )
 
     def test_fn_early(self):
         # Early division in gt
         G_pred, G_gt, mapper = get_division_graphs()
-        G_gt.nodes["1_1"]["is_fn_division"] = True
-        G_pred.nodes["1_3"]["is_fp_division"] = True
+        G_gt.nodes["1_1"][NodeAttr.FN_DIV] = True
+        G_pred.nodes["1_3"][NodeAttr.FP_DIV] = True
 
         # buffer of 3, corrections
         nG_gt, nG_pred = _correct_shifted_divisions(
             TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=3
         )
 
-        assert nG_pred.nodes()["1_3"]["is_fp_division"] is False
-        assert nG_gt.nodes()["1_1"]["is_fn_division"] is False
-        assert nG_pred.nodes()["1_3"]["is_tp_division"] is True
-        assert nG_gt.nodes()["1_1"]["is_tp_division"] is True
+        assert nG_pred.nodes()["1_3"][NodeAttr.FP_DIV] is False
+        assert nG_gt.nodes()["1_1"][NodeAttr.FN_DIV] is False
+        assert nG_pred.nodes()["1_3"][NodeAttr.TP_DIV] is True
+        assert nG_gt.nodes()["1_1"][NodeAttr.TP_DIV] is True
 
     def test_fp_early(self):
         # Early division in pred
         G_gt, G_pred, mapper = get_division_graphs()
-        G_pred.nodes["1_1"]["is_fp_division"] = True
-        G_gt.nodes["1_3"]["is_fn_division"] = True
+        G_pred.nodes["1_1"][NodeAttr.FP_DIV] = True
+        G_gt.nodes["1_3"][NodeAttr.FN_DIV] = True
 
         # buffer of 3, corrections
         nG_gt, nG_pred = _correct_shifted_divisions(
             TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=3
         )
 
-        assert nG_pred.nodes()["1_1"]["is_fp_division"] is False
-        assert nG_gt.nodes()["1_3"]["is_fn_division"] is False
-        assert nG_pred.nodes()["1_1"]["is_tp_division"] is True
-        assert nG_gt.nodes()["1_3"]["is_tp_division"] is True
+        assert nG_pred.nodes()["1_1"][NodeAttr.FP_DIV] is False
+        assert nG_gt.nodes()["1_3"][NodeAttr.FN_DIV] is False
+        assert nG_pred.nodes()["1_1"][NodeAttr.TP_DIV] is True
+        assert nG_gt.nodes()["1_3"][NodeAttr.TP_DIV] is True
 
 
 def test_evaluate_division_events():

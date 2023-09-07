@@ -33,8 +33,8 @@ as the late division daughters.
 """
 
 
-from traccuracy.track_errors.divisions import _evaluate_division_events
-
+from .._tracking_graph import NodeAttr
+from ..track_errors.divisions import _evaluate_division_events
 from ._base import Metric
 
 
@@ -44,14 +44,10 @@ def _calculate_metrics(G_gt, G_pred):
             "Both input TrackingGraphs must have division_annotations calculated"
         )
 
-    tp_division_count = len(
-        G_gt.get_nodes_with_attribute("is_tp_division", lambda x: x)
-    )
-    fn_division_count = len(
-        G_gt.get_nodes_with_attribute("is_fn_division", lambda x: x)
-    )
+    tp_division_count = len(G_gt.get_nodes_with_attribute(NodeAttr.TP_DIV, lambda x: x))
+    fn_division_count = len(G_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x))
     fp_division_count = len(
-        G_pred.get_nodes_with_attribute("is_fp_division", lambda x: x)
+        G_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x)
     )
 
     try:

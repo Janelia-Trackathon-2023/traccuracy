@@ -2,7 +2,7 @@ import copy
 import itertools
 from collections import Counter
 
-from traccuracy._tracking_graph import TrackingGraph
+from traccuracy._tracking_graph import NodeAttr, TrackingGraph
 from traccuracy._utils import find_gt_node_matches, find_pred_node_matches
 
 
@@ -50,7 +50,7 @@ def _classify_divisions(G_gt, G_pred, mapper):
         pred_node = _find_gt_node_matches(gt_node)
         # No matching node so division missed
         if pred_node is None:
-            G_gt.set_node_attribute(gt_node, "is_fn_division", True)
+            G_gt.set_node_attribute(gt_node, NodeAttr.FN_DIV, True)
         # Check if the division has the corret daughters
         else:
             succ_gt = G_gt.get_succs(gt_node)
@@ -61,18 +61,18 @@ def _classify_divisions(G_gt, G_pred, mapper):
 
             # If daughters are same, division is correct
             if Counter(succ_gt) == Counter(succ_pred):
-                G_gt.set_node_attribute(gt_node, "is_tp_division", True)
-                G_pred.set_node_attribute(pred_node, "is_tp_division", True)
+                G_gt.set_node_attribute(gt_node, NodeAttr.TP_DIV, True)
+                G_pred.set_node_attribute(pred_node, NodeAttr.TP_DIV, True)
             # If daughters are at all mismatched, division is false negative
             else:
-                G_gt.set_node_attribute(gt_node, "is_fn_division", True)
+                G_gt.set_node_attribute(gt_node, NodeAttr.FN_DIV, True)
 
         # Remove res division to record that we have classified it
         if pred_node in div_pred:
             div_pred.remove(pred_node)
 
     # Any remaining pred divisions are false positives
-    G_pred.set_node_attribute(div_pred, "is_fp_division", True)
+    G_pred.set_node_attribute(div_pred, NodeAttr.FP_DIV, True)
 
     # Set division annotation flag
     G_gt.division_annotations = True
@@ -163,8 +163,8 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
     G_gt = copy.deepcopy(G_gt)
     G_pred = copy.deepcopy(G_pred)
 
-    fp_divs = G_pred.get_nodes_with_attribute("is_fp_division")
-    fn_divs = G_gt.get_nodes_with_attribute("is_fn_division")
+    fp_divs = G_pred.get_nodes_with_attribute(NodeAttr.FP_DIV)
+    fn_divs = G_gt.get_nodes_with_attribute(NodeAttr.FN_DIV)
 
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
@@ -221,12 +221,12 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
 
         if correct:
             # Remove error annotations from pred graph
-            G_pred.set_node_attribute(fp_node, "is_fp_division", False)
-            G_gt.set_node_attribute(fn_node, "is_fn_division", False)
+            G_pred.set_node_attribute(fp_node, NodeAttr.FP_DIV, False)
+            G_gt.set_node_attribute(fn_node, NodeAttr.FN_DIV, False)
 
             # Add the tp divisions annotations
-            G_gt.set_node_attribute(fn_node, "is_tp_division", True)
-            G_pred.set_node_attribute(fp_node, "is_tp_division", True)
+            G_gt.set_node_attribute(fn_node, NodeAttr.TP_DIV, True)
+            G_pred.set_node_attribute(fp_node, NodeAttr.TP_DIV, True)
 
     return G_gt, G_pred
 
@@ -253,7 +253,7 @@ def _evaluate_division_events(G_gt, G_pred, mapper, frame_buffer=(0)):
     div_annotations = {}
 
     # Baseline division classification
-    G_gt, G_pred = _classify_divisions(G_gt, G_pred, mapper)
+    _classify_divisions(G_gt, G_pred, mapper)
     div_annotations[0] = (G_gt, G_pred)
 
     # Correct shifted divisions for each nonzero value in frame_buffer
