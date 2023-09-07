@@ -317,44 +317,52 @@ class TrackingGraph:
             for g in nx.weakly_connected_components(graph)
         ]
 
-    def set_node_attribute(self, ids, key, value):
-        """Set a key/value pair in the attribute dictionary for the node or nodes
-        specified by ids. If an id is not found in the graph, a KeyError will be raised.
+    def set_node_attribute(self, ids, attr, value=True):
+        """Set an attribute flag for a set of nodes specified by
+        ids. If an id is not found in the graph, a KeyError will be raised.
         If the key already exists, the existing value will be overwritten.
 
         Args:
             ids (hashable | list[hashable]): The node id or list of node ids
                 to set the attribute for.
-            key (string): The name of the attribute to set.
-            value (any): The value of the attribute to set.
+            attr (traccuracy.NodeAttr): The node attribute to set. Must be
+                of type NodeAttr - you may not not pass strings, even if they
+                are included in the NodeAttr enum values.
+            value (bool, optional): Attributes are flags and can only be set to
+                True or False. Defaults to True.
         """
         if not isinstance(ids, list):
             ids = [ids]
-        if key == self.frame_key or key in self.location_keys:
+        if not isinstance(attr, NodeAttr):
             raise ValueError(
-                "Cannot change node attributes storing time frame or location. "
-                f"(key: {key})"
+                f"Provided attribute {attr} is not of type NodeAttr. "
+                "Please use the enum instead of passing string values, "
+                "and add new attributes to the class to avoid key collision."
             )
         for _id in ids:
-            self.graph.nodes[_id][key] = value
+            self.graph.nodes[_id][attr] = value
 
-    def set_edge_attribute(self, ids, key, value):
-        """Set a key/value pair in the attribute dictionary for the edge or edges
-        specified by ids. If an id is not found in the graph, a KeyError will be raised.
+    def set_edge_attribute(self, ids, attr, value=True):
+        """Set an attribute flag for a set of edges specified by
+        ids. If an edge is not found in the graph, a KeyError will be raised.
         If the key already exists, the existing value will be overwritten.
 
         Args:
             ids (tuple(hashable) | list[tuple(hashable)]): The edge id or list of edge ids
                 to set the attribute for. Edge ids are a 2-tuple of node ids.
-            key (string): The name of the attribute to set.
-            value (any): The value of the attribute to set.
+            attr (traccuracy.EdgeAttr): The edge attribute to set. Must be
+                of type EdgeAttr - you may not pass strings, even if they are
+                included in the EdgeAttr enum values.
+            value (bool): Attributes are flags and can only be set to
+                True or False. Defaults to True.
         """
         if not isinstance(ids, list):
             ids = [ids]
-        if key == self.frame_key or key in self.location_keys:
+        if not isinstance(attr, EdgeAttr):
             raise ValueError(
-                "Cannot change node attributes storing time frame or location. "
-                f"(key: {key})"
+                f"Provided attribute {attr} is not of type EdgeAttr. "
+                "Please use the enum instead of passing string values, "
+                "and add new attributes to the class to avoid key collision."
             )
         for _id in ids:
-            self.graph.edges[_id][key] = value
+            self.graph.edges[_id][attr] = value
