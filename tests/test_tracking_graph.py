@@ -1,6 +1,5 @@
 import networkx as nx
 import pytest
-
 from traccuracy import EdgeAttr, NodeAttr, TrackingGraph
 
 
@@ -200,10 +199,7 @@ def test_get_and_set_edge_attributes(simple_graph):
     print(simple_graph.edges())
     assert simple_graph.edges()[("1_0", "1_1")] == {}
 
-    simple_graph.set_edge_attribute(
-        ("1_0", "1_1"),
-        EdgeAttr.TRUE_POS,
-        value=False)
+    simple_graph.set_edge_attribute(("1_0", "1_1"), EdgeAttr.TRUE_POS, value=False)
     assert simple_graph.edges()[("1_0", "1_1")] == {EdgeAttr.TRUE_POS: False}
     with pytest.raises(ValueError):
         simple_graph.set_edge_attribute(("1_0", "1_1"), "x", 2)
