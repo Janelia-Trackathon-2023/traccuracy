@@ -1,6 +1,6 @@
 import networkx as nx
 import pytest
-from traccuracy import TrackingGraph
+from traccuracy import EdgeAttr, NodeAttr, TrackingGraph
 
 
 @pytest.fixture
@@ -86,11 +86,16 @@ def test_constructor(nx_comp1):
         3: ["1_4"],
     }
 
-    # raise AssertionError if frame key not present
+    # raise AssertionError if frame key not present or overlaps with
+    # reserved values
     with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, frame_key="f")
     with pytest.raises(AssertionError):
+        TrackingGraph(nx_comp1, frame_key=NodeAttr.FALSE_NEG.value)
+    with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, location_keys=["x", "y", "z"])
+    with pytest.raises(AssertionError):
+        TrackingGraph(nx_comp1, location_keys=["x", NodeAttr.FALSE_NEG.value])
 
 
 def test_get_cells_by_frame(simple_graph):
@@ -178,13 +183,13 @@ def test_get_and_set_node_attributes(simple_graph):
         "division": True,
     }
 
-    simple_graph.set_node_attribute("1_0", "flag", False)
+    simple_graph.set_node_attribute("1_0", NodeAttr.FALSE_POS, value=False)
     assert simple_graph.nodes()["1_0"] == {
         "id": "1_0",
         "t": 0,
         "y": 1,
         "x": 1,
-        "flag": False,
+        NodeAttr.FALSE_POS: False,
     }
     with pytest.raises(ValueError):
         simple_graph.set_node_attribute("1_0", "x", 2)
@@ -194,7 +199,7 @@ def test_get_and_set_edge_attributes(simple_graph):
     print(simple_graph.edges())
     assert simple_graph.edges()[("1_0", "1_1")] == {}
 
-    simple_graph.set_edge_attribute(("1_0", "1_1"), "flag", False)
-    assert simple_graph.edges()[("1_0", "1_1")] == {"flag": False}
+    simple_graph.set_edge_attribute(("1_0", "1_1"), EdgeAttr.TRUE_POS, value=False)
+    assert simple_graph.edges()[("1_0", "1_1")] == {EdgeAttr.TRUE_POS: False}
     with pytest.raises(ValueError):
         simple_graph.set_edge_attribute(("1_0", "1_1"), "x", 2)
