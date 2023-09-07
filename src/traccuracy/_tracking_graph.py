@@ -6,11 +6,13 @@ import networkx as nx
 logger = logging.getLogger(__name__)
 
 
-class NodeAttrs(Enum):
+class NodeAttr(Enum):
     """An enum containing all valid attributes that can be used to
     annotate the nodes of a TrackingGraph. If new metrics require new
     annotations, they should be added here to ensure strings do not overlap and
-    are standardized.
+    are standardized. Note that the user specified frame and location
+    attributes are also valid node attributes that will be stored on the graph
+    and should not overlap with these values.
     """
     # True positive nodes. Valid on gt and computed graphs.
     TRUE_POS = "is_tp"
@@ -29,7 +31,7 @@ class NodeAttrs(Enum):
     FN_DIV = "is_fn_division"
 
 
-class EdgeAttrs(Enum):
+class EdgeAttr(Enum):
     """An enum containing all valid attributes that can be used to
     annotate the edges of a TrackingGraph. If new metrics require new
     annotations, they should be added here to ensure strings do not overlap and
@@ -99,6 +101,7 @@ class TrackingGraph:
                 must have a value stored at each of these keys. Defaults to ('x', 'y').
         """
         self.graph = graph
+        # TODO: check that these keys do not overlap with NodeAttrs
         self.frame_key = frame_key
         self.label_key = label_key
         self.location_keys = location_keys
