@@ -1,8 +1,50 @@
 import logging
+from enum import Enum
 
 import networkx as nx
 
 logger = logging.getLogger(__name__)
+
+
+class NodeAttrs(Enum):
+    """An enum containing all valid attributes that can be used to
+    annotate the nodes of a TrackingGraph. If new metrics require new
+    annotations, they should be added here to ensure strings do not overlap and
+    are standardized.
+    """
+    # True positive nodes. Valid on gt and computed graphs.
+    TRUE_POS = "is_tp"
+    # False positive nodes. Valid on computed graph.
+    FALSE_POS = "is_fp"
+    # False negative nodes. Valid on gt graph.
+    FALSE_NEG = "is_fn"
+    # Non-split vertices as defined by CTC. Valid on computed graph
+    # when many computed nodes can be matched to one gt node.
+    NON_SPLIT = "is_ns"
+    # True positive divisions. Valid on gt and computed graphs.
+    TP_DIV = "is_tp_division"
+    # False positive divisions. Valid on computed graph.
+    FP_DIV = "is_fp_division"
+    # False negative divisions. Valid on gt graph.
+    FN_DIV = "is_fn_division"
+
+
+class EdgeAttrs(Enum):
+    """An enum containing all valid attributes that can be used to
+    annotate the edges of a TrackingGraph. If new metrics require new
+    annotations, they should be added here to ensure strings do not overlap and
+    are standardized.
+    """
+    # True positive edges. Valid on gt and computed graphs.
+    TRUE_POS = "is_tp"
+    # False positive edges.Valid on computed graph.
+    FALSE_POS = "is_fp"
+    # False negative nodes. Valid on gt graph.
+    FALSE_NEG = "is_fn"
+    # Edges between tracks as defined by CTC. Valid on gt and computed graphs.
+    INTERTRACK_EDGE = "is_intertrack_edge"
+    # Edges with wrong semantic as defined by CTC. Valid on computed graph.
+    WRONG_SEMANTIC = "is_wrong_semantic"
 
 
 class TrackingGraph:
