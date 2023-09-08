@@ -88,16 +88,16 @@ def test_constructor(nx_comp1):
         3: ["1_4"],
     }
 
-    # raise AssertionError if frame key not present or overlaps with
-    # reserved values
+    # raise AssertionError if frame key not present or ValueError if overlaps
+    # with reserved values
     with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, frame_key="f")
-    with pytest.raises(AssertionError):
-        TrackingGraph(nx_comp1, frame_key=NodeAttr.FALSE_NEG.value)
+    with pytest.raises(ValueError):
+        TrackingGraph(nx_comp1, frame_key=NodeAttr.FALSE_NEG)
     with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, location_keys=["x", "y", "z"])
-    with pytest.raises(AssertionError):
-        TrackingGraph(nx_comp1, location_keys=["x", NodeAttr.FALSE_NEG.value])
+    with pytest.raises(ValueError):
+        TrackingGraph(nx_comp1, location_keys=["x", NodeAttr.FALSE_NEG])
 
 
 def test_get_cells_by_frame(simple_graph):
@@ -130,13 +130,13 @@ def test_get_edges_with_flag(simple_graph):
 
 
 def test_get_nodes_with_attribute(simple_graph):
-    assert simple_graph.get_nodes_with_attribute("division") == ["1_1"]
+    assert simple_graph.get_nodes_with_attribute("is_tp_division") == ["1_1"]
     assert simple_graph.get_nodes_with_attribute("null") == []
-    assert simple_graph.get_nodes_with_attribute("division", criterion=lambda x: x) == [
+    assert simple_graph.get_nodes_with_attribute("is_tp_division", criterion=lambda x: x) == [
         "1_1"
     ]
     assert (
-        simple_graph.get_nodes_with_attribute("division", criterion=lambda x: not x)
+        simple_graph.get_nodes_with_attribute("is_tp_division", criterion=lambda x: not x)
         == []
     )
     assert simple_graph.get_nodes_with_attribute("x", criterion=lambda x: x > 1) == [
@@ -196,7 +196,7 @@ def test_get_and_set_node_attributes(simple_graph):
         "t": 1,
         "y": 1,
         "x": 1,
-        "division": True,
+        "is_tp_division": True,
     }
 
     simple_graph.set_node_attribute("1_0", NodeAttr.FALSE_POS, value=False)
@@ -213,9 +213,9 @@ def test_get_and_set_node_attributes(simple_graph):
 
 def test_get_and_set_edge_attributes(simple_graph):
     print(simple_graph.edges())
-    assert simple_graph.edges()[("1_0", "1_1")] == {}
+    assert EdgeAttr.TRUE_POS not in simple_graph.edges()[("1_1", "1_3")]
 
-    simple_graph.set_edge_attribute(("1_0", "1_1"), EdgeAttr.TRUE_POS, value=False)
-    assert simple_graph.edges()[("1_0", "1_1")] == {EdgeAttr.TRUE_POS: False}
+    simple_graph.set_edge_attribute(("1_1", "1_3"), EdgeAttr.TRUE_POS, value=False)
+    assert simple_graph.edges()[("1_1", "1_3")][EdgeAttr.TRUE_POS] is False
     with pytest.raises(ValueError):
-        simple_graph.set_edge_attribute(("1_0", "1_1"), "x", 2)
+        simple_graph.set_edge_attribute(("1_1", "1_3"), "x", 2)
