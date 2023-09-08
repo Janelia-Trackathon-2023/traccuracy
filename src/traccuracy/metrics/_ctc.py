@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING
 
-from .._tracking_graph import EdgeAttr, NodeAttr
-from ..track_errors._ctc import evaluate_ctc_events
+from traccuracy._tracking_graph import EdgeAttr, NodeAttr
+from traccuracy.track_errors._ctc import evaluate_ctc_events
+
 from ._base import Metric
 
 if TYPE_CHECKING:

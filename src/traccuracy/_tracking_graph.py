@@ -161,7 +161,7 @@ class TrackingGraph:
         self.start_frame = None
         self.end_frame = None
 
-        self.update_graph(graph)
+        self._update_graph(graph)
 
         self.node_errors = False
         self.edge_errors = False
@@ -356,11 +356,17 @@ class TrackingGraph:
 
         new_graph = self.graph.subgraph(nodes).copy()
         new_trackgraph = copy.deepcopy(self)
-        new_trackgraph.update_graph(new_graph)
+        new_trackgraph._update_graph(new_graph)
 
         return new_trackgraph
 
-    def update_graph(self, graph):
+    def _update_graph(self, graph):
+        """Given a new graph, which is expected to be a subgraph of the current graph,
+        update attributes which are dependent on the graph.
+
+        Args:
+            graph (nx.DiGraph): A networkx graph that is a subgraph of the original graph
+        """
         self.graph = graph
 
         # construct a dictionary from frames to node ids for easy lookup
