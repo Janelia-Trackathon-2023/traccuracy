@@ -1,9 +1,12 @@
 import copy
 import itertools
+import logging
 from collections import Counter
 
 from traccuracy._tracking_graph import NodeAttr, TrackingGraph
 from traccuracy._utils import find_gt_node_matches, find_pred_node_matches
+
+logger = logging.getLogger(__name__)
 
 
 def _classify_divisions(G_gt, G_pred, mapper):
@@ -24,6 +27,10 @@ def _classify_divisions(G_gt, G_pred, mapper):
     """
     if not isinstance(G_gt, TrackingGraph) or not isinstance(G_pred, TrackingGraph):
         raise TypeError("G_gt and G_pred must be TrackingGraph objects")
+
+    if G_gt.division_annotations and G_pred.division_annotations:
+        logger.info("Divison annotations already present. Skipping graph annotation.")
+        return
 
     # Check that mapper is one to one
     if len(mapper) != len({pair[0] for pair in mapper}) or len(mapper) != len(
