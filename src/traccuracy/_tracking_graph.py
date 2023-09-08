@@ -163,11 +163,10 @@ class TrackingGraph:
 
         self._update_graph(graph)
 
-        self.node_errors = False
-        self.edge_errors = False
-
         # Record types of annotations that have been calculated
         self.division_annotations = False
+        self.node_errors = False
+        self.edge_errors = False
 
     def nodes(self, limit_to=None):
         """Get all the nodes in the graph, along with their attributes.
