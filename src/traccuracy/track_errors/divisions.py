@@ -27,8 +27,8 @@ def _classify_divisions(matched_data: "Matched"):
     Raises:
         ValueError: mapper must contain a one-to-one mapping of nodes
     """
-    g_gt = matched_data.gt_data.tracking_graph
-    g_pred = matched_data.pred_data.tracking_graph
+    g_gt = matched_data.gt_graph
+    g_pred = matched_data.pred_graph
     mapper = matched_data.mapping
 
     if g_gt.division_annotations and g_pred.division_annotations:
@@ -158,8 +158,8 @@ def _correct_shifted_divisions(matched_data: "Matched", n_frames=1):
     """
     # Create copies of the graphs to modify during correction of divisions
     new_matched = copy.deepcopy(matched_data)
-    g_gt = new_matched.gt_data.tracking_graph
-    g_pred = new_matched.pred_data.tracking_graph
+    g_gt = new_matched.gt_graph
+    g_pred = new_matched.pred_graph
     mapper = new_matched.mapping
 
     # Check that mapper is one to one
