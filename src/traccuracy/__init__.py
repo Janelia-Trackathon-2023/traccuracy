@@ -7,7 +7,6 @@ except PackageNotFoundError:
     __version__ = "uninstalled"
 
 from ._run_metrics import run_metrics
-from ._tracking_data import TrackingData
 from ._tracking_graph import EdgeAttr, NodeAttr, TrackingGraph
 
-__all__ = ["TrackingData", "TrackingGraph", "run_metrics", "NodeAttr", "EdgeAttr"]
+__all__ = ["TrackingGraph", "run_metrics", "NodeAttr", "EdgeAttr"]

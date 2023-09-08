@@ -1,6 +1,5 @@
 import networkx as nx
 import numpy as np
-from traccuracy._tracking_data import TrackingData
 from traccuracy._tracking_graph import EdgeAttr, NodeAttr, TrackingGraph
 from traccuracy.matchers._matched import Matched
 from traccuracy.track_errors._ctc import (
@@ -43,7 +42,7 @@ def test_get_vertex_errors():
     )
     G_comp = TrackingGraph(comp_g)
 
-    matched_data = DummyMatched(TrackingData(G_gt), TrackingData(G_comp))
+    matched_data = DummyMatched(G_gt, G_comp)
     matched_data.mapping = mapping
 
     get_vertex_errors(matched_data)
@@ -101,7 +100,7 @@ def test_assign_edge_errors():
     )
     G_gt = TrackingGraph(gt_g)
 
-    matched_data = DummyMatched(TrackingData(G_gt), TrackingData(G_comp))
+    matched_data = DummyMatched(G_gt, G_comp)
     matched_data.mapping = mapping
 
     get_edge_errors(matched_data)
@@ -147,7 +146,7 @@ def test_assign_edge_errors_semantics():
     )
     G_gt = TrackingGraph(gt_g)
 
-    matched_data = DummyMatched(TrackingData(G_gt), TrackingData(G_comp))
+    matched_data = DummyMatched(G_gt, G_comp)
     matched_data.mapping = mapping
 
     get_edge_errors(matched_data)

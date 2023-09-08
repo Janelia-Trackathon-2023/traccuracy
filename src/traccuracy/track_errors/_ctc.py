@@ -30,8 +30,8 @@ def get_vertex_errors(matched_data: "Matched"):
     matched_data: Matched
         Matched data object containing gt and pred graphs with their associated mapping
     """
-    comp_graph = matched_data.pred_data.tracking_graph
-    gt_graph = matched_data.gt_data.tracking_graph
+    comp_graph = matched_data.pred_graph
+    gt_graph = matched_data.gt_graph
     mapping = matched_data.mapping
 
     if comp_graph.node_errors and gt_graph.node_errors:
@@ -72,8 +72,8 @@ def get_vertex_errors(matched_data: "Matched"):
 
 
 def get_edge_errors(matched_data: "Matched"):
-    comp_graph = matched_data.pred_data.tracking_graph
-    gt_graph = matched_data.gt_data.tracking_graph
+    comp_graph = matched_data.pred_graph
+    gt_graph = matched_data.gt_graph
     node_mapping = matched_data.mapping
 
     if comp_graph.edge_errors and gt_graph.edge_errors:

@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 
-from traccuracy._tracking_data import TrackingData
+from traccuracy._tracking_graph import TrackingGraph
 
 from ._compute_overlap import get_labels_with_overlap
 from ._matched import Matched
@@ -52,8 +52,8 @@ def match_iou(gt, pred, threshold=0.6):
     and that the label is recorded on each node using label_key
 
     Args:
-        gt (TrackingData): Tracking data object containing graph and segmentations
-        pred (TrackingData): Tracking data object containing graph and segmentations
+        gt (TrackingGraph): Tracking data object containing graph and segmentations
+        pred (TrackingGraph): Tracking data object containing graph and segmentations
         threshold (float, optional): Minimum IoU for matching cells. Defaults to 0.6.
 
     Returns:
@@ -63,51 +63,50 @@ def match_iou(gt, pred, threshold=0.6):
         ValueError: gt and pred must be a TrackingData object
         ValueError: GT and pred segmentations must be the same shape
     """
-    if not isinstance(gt, TrackingData) or not isinstance(pred, TrackingData):
+    if not isinstance(gt, TrackingGraph) or not isinstance(pred, TrackingGraph):
         raise ValueError(
             "Input data must be a TrackingData object with a graph and segmentations"
         )
 
     mapper = []
 
-    G_gt, mask_gt = gt.tracking_graph, gt.segmentation
-    G_pred, mask_pred = pred.tracking_graph, pred.segmentation
-
-    if mask_gt.shape != mask_pred.shape:
+    if gt.segmentation.shape != pred.segmentation.shape:
         raise ValueError("Segmentation shapes must match between gt and pred")
 
     # Get overlaps for each frame
-    frame_range = range(gt.tracking_graph.start_frame, gt.tracking_graph.end_frame)
+    frame_range = range(gt.start_frame, gt.end_frame)
     total = len(list(frame_range))
     for i, t in tqdm(enumerate(frame_range), desc="Matching frames", total=total):
-        matches = _match_nodes(mask_gt[i], mask_pred[i], threshold=threshold)
+        matches = _match_nodes(
+            gt.segmentation[i], pred.segmentation[i], threshold=threshold
+        )
 
         # Construct node id tuple for each match
         for gt_id, pred_id in zip(*matches):
             # Find node id based on time and segmentation label
-            gt_node = G_gt.get_nodes_with_attribute(
-                G_gt.label_key,
+            gt_node = gt.get_nodes_with_attribute(
+                gt.label_key,
                 criterion=lambda x: x == gt_id,  # noqa
-                limit_to=G_gt.get_nodes_in_frame(t),
+                limit_to=gt.get_nodes_in_frame(t),
             )[0]
-            pred_node = G_pred.get_nodes_with_attribute(
-                G_pred.label_key,
+            pred_node = pred.get_nodes_with_attribute(
+                pred.label_key,
                 criterion=lambda x: x == pred_id,  # noqa
-                limit_to=G_pred.get_nodes_in_frame(t),
+                limit_to=pred.get_nodes_in_frame(t),
             )[0]
             mapper.append((gt_node, pred_node))
     return mapper
 
 
 class IOUMatched(Matched):
-    def __init__(self, gt_data, pred_data, iou_threshold=0.6):
+    def __init__(self, gt_graph, pred_graph, iou_threshold=0.6):
         """Constructs a mapping between gt and pred nodes using the IoU of the segmentations
 
         Lower values for iou_threshold will be more permissive of imperfect matches
 
         Args:
-            gt_data (TrackingData): TrackingData for the ground truth with segmentations
-            pred_data (TrackingData): TrackingData for the prediction with segmentations
+            gt_graph (TrackingGraph): TrackingGraph for the ground truth with segmentations
+            pred_graph (TrackingGraph): TrackingGraph for the prediction with segmentations
             iou_threshold (float, optional): Minimum IoU value to assign a match. Defaults to 0.6.
 
         Raises:
@@ -116,12 +115,12 @@ class IOUMatched(Matched):
         self.iou_threshold = iou_threshold
 
         # Check that segmentations exist in the data
-        if gt_data.segmentation is None or pred_data.segmentation is None:
+        if gt_graph.segmentation is None or pred_graph.segmentation is None:
             raise ValueError(
                 "Segmentation data must be provided for both gt and pred data"
             )
 
-        super().__init__(gt_data, pred_data)
+        super().__init__(gt_graph, pred_graph)
 
     def compute_mapping(self):
-        return match_iou(self.gt_data, self.pred_data, threshold=self.iou_threshold)
+        return match_iou(self.gt_graph, self.pred_graph, threshold=self.iou_threshold)

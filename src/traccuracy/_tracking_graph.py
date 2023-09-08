@@ -106,6 +106,7 @@ class TrackingGraph:
     def __init__(
         self,
         graph,
+        segmentation=None,
         frame_key="t",
         label_key="segmentation_id",
         location_keys=("x", "y"),
@@ -122,6 +123,9 @@ class TrackingGraph:
                 solution where edges go forward in time. If the graph already
                 has annotations that are strings included in NodeAttrs or
                 EdgeAttrs, this will likely ruin metrics computation!
+            segmentation (numpy-like array, optional): A numpy-like array of segmentations.
+                The location of each node in tracking_graph is assumed to be inside the
+                area of the corresponding segmentation. Defaults to None.
             frame_key (str, optional): The key on each node in graph that
                 contains the time frameof the node. Every node must have a
                 value stored at this key. Defaults to 't'.
@@ -134,7 +138,7 @@ class TrackingGraph:
                 node must have a value stored at each of these keys.
                 Defaults to ('x', 'y').
         """
-        self.graph = graph
+        self.segmentation = segmentation
         if NodeAttr.has_value(frame_key):
             raise ValueError(
                 f"Specified frame key {frame_key} is reserved for graph "

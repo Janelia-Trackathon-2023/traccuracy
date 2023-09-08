@@ -5,14 +5,14 @@ from traccuracy._utils import get_relevant_kwargs, validate_matched_data
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Type
 
-    from traccuracy import TrackingData
+    from traccuracy import TrackingGraph
     from traccuracy.matchers._matched import Matched
     from traccuracy.metrics._base import Metric
 
 
 def run_metrics(
-    gt_data: "TrackingData",
-    pred_data: "TrackingData",
+    gt_data: "TrackingGraph",
+    pred_data: "TrackingGraph",
     matcher: "Type[Matched]",
     metrics: "List[Type[Metric]]",
     matcher_kwargs: "Optional[Dict]" = None,
