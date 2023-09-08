@@ -50,19 +50,15 @@ class AOGMMetrics(Metric):
         }
         edge_error_counts = {
             "ws": len(
-                self.data.pred_graph.get_edges_with_attribute(
-                    EdgeAttr.WRONG_SEMANTIC, lambda x: x
+                self.data.pred_graph.get_edges_with_flag(
+                    EdgeAttr.WRONG_SEMANTIC
                 )
             ),
             "fp": len(
-                self.data.pred_graph.get_edges_with_attribute(
-                    EdgeAttr.FALSE_POS, lambda x: x
-                )
+                self.data.pred_graph.get_edges_with_flag(EdgeAttr.FALSE_POS)
             ),
             "fn": len(
-                self.data.gt_graph.get_edges_with_attribute(
-                    EdgeAttr.FALSE_NEG, lambda x: x
-                )
+                self.data.gt_graph.get_edges_with_flag(EdgeAttr.FALSE_NEG)
             ),
         }
         error_sum = get_weighted_error_sum(
