@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -8,6 +9,8 @@ from traccuracy import EdgeAttr, NodeAttr
 
 if TYPE_CHECKING:
     from traccuracy.matchers._matched import Matched
+
+logger = logging.getLogger(__name__)
 
 
 def evaluate_ctc_events(matched_data: "Matched"):
@@ -30,6 +33,10 @@ def get_vertex_errors(matched_data: "Matched"):
     comp_graph = matched_data.pred_data.tracking_graph
     gt_graph = matched_data.gt_data.tracking_graph
     mapping = matched_data.mapping
+
+    if comp_graph.node_errors and gt_graph.node_errors:
+        logger.info("Node errors already calculated. Skipping graph annotation")
+        return
 
     comp_graph.set_node_attribute(list(comp_graph.nodes()), NodeAttr.TRUE_POS, False)
     comp_graph.set_node_attribute(list(comp_graph.nodes()), NodeAttr.NON_SPLIT, False)
@@ -68,6 +75,10 @@ def get_edge_errors(matched_data: "Matched"):
     comp_graph = matched_data.pred_data.tracking_graph
     gt_graph = matched_data.gt_data.tracking_graph
     node_mapping = matched_data.mapping
+
+    if comp_graph.edge_errors and gt_graph.edge_errors:
+        logger.info("Edge errors already calculated. Skipping graph annotation")
+        return
 
     induced_graph = comp_graph.get_subgraph(
         comp_graph.get_nodes_with_attribute(NodeAttr.TRUE_POS, criterion=lambda x: x)
