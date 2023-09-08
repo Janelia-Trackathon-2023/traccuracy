@@ -69,15 +69,16 @@ class DivisionMetrics(Metric):
             dict: Returns a nested dictionary with one dictionary per frame buffer value
         """
         div_annotations = _evaluate_division_events(
-            self.data.gt_data.tracking_graph,
-            self.data.pred_data.tracking_graph,
-            self.data.mapping,
+            self.data,
             frame_buffer=self.frame_buffer,
         )
 
         return {
-            f"Frame Buffer {fb}": self._calculate_metrics(g_gt, g_pred)
-            for fb, (g_gt, g_pred) in div_annotations.items()
+            f"Frame Buffer {fb}": self._calculate_metrics(
+                matched_data.gt_data.tracking_graph,
+                matched_data.pred_data.tracking_graph,
+            )
+            for fb, matched_data in div_annotations.items()
         }
 
     def _calculate_metrics(self, g_gt, g_pred):

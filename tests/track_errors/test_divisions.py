@@ -1,7 +1,8 @@
 import networkx as nx
 import numpy as np
 import pytest
-from traccuracy import NodeAttr, TrackingGraph
+from traccuracy import NodeAttr, TrackingData, TrackingGraph
+from traccuracy.matchers._matched import Matched
 from traccuracy.track_errors.divisions import (
     _classify_divisions,
     _correct_shifted_divisions,
@@ -11,6 +12,11 @@ from traccuracy.track_errors.divisions import (
 )
 
 from ..test_utils import get_division_graphs
+
+
+class DummyMatched(Matched):
+    def compute_mapping(self):
+        return []
 
 
 @pytest.fixture
@@ -47,9 +53,11 @@ def test_classify_divisions_tp(G):
     mapper = [(n, n) for n in G.nodes]
     G_gt = TrackingGraph(G.copy())
     G_pred = TrackingGraph(G.copy())
+    matched_data = DummyMatched(TrackingData(G_gt), TrackingData(G_pred))
+    matched_data.mapping = mapper
 
     # Test true positive
-    _classify_divisions(G_gt, G_pred, mapper)
+    _classify_divisions(matched_data)
 
     assert len(G_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x is True)) == 0
     assert (
@@ -80,8 +88,10 @@ def test_classify_divisions_fp(G):
 
     G_gt = TrackingGraph(G)
     G_pred = TrackingGraph(H)
+    matched_data = DummyMatched(TrackingData(G_gt), TrackingData(G_pred))
+    matched_data.mapping = mapper
 
-    _classify_divisions(G_gt, G_pred, mapper)
+    _classify_divisions(matched_data)
 
     assert len(G_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x is True)) == 0
     assert NodeAttr.FP_DIV in G_pred.nodes()["1_2"]
@@ -101,8 +111,10 @@ def test_classify_divisions_fn(G):
 
     G_gt = TrackingGraph(G)
     G_pred = TrackingGraph(H)
+    matched_data = DummyMatched(TrackingData(G_gt), TrackingData(G_pred))
+    matched_data.mapping = mapper
 
-    _classify_divisions(G_gt, G_pred, mapper)
+    _classify_divisions(matched_data)
 
     assert (
         len(G_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x is True)) == 0
@@ -169,10 +181,15 @@ class Test_correct_shifted_divisions:
         G_gt.nodes["1_1"][NodeAttr.FN_DIV] = True
         G_pred.nodes["1_3"][NodeAttr.FP_DIV] = True
 
-        # buffer of 1, no change
-        nG_gt, nG_pred = _correct_shifted_divisions(
-            TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=1
+        matched_data = DummyMatched(
+            TrackingData(TrackingGraph(G_gt)), TrackingData(TrackingGraph(G_pred))
         )
+        matched_data.mapping = mapper
+
+        # buffer of 1, no change
+        new_matched = _correct_shifted_divisions(matched_data, n_frames=1)
+        nG_pred = new_matched.pred_data.tracking_graph
+        nG_gt = new_matched.gt_data.tracking_graph
 
         assert nG_pred.nodes()["1_3"][NodeAttr.FP_DIV] is True
         assert nG_gt.nodes()["1_1"][NodeAttr.FN_DIV] is True
@@ -187,10 +204,15 @@ class Test_correct_shifted_divisions:
         G_gt.nodes["1_1"][NodeAttr.FN_DIV] = True
         G_pred.nodes["1_3"][NodeAttr.FP_DIV] = True
 
-        # buffer of 3, corrections
-        nG_gt, nG_pred = _correct_shifted_divisions(
-            TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=3
+        matched_data = DummyMatched(
+            TrackingData(TrackingGraph(G_gt)), TrackingData(TrackingGraph(G_pred))
         )
+        matched_data.mapping = mapper
+
+        # buffer of 3, corrections
+        new_matched = _correct_shifted_divisions(matched_data, n_frames=3)
+        nG_pred = new_matched.pred_data.tracking_graph
+        nG_gt = new_matched.gt_data.tracking_graph
 
         assert nG_pred.nodes()["1_3"][NodeAttr.FP_DIV] is False
         assert nG_gt.nodes()["1_1"][NodeAttr.FN_DIV] is False
@@ -203,10 +225,15 @@ class Test_correct_shifted_divisions:
         G_pred.nodes["1_1"][NodeAttr.FP_DIV] = True
         G_gt.nodes["1_3"][NodeAttr.FN_DIV] = True
 
-        # buffer of 3, corrections
-        nG_gt, nG_pred = _correct_shifted_divisions(
-            TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, n_frames=3
+        matched_data = DummyMatched(
+            TrackingData(TrackingGraph(G_gt)), TrackingData(TrackingGraph(G_pred))
         )
+        matched_data.mapping = mapper
+
+        # buffer of 3, corrections
+        new_matched = _correct_shifted_divisions(matched_data, n_frames=3)
+        nG_pred = new_matched.pred_data.tracking_graph
+        nG_gt = new_matched.gt_data.tracking_graph
 
         assert nG_pred.nodes()["1_1"][NodeAttr.FP_DIV] is False
         assert nG_gt.nodes()["1_3"][NodeAttr.FN_DIV] is False
@@ -218,8 +245,11 @@ def test_evaluate_division_events():
     G_gt, G_pred, mapper = get_division_graphs()
     frame_buffer = (0, 1, 2)
 
-    results = _evaluate_division_events(
-        TrackingGraph(G_gt), TrackingGraph(G_pred), mapper, frame_buffer=frame_buffer
+    matched_data = DummyMatched(
+        TrackingData(TrackingGraph(G_gt)), TrackingData(TrackingGraph(G_pred))
     )
+    matched_data.mapping = mapper
+
+    results = _evaluate_division_events(matched_data, frame_buffer=frame_buffer)
 
     assert np.all([isinstance(k, int) for k in results.keys()])
