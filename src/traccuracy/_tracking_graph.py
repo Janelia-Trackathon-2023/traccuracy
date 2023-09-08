@@ -163,6 +163,8 @@ class TrackingGraph:
 
         self._update_graph(graph)
 
+        # Record types of annotations that have been calculated
+        self.division_annotations = False
         self.node_errors = False
         self.edge_errors = False
 
