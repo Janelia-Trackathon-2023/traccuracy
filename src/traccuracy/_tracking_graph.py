@@ -1,3 +1,4 @@
+import copy
 import enum
 import logging
 
@@ -154,28 +155,16 @@ class TrackingGraph:
                 )
         self.location_keys = location_keys
 
-        # construct a dictionary from frames to node ids for easy lookup
-        self.nodes_by_frame = {}
-        for node, attrs in self.graph.nodes.items():
-            # check that every node has the time frame and location specified
-            assert (
-                self.frame_key in attrs.keys()
-            ), f"Frame key {self.frame_key} not present for node {node}."
-            for key in self.location_keys:
-                assert (
-                    key in attrs.keys()
-                ), f"Location key {key} not present for node {node}."
+        # Define empty attributes that will be set by update_graph
+        self.graph = None
+        self.nodes_by_frame = None
+        self.start_frame = None
+        self.end_frame = None
 
-            # store node id in nodes_by_frame mapping
-            frame = attrs[self.frame_key]
-            if frame not in self.nodes_by_frame.keys():
-                self.nodes_by_frame[frame] = [node]
-            else:
-                self.nodes_by_frame[frame].append(node)
+        self._update_graph(graph)
 
-        # Store first and last frames for reference
-        self.start_frame = min(self.nodes_by_frame.keys())
-        self.end_frame = max(self.nodes_by_frame.keys()) + 1
+        self.node_errors = False
+        self.edge_errors = False
 
     def nodes(self, limit_to=None):
         """Get all the nodes in the graph, along with their attributes.
@@ -356,14 +345,52 @@ class TrackingGraph:
         if len(graph.nodes) == 0:
             return []
 
-        return [
-            TrackingGraph(
-                graph=graph.subgraph(g).copy(),
-                frame_key=self.frame_key,
-                location_keys=self.location_keys,
-            )
-            for g in nx.weakly_connected_components(graph)
-        ]
+        return [self.get_subgraph(g) for g in nx.weakly_connected_components(graph)]
+
+    def get_subgraph(self, nodes):
+        """Returns a new TrackingGraph with the subgraph defined by the list of nodes
+
+        Args:
+            nodes (list): List of node ids to use in constructing the subgraph
+        """
+
+        new_graph = self.graph.subgraph(nodes).copy()
+        new_trackgraph = copy.deepcopy(self)
+        new_trackgraph._update_graph(new_graph)
+
+        return new_trackgraph
+
+    def _update_graph(self, graph):
+        """Given a new graph, which is expected to be a subgraph of the current graph,
+        update attributes which are dependent on the graph.
+
+        Args:
+            graph (nx.DiGraph): A networkx graph that is a subgraph of the original graph
+        """
+        self.graph = graph
+
+        # construct a dictionary from frames to node ids for easy lookup
+        self.nodes_by_frame = {}
+        for node, attrs in self.graph.nodes.items():
+            # check that every node has the time frame and location specified
+            assert (
+                self.frame_key in attrs.keys()
+            ), f"Frame key {self.frame_key} not present for node {node}."
+            for key in self.location_keys:
+                assert (
+                    key in attrs.keys()
+                ), f"Location key {key} not present for node {node}."
+
+            # store node id in nodes_by_frame mapping
+            frame = attrs[self.frame_key]
+            if frame not in self.nodes_by_frame.keys():
+                self.nodes_by_frame[frame] = [node]
+            else:
+                self.nodes_by_frame[frame].append(node)
+
+        # Store first and last frames for reference
+        self.start_frame = min(self.nodes_by_frame.keys())
+        self.end_frame = max(self.nodes_by_frame.keys()) + 1
 
     def set_node_attribute(self, ids, attr, value=True):
         """Set an attribute flag for a set of nodes specified by
