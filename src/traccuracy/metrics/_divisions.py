@@ -1,4 +1,4 @@
-"""This submodule classifies division erros in tracking graphs
+"""This submodule classifies division errors in tracking graphs
 
 Each division is classifed as one of the following:
 - true positive
@@ -33,61 +33,25 @@ as the late division daughters.
 """
 
 
-from .._tracking_graph import NodeAttr
-from ..track_errors.divisions import _evaluate_division_events
+from traccuracy._tracking_graph import NodeAttr
+from traccuracy.track_errors.divisions import _evaluate_division_events
+
 from ._base import Metric
-
-
-def _calculate_metrics(G_gt, G_pred):
-    if not (G_gt.division_annotations and G_pred.division_annotations):
-        raise ValueError(
-            "Both input TrackingGraphs must have division_annotations calculated"
-        )
-
-    tp_division_count = len(G_gt.get_nodes_with_attribute(NodeAttr.TP_DIV, lambda x: x))
-    fn_division_count = len(G_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x))
-    fp_division_count = len(
-        G_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x)
-    )
-
-    try:
-        recall = tp_division_count / (tp_division_count + fn_division_count)
-    except ZeroDivisionError:
-        recall = 0
-
-    try:
-        precision = tp_division_count / (tp_division_count + fp_division_count)
-    except ZeroDivisionError:
-        precision = 0
-
-    try:
-        f1 = 2 * (recall * precision) / (recall + precision)
-    except ZeroDivisionError:
-        f1 = 0
-
-    try:
-        mbc = tp_division_count / (
-            tp_division_count + fn_division_count + fp_division_count
-        )
-    except ZeroDivisionError:
-        mbc = 0
-
-    return {
-        "Division Recall": recall,
-        "Division Precision": precision,
-        "Division F1": f1,
-        "Mitotic Branching Correctness": mbc,
-        "True Positive Divisions": tp_division_count,
-        "False Positive Divisions": fp_division_count,
-        "False Negative Divisions": fn_division_count,
-    }
 
 
 class DivisionMetrics(Metric):
     needs_one_to_one = True
 
     def __init__(self, matched_data, frame_buffer=(0,)):
-        """Classify division events and provide summary metrics
+        """Classify division events and provide the following summary metrics
+
+        - Division Recall
+        - Division Precision
+        - Divison F1 Score
+        - Mitotic Branching Correctness: TP / (TP + FP + FN) as defined by Ulicna, K.,
+          Vallardi, G., Charras, G. & Lowe, A. R. Automated deep lineage tree analysis
+          using a Bayesian single cell tracking approach. Frontiers in Computer Science
+          3, 734559 (2021).
 
         Args:
             matched_data (Matched): Matched object for set of GT and Pred data
@@ -112,6 +76,49 @@ class DivisionMetrics(Metric):
         )
 
         return {
-            f"Frame Buffer {fb}": _calculate_metrics(G_gt, G_pred)
-            for fb, (G_gt, G_pred) in div_annotations.items()
+            f"Frame Buffer {fb}": self._calculate_metrics(g_gt, g_pred)
+            for fb, (g_gt, g_pred) in div_annotations.items()
+        }
+
+    def _calculate_metrics(self, g_gt, g_pred):
+        tp_division_count = len(
+            g_gt.get_nodes_with_attribute(NodeAttr.TP_DIV, lambda x: x)
+        )
+        fn_division_count = len(
+            g_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x)
+        )
+        fp_division_count = len(
+            g_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x)
+        )
+
+        try:
+            recall = tp_division_count / (tp_division_count + fn_division_count)
+        except ZeroDivisionError:
+            recall = 0
+
+        try:
+            precision = tp_division_count / (tp_division_count + fp_division_count)
+        except ZeroDivisionError:
+            precision = 0
+
+        try:
+            f1 = 2 * (recall * precision) / (recall + precision)
+        except ZeroDivisionError:
+            f1 = 0
+
+        try:
+            mbc = tp_division_count / (
+                tp_division_count + fn_division_count + fp_division_count
+            )
+        except ZeroDivisionError:
+            mbc = 0
+
+        return {
+            "Division Recall": recall,
+            "Division Precision": precision,
+            "Division F1": f1,
+            "Mitotic Branching Correctness": mbc,
+            "True Positive Divisions": tp_division_count,
+            "False Positive Divisions": fp_division_count,
+            "False Negative Divisions": fn_division_count,
         }
