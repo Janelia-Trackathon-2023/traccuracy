@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from traccuracy._tracking_graph import EdgeAttr, NodeAttr
 from traccuracy.track_errors._ctc import evaluate_ctc_events
 
 from ._base import Metric
@@ -34,20 +35,41 @@ class AOGMMetrics(Metric):
         super().__init__(matched_data)
 
     def compute(self):
-        gt_graph = self.data.gt_data.tracking_graph
-        pred_graph = self.data.pred_data.tracking_graph
-        mapping = self.data.mapping
+        evaluate_ctc_events(self.data)
 
-        track_events = evaluate_ctc_events(gt_graph, pred_graph, mapping)
         vertex_error_counts = {
-            "ns": track_events.nonsplit_vertices_count,
-            "fp": track_events.fp_node_count,
-            "fn": track_events.fn_node_count,
+            "ns": len(
+                self.data.pred_data.tracking_graph.get_nodes_with_attribute(
+                    NodeAttr.NON_SPLIT, lambda x: x
+                )
+            ),
+            "fp": len(
+                self.data.pred_data.tracking_graph.get_nodes_with_attribute(
+                    NodeAttr.FALSE_POS, lambda x: x
+                )
+            ),
+            "fn": len(
+                self.data.gt_data.tracking_graph.get_nodes_with_attribute(
+                    NodeAttr.FALSE_NEG, lambda x: x
+                )
+            ),
         }
         edge_error_counts = {
-            "ws": track_events.incorrect_semantics_count,
-            "fp": track_events.fp_edge_count,
-            "fn": track_events.fn_edge_count,
+            "ws": len(
+                self.data.pred_data.tracking_graph.get_edges_with_attribute(
+                    EdgeAttr.WRONG_SEMANTIC, lambda x: x
+                )
+            ),
+            "fp": len(
+                self.data.pred_data.tracking_graph.get_edges_with_attribute(
+                    EdgeAttr.FALSE_POS, lambda x: x
+                )
+            ),
+            "fn": len(
+                self.data.gt_data.tracking_graph.get_edges_with_attribute(
+                    EdgeAttr.FALSE_NEG, lambda x: x
+                )
+            ),
         }
         error_sum = get_weighted_error_sum(
             vertex_error_counts,
