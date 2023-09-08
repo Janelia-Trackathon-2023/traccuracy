@@ -8,7 +8,6 @@ from skimage.measure import regionprops_table
 from tifffile import imread
 from tqdm import tqdm
 
-from traccuracy._tracking_data import TrackingData
 from traccuracy._tracking_graph import TrackingGraph
 
 
@@ -199,6 +198,4 @@ def load_ctc_data(data_dir, track_path=None):
 
     G = ctc_to_graph(tracks, detections)
 
-    data = TrackingData(TrackingGraph(G), segmentation=masks)
-
-    return data
+    return TrackingGraph(G, segmentation=masks)

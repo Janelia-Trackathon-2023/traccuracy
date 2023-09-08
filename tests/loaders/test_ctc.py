@@ -1,7 +1,6 @@
 import os
 
 import pandas as pd
-from traccuracy import TrackingData
 from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.loaders import _ctc
 
@@ -74,8 +73,7 @@ def test_load_data():
     )
     track_path = os.path.join(data_dir, "res_track.txt")
     track_data = _ctc.load_ctc_data(data_dir, track_path)
-    assert isinstance(track_data, TrackingData)
-    assert isinstance(track_data.tracking_graph, TrackingGraph)
+    assert isinstance(track_data, TrackingGraph)
     assert len(track_data.segmentation) == 92
 
 
@@ -85,6 +83,5 @@ def test_load_data_no_track_path():
         os.path.join(test_dir, "../../../examples/sample-data/Fluo-N2DL-HeLa/01_RES/")
     )
     track_data = _ctc.load_ctc_data(data_dir)
-    assert isinstance(track_data, TrackingData)
-    assert isinstance(track_data.tracking_graph, TrackingGraph)
+    assert isinstance(track_data, TrackingGraph)
     assert len(track_data.segmentation) == 92

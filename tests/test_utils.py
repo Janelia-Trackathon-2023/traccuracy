@@ -102,7 +102,7 @@ def get_movie_with_graph(ndims=3, n_frames=3, n_labels=3):
             attrs[f"{i}_{t}"] = a
     nx.set_node_attributes(G, attrs)
 
-    return TrackingGraph(G), movie
+    return TrackingGraph(G, segmentation=movie)
 
 
 def get_division_graphs():

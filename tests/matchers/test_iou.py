@@ -1,7 +1,7 @@
 import networkx as nx
 import numpy as np
 import pytest
-from traccuracy._tracking_data import TrackingData
+from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.matchers._iou import IOUMatched, _match_nodes, match_iou
 
 from tests.test_utils import get_annotated_image, get_movie_with_graph
@@ -29,21 +29,17 @@ def test_match_iou():
     # shapes don't match
     with pytest.raises(ValueError):
         match_iou(
-            TrackingData(
-                tracking_graph=nx.DiGraph(), segmentation=np.zeros((5, 10, 10))
-            ),
-            TrackingData(
-                tracking_graph=nx.DiGraph(), segmentation=np.zeros((5, 10, 5))
-            ),
+            TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10))),
+            TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5))),
         )
 
     # Test 2d data
     n_frames = 3
     n_labels = 3
-    G, movie = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
+    track_graph = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
     mapper = match_iou(
-        TrackingData(tracking_graph=G, segmentation=movie),
-        TrackingData(tracking_graph=G, segmentation=movie),
+        track_graph,
+        track_graph,
     )
 
     # Check for correct number of pairs
@@ -53,10 +49,10 @@ def test_match_iou():
         assert pair[0] == pair[1]
 
     # Check 3d data
-    G, movie = get_movie_with_graph(ndims=4, n_frames=n_frames, n_labels=n_labels)
+    track_graph = get_movie_with_graph(ndims=4, n_frames=n_frames, n_labels=n_labels)
     mapper = match_iou(
-        TrackingData(tracking_graph=G, segmentation=movie),
-        TrackingData(tracking_graph=G, segmentation=movie),
+        track_graph,
+        track_graph,
     )
 
     # Check for correct number of pairs
@@ -69,8 +65,8 @@ def test_match_iou():
 class TestIOUMatched:
     def test__init__(self):
         # No segmentation
-        G, _ = get_movie_with_graph()
-        data = TrackingData(G)
+        track_graph = get_movie_with_graph()
+        data = TrackingGraph(track_graph.graph)
 
         with pytest.raises(ValueError):
             IOUMatched(data, data)
@@ -79,11 +75,11 @@ class TestIOUMatched:
         # Test 2d data
         n_frames = 3
         n_labels = 3
-        G, movie = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
-
-        matched = IOUMatched(
-            gt_data=TrackingData(G, movie), pred_data=TrackingData(G, movie)
+        track_graph = get_movie_with_graph(
+            ndims=3, n_frames=n_frames, n_labels=n_labels
         )
+
+        matched = IOUMatched(gt_graph=track_graph, pred_graph=track_graph)
 
         # Check for correct number of pairs
         assert len(matched.mapping) == n_frames * n_labels

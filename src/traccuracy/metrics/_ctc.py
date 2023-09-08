@@ -39,34 +39,34 @@ class AOGMMetrics(Metric):
 
         vertex_error_counts = {
             "ns": len(
-                self.data.pred_data.tracking_graph.get_nodes_with_attribute(
+                self.data.pred_graph.get_nodes_with_attribute(
                     NodeAttr.NON_SPLIT, lambda x: x
                 )
             ),
             "fp": len(
-                self.data.pred_data.tracking_graph.get_nodes_with_attribute(
+                self.data.pred_graph.get_nodes_with_attribute(
                     NodeAttr.FALSE_POS, lambda x: x
                 )
             ),
             "fn": len(
-                self.data.gt_data.tracking_graph.get_nodes_with_attribute(
+                self.data.gt_graph.get_nodes_with_attribute(
                     NodeAttr.FALSE_NEG, lambda x: x
                 )
             ),
         }
         edge_error_counts = {
             "ws": len(
-                self.data.pred_data.tracking_graph.get_edges_with_attribute(
+                self.data.pred_graph.get_edges_with_attribute(
                     EdgeAttr.WRONG_SEMANTIC, lambda x: x
                 )
             ),
             "fp": len(
-                self.data.pred_data.tracking_graph.get_edges_with_attribute(
+                self.data.pred_graph.get_edges_with_attribute(
                     EdgeAttr.FALSE_POS, lambda x: x
                 )
             ),
             "fn": len(
-                self.data.gt_data.tracking_graph.get_edges_with_attribute(
+                self.data.gt_graph.get_edges_with_attribute(
                     EdgeAttr.FALSE_NEG, lambda x: x
                 )
             ),
@@ -113,7 +113,7 @@ class CTCMetrics(AOGMMetrics):
 
     def compute(self):
         # AOGM-0 is the cost of creating the gt graph from scratch
-        gt_graph = self.data.gt_data.tracking_graph.graph
+        gt_graph = self.data.gt_graph.graph
         n_nodes = gt_graph.number_of_nodes()
         n_edges = gt_graph.number_of_edges()
         aogm_0 = n_nodes * self.v_weights["fn"] + n_edges * self.e_weights["fn"]
