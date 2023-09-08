@@ -75,8 +75,8 @@ class DivisionMetrics(Metric):
 
         return {
             f"Frame Buffer {fb}": self._calculate_metrics(
-                matched_data.gt_data.tracking_graph,
-                matched_data.pred_data.tracking_graph,
+                matched_data.gt_graph,
+                matched_data.pred_graph,
             )
             for fb, matched_data in div_annotations.items()
         }

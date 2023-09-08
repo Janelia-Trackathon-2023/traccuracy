@@ -1,4 +1,4 @@
-from traccuracy import TrackingData, TrackingGraph
+from traccuracy import TrackingGraph
 from traccuracy.matchers._matched import Matched
 from traccuracy.metrics._divisions import DivisionMetrics
 
@@ -17,8 +17,8 @@ class DummyMatched(Matched):
 def test_DivisionMetrics():
     g_gt, g_pred, mapper = get_division_graphs()
     matched = DummyMatched(
-        TrackingData(TrackingGraph(g_gt)),
-        TrackingData(TrackingGraph(g_pred)),
+        TrackingGraph(g_gt),
+        TrackingGraph(g_pred),
         mapper=mapper,
     )
     frame_buffer = (0, 1, 2)
