@@ -15,10 +15,10 @@ class DummyMatched(Matched):
 
 
 def test_DivisionMetrics():
-    G_gt, G_pred, mapper = get_division_graphs()
+    g_gt, g_pred, mapper = get_division_graphs()
     matched = DummyMatched(
-        TrackingData(TrackingGraph(G_gt)),
-        TrackingData(TrackingGraph(G_pred)),
+        TrackingData(TrackingGraph(g_gt)),
+        TrackingData(TrackingGraph(g_pred)),
         mapper=mapper,
     )
     frame_buffer = (0, 1, 2)
