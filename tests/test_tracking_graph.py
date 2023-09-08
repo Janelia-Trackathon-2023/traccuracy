@@ -24,14 +24,15 @@ def nx_comp1():
     ]
 
     edges = [
-        {"source": "1_0", "target": "1_1"},
-        {"source": "1_1", "target": "1_2"},
+        {"source": "1_0", "target": "1_1", "is_tp": True},
+        {"source": "1_1", "target": "1_2", "is_tp": False},
         {"source": "1_1", "target": "1_3"},
         {"source": "1_3", "target": "1_4"},
     ]
     graph = nx.DiGraph()
     graph.add_nodes_from([(cell["id"], cell) for cell in cells])
-    graph.add_edges_from([(edge["source"], edge["target"]) for edge in edges])
+    graph.add_edges_from([(edge["source"], edge["target"], edge)
+                          for edge in edges])
     return graph
 
 
@@ -119,6 +120,13 @@ def test_get_nodes_with_flag(simple_graph):
     assert simple_graph.get_nodes_with_flag(NodeAttr.FP_DIV) == []
     with pytest.raises(ValueError):
         assert simple_graph.get_nodes_with_flag("is_tp_division")
+
+
+def test_get_edges_with_flag(simple_graph):
+    assert simple_graph.get_edges_with_flag(EdgeAttr.TRUE_POS) == [("1_0", "1_1")]
+    assert simple_graph.get_edges_with_flag(EdgeAttr.FALSE_NEG) == []
+    with pytest.raises(ValueError):
+        assert simple_graph.get_nodes_with_flag("is_tp")
 
 
 def test_get_nodes_with_attribute(simple_graph):

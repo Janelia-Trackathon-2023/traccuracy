@@ -248,6 +248,23 @@ class TrackingGraph:
                            if attr in attrs.keys() and attrs[attr] is True]
         return nodes_with_flag
 
+    def get_edges_with_flag(self, attr):
+        """Get all edges with specified EdgeAttr set to True.
+
+        Args:
+            attr (traccuracy.EdgeAttr): the edge attribute to query for
+
+        Returns:
+            (List(hashable)): A list of edge ids which have the given attribute
+                and the value is True.
+        """
+        if not isinstance(attr, EdgeAttr):
+            raise ValueError(
+                f"Function takes EdgeAttr arguments, not {type(attr)}.")
+        edges_with_flag = [edge for edge, attrs in self.edges().items()
+                           if attr in attrs.keys() and attrs[attr] is True]
+        return edges_with_flag
+
     def get_nodes_with_attribute(self, attr, criterion=None, limit_to=None):
         """Get the node_ids of all nodes who have an attribute, optionally
         limiting to nodes whose value at that attribute meet a given criteria.
