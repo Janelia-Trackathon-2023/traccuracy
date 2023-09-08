@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 
-from traccuracy._tracking_data import TrackingData
+from traccuracy._tracking_graph import TrackingGraph
 
 
 class Matched(ABC):
-    def __init__(self, gt_data: "TrackingData", pred_data: "TrackingData"):
+    def __init__(self, gt_data: "TrackingGraph", pred_data: "TrackingGraph"):
         """Matched class which takes TrackingData objects for gt and pred, and computes matching.
 
         Each current matching method will be a subclass of Matched e.g. CTCMatched or IOUMatched.
@@ -21,9 +21,9 @@ class Matched(ABC):
         self.mapping = self.compute_mapping()
 
         # Report matching performance
-        total_gt = len(self.gt_data.tracking_graph.nodes())
+        total_gt = len(self.gt_data.nodes())
         matched_gt = len({m[0] for m in self.mapping})
-        total_pred = len(self.pred_data.tracking_graph.nodes())
+        total_pred = len(self.pred_data.nodes())
         matched_pred = len({m[1] for m in self.mapping})
         print(f"Matched {matched_gt} out of {total_gt} ground truth nodes.")
         print(f"Matched {matched_pred} out of {total_pred} predicted nodes.")

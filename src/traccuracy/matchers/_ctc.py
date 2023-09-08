@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 from tqdm import tqdm
 
-from traccuracy._tracking_data import TrackingData
+from traccuracy._tracking_graph import TrackingGraph
 
 from ._compute_overlap import get_labels_with_overlap
 from ._matched import Matched
@@ -30,21 +30,21 @@ class CTCMatched(Matched):
             and pred node
 
         Raises:
-            ValueError: gt and pred must be a TrackingData object
+            ValueError: gt and pred must be a TrackingGraph object
             ValueError: GT and pred segmentations must be the same shape
         """
-        if not isinstance(self.gt_data, TrackingData) or not isinstance(
-            self.pred_data, TrackingData
+        if not isinstance(self.gt_data, TrackingGraph) or not isinstance(
+            self.pred_data, TrackingGraph
         ):
             raise ValueError(
                 "Input data must be a TrackingData object with a graph and segmentations"
             )
         gt = self.gt_data
         pred = self.pred_data
-        gt_label_key = self.gt_data.tracking_graph.label_key
-        pred_label_key = self.pred_data.tracking_graph.label_key
-        G_gt, mask_gt = gt.tracking_graph, gt.segmentation
-        G_pred, mask_pred = pred.tracking_graph, pred.segmentation
+        gt_label_key = self.gt_data.label_key
+        pred_label_key = self.pred_data.label_key
+        G_gt, mask_gt = gt, gt.segmentation
+        G_pred, mask_pred = pred, pred.segmentation
 
         if mask_gt.shape != mask_pred.shape:
             raise ValueError("Segmentation shapes must match between gt and pred")
@@ -53,14 +53,14 @@ class CTCMatched(Matched):
         # Get overlaps for each frame
         for i, t in enumerate(
             tqdm(
-                range(gt.tracking_graph.start_frame, gt.tracking_graph.end_frame),
+                range(gt.start_frame, gt.end_frame),
                 desc="Matching frames",
             )
         ):
             gt_frame = mask_gt[i]
             pred_frame = mask_pred[i]
-            gt_frame_nodes = gt.tracking_graph.nodes_by_frame[t]
-            pred_frame_nodes = pred.tracking_graph.nodes_by_frame[t]
+            gt_frame_nodes = gt.nodes_by_frame[t]
+            pred_frame_nodes = pred.nodes_by_frame[t]
 
             # get the labels for this frame
             gt_labels = dict(
