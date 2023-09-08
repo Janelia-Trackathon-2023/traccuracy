@@ -137,7 +137,7 @@ class TrackingGraph:
         self.graph = graph
         if NodeAttr.has_value(frame_key):
             raise ValueError(
-                f"Specified frame key {frame_key} is reserved for graph"
+                f"Specified frame key {frame_key} is reserved for graph "
                 "annotation. Please change the frame key."
             )
         self.frame_key = frame_key
@@ -264,6 +264,46 @@ class TrackingGraph:
         edges_with_flag = [edge for edge, attrs in self.edges().items()
                            if attr in attrs.keys() and attrs[attr] is True]
         return edges_with_flag
+
+    def get_nodes_by_roi(self, **kwargs):
+        """Gets the nodes in a given region of interest (ROI). The ROI is
+        defined by keyword arguments that correspond to the frame key and
+        location keys, where each argument should be a (start, end) tuple
+        (the end is exclusive). Dimensions that are not passed as arguments
+        are unbounded. None can be passed as an element of the tuple to
+        signify an unbounded ROI on that side.
+
+        For example, if frame_key='t' and location_keys=('x', 'y'):
+            `graph.get_nodes_by_roi(t=(10, None), x=(0, 100))`
+        would return all nodes with time >= 10, and 0 <= x < 100, with no limit
+        on the y values.
+
+        Returns:
+            list of hashable: A list of node_ids for all nodes in the ROI.
+        """
+        dimensions = []
+        limit_criterion = []
+        for dim, limit in kwargs.items():
+            if not (dim == self.frame_key or dim in self.location_keys):
+                raise ValueError(
+                    f"Provided argument {dim} is neither the frame key"
+                    f" {self.frame_key} or one of the location keys"
+                    f" {self.location_keys}.")
+            dimensions.append((dim, limit[0], limit[1]))
+            limit_criterion.append(lambda x: x >= limit[0])
+        nodes = []
+        for node, attrs in self.graph.nodes().items():
+            inside = True
+            for dim, start, end in dimensions:
+                if start is not None and attrs[dim] < start:
+                    inside = False
+                    break
+                if end is not None and attrs[dim] >= end:
+                    inside = False
+                    break
+            if inside:
+                nodes.append(node)
+        return nodes
 
     def get_nodes_with_attribute(self, attr, criterion=None, limit_to=None):
         """Get the node_ids of all nodes who have an attribute, optionally

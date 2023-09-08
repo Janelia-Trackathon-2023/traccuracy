@@ -106,6 +106,12 @@ def test_get_cells_by_frame(simple_graph):
     assert simple_graph.get_nodes_in_frame(5) == []
 
 
+def test_get_nodes_by_roi(simple_graph):
+    assert simple_graph.get_nodes_by_roi(t=(0, 1)) == ["1_0"]
+    assert simple_graph.get_nodes_by_roi(x=(1, None)) == ["1_0", "1_1", "1_3", "1_4"]
+    assert simple_graph.get_nodes_by_roi(x=(None, 2), t=(1, None)) == ["1_1", "1_2"]
+
+
 def test_get_location(nx_comp1):
     graph1 = TrackingGraph(nx_comp1, location_keys=["x", "y"])
     assert graph1.get_location("1_2") == [0, 1]
