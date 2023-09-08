@@ -1,6 +1,5 @@
 import networkx as nx
 import pytest
-
 from traccuracy import EdgeAttr, NodeAttr, TrackingGraph
 
 
@@ -31,8 +30,7 @@ def nx_comp1():
     ]
     graph = nx.DiGraph()
     graph.add_nodes_from([(cell["id"], cell) for cell in cells])
-    graph.add_edges_from([(edge["source"], edge["target"], edge)
-                          for edge in edges])
+    graph.add_edges_from([(edge["source"], edge["target"], edge) for edge in edges])
     return graph
 
 
@@ -138,11 +136,13 @@ def test_get_edges_with_flag(simple_graph):
 def test_get_nodes_with_attribute(simple_graph):
     assert simple_graph.get_nodes_with_attribute("is_tp_division") == ["1_1"]
     assert simple_graph.get_nodes_with_attribute("null") == []
-    assert simple_graph.get_nodes_with_attribute("is_tp_division", criterion=lambda x: x) == [
-        "1_1"
-    ]
+    assert simple_graph.get_nodes_with_attribute(
+        "is_tp_division", criterion=lambda x: x
+    ) == ["1_1"]
     assert (
-        simple_graph.get_nodes_with_attribute("is_tp_division", criterion=lambda x: not x)
+        simple_graph.get_nodes_with_attribute(
+            "is_tp_division", criterion=lambda x: not x
+        )
         == []
     )
     assert simple_graph.get_nodes_with_attribute("x", criterion=lambda x: x > 1) == [

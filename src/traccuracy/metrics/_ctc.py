@@ -38,28 +38,16 @@ class AOGMMetrics(Metric):
         evaluate_ctc_events(self.data)
 
         vertex_error_counts = {
-            "ns": len(
-                self.data.pred_graph.get_nodes_with_flag(NodeAttr.NON_SPLIT)
-            ),
-            "fp": len(
-                self.data.pred_graph.get_nodes_with_flag(NodeAttr.FALSE_POS)
-            ),
-            "fn": len(
-                self.data.gt_graph.get_nodes_with_flag(NodeAttr.FALSE_NEG)
-            ),
+            "ns": len(self.data.pred_graph.get_nodes_with_flag(NodeAttr.NON_SPLIT)),
+            "fp": len(self.data.pred_graph.get_nodes_with_flag(NodeAttr.FALSE_POS)),
+            "fn": len(self.data.gt_graph.get_nodes_with_flag(NodeAttr.FALSE_NEG)),
         }
         edge_error_counts = {
             "ws": len(
-                self.data.pred_graph.get_edges_with_flag(
-                    EdgeAttr.WRONG_SEMANTIC
-                )
+                self.data.pred_graph.get_edges_with_flag(EdgeAttr.WRONG_SEMANTIC)
             ),
-            "fp": len(
-                self.data.pred_graph.get_edges_with_flag(EdgeAttr.FALSE_POS)
-            ),
-            "fn": len(
-                self.data.gt_graph.get_edges_with_flag(EdgeAttr.FALSE_NEG)
-            ),
+            "fp": len(self.data.pred_graph.get_edges_with_flag(EdgeAttr.FALSE_POS)),
+            "fn": len(self.data.gt_graph.get_edges_with_flag(EdgeAttr.FALSE_NEG)),
         }
         error_sum = get_weighted_error_sum(
             vertex_error_counts,

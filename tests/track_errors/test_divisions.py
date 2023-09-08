@@ -1,7 +1,6 @@
 import networkx as nx
 import numpy as np
 import pytest
-
 from traccuracy import NodeAttr, TrackingGraph
 from traccuracy.matchers._matched import Matched
 from traccuracy.track_errors.divisions import (
@@ -61,9 +60,7 @@ def test_classify_divisions_tp(g):
     _classify_divisions(matched_data)
 
     assert len(g_gt.get_nodes_with_flag(NodeAttr.FN_DIV)) == 0
-    assert (
-        len(g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)) == 0
-    )
+    assert len(g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)) == 0
     assert NodeAttr.TP_DIV in g_gt.nodes()["2_2"]
     assert NodeAttr.TP_DIV in g_pred.nodes()["2_2"]
 
@@ -117,9 +114,7 @@ def test_classify_divisions_fn(g):
 
     _classify_divisions(matched_data)
 
-    assert (
-        len(g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)) == 0
-    )
+    assert len(g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)) == 0
     assert len(g_gt.get_nodes_with_flag(NodeAttr.TP_DIV)) == 0
     assert NodeAttr.FN_DIV in g_gt.nodes()["2_2"]
 
@@ -192,10 +187,7 @@ class Test_correct_shifted_divisions:
 
         assert ng_pred.nodes()["1_3"][NodeAttr.FP_DIV] is True
         assert ng_gt.nodes()["1_1"][NodeAttr.FN_DIV] is True
-        assert (
-            len(ng_gt.get_nodes_with_flag(NodeAttr.TP_DIV))
-            == 0
-        )
+        assert len(ng_gt.get_nodes_with_flag(NodeAttr.TP_DIV)) == 0
 
     def test_fn_early(self):
         # Early division in gt

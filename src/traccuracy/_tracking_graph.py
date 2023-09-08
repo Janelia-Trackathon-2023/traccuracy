@@ -246,10 +246,12 @@ class TrackingGraph:
                 and the value is True.
         """
         if not isinstance(attr, NodeAttr):
-            raise ValueError(
-                f"Function takes NodeAttr arguments, not {type(attr)}.")
-        nodes_with_flag = [node for node, attrs in self.nodes().items()
-                           if attr in attrs.keys() and attrs[attr] is True]
+            raise ValueError(f"Function takes NodeAttr arguments, not {type(attr)}.")
+        nodes_with_flag = [
+            node
+            for node, attrs in self.nodes().items()
+            if attr in attrs.keys() and attrs[attr] is True
+        ]
         return nodes_with_flag
 
     def get_edges_with_flag(self, attr):
@@ -263,10 +265,12 @@ class TrackingGraph:
                 and the value is True.
         """
         if not isinstance(attr, EdgeAttr):
-            raise ValueError(
-                f"Function takes EdgeAttr arguments, not {type(attr)}.")
-        edges_with_flag = [edge for edge, attrs in self.edges().items()
-                           if attr in attrs.keys() and attrs[attr] is True]
+            raise ValueError(f"Function takes EdgeAttr arguments, not {type(attr)}.")
+        edges_with_flag = [
+            edge
+            for edge, attrs in self.edges().items()
+            if attr in attrs.keys() and attrs[attr] is True
+        ]
         return edges_with_flag
 
     def get_nodes_by_roi(self, **kwargs):
@@ -292,7 +296,8 @@ class TrackingGraph:
                 raise ValueError(
                     f"Provided argument {dim} is neither the frame key"
                     f" {self.frame_key} or one of the location keys"
-                    f" {self.location_keys}.")
+                    f" {self.location_keys}."
+                )
             dimensions.append((dim, limit[0], limit[1]))
             limit_criterion.append(lambda x: x >= limit[0])
         nodes = []
