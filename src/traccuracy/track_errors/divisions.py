@@ -9,26 +9,26 @@ from traccuracy._utils import find_gt_node_matches, find_pred_node_matches
 logger = logging.getLogger(__name__)
 
 
-def _classify_divisions(G_gt, G_pred, mapper):
+def _classify_divisions(g_gt, g_pred, mapper):
     """Identify each division as a true positive, false positive or false negative
 
     This function only works on node mappers that are one-to-one
 
-    G_gt and G_pred are modified in place and therefore not returned
+    g_gt and g_pred are modified in place and therefore not returned
 
     Args:
-        G_gt (TrackingGraph): `TrackingGraph` of GT data
-        G_pred (TrackingGraph): `TrackingGraph` of pred data
+        g_gt (TrackingGraph): `TrackingGraph` of GT data
+        g_pred (TrackingGraph): `TrackingGraph` of pred data
         mapper ([(gt_node, pred_node)]): List of tuples with pairs of gt and pred nodes
 
     Raises:
-        TypeError: G_gt and G_pred must be TrackingGraph objects
+        TypeError: g_gt and g_pred must be TrackingGraph objects
         ValueError: mapper must contain a one-to-one mapping of nodes
     """
-    if not isinstance(G_gt, TrackingGraph) or not isinstance(G_pred, TrackingGraph):
-        raise TypeError("G_gt and G_pred must be TrackingGraph objects")
+    if not isinstance(g_gt, TrackingGraph) or not isinstance(g_pred, TrackingGraph):
+        raise TypeError("g_gt and g_pred must be TrackingGraph objects")
 
-    if G_gt.division_annotations and G_pred.division_annotations:
+    if g_gt.division_annotations and g_pred.division_annotations:
         logger.info("Divison annotations already present. Skipping graph annotation.")
         return
 
@@ -49,44 +49,44 @@ def _classify_divisions(G_gt, G_pred, mapper):
             return match[0]
 
     # Collect list of divisions
-    div_gt = G_gt.get_divisions()
-    div_pred = G_pred.get_divisions()
+    div_gt = g_gt.get_divisions()
+    div_pred = g_pred.get_divisions()
 
     for gt_node in div_gt:
         # Find possible matching nodes
         pred_node = _find_gt_node_matches(gt_node)
         # No matching node so division missed
         if pred_node is None:
-            G_gt.set_node_attribute(gt_node, NodeAttr.FN_DIV, True)
+            g_gt.set_node_attribute(gt_node, NodeAttr.FN_DIV, True)
         # Check if the division has the corret daughters
         else:
-            succ_gt = G_gt.get_succs(gt_node)
+            succ_gt = g_gt.get_succs(gt_node)
             # Map pred succ nodes onto gt, unmapped nodes will return as None
             succ_pred = [
-                _find_pred_node_matches(n) for n in G_pred.get_succs(pred_node)
+                _find_pred_node_matches(n) for n in g_pred.get_succs(pred_node)
             ]
 
             # If daughters are same, division is correct
             if Counter(succ_gt) == Counter(succ_pred):
-                G_gt.set_node_attribute(gt_node, NodeAttr.TP_DIV, True)
-                G_pred.set_node_attribute(pred_node, NodeAttr.TP_DIV, True)
+                g_gt.set_node_attribute(gt_node, NodeAttr.TP_DIV, True)
+                g_pred.set_node_attribute(pred_node, NodeAttr.TP_DIV, True)
             # If daughters are at all mismatched, division is false negative
             else:
-                G_gt.set_node_attribute(gt_node, NodeAttr.FN_DIV, True)
+                g_gt.set_node_attribute(gt_node, NodeAttr.FN_DIV, True)
 
         # Remove res division to record that we have classified it
         if pred_node in div_pred:
             div_pred.remove(pred_node)
 
     # Any remaining pred divisions are false positives
-    G_pred.set_node_attribute(div_pred, NodeAttr.FP_DIV, True)
+    g_pred.set_node_attribute(div_pred, NodeAttr.FP_DIV, True)
 
     # Set division annotation flag
-    G_gt.division_annotations = True
-    G_pred.division_annotations = True
+    g_gt.division_annotations = True
+    g_pred.division_annotations = True
 
 
-def _get_pred_by_t(G, node, delta_frames):
+def _get_pred_by_t(g, node, delta_frames):
     """For a given graph and node, traverses back by predecessor until target_frame
 
     Args:
@@ -101,7 +101,7 @@ def _get_pred_by_t(G, node, delta_frames):
         hashable: Node key of predecessor in target frame
     """
     for _ in range(delta_frames):
-        nodes = G.get_preds(node)
+        nodes = g.get_preds(node)
         # Exit if there are no predecessors
         if len(nodes) == 0:
             return None
@@ -113,7 +113,7 @@ def _get_pred_by_t(G, node, delta_frames):
     return node
 
 
-def _get_succ_by_t(G, node, delta_frames):
+def _get_succ_by_t(g, node, delta_frames):
     """For a given node, find the successors after delta frames
 
     If a division event is discovered, returns None
@@ -127,7 +127,7 @@ def _get_succ_by_t(G, node, delta_frames):
         hashable: Node id of successor
     """
     for _ in range(delta_frames):
-        nodes = G.get_succs(node)
+        nodes = g.get_succs(node)
         # Exit if there are no successors another division
         if len(nodes) == 0 or len(nodes) >= 2:
             return None
@@ -136,29 +136,29 @@ def _get_succ_by_t(G, node, delta_frames):
     return node
 
 
-def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
+def _correct_shifted_divisions(g_gt, g_pred, mapper, n_frames=1):
     """Allows for divisions to occur within a frame buffer and still be correct
 
     This implementation asserts that the parent lineages and daughter lineages must match.
     Matching is determined based on the provided mapper
     Does not support merges
 
-    Copies G_gt and G_pred before modifying node annotations and returns the new versions
+    Copies g_gt and g_pred before modifying node annotations and returns the new versions
 
     Args:
-        G_gt (TrackingGraph): GT tracking graph with FN division annotations
-        G_pred (TrackningGraph): Pred tracking graph with FP division annotations
+        g_gt (TrackingGraph): GT tracking graph with FN division annotations
+        g_pred (TrackningGraph): Pred tracking graph with FP division annotations
         mapper ([(gt_node, pred_node)]): List of tuples with pairs of gt and pred nodes
             Must be a one-to-one mapping
         n_frames (int): Number of frames to include in the frame buffer
 
     Returns:
-        TrackingGraph: Copy of G_gt with division annotations
-        TrackingGraph: Copy of G_pred with division annotations
+        TrackingGraph: Copy of g_gt with division annotations
+        TrackingGraph: Copy of g_pred with division annotations
     """
 
-    if not isinstance(G_gt, TrackingGraph) or not isinstance(G_pred, TrackingGraph):
-        raise TypeError("G_gt and G_pred must be TrackingGraph objects")
+    if not isinstance(g_gt, TrackingGraph) or not isinstance(g_pred, TrackingGraph):
+        raise TypeError("g_gt and g_pred must be TrackingGraph objects")
 
     # Check that mapper is one to one
     if len(mapper) != len({pair[0] for pair in mapper}) or len(mapper) != len(
@@ -167,17 +167,17 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
         raise ValueError("Mapping must be one-to-one")
 
     # Create copies of the graphs to modify during correction of divisions
-    G_gt = copy.deepcopy(G_gt)
-    G_pred = copy.deepcopy(G_pred)
+    g_gt = copy.deepcopy(g_gt)
+    g_pred = copy.deepcopy(g_pred)
 
-    fp_divs = G_pred.get_nodes_with_attribute(NodeAttr.FP_DIV)
-    fn_divs = G_gt.get_nodes_with_attribute(NodeAttr.FN_DIV)
+    fp_divs = g_pred.get_nodes_with_attribute(NodeAttr.FP_DIV)
+    fn_divs = g_gt.get_nodes_with_attribute(NodeAttr.FN_DIV)
 
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
         correct = False
-        t_fp = G_pred.graph.nodes[fp_node][G_pred.frame_key]
-        t_fn = G_gt.graph.nodes[fn_node][G_gt.frame_key]
+        t_fp = g_pred.graph.nodes[fp_node][g_pred.frame_key]
+        t_fn = g_gt.graph.nodes[fn_node][g_gt.frame_key]
 
         # Move on if nodes are not within frame buffer or within same frame
         if abs(t_fp - t_fn) > n_frames or t_fp == t_fn:
@@ -186,7 +186,7 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
         # False positive in pred occurs before false negative in gt
         if t_fp < t_fn:
             # Check if fp node matches prececessor of fn
-            fn_pred = _get_pred_by_t(G_gt, fn_node, t_fn - t_fp)
+            fn_pred = _get_pred_by_t(g_gt, fn_node, t_fn - t_fp)
             # Check if the match exists
             if (fn_pred, fp_node) not in mapper:
                 # Match does not exist so divisions cannot match
@@ -194,10 +194,10 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
 
             # Check if daughters match
             fp_succ = [
-                _get_succ_by_t(G_pred, node, t_fn - t_fp)
-                for node in G_pred.get_succs(fp_node)
+                _get_succ_by_t(g_pred, node, t_fn - t_fp)
+                for node in g_pred.get_succs(fp_node)
             ]
-            fn_succ = G_gt.get_succs(fn_node)
+            fn_succ = g_gt.get_succs(fn_node)
             if Counter(fp_succ) != Counter(fn_succ):
                 # Daughters don't match so division cannot match
                 continue
@@ -207,7 +207,7 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
         # False negative in gt occurs before false positive in pred
         else:
             # Check if fp node matches fn predecessor
-            fp_pred = _get_pred_by_t(G_pred, fp_node, t_fp - t_fn)
+            fp_pred = _get_pred_by_t(g_pred, fp_node, t_fp - t_fn)
             # Check if match exists
             if (fn_node, fp_pred) not in mapper:
                 # Match does not exist so divisions cannot match
@@ -215,10 +215,10 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
 
             # Check if daughters match
             fn_succ = [
-                _get_succ_by_t(G_gt, node, t_fp - t_fn)
-                for node in G_gt.get_succs(fn_node)
+                _get_succ_by_t(g_gt, node, t_fp - t_fn)
+                for node in g_gt.get_succs(fn_node)
             ]
-            fp_succ = G_pred.get_succs(fp_node)
+            fp_succ = g_pred.get_succs(fp_node)
             if Counter(fp_succ) != Counter(fn_succ):
                 # Daughters don't match so division cannot match
                 continue
@@ -228,31 +228,31 @@ def _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=1):
 
         if correct:
             # Remove error annotations from pred graph
-            G_pred.set_node_attribute(fp_node, NodeAttr.FP_DIV, False)
-            G_gt.set_node_attribute(fn_node, NodeAttr.FN_DIV, False)
+            g_pred.set_node_attribute(fp_node, NodeAttr.FP_DIV, False)
+            g_gt.set_node_attribute(fn_node, NodeAttr.FN_DIV, False)
 
             # Add the tp divisions annotations
-            G_gt.set_node_attribute(fn_node, NodeAttr.TP_DIV, True)
-            G_pred.set_node_attribute(fp_node, NodeAttr.TP_DIV, True)
+            g_gt.set_node_attribute(fn_node, NodeAttr.TP_DIV, True)
+            g_pred.set_node_attribute(fp_node, NodeAttr.TP_DIV, True)
 
-    return G_gt, G_pred
+    return g_gt, g_pred
 
 
-def _evaluate_division_events(G_gt, G_pred, mapper, frame_buffer=(0)):
+def _evaluate_division_events(g_gt, g_pred, mapper, frame_buffer=(0)):
     """Classify division errors and correct shifted divisions according to frame_buffer
 
-    Note: A copy of G_gt and G_pred will be created for each frame_buffer other than 0.
+    Note: A copy of g_gt and g_pred will be created for each frame_buffer other than 0.
     For large graphs, creating copies may introduce memory problems.
 
     Args:
-        G_gt (TrackingGraph): TrackingGraph of GT data
-        G_pred (TrackingGraph): TrackingGraph of pred data
+        g_gt (TrackingGraph): TrackingGraph of GT data
+        g_pred (TrackingGraph): TrackingGraph of pred data
         mapper ([(gt_node, pred_node)]): List of tuples with pairs of gt and pred nodes
         frame_buffer (tuple, optional): Tuple of integers. Value used as n_frames
             to tolerate in correct_shifted_divisions. Defaults to (0).
 
     Returns:
-        dict {frame_buffer: (G_gt, G_pred)}: A dictionary where each key corresponds to a frame
+        dict {frame_buffer: (g_gt, g_pred)}: A dictionary where each key corresponds to a frame
             buffer with a tuple of the corresponding ground truth and predicted TrackingGraphs
             after division annotations and correction by frame buffer
     """
@@ -260,8 +260,8 @@ def _evaluate_division_events(G_gt, G_pred, mapper, frame_buffer=(0)):
     div_annotations = {}
 
     # Baseline division classification
-    _classify_divisions(G_gt, G_pred, mapper)
-    div_annotations[0] = (G_gt, G_pred)
+    _classify_divisions(g_gt, g_pred, mapper)
+    div_annotations[0] = (g_gt, g_pred)
 
     # Correct shifted divisions for each nonzero value in frame_buffer
     for delta in frame_buffer:
@@ -269,7 +269,7 @@ def _evaluate_division_events(G_gt, G_pred, mapper, frame_buffer=(0)):
         if delta == 0:
             continue
 
-        gg, gp = _correct_shifted_divisions(G_gt, G_pred, mapper, n_frames=delta)
+        gg, gp = _correct_shifted_divisions(g_gt, g_pred, mapper, n_frames=delta)
         div_annotations[delta] = (gg, gp)
 
     return div_annotations
