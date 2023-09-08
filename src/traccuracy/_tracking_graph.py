@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 @enum.unique
-class NodeAttr(enum.Enum):
+class NodeAttr(str, enum.Enum):
     """An enum containing all valid attributes that can be used to
     annotate the nodes of a TrackingGraph. If new metrics require new
     annotations, they should be added here to ensure strings do not overlap and
@@ -52,7 +52,7 @@ class NodeAttr(enum.Enum):
 
 
 @enum.unique
-class EdgeAttr(enum.Enum):
+class EdgeAttr(str, enum.Enum):
     """An enum containing all valid attributes that can be used to
     annotate the edges of a TrackingGraph. If new metrics require new
     annotations, they should be added here to ensure strings do not overlap and
