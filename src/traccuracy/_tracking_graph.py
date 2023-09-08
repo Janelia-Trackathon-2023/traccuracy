@@ -290,7 +290,6 @@ class TrackingGraph:
             list of hashable: A list of node_ids for all nodes in the ROI.
         """
         dimensions = []
-        limit_criterion = []
         for dim, limit in kwargs.items():
             if not (dim == self.frame_key or dim in self.location_keys):
                 raise ValueError(
@@ -299,7 +298,6 @@ class TrackingGraph:
                     f" {self.location_keys}."
                 )
             dimensions.append((dim, limit[0], limit[1]))
-            limit_criterion.append(lambda x: x >= limit[0])
         nodes = []
         for node, attrs in self.graph.nodes().items():
             inside = True
