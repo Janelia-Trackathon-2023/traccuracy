@@ -13,9 +13,7 @@ def test_compute_mapping():
     track_graph = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
     nx.set_edge_attributes(track_graph.graph, 0, EdgeAttr.INTERTRACK_EDGE)
 
-    matched = CTCMatched(
-        gt_graph=track_graph, pred_graph=track_graph
-    )
+    matched = CTCMatched(gt_graph=track_graph, pred_graph=track_graph)
     metric = CTCMetrics(matched)
     assert metric.results
     assert "TRA" in metric.results

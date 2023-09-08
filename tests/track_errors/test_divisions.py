@@ -181,9 +181,7 @@ class Test_correct_shifted_divisions:
         g_gt.nodes["1_1"][NodeAttr.FN_DIV] = True
         g_pred.nodes["1_3"][NodeAttr.FP_DIV] = True
 
-        matched_data = DummyMatched(
-            TrackingGraph(g_gt), TrackingGraph(g_pred)
-        )
+        matched_data = DummyMatched(TrackingGraph(g_gt), TrackingGraph(g_pred))
         matched_data.mapping = mapper
 
         # buffer of 1, no change
@@ -204,9 +202,7 @@ class Test_correct_shifted_divisions:
         g_gt.nodes["1_1"][NodeAttr.FN_DIV] = True
         g_pred.nodes["1_3"][NodeAttr.FP_DIV] = True
 
-        matched_data = DummyMatched(
-            TrackingGraph(g_gt), TrackingGraph(g_pred)
-        )
+        matched_data = DummyMatched(TrackingGraph(g_gt), TrackingGraph(g_pred))
         matched_data.mapping = mapper
 
         # buffer of 3, corrections
@@ -225,9 +221,7 @@ class Test_correct_shifted_divisions:
         g_pred.nodes["1_1"][NodeAttr.FP_DIV] = True
         g_gt.nodes["1_3"][NodeAttr.FN_DIV] = True
 
-        matched_data = DummyMatched(
-            TrackingGraph(g_gt), TrackingGraph(g_pred)
-        )
+        matched_data = DummyMatched(TrackingGraph(g_gt), TrackingGraph(g_pred))
         matched_data.mapping = mapper
 
         # buffer of 3, corrections
@@ -245,9 +239,7 @@ def test_evaluate_division_events():
     g_gt, g_pred, mapper = get_division_graphs()
     frame_buffer = (0, 1, 2)
 
-    matched_data = DummyMatched(
-        TrackingGraph(g_gt), TrackingGraph(g_pred)
-    )
+    matched_data = DummyMatched(TrackingGraph(g_gt), TrackingGraph(g_pred))
     matched_data.mapping = mapper
 
     results = _evaluate_division_events(matched_data, frame_buffer=frame_buffer)
