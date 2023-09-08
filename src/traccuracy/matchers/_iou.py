@@ -99,14 +99,14 @@ def match_iou(gt, pred, threshold=0.6):
 
 
 class IOUMatched(Matched):
-    def __init__(self, gt_data, pred_data, iou_threshold=0.6):
+    def __init__(self, gt_graph, pred_graph, iou_threshold=0.6):
         """Constructs a mapping between gt and pred nodes using the IoU of the segmentations
 
         Lower values for iou_threshold will be more permissive of imperfect matches
 
         Args:
-            gt_data (TrackingData): TrackingData for the ground truth with segmentations
-            pred_data (TrackingData): TrackingData for the prediction with segmentations
+            gt_graph (TrackingGraph): TrackingGraph for the ground truth with segmentations
+            pred_graph (TrackingGraph): TrackingGraph for the prediction with segmentations
             iou_threshold (float, optional): Minimum IoU value to assign a match. Defaults to 0.6.
 
         Raises:
@@ -115,12 +115,12 @@ class IOUMatched(Matched):
         self.iou_threshold = iou_threshold
 
         # Check that segmentations exist in the data
-        if gt_data.segmentation is None or pred_data.segmentation is None:
+        if gt_graph.segmentation is None or pred_graph.segmentation is None:
             raise ValueError(
                 "Segmentation data must be provided for both gt and pred data"
             )
 
-        super().__init__(gt_data, pred_data)
+        super().__init__(gt_graph, pred_graph)
 
     def compute_mapping(self):
-        return match_iou(self.gt_data, self.pred_data, threshold=self.iou_threshold)
+        return match_iou(self.gt_graph, self.pred_graph, threshold=self.iou_threshold)

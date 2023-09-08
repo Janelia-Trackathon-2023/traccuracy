@@ -79,7 +79,7 @@ class TestIOUMatched:
             ndims=3, n_frames=n_frames, n_labels=n_labels
         )
 
-        matched = IOUMatched(gt_data=track_graph, pred_data=track_graph)
+        matched = IOUMatched(gt_graph=track_graph, pred_graph=track_graph)
 
         # Check for correct number of pairs
         assert len(matched.mapping) == n_frames * n_labels

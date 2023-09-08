@@ -33,16 +33,16 @@ class CTCMatched(Matched):
             ValueError: gt and pred must be a TrackingGraph object
             ValueError: GT and pred segmentations must be the same shape
         """
-        if not isinstance(self.gt_data, TrackingGraph) or not isinstance(
-            self.pred_data, TrackingGraph
+        if not isinstance(self.gt_graph, TrackingGraph) or not isinstance(
+            self.pred_graph, TrackingGraph
         ):
             raise ValueError(
                 "Input data must be a TrackingData object with a graph and segmentations"
             )
-        gt = self.gt_data
-        pred = self.pred_data
-        gt_label_key = self.gt_data.label_key
-        pred_label_key = self.pred_data.label_key
+        gt = self.gt_graph
+        pred = self.pred_graph
+        gt_label_key = self.gt_graph.label_key
+        pred_label_key = self.pred_graph.label_key
         G_gt, mask_gt = gt, gt.segmentation
         G_pred, mask_pred = pred, pred.segmentation
 

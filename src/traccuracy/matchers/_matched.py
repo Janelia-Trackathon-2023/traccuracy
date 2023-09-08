@@ -4,7 +4,7 @@ from traccuracy._tracking_graph import TrackingGraph
 
 
 class Matched(ABC):
-    def __init__(self, gt_data: "TrackingGraph", pred_data: "TrackingGraph"):
+    def __init__(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
         """Matched class which takes TrackingData objects for gt and pred, and computes matching.
 
         Each current matching method will be a subclass of Matched e.g. CTCMatched or IOUMatched.
@@ -12,18 +12,18 @@ class Matched(ABC):
         and any additional private attributes that may be needed/used e.g. detection matrices.
 
         Args:
-            gt_data (TrackingData): Tracking data object for the gt
-            pred_data (TrackingData): Tracking data object for the pred
+            gt_graph (TrackingGraph): Tracking graph object for the gt
+            pred_graph (TrackingGraph): Tracking graph object for the pred
         """
-        self.gt_data = gt_data
-        self.pred_data = pred_data
+        self.gt_graph = gt_graph
+        self.pred_graph = pred_graph
 
         self.mapping = self.compute_mapping()
 
         # Report matching performance
-        total_gt = len(self.gt_data.nodes())
+        total_gt = len(self.gt_graph.nodes())
         matched_gt = len({m[0] for m in self.mapping})
-        total_pred = len(self.pred_data.nodes())
+        total_pred = len(self.pred_graph.nodes())
         matched_pred = len({m[1] for m in self.mapping})
         print(f"Matched {matched_gt} out of {total_gt} ground truth nodes.")
         print(f"Matched {matched_pred} out of {total_pred} predicted nodes.")
