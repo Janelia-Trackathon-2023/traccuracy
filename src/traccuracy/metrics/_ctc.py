@@ -39,19 +39,13 @@ class AOGMMetrics(Metric):
 
         vertex_error_counts = {
             "ns": len(
-                self.data.pred_graph.get_nodes_with_attribute(
-                    NodeAttr.NON_SPLIT, lambda x: x
-                )
+                self.data.pred_graph.get_nodes_with_flag(NodeAttr.NON_SPLIT)
             ),
             "fp": len(
-                self.data.pred_graph.get_nodes_with_attribute(
-                    NodeAttr.FALSE_POS, lambda x: x
-                )
+                self.data.pred_graph.get_nodes_with_flag(NodeAttr.FALSE_POS)
             ),
             "fn": len(
-                self.data.gt_graph.get_nodes_with_attribute(
-                    NodeAttr.FALSE_NEG, lambda x: x
-                )
+                self.data.gt_graph.get_nodes_with_flag(NodeAttr.FALSE_NEG)
             ),
         }
         edge_error_counts = {

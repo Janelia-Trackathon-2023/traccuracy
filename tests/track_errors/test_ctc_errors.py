@@ -1,11 +1,9 @@
 import networkx as nx
 import numpy as np
+
 from traccuracy._tracking_graph import EdgeAttr, NodeAttr, TrackingGraph
 from traccuracy.matchers._matched import Matched
-from traccuracy.track_errors._ctc import (
-    get_edge_errors,
-    get_vertex_errors,
-)
+from traccuracy.track_errors._ctc import get_edge_errors, get_vertex_errors
 
 
 class DummyMatched(Matched):
@@ -47,10 +45,10 @@ def test_get_vertex_errors():
 
     get_vertex_errors(matched_data)
 
-    assert len(G_comp.get_nodes_with_attribute(NodeAttr.NON_SPLIT, lambda x: x)) == 1
-    assert len(G_comp.get_nodes_with_attribute(NodeAttr.TRUE_POS, lambda x: x)) == 3
-    assert len(G_comp.get_nodes_with_attribute(NodeAttr.FALSE_POS, lambda x: x)) == 2
-    assert len(G_gt.get_nodes_with_attribute(NodeAttr.FALSE_NEG, lambda x: x)) == 3
+    assert len(G_comp.get_nodes_with_flag(NodeAttr.NON_SPLIT)) == 1
+    assert len(G_comp.get_nodes_with_flag(NodeAttr.TRUE_POS)) == 3
+    assert len(G_comp.get_nodes_with_flag(NodeAttr.FALSE_POS)) == 2
+    assert len(G_gt.get_nodes_with_flag(NodeAttr.FALSE_NEG)) == 3
 
     assert gt_g.nodes[15][NodeAttr.FALSE_NEG]
     assert not gt_g.nodes[17][NodeAttr.FALSE_NEG]

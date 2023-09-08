@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import pytest
+
 from traccuracy import NodeAttr, TrackingGraph
 from traccuracy.matchers._matched import Matched
 from traccuracy.track_errors.divisions import (
@@ -59,9 +60,9 @@ def test_classify_divisions_tp(g):
     # Test true positive
     _classify_divisions(matched_data)
 
-    assert len(g_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x is True)) == 0
+    assert len(g_gt.get_nodes_with_flag(NodeAttr.FN_DIV)) == 0
     assert (
-        len(g_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x is True)) == 0
+        len(g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)) == 0
     )
     assert NodeAttr.TP_DIV in g_gt.nodes()["2_2"]
     assert NodeAttr.TP_DIV in g_pred.nodes()["2_2"]
@@ -93,7 +94,7 @@ def test_classify_divisions_fp(g):
 
     _classify_divisions(matched_data)
 
-    assert len(g_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x is True)) == 0
+    assert len(g_gt.get_nodes_with_flag(NodeAttr.FN_DIV)) == 0
     assert NodeAttr.FP_DIV in g_pred.nodes()["1_2"]
     assert NodeAttr.TP_DIV in g_gt.nodes()["2_2"]
     assert NodeAttr.TP_DIV in g_pred.nodes()["2_2"]
@@ -117,9 +118,9 @@ def test_classify_divisions_fn(g):
     _classify_divisions(matched_data)
 
     assert (
-        len(g_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x is True)) == 0
+        len(g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)) == 0
     )
-    assert len(g_gt.get_nodes_with_attribute(NodeAttr.TP_DIV, lambda x: x is True)) == 0
+    assert len(g_gt.get_nodes_with_flag(NodeAttr.TP_DIV)) == 0
     assert NodeAttr.FN_DIV in g_gt.nodes()["2_2"]
 
 
@@ -192,7 +193,7 @@ class Test_correct_shifted_divisions:
         assert ng_pred.nodes()["1_3"][NodeAttr.FP_DIV] is True
         assert ng_gt.nodes()["1_1"][NodeAttr.FN_DIV] is True
         assert (
-            len(ng_gt.get_nodes_with_attribute(NodeAttr.TP_DIV, lambda x: x is True))
+            len(ng_gt.get_nodes_with_flag(NodeAttr.TP_DIV))
             == 0
         )
 
