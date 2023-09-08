@@ -1,5 +1,6 @@
 import networkx as nx
 import pytest
+
 from traccuracy import EdgeAttr, NodeAttr, TrackingGraph
 
 
@@ -16,7 +17,7 @@ def nx_comp1():
     """
     cells = [
         {"id": "1_0", "t": 0, "y": 1, "x": 1},
-        {"id": "1_1", "t": 1, "y": 1, "x": 1, "division": True},
+        {"id": "1_1", "t": 1, "y": 1, "x": 1, "is_tp_division": True},
         {"id": "1_2", "t": 2, "y": 1, "x": 0},
         {"id": "1_3", "t": 2, "y": 1, "x": 2},
         {"id": "1_4", "t": 3, "y": 1, "x": 2},
@@ -48,7 +49,7 @@ def nx_comp2():
     cells = [
         {"id": "2_0", "t": 0, "y": 2, "x": 1},
         {"id": "2_1", "t": 1, "y": 2, "x": 1},
-        {"id": "2_2", "t": 2, "y": 2, "x": 1, "division": True},
+        {"id": "2_2", "t": 2, "y": 2, "x": 1, "is_tp_division": True},
         {"id": "2_3", "t": 3, "y": 1, "x": 1},
         {"id": "2_4", "t": 3, "y": 3, "x": 1},
     ]
@@ -111,6 +112,13 @@ def test_get_location(nx_comp1):
     graph2 = TrackingGraph(nx_comp1, location_keys=["y", "x"])
     assert graph2.get_location("1_2") == [1, 0]
     assert graph2.get_location("1_4") == [1, 2]
+
+
+def test_get_nodes_with_flag(simple_graph):
+    assert simple_graph.get_nodes_with_flag(NodeAttr.TP_DIV) == ["1_1"]
+    assert simple_graph.get_nodes_with_flag(NodeAttr.FP_DIV) == []
+    with pytest.raises(ValueError):
+        assert simple_graph.get_nodes_with_flag("is_tp_division")
 
 
 def test_get_nodes_with_attribute(simple_graph):

@@ -231,6 +231,23 @@ class TrackingGraph:
         """
         return [self.graph.nodes[node_id][key] for key in self.location_keys]
 
+    def get_nodes_with_flag(self, attr):
+        """Get all nodes with specified NodeAttr set to True.
+
+        Args:
+            attr (traccuracy.NodeAttr): the node attribute to query for
+
+        Returns:
+            (List(hashable)): A list of node_ids which have the given attribute
+                and the value is True.
+        """
+        if not isinstance(attr, NodeAttr):
+            raise ValueError(
+                f"Function takes NodeAttr arguments, not {type(attr)}.")
+        nodes_with_flag = [node for node, attrs in self.nodes().items()
+                           if attr in attrs.keys() and attrs[attr] is True]
+        return nodes_with_flag
+
     def get_nodes_with_attribute(self, attr, criterion=None, limit_to=None):
         """Get the node_ids of all nodes who have an attribute, optionally
         limiting to nodes whose value at that attribute meet a given criteria.
