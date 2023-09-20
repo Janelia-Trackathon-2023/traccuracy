@@ -86,7 +86,7 @@ def get_edge_errors(matched_data: "Matched"):
         get_vertex_errors(matched_data)
 
     induced_graph = comp_graph.get_subgraph(
-        comp_graph.get_nodes_with_attribute(NodeAttr.TRUE_POS, criterion=lambda x: x)
+        comp_graph.get_nodes_with_flag(NodeAttr.TRUE_POS)
     ).graph
 
     comp_graph.set_edge_attribute(list(comp_graph.edges()), EdgeAttr.FALSE_POS, False)

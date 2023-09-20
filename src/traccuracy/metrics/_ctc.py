@@ -38,38 +38,16 @@ class AOGMMetrics(Metric):
         evaluate_ctc_events(self.data)
 
         vertex_error_counts = {
-            "ns": len(
-                self.data.pred_graph.get_nodes_with_attribute(
-                    NodeAttr.NON_SPLIT, lambda x: x
-                )
-            ),
-            "fp": len(
-                self.data.pred_graph.get_nodes_with_attribute(
-                    NodeAttr.FALSE_POS, lambda x: x
-                )
-            ),
-            "fn": len(
-                self.data.gt_graph.get_nodes_with_attribute(
-                    NodeAttr.FALSE_NEG, lambda x: x
-                )
-            ),
+            "ns": len(self.data.pred_graph.get_nodes_with_flag(NodeAttr.NON_SPLIT)),
+            "fp": len(self.data.pred_graph.get_nodes_with_flag(NodeAttr.FALSE_POS)),
+            "fn": len(self.data.gt_graph.get_nodes_with_flag(NodeAttr.FALSE_NEG)),
         }
         edge_error_counts = {
             "ws": len(
-                self.data.pred_graph.get_edges_with_attribute(
-                    EdgeAttr.WRONG_SEMANTIC, lambda x: x
-                )
+                self.data.pred_graph.get_edges_with_flag(EdgeAttr.WRONG_SEMANTIC)
             ),
-            "fp": len(
-                self.data.pred_graph.get_edges_with_attribute(
-                    EdgeAttr.FALSE_POS, lambda x: x
-                )
-            ),
-            "fn": len(
-                self.data.gt_graph.get_edges_with_attribute(
-                    EdgeAttr.FALSE_NEG, lambda x: x
-                )
-            ),
+            "fp": len(self.data.pred_graph.get_edges_with_flag(EdgeAttr.FALSE_POS)),
+            "fn": len(self.data.gt_graph.get_edges_with_flag(EdgeAttr.FALSE_NEG)),
         }
         error_sum = get_weighted_error_sum(
             vertex_error_counts,
