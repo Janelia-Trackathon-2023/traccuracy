@@ -82,7 +82,6 @@ def test_assign_edge_errors():
     comp_g.add_nodes_from(comp_ids)
     comp_g.add_edges_from(comp_edges)
     nx.set_node_attributes(comp_g, True, NodeAttr.TRUE_POS)
-    nx.set_edge_attributes(comp_g, 0, EdgeAttr.INTERTRACK_EDGE)
     nx.set_node_attributes(
         comp_g,
         {idx: {"t": 0, "segmentation_id": 1, "y": 0, "x": 0} for idx in comp_ids},
@@ -93,7 +92,6 @@ def test_assign_edge_errors():
     gt_g = nx.DiGraph()
     gt_g.add_nodes_from(gt_ids)
     gt_g.add_edges_from(gt_edges)
-    nx.set_edge_attributes(gt_g, 0, EdgeAttr.INTERTRACK_EDGE)
     nx.set_node_attributes(gt_g, False, NodeAttr.FALSE_NEG)
     nx.set_node_attributes(
         gt_g, {idx: {"t": 0, "segmentation_id": 1, "y": 0, "x": 0} for idx in gt_ids}
@@ -111,45 +109,40 @@ def test_assign_edge_errors():
 
 
 def test_assign_edge_errors_semantics():
-    comp_ids = [3, 7, 10]
-    comp_ids_2 = list(np.asarray(comp_ids) + 1)
-    comp_ids += comp_ids_2
+    """
+    gt:
+    1_0 -- 1_1 -- 1_2 -- 1_3
 
-    gt_ids = [4, 12, 17]
-    gt_ids_2 = list(np.asarray(gt_ids) + 1)
-    gt_ids += gt_ids_2
+    comp:
+                         1_3
+    1_0 -- 1_1 -- 1_2 -<
+                         2_3
+    """
 
-    mapping = [(4, 3), (12, 7), (17, 10), (5, 4), (18, 11), (13, 8)]
+    gt = nx.DiGraph()
+    gt.add_edge("1_0", "1_1")
+    gt.add_edge("1_1", "1_2")
+    gt.add_edge("1_2", "1_3")
+    # Set node attrs
+    attrs = {}
+    for node in gt.nodes:
+        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
+    nx.set_node_attributes(gt, attrs)
 
-    # need a tp, fp, fn
-    comp_edges = [(3, 4)]
-    comp_g = nx.DiGraph()
-    comp_g.add_nodes_from(comp_ids)
-    comp_g.add_edges_from(comp_edges)
-    nx.set_node_attributes(comp_g, True, NodeAttr.TRUE_POS)
-    nx.set_edge_attributes(comp_g, 0, EdgeAttr.INTERTRACK_EDGE)
-    nx.set_node_attributes(
-        comp_g,
-        {idx: {"t": 0, "segmentation_id": 1, "y": 0, "x": 0} for idx in comp_ids},
-    )
-    G_comp = TrackingGraph(comp_g)
+    comp = gt.copy()
+    comp.add_edge("1_2", "2_3")
+    # Set node attrs
+    attrs = {}
+    for node in comp.nodes:
+        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
+    nx.set_node_attributes(comp, attrs)
 
-    gt_edges = [(4, 5), (17, 18)]
-    gt_g = nx.DiGraph()
-    gt_g.add_nodes_from(gt_ids)
-    gt_g.add_edges_from(gt_edges)
-    nx.set_edge_attributes(gt_g, 0, EdgeAttr.INTERTRACK_EDGE)
-    nx.set_node_attributes(gt_g, False, NodeAttr.FALSE_NEG)
-    gt_g.edges[(4, 5)][EdgeAttr.INTERTRACK_EDGE] = 1
-    nx.set_node_attributes(
-        gt_g, {idx: {"t": 0, "segmentation_id": 1, "y": 0, "x": 0} for idx in gt_ids}
-    )
-    G_gt = TrackingGraph(gt_g)
+    # Define mapping with all nodes matching except for 2_3 in comp
+    mapping = [(n, n) for n in gt.nodes]
 
-    matched_data = DummyMatched(G_gt, G_comp)
+    matched_data = DummyMatched(TrackingGraph(gt), TrackingGraph(comp))
     matched_data.mapping = mapping
 
     get_edge_errors(matched_data)
 
-    assert comp_g.edges[(3, 4)][EdgeAttr.WRONG_SEMANTIC]
-    assert not comp_g.edges[(3, 4)][EdgeAttr.TRUE_POS]
+    assert comp.edges[("1_2", "1_3")][EdgeAttr.WRONG_SEMANTIC]
