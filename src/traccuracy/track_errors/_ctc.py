@@ -90,7 +90,6 @@ def get_edge_errors(matched_data: "Matched"):
     ).graph
 
     comp_graph.set_edge_attribute(list(comp_graph.edges()), EdgeAttr.FALSE_POS, False)
-    comp_graph.set_edge_attribute(list(comp_graph.edges()), EdgeAttr.TRUE_POS, False)
     comp_graph.set_edge_attribute(
         list(comp_graph.edges()), EdgeAttr.WRONG_SEMANTIC, False
     )
@@ -126,8 +125,6 @@ def get_edge_errors(matched_data: "Matched"):
             is_parent_comp = comp_graph.edges()[edge][EdgeAttr.INTERTRACK_EDGE]
             if is_parent_gt != is_parent_comp:
                 comp_graph.set_edge_attribute(edge, EdgeAttr.WRONG_SEMANTIC, True)
-            else:
-                comp_graph.set_edge_attribute(edge, EdgeAttr.TRUE_POS, True)
 
     # fn edges - edges in gt_graph that aren't in induced graph
     for edge in tqdm(gt_graph.edges(), "Evaluating FN edges"):

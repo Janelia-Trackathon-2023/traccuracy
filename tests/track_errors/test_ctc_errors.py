@@ -103,7 +103,6 @@ def test_assign_edge_errors():
 
     get_edge_errors(matched_data)
 
-    assert comp_g.edges[(3, 4)][EdgeAttr.TRUE_POS]
     assert comp_g.edges[(7, 8)][EdgeAttr.FALSE_POS]
     assert gt_g.edges[(17, 18)][EdgeAttr.FALSE_NEG]
 
