@@ -168,8 +168,8 @@ def _correct_shifted_divisions(matched_data: "Matched", n_frames=1):
     ):
         raise ValueError("Mapping must be one-to-one")
 
-    fp_divs = g_pred.get_nodes_with_attribute(NodeAttr.FP_DIV)
-    fn_divs = g_gt.get_nodes_with_attribute(NodeAttr.FN_DIV)
+    fp_divs = g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)
+    fn_divs = g_gt.get_nodes_with_flag(NodeAttr.FN_DIV)
 
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
