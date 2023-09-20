@@ -131,5 +131,16 @@ def get_edge_errors(matched_data: "Matched"):
         if expected_comp_edge not in induced_graph.edges:
             gt_graph.set_edge_attribute(edge, EdgeAttr.FALSE_NEG, True)
 
+    # intertrack edges = connection between parent and daughter
+    for graph in [comp_graph, gt_graph]:
+        # Set to False by default
+        graph.set_edge_attribute(list(graph.edges()), EdgeAttr.INTERTRACK_EDGE, False)
+
+        for parent in graph.get_divisions():
+            for daughter in graph.get_succs(parent):
+                graph.set_edge_attribute(
+                    (parent, daughter), EdgeAttr.INTERTRACK_EDGE, True
+                )
+
     gt_graph.edge_errors = True
     comp_graph.edge_errors = True
