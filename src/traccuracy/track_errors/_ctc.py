@@ -80,6 +80,11 @@ def get_edge_errors(matched_data: "Matched"):
         logger.info("Edge errors already calculated. Skipping graph annotation")
         return
 
+    # Node errors must already be annotated
+    if not comp_graph.node_errors and not gt_graph.node_errors:
+        logger.warning("Node errors have not been annotated. Running node annotation.")
+        get_vertex_errors(matched_data)
+
     induced_graph = comp_graph.get_subgraph(
         comp_graph.get_nodes_with_attribute(NodeAttr.TRUE_POS, criterion=lambda x: x)
     ).graph
@@ -93,6 +98,17 @@ def get_edge_errors(matched_data: "Matched"):
 
     node_mapping_first = np.array([mp[0] for mp in node_mapping])
     node_mapping_second = np.array([mp[1] for mp in node_mapping])
+
+    # intertrack edges = connection between parent and daughter
+    for graph in [comp_graph, gt_graph]:
+        # Set to False by default
+        graph.set_edge_attribute(list(graph.edges()), EdgeAttr.INTERTRACK_EDGE, False)
+
+        for parent in graph.get_divisions():
+            for daughter in graph.get_succs(parent):
+                graph.set_edge_attribute(
+                    (parent, daughter), EdgeAttr.INTERTRACK_EDGE, True
+                )
 
     # fp edges - edges in induced_graph that aren't in gt_graph
     for edge in tqdm(induced_graph.edges, "Evaluating FP edges"):
@@ -130,17 +146,6 @@ def get_edge_errors(matched_data: "Matched"):
         expected_comp_edge = (source_comp_id, target_comp_id)
         if expected_comp_edge not in induced_graph.edges:
             gt_graph.set_edge_attribute(edge, EdgeAttr.FALSE_NEG, True)
-
-    # intertrack edges = connection between parent and daughter
-    for graph in [comp_graph, gt_graph]:
-        # Set to False by default
-        graph.set_edge_attribute(list(graph.edges()), EdgeAttr.INTERTRACK_EDGE, False)
-
-        for parent in graph.get_divisions():
-            for daughter in graph.get_succs(parent):
-                graph.set_edge_attribute(
-                    (parent, daughter), EdgeAttr.INTERTRACK_EDGE, True
-                )
 
     gt_graph.edge_errors = True
     comp_graph.edge_errors = True
