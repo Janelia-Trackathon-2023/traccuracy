@@ -125,11 +125,7 @@ def ctc_to_graph(df, detections):
 
         target = "{}_{}".format(row["Cell_ID"], row["Start"])
 
-        edges.append(
-            pd.DataFrame(
-                {"source": [source], "target": [target]}
-            )
-        )
+        edges.append(pd.DataFrame({"source": [source], "target": [target]}))
 
     # Store position attributes on nodes
     detections["node_id"] = (
