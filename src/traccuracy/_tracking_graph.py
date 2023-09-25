@@ -183,11 +183,12 @@ class TrackingGraph:
         Returns:
             dict[hashable, dict]: A dictionary from node ids to node attributes
         """
-        nodes = self.graph.nodes.items()
         if limit_to is None:
-            return dict(nodes)
+            return self.graph.nodes
         else:
-            limited_nodes = {_id: data for _id, data in nodes if _id in limit_to}
+            limited_nodes = {
+                _id: data for _id, data in self.graph.nodes if _id in limit_to
+            }
             return limited_nodes
 
     def edges(self, limit_to=None):
@@ -201,11 +202,12 @@ class TrackingGraph:
         Returns:
             dict[tuple[hashable], dict]: A dictionary from edge ids to edge attributes
         """
-        edges = self.graph.edges.items()
         if limit_to is None:
-            return dict(edges)
+            return self.graph.edges
         else:
-            limited_edges = {_id: data for _id, data in edges if _id in limit_to}
+            limited_edges = {
+                _id: data for _id, data in self.graph.edges if _id in limit_to
+            }
             return limited_edges
 
     def get_nodes_in_frame(self, frame):
