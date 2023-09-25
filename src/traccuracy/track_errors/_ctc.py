@@ -90,8 +90,12 @@ def get_edge_errors(matched_data: "Matched"):
     )
     gt_graph.set_edge_attribute(list(gt_graph.edges()), EdgeAttr.FALSE_NEG, False)
 
-    node_mapping_first = {mp[0]: mp[1] for mp in node_mapping}
-    node_mapping_second = {mp[1]: mp[0] for mp in node_mapping}
+    node_mapping_first = {
+        gt: comp for gt, comp in node_mapping if comp in induced_graph
+    }
+    node_mapping_second = {
+        comp: gt for gt, comp in node_mapping if comp in induced_graph
+    }
 
     # fp edges - edges in induced_graph that aren't in gt_graph
     for edge in tqdm(induced_graph.edges, "Evaluating FP edges"):
