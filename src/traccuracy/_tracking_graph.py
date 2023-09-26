@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 @enum.unique
-class NodeAttr(enum.Enum):
+class NodeAttr(str, enum.Enum):
     """An enum containing all valid attributes that can be used to
     annotate the nodes of a TrackingGraph. If new metrics require new
     annotations, they should be added here to ensure strings do not overlap and
@@ -52,7 +52,7 @@ class NodeAttr(enum.Enum):
 
 
 @enum.unique
-class EdgeAttr(enum.Enum):
+class EdgeAttr(str, enum.Enum):
     """An enum containing all valid attributes that can be used to
     annotate the edges of a TrackingGraph. If new metrics require new
     annotations, they should be added here to ensure strings do not overlap and
@@ -141,7 +141,7 @@ class TrackingGraph:
         self.segmentation = segmentation
         if NodeAttr.has_value(frame_key):
             raise ValueError(
-                f"Specified frame key {frame_key} is reserved for graph"
+                f"Specified frame key {frame_key} is reserved for graph "
                 "annotation. Please change the frame key."
             )
         self.frame_key = frame_key
@@ -234,6 +234,83 @@ class TrackingGraph:
             list of float: A list of location values in the same order as self.location_keys
         """
         return [self.graph.nodes[node_id][key] for key in self.location_keys]
+
+    def get_nodes_with_flag(self, attr):
+        """Get all nodes with specified NodeAttr set to True.
+
+        Args:
+            attr (traccuracy.NodeAttr): the node attribute to query for
+
+        Returns:
+            (List(hashable)): A list of node_ids which have the given attribute
+                and the value is True.
+        """
+        if not isinstance(attr, NodeAttr):
+            raise ValueError(f"Function takes NodeAttr arguments, not {type(attr)}.")
+        nodes_with_flag = [
+            node
+            for node, attrs in self.nodes().items()
+            if attr in attrs.keys() and attrs[attr] is True
+        ]
+        return nodes_with_flag
+
+    def get_edges_with_flag(self, attr):
+        """Get all edges with specified EdgeAttr set to True.
+
+        Args:
+            attr (traccuracy.EdgeAttr): the edge attribute to query for
+
+        Returns:
+            (List(hashable)): A list of edge ids which have the given attribute
+                and the value is True.
+        """
+        if not isinstance(attr, EdgeAttr):
+            raise ValueError(f"Function takes EdgeAttr arguments, not {type(attr)}.")
+        edges_with_flag = [
+            edge
+            for edge, attrs in self.edges().items()
+            if attr in attrs.keys() and attrs[attr] is True
+        ]
+        return edges_with_flag
+
+    def get_nodes_by_roi(self, **kwargs):
+        """Gets the nodes in a given region of interest (ROI). The ROI is
+        defined by keyword arguments that correspond to the frame key and
+        location keys, where each argument should be a (start, end) tuple
+        (the end is exclusive). Dimensions that are not passed as arguments
+        are unbounded. None can be passed as an element of the tuple to
+        signify an unbounded ROI on that side.
+
+        For example, if frame_key='t' and location_keys=('x', 'y'):
+            `graph.get_nodes_by_roi(t=(10, None), x=(0, 100))`
+        would return all nodes with time >= 10, and 0 <= x < 100, with no limit
+        on the y values.
+
+        Returns:
+            list of hashable: A list of node_ids for all nodes in the ROI.
+        """
+        dimensions = []
+        for dim, limit in kwargs.items():
+            if not (dim == self.frame_key or dim in self.location_keys):
+                raise ValueError(
+                    f"Provided argument {dim} is neither the frame key"
+                    f" {self.frame_key} or one of the location keys"
+                    f" {self.location_keys}."
+                )
+            dimensions.append((dim, limit[0], limit[1]))
+        nodes = []
+        for node, attrs in self.graph.nodes().items():
+            inside = True
+            for dim, start, end in dimensions:
+                if start is not None and attrs[dim] < start:
+                    inside = False
+                    break
+                if end is not None and attrs[dim] >= end:
+                    inside = False
+                    break
+            if inside:
+                nodes.append(node)
+        return nodes
 
     def get_nodes_with_attribute(self, attr, criterion=None, limit_to=None):
         """Get the node_ids of all nodes who have an attribute, optionally
