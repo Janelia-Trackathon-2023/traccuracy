@@ -268,3 +268,19 @@ def test_get_and_set_edge_attributes(simple_graph):
     assert simple_graph.edges()[("1_1", "1_3")][EdgeAttr.TRUE_POS] is False
     with pytest.raises(ValueError):
         simple_graph.set_edge_attribute(("1_1", "1_3"), "x", 2)
+
+
+def test_get_tracklets(simple_graph):
+    tracklets = simple_graph.get_tracklets()
+    for tracklet in tracklets:
+        start_nodes = [n for n, d in tracklet.graph.in_degree() if d == 0]
+        assert len(start_nodes) == 1
+        end_nodes = [n for n, d in tracklet.graph.out_degree() if d == 0]
+        assert len(end_nodes)
+
+        if start_nodes[0] == "1_0":
+            assert end_nodes[0] == "1_1"
+        elif start_nodes[0] == "1_2":
+            assert end_nodes[0] == "1_2"
+        elif start_nodes[0] == "1_3":
+            assert end_nodes[0] == "1_4"
