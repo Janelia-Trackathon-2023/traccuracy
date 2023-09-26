@@ -526,8 +526,7 @@ class TrackingGraph:
             self.graph.edges[_id][attr] = value
 
     def get_tracklets(self):
-        """Gets a list of new TrackingGraph objects where each graph is a subgraph of a
-        tracklet.
+        """Gets a list of new TrackingGraph objects containing all tracklets of the current graph.
 
         Tracklet is defined as all connected components between divisions (daughter to next
         parent). Tracklets can also start or end with a non-dividing cell.
