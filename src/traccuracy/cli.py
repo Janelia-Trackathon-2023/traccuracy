@@ -1,10 +1,13 @@
 import json
+import logging
 from typing import Optional
 
 import typer
 
 from traccuracy import run_metrics
 from traccuracy.loaders import load_ctc_data
+
+logger = logging.getLogger(__name__)
 
 app = typer.Typer()
 
@@ -57,8 +60,8 @@ def run_ctc(
     result = run_metrics(gt_data, pred_data, CTCMatched, [CTCMetrics])
     with open(out_path, "w") as fp:
         json.dump(result, fp)
-    print(f'TRA: {result["CTCMetrics"]["TRA"]}')
-    print(f'DET: {result["CTCMetrics"]["DET"]}')
+    logger.info(f'TRA: {result["CTCMetrics"]["TRA"]}')
+    logger.info(f'DET: {result["CTCMetrics"]["DET"]}')
 
 
 @app.command()
@@ -130,7 +133,7 @@ def run_aogm(
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)
-    print(f'AOGM: {result["AOGMMetrics"]["AOGM"]}')
+    logger.info(f'AOGM: {result["AOGMMetrics"]["AOGM"]}')
 
 
 @app.command()
@@ -194,7 +197,7 @@ def run_divisions_on_iou(
     res_str = ""
     for frame_buffer, res_dict in result["DivisionMetrics"].items():
         res_str += f'{frame_buffer} F1: {res_dict["Division F1"]}\n'
-    print(res_str)
+    logger.info(res_str)
 
 
 @app.command()
@@ -252,7 +255,7 @@ def run_divisions_on_ctc(
     res_str = ""
     for frame_buffer, res_dict in result["DivisionMetrics"].items():
         res_str += f'{frame_buffer} F1: {res_dict["Division F1"]}\n'
-    print(res_str)
+    logger.info(res_str)
 
 
 typer_click_object = typer.main.get_command(app)
