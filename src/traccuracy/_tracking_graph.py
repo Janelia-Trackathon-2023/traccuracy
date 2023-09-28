@@ -181,15 +181,15 @@ class TrackingGraph:
                 Will raise KeyError if any of these node_ids are not present.
 
         Returns:
-            dict[hashable, dict]: A dictionary from node ids to node attributes
+            NodeView: Provides set-like operations on the nodes as well as node attribute lookup.
         """
         if limit_to is None:
             return self.graph.nodes
         else:
-            limited_nodes = {
-                _id: data for _id, data in self.graph.nodes if _id in limit_to
-            }
-            return limited_nodes
+            for node in limit_to:
+                if not self.graph.has_node(node):
+                    raise KeyError(f"Queried node {node} not present in graph.")
+            return self.graph.subgraph(limit_to).nodes
 
     def edges(self, limit_to=None):
         """Get all the edges in the graph, along with their attributes.
@@ -200,15 +200,16 @@ class TrackingGraph:
                 Will raise KeyError if any of these edge ids are not present.
 
         Returns:
-            dict[tuple[hashable], dict]: A dictionary from edge ids to edge attributes
+            OutEdgeView: Provides set-like operations on the edge-tuples as well as edge attribute
+                lookup.
         """
         if limit_to is None:
             return self.graph.edges
         else:
-            limited_edges = {
-                _id: data for _id, data in self.graph.edges if _id in limit_to
-            }
-            return limited_edges
+            for edge in limit_to:
+                if not self.graph.has_edge(*edge):
+                    raise KeyError(f"Queried edge {edge} not present in graph.")
+            return self.graph.edge_subgraph(limit_to).edges
 
     def get_nodes_in_frame(self, frame):
         """Get the node ids of all nodes in the given frame.
