@@ -90,19 +90,15 @@ def get_edge_errors(matched_data: "Matched"):
     )
     gt_graph.set_edge_attribute(list(gt_graph.edges()), EdgeAttr.FALSE_NEG, False)
 
-    node_mapping_first = {
-        gt: comp for gt, comp in node_mapping if comp in induced_graph
-    }
-    node_mapping_second = {
-        comp: gt for gt, comp in node_mapping if comp in induced_graph
-    }
+    gt_comp_mapping = {gt: comp for gt, comp in node_mapping if comp in induced_graph}
+    comp_gt_mapping = {comp: gt for gt, comp in node_mapping if comp in induced_graph}
 
     # fp edges - edges in induced_graph that aren't in gt_graph
     for edge in tqdm(induced_graph.edges, "Evaluating FP edges"):
         source, target = edge[0], edge[1]
 
-        source_gt_id = node_mapping_second[source]
-        target_gt_id = node_mapping_second[target]
+        source_gt_id = comp_gt_mapping[source]
+        target_gt_id = comp_gt_mapping[target]
 
         expected_gt_edge = (source_gt_id, target_gt_id)
         if expected_gt_edge not in gt_graph.edges():
@@ -127,8 +123,8 @@ def get_edge_errors(matched_data: "Matched"):
             gt_graph.set_edge_attribute(edge, EdgeAttr.FALSE_NEG, True)
             continue
 
-        source_comp_id = node_mapping_first[source]
-        target_comp_id = node_mapping_first[target]
+        source_comp_id = gt_comp_mapping[source]
+        target_comp_id = gt_comp_mapping[target]
 
         expected_comp_edge = (source_comp_id, target_comp_id)
         if expected_comp_edge not in induced_graph.edges:
