@@ -159,13 +159,42 @@ class TrackingGraph:
                 )
         self.location_keys = location_keys
 
-        # Define empty attributes that will be set by update_graph
-        self.graph = None
-        self.nodes_by_frame = None
-        self.start_frame = None
-        self.end_frame = None
+        self.graph = graph
 
-        self._update_graph(graph)
+        # construct dictionaries from attributes to nodes/edges for easy lookup
+        self.nodes_by_frame = {}
+        self.nodes_by_flag = {flag: set() for flag in NodeAttr}
+        self.edges_by_flag = {flag: set() for flag in EdgeAttr}
+        for node, attrs in self.graph.nodes.items():
+            # check that every node has the time frame and location specified
+            assert (
+                self.frame_key in attrs.keys()
+            ), f"Frame key {self.frame_key} not present for node {node}."
+            for key in self.location_keys:
+                assert (
+                    key in attrs.keys()
+                ), f"Location key {key} not present for node {node}."
+
+            # store node id in nodes_by_frame mapping
+            frame = attrs[self.frame_key]
+            if frame not in self.nodes_by_frame.keys():
+                self.nodes_by_frame[frame] = set([node])
+            else:
+                self.nodes_by_frame[frame].add(node)
+            # store node id in nodes_by_flag mapping
+            for flag in NodeAttr:
+                if flag in attrs and attrs[flag]:
+                    self.nodes_by_flag[flag].add(node)
+
+        # store edge id in edges_by_flag
+        for edge, attrs in self.graph.edges.items():
+            for flag in EdgeAttr:
+                if flag in attrs and attrs[flag]:
+                    self.edges_by_flag[flag].add(edge)
+
+        # Store first and last frames for reference
+        self.start_frame = min(self.nodes_by_frame.keys())
+        self.end_frame = max(self.nodes_by_frame.keys()) + 1
 
         # Record types of annotations that have been calculated
         self.division_annotations = False
@@ -220,7 +249,7 @@ class TrackingGraph:
             list of node_ids: A list of node ids for all nodes in frame.
         """
         if frame in self.nodes_by_frame.keys():
-            return self.nodes_by_frame[frame]
+            return list(self.nodes_by_frame[frame])
         else:
             return []
 
@@ -247,12 +276,7 @@ class TrackingGraph:
         """
         if not isinstance(attr, NodeAttr):
             raise ValueError(f"Function takes NodeAttr arguments, not {type(attr)}.")
-        nodes_with_flag = [
-            node
-            for node, attrs in self.nodes().items()
-            if attr in attrs.keys() and attrs[attr] is True
-        ]
-        return nodes_with_flag
+        return list(self.nodes_by_flag[attr])
 
     def get_edges_with_flag(self, attr):
         """Get all edges with specified EdgeAttr set to True.
@@ -266,12 +290,7 @@ class TrackingGraph:
         """
         if not isinstance(attr, EdgeAttr):
             raise ValueError(f"Function takes EdgeAttr arguments, not {type(attr)}.")
-        edges_with_flag = [
-            edge
-            for edge, attrs in self.edges().items()
-            if attr in attrs.keys() and attrs[attr] is True
-        ]
-        return edges_with_flag
+        return list(self.edges_by_flag[attr])
 
     def get_nodes_by_roi(self, **kwargs):
         """Gets the nodes in a given region of interest (ROI). The ROI is
@@ -439,41 +458,23 @@ class TrackingGraph:
 
         new_graph = self.graph.subgraph(nodes).copy()
         new_trackgraph = copy.deepcopy(self)
-        new_trackgraph._update_graph(new_graph)
+        new_trackgraph.graph = new_graph
+        for frame, nodes_in_frame in self.nodes_by_frame.items():
+            new_nodes_in_frame = nodes_in_frame.intersection(nodes)
+            if new_nodes_in_frame:
+                new_trackgraph.nodes_by_frame[frame] = new_nodes_in_frame
+            else:
+                del new_trackgraph.nodes_by_frame[frame]
+
+        for attr in NodeAttr:
+            new_trackgraph.nodes_by_flag[attr] = self.nodes_by_flag[attr].intersection(nodes)
+        for attr in EdgeAttr:
+            new_trackgraph.edges_by_flag[attr] = self.edges_by_flag[attr].intersection(nodes)
+
+        new_trackgraph.start_frame = min(new_trackgraph.nodes_by_frame.keys())
+        new_trackgraph.end_frame = max(new_trackgraph.nodes_by_frame.keys()) + 1
 
         return new_trackgraph
-
-    def _update_graph(self, graph):
-        """Given a new graph, which is expected to be a subgraph of the current graph,
-        update attributes which are dependent on the graph.
-
-        Args:
-            graph (nx.DiGraph): A networkx graph that is a subgraph of the original graph
-        """
-        self.graph = graph
-
-        # construct a dictionary from frames to node ids for easy lookup
-        self.nodes_by_frame = {}
-        for node, attrs in self.graph.nodes.items():
-            # check that every node has the time frame and location specified
-            assert (
-                self.frame_key in attrs.keys()
-            ), f"Frame key {self.frame_key} not present for node {node}."
-            for key in self.location_keys:
-                assert (
-                    key in attrs.keys()
-                ), f"Location key {key} not present for node {node}."
-
-            # store node id in nodes_by_frame mapping
-            frame = attrs[self.frame_key]
-            if frame not in self.nodes_by_frame.keys():
-                self.nodes_by_frame[frame] = [node]
-            else:
-                self.nodes_by_frame[frame].append(node)
-
-        # Store first and last frames for reference
-        self.start_frame = min(self.nodes_by_frame.keys())
-        self.end_frame = max(self.nodes_by_frame.keys()) + 1
 
     def set_node_attribute(self, ids, attr, value=True):
         """Set an attribute flag for a set of nodes specified by
@@ -499,6 +500,10 @@ class TrackingGraph:
             )
         for _id in ids:
             self.graph.nodes[_id][attr] = value
+            if value:
+                self.nodes_by_flag[attr].add(_id)
+            else:
+                self.nodes_by_flag[attr].discard(_id)
 
     def set_edge_attribute(self, ids, attr, value=True):
         """Set an attribute flag for a set of edges specified by
@@ -524,6 +529,10 @@ class TrackingGraph:
             )
         for _id in ids:
             self.graph.edges[_id][attr] = value
+            if value:
+                self.edges_by_flag[attr].add(_id)
+            else:
+                self.edges_by_flag[attr].discard(_id)
 
     def get_tracklets(self):
         """Gets a list of new TrackingGraph objects containing all tracklets of the current graph.
