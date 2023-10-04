@@ -11,8 +11,7 @@ from traccuracy.metrics import CTCMetrics, DivisionMetrics
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-@pytest.fixture
-def gt_data():
+def download_gt_data():
     # Download GT data -- look into cacheing this in github actions
     url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N2DL-HeLa.zip"
     data_dir = "downloads"
@@ -30,6 +29,10 @@ def gt_data():
         with zipfile.ZipFile(file_path, "r") as zip_ref:
             zip_ref.extractall(data_dir)
 
+
+@pytest.fixture
+def gt_data():
+    download_gt_data()
     return load_ctc_data(
         "downloads/Fluo-N2DL-HeLa/01_GT/TRA",
         "downloads/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt",
@@ -57,6 +60,7 @@ def iou_matched(gt_data, pred_data):
 
 
 def test_load_gt_data(benchmark):
+    download_gt_data()
     benchmark(
         load_ctc_data,
         "downloads/Fluo-N2DL-HeLa/01_GT/TRA",
