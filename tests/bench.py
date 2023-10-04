@@ -71,8 +71,10 @@ def test_load_gt_data(benchmark):
 def test_load_pred_data(benchmark):
     benchmark(
         load_ctc_data,
-        "../examples/sample-data/Fluo-N2DL-HeLa/01_RES",
-        "../examples/sample-data/Fluo-N2DL-HeLa/01_RES/res_track.txt",
+        os.path.join(ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES"),
+        os.path.join(
+            ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES/res_track.txt"
+        ),
     )
 
 
