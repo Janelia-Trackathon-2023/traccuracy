@@ -14,7 +14,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def download_gt_data():
     # Download GT data -- look into cacheing this in github actions
     url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N2DL-HeLa.zip"
-    data_dir = "downloads"
+    data_dir = os.path.join(ROOT_DIR, "downloads")
 
     if not os.path.exists(data_dir):
         os.mkdir(data_dir)
@@ -34,8 +34,8 @@ def download_gt_data():
 def gt_data():
     download_gt_data()
     return load_ctc_data(
-        "downloads/Fluo-N2DL-HeLa/01_GT/TRA",
-        "downloads/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt",
+        os.path.join(ROOT_DIR, "downloads/Fluo-N2DL-HeLa/01_GT/TRA"),
+        os.path.join(ROOT_DIR, "downloads/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt"),
     )
 
 
