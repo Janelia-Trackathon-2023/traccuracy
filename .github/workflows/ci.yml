@@ -44,6 +44,25 @@ jobs:
       - name: Test
         run: pytest --color=yes #--cov --cov-report=xml --cov-report=term-missing
 
+      - name: Run benchmark
+        run: |
+          cd tests
+          pytest bench.py --benchmark-json output.json
+
+      - name: Store benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: Python Benchmark with pytest-benchmark
+          tool: 'pytest'
+          output-file-path: tests/output.json
+          external-data-json-path: ./cache/benchmark-data.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # auto-push: true
+          # Show alert with commit comment on detecting possible performance regression
+          alert-threshold: '200%'
+          comment-on-alert: true
+          summary-always: true
+
       # - name: Coverage
       #   uses: codecov/codecov-action@v3
 
