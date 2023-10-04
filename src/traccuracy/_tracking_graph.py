@@ -308,6 +308,7 @@ class TrackingGraph:
         Returns:
             list of hashable: A list of node_ids for all nodes in the ROI.
         """
+        frames = None
         dimensions = []
         for dim, limit in kwargs.items():
             if not (dim == self.frame_key or dim in self.location_keys):
@@ -316,9 +317,25 @@ class TrackingGraph:
                     f" {self.frame_key} or one of the location keys"
                     f" {self.location_keys}."
                 )
-            dimensions.append((dim, limit[0], limit[1]))
+            if dim == self.frame_key:
+                frames = list(limit)
+            else:
+                dimensions.append((dim, limit[0], limit[1]))
         nodes = []
-        for node, attrs in self.graph.nodes().items():
+        if frames:
+            if frames[0] is None:
+                frames[0] = self.start_frame
+            if frames[1] is None:
+                frames[1] = self.end_frame
+            possible_nodes = []
+            for frame in range(frames[0], frames[1]):
+                if frame in self.nodes_by_frame:
+                    possible_nodes.extend(self.nodes_by_frame[frame])
+        else:
+            possible_nodes = self.graph.nodes()
+
+        for node in possible_nodes:
+            attrs = self.graph.nodes[node]
             inside = True
             for dim, start, end in dimensions:
                 if start is not None and attrs[dim] < start:
