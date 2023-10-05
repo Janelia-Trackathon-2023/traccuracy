@@ -551,6 +551,56 @@ class TrackingGraph:
             else:
                 self.edges_by_flag[attr].discard(_id)
 
+    def get_node_attribute(self, _id, attr):
+        """Get the boolean value of a given attribute for a given node.
+
+        Args:
+            _id (hashable): node id
+            attr (NodeAttr): Node attribute to fetch the value of
+
+        Raises:
+            ValueError: if attr is not a NodeAttr
+
+        Returns:
+            bool: The value of the attribute for that node. If the attribute
+                is not present on the graph, the value is presumed False.
+        """
+        if not isinstance(attr, NodeAttr):
+            raise ValueError(
+                f"Provided attribute {attr} is not of type NodeAttr. "
+                "Please use the enum instead of passing string values, "
+                "and add new attributes to the class to avoid key collision."
+            )
+
+        if attr not in self.graph.nodes[_id]:
+            return False
+        return self.graph.nodes[_id][attr]
+
+    def get_edge_attribute(self, _id, attr):
+        """Get the boolean value of a given attribute for a given edge.
+
+        Args:
+            _id (hashable): node id
+            attr (EdgeAttr): Edge attribute to fetch the value of
+
+        Raises:
+            ValueError: if attr is not a EdgeAttr
+
+        Returns:
+            bool: The value of the attribute for that edge. If the attribute
+                is not present on the graph, the value is presumed False.
+        """
+        if not isinstance(attr, EdgeAttr):
+            raise ValueError(
+                f"Provided attribute {attr} is not of type EdgeAttr. "
+                "Please use the enum instead of passing string values, "
+                "and add new attributes to the class to avoid key collision."
+            )
+
+        if attr not in self.graph.edges[_id]:
+            return False
+        return self.graph.edges[_id][attr]
+
     def get_tracklets(self):
         """Gets a list of new TrackingGraph objects containing all tracklets of the current graph.
 
