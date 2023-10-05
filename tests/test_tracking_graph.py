@@ -2,7 +2,6 @@ from collections import Counter
 
 import networkx as nx
 import pytest
-
 from traccuracy import EdgeAttr, NodeAttr, TrackingGraph
 
 
@@ -109,8 +108,12 @@ def test_get_cells_by_frame(simple_graph):
 
 def test_get_nodes_by_roi(simple_graph):
     assert simple_graph.get_nodes_by_roi(t=(0, 1)) == ["1_0"]
-    assert Counter(simple_graph.get_nodes_by_roi(x=(1, None))) == Counter(["1_0", "1_1", "1_3", "1_4"])
-    assert Counter(simple_graph.get_nodes_by_roi(x=(None, 2), t=(1, None))) == Counter(["1_1", "1_2"])
+    assert Counter(simple_graph.get_nodes_by_roi(x=(1, None))) == Counter(
+        ["1_0", "1_1", "1_3", "1_4"]
+    )
+    assert Counter(simple_graph.get_nodes_by_roi(x=(None, 2), t=(1, None))) == Counter(
+        ["1_1", "1_2"]
+    )
 
 
 def test_get_location(nx_comp1):

@@ -178,7 +178,7 @@ class TrackingGraph:
             # store node id in nodes_by_frame mapping
             frame = attrs[self.frame_key]
             if frame not in self.nodes_by_frame.keys():
-                self.nodes_by_frame[frame] = set([node])
+                self.nodes_by_frame[frame] = {node}
             else:
                 self.nodes_by_frame[frame].add(node)
             # store node id in nodes_by_flag mapping
@@ -484,9 +484,13 @@ class TrackingGraph:
                 del new_trackgraph.nodes_by_frame[frame]
 
         for attr in NodeAttr:
-            new_trackgraph.nodes_by_flag[attr] = self.nodes_by_flag[attr].intersection(nodes)
+            new_trackgraph.nodes_by_flag[attr] = self.nodes_by_flag[attr].intersection(
+                nodes
+            )
         for attr in EdgeAttr:
-            new_trackgraph.edges_by_flag[attr] = self.edges_by_flag[attr].intersection(nodes)
+            new_trackgraph.edges_by_flag[attr] = self.edges_by_flag[attr].intersection(
+                nodes
+            )
 
         new_trackgraph.start_frame = min(new_trackgraph.nodes_by_frame.keys())
         new_trackgraph.end_frame = max(new_trackgraph.nodes_by_frame.keys()) + 1
