@@ -31,7 +31,7 @@ jobs:
 
       - name: Run benchmark
         run: |
-          pytest tests/bench.py --benchmark-json output.json
+          pytest tests/bench.py --benchmark-min-rounds=1 --benchmark-json output.json
 
       - name: Store benchmark results
         uses: benchmark-action/github-action-benchmark@v1

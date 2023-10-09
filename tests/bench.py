@@ -30,7 +30,7 @@ def download_gt_data():
             zip_ref.extractall(data_dir)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def gt_data():
     download_gt_data()
     return load_ctc_data(
@@ -39,7 +39,7 @@ def gt_data():
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def pred_data():
     return load_ctc_data(
         os.path.join(ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES"),
@@ -49,32 +49,41 @@ def pred_data():
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def ctc_matched(gt_data, pred_data):
     return CTCMatched(gt_data, pred_data)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def iou_matched(gt_data, pred_data):
     return IOUMatched(gt_data, pred_data, iou_threshold=0.1)
 
 
 def test_load_gt_data(benchmark):
     download_gt_data()
-    benchmark(
+
+    benchmark.pedantic(
         load_ctc_data,
-        "downloads/Fluo-N2DL-HeLa/01_GT/TRA",
-        "downloads/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt",
+        args=(
+            "downloads/Fluo-N2DL-HeLa/01_GT/TRA",
+            "downloads/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt",
+        ),
+        rounds=1,
+        iterations=1,
     )
 
 
 def test_load_pred_data(benchmark):
-    benchmark(
+    benchmark.pedantic(
         load_ctc_data,
-        os.path.join(ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES"),
-        os.path.join(
-            ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES/res_track.txt"
+        args=(
+            os.path.join(ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES"),
+            os.path.join(
+                ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES/res_track.txt"
+            ),
         ),
+        rounds=1,
+        iterations=1,
     )
 
 
