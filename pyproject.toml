@@ -44,7 +44,7 @@ dependencies = [
 # extras
 # https://peps.python.org/pep-0621/#dependencies-optional-dependencies
 [project.optional-dependencies]
-test = ["pytest>=6.0", "pytest-cov", "pytest-benchmark"]
+test = ["pytest>=6.0", "pytest-cov", "pytest-benchmark", "pytest-timeout"]
 dev = [
     "black",
     "ipython",

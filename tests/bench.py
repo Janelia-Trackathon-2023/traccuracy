@@ -91,6 +91,7 @@ def test_ctc_matched(benchmark, gt_data, pred_data):
     benchmark(CTCMatched, gt_data, pred_data)
 
 
+@pytest.mark.timeout(300)
 def test_ctc_metrics(benchmark, ctc_matched):
     def run_compute():
         return CTCMetrics(copy.deepcopy(ctc_matched)).compute()
