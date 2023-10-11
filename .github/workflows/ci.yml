@@ -47,6 +47,43 @@ jobs:
       # - name: Coverage
       #   uses: codecov/codecov-action@v3
 
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+          cache-dependency-path: "pyproject.toml"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e .[test]
+
+      - name: Run benchmark
+        run: |
+          pytest tests/bench.py --benchmark-json output.json
+
+      - name: Store benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: Python Benchmark with pytest-benchmark
+          tool: 'pytest'
+          output-file-path: output.json
+          external-data-json-path: ./cache/benchmark-data.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # auto-push: true
+          # Show alert with commit comment on detecting possible performance regression
+          alert-threshold: '200%'
+          comment-on-alert: true
+          summary-always: true
+
   deploy:
     name: Deploy
     needs: test
