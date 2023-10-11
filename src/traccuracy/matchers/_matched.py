@@ -1,6 +1,9 @@
+import logging
 from abc import ABC, abstractmethod
 
 from traccuracy._tracking_graph import TrackingGraph
+
+logger = logging.getLogger(__name__)
 
 
 class Matched(ABC):
@@ -25,8 +28,8 @@ class Matched(ABC):
         matched_gt = len({m[0] for m in self.mapping})
         total_pred = len(self.pred_graph.nodes())
         matched_pred = len({m[1] for m in self.mapping})
-        print(f"Matched {matched_gt} out of {total_gt} ground truth nodes.")
-        print(f"Matched {matched_pred} out of {total_pred} predicted nodes.")
+        logger.info(f"Matched {matched_gt} out of {total_gt} ground truth nodes.")
+        logger.info(f"Matched {matched_pred} out of {total_pred} predicted nodes.")
 
     @abstractmethod
     def compute_mapping(self):

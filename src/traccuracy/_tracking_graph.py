@@ -527,3 +527,22 @@ class TrackingGraph:
             )
         for _id in ids:
             self.graph.edges[_id][attr] = value
+
+    def get_tracklets(self):
+        """Gets a list of new TrackingGraph objects containing all tracklets of the current graph.
+
+        Tracklet is defined as all connected components between divisions (daughter to next
+        parent). Tracklets can also start or end with a non-dividing cell.
+        """
+
+        graph_copy = self.graph.copy()
+
+        # Remove all intertrack edges from a copy of the original graph
+        for parent in self.get_divisions():
+            for daughter in self.get_succs(parent):
+                graph_copy.remove_edge(parent, daughter)
+
+        # Extract subgraphs (aka tracklets) and return as new track graphs
+        return [
+            self.get_subgraph(g) for g in nx.weakly_connected_components(graph_copy)
+        ]
