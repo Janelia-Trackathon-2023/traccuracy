@@ -22,9 +22,14 @@ def make_report(old_path, new_path, out_file):
     new = load_stats(new_path)
 
     # Merge on benchmark name
-    df = new[-1].merge(old[-1], on="Benchmark", suffixes=("_new", "_old"))
+    df = old[-1].merge(new[-1], on="Benchmark", suffixes=("_old", "_new"))
 
     df["Percent Change"] = 100 * (df["mean_new"] - df["mean_old"]) / df["mean_old"]
+    df["Percent Change"] = df["Percent Change"].map("{:.2f}".format)
+
+    # Format runtimes
+    df["mean_old"] = df["mean_old"].map("{:.5f}".format)
+    df["mean_new"] = df["mean_new"].map("{:.5f}".format)
 
     # Change column names to commit ids
     df = df.rename(
