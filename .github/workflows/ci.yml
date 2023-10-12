@@ -50,6 +50,7 @@ jobs:
   benchmark:
     name: Benchmark
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
 
     steps:
       - uses: actions/checkout@v3
@@ -71,6 +72,7 @@ jobs:
 
       - name: Retrieve cached baseline if available
         uses: actions/cache/restore@v3
+        id: cache
         with:
           path: baseline.json
           key: ${{ github.event.pull_request.base.sha }}
@@ -87,8 +89,6 @@ jobs:
         with:
           path: baseline.json
           key: ${{ github.event.pull_request.base.sha }}
-
-
 
       - name: Run benchmark on PR head commit
         run: |
