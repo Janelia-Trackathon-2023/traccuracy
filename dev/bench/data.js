@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1697065732719,
+  "lastUpdate": 1697135377213,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -146,6 +146,79 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.06094721567754861",
             "extra": "mean: 552.3255694999989 msec\nrounds: 2"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ecbf250220c1677e9218a0300ac9e53c67c3e139",
+          "message": "Improve the benchmarking workflow to generate a commit comment on PRs (#64)\n\n* Update benchmark ci workflow to generate a report\r\n\r\n* Improve report output\r\n\r\n* Add ID for cache step\r\n\r\n* Add missing dependency\r\n\r\n* Beautify benchmark commit table\r\n\r\n---------\r\n\r\nCo-authored-by: Benjamin Gallusser <bgallusser@googlemail.com>",
+          "timestamp": "2023-10-12T20:24:11+02:00",
+          "tree_id": "03860a2b20ca9afce54252fcb9db2fcc7a2a14f9",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/ecbf250220c1677e9218a0300ac9e53c67c3e139"
+        },
+        "date": 1697135376358,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_data",
+            "value": 0.5908492832915347,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.692478992999952 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_data",
+            "value": 0.7175831801935637,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.3935666659999697 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matched",
+            "value": 0.17585046249238723,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 5.68664981500001 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics",
+            "value": 0.006303631764377542,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 158.638708189 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_div_metrics",
+            "value": 2.0421670512436205,
+            "unit": "iter/sec",
+            "range": "stddev: 0.058956596951455574",
+            "extra": "mean: 489.6759055000075 msec\nrounds: 2"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matched",
+            "value": 0.06134712568614267,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 16.30068220499993 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics",
+            "value": 2.0703462990096737,
+            "unit": "iter/sec",
+            "range": "stddev: 0.05067068999095769",
+            "extra": "mean: 483.0109825000477 msec\nrounds: 2"
           }
         ]
       }
