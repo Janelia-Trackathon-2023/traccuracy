@@ -24,10 +24,15 @@ def make_report(old_path, new_path, out_file):
     # Merge on benchmark name
     df = new[-1].merge(old[-1], on="Benchmark", suffixes=("_new", "_old"))
 
-    df["Percent Change"] = (df["mean_new"] - df["mean_old"]) / df["mean_old"]
+    df["Percent Change"] = 100 * (df["mean_new"] - df["mean_old"]) / df["mean_old"]
 
     # Change column names to commit ids
-    df = df.rename(columns={"mean_new": new[0], "mean_old": old[0]})
+    df = df.rename(
+        columns={
+            "mean_new": f"Mean (s) HEAD {new[0]}",
+            "mean_old": f"Mean (s) BASE {old[0]}",
+        }
+    )
 
     df.to_markdown(out_file, index=False)
 
