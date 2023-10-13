@@ -41,6 +41,9 @@ def make_report(old_path, new_path, out_file):
 
     df.to_markdown(out_file, index=False)
 
+    # Print report to logs
+    print(df.to_markdown(index=False))
+
 
 if __name__ == "__main__":
     typer.run(make_report)
