@@ -98,8 +98,9 @@ jobs:
       - name: Generate report
         run: python .github/workflows/benchmark-pr.py baseline.json pr.json report.md
 
-      - name: Comment on commit with report
+      - name: Comment on commit with report for non-forks
         uses: peter-evans/commit-comment@v3
+        if: github.event.pull_request.head.repo.fork == false
         with:
           body-path: report.md
 
