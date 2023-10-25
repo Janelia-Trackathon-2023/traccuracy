@@ -385,6 +385,14 @@ class TrackingGraph:
         """
         return [node for node, degree in self.graph.out_degree() if degree >= 2]
 
+    def get_merges(self):
+        """Get all nodes that have at least two incoming edges from the previous time frame
+
+        Returns:
+            list of hashable: a list of node ids for nodes that have more than one parent
+        """
+        return [node for node, degree in self.graph.in_degree() if degree >= 2]
+
     def get_preds(self, node):
         """Get all predecessors of the given node.
 
