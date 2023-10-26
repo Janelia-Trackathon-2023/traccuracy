@@ -44,7 +44,7 @@ dependencies = [
 # extras
 # https://peps.python.org/pep-0621/#dependencies-optional-dependencies
 [project.optional-dependencies]
-test = ["pytest>=6.0", "pytest-cov"]
+test = ["pytest>=6.0", "pytest-cov", "pytest-benchmark", "pytest-timeout", "tabulate"]
 dev = [
     "black",
     "ipython",
@@ -146,6 +146,9 @@ testpaths = ["tests"]
 filterwarnings = [
     "error",
     "ignore:Numba not installed, falling back to slower:UserWarning",
+]
+addopts = [
+    "--benchmark-min-rounds=1"
 ]
 
 # https://mypy.readthedocs.io/en/stable/config_file.html

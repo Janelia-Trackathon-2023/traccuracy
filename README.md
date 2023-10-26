@@ -4,6 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/traccuracy.svg?color=green)](https://pypi.org/project/traccuracy)
 [![Python Version](https://img.shields.io/pypi/pyversions/traccuracy.svg?color=green)](https://python.org)
 [![CI](https://github.com/Janelia-Trackathon-2023/traccuracy/actions/workflows/ci.yml/badge.svg)](https://github.com/Janelia-Trackathon-2023/traccuracy/actions/workflows/ci.yml)
+[![Benchmarking](https://github.com/Janelia-Trackathon-2023/traccuracy/actions/workflows/benchmark-report.yml/badge.svg)](https://janelia-trackathon-2023.github.io/traccuracy/dev/bench/)
 [![Documentation Status](https://readthedocs.org/projects/traccuracy/badge/?version=latest)](https://traccuracy.readthedocs.io/en/latest/?badge=latest)
 
 
