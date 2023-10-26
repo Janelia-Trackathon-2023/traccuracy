@@ -44,7 +44,7 @@ dependencies = [
 # extras
 # https://peps.python.org/pep-0621/#dependencies-optional-dependencies
 [project.optional-dependencies]
-test = ["pytest>=6.0", "pytest-cov"]
+test = ["pytest>=6.0", "pytest-cov", "pytest-benchmark", "pytest-timeout", "tabulate"]
 dev = [
     "black",
     "ipython",
@@ -59,13 +59,16 @@ dev = [
 docs = [
     "mock",
     "Sphinx<6",
-    "sphinx-rtd-theme",
-    "m2r2",
+    "sphinx-rtd-theme>=0.5.2 ",
+    "m2r2<0.3.3",
     "sphinx-autoapi",
     "nbsphinx",
     "nbsphinx-link",
     "sphinx-click",
-    "ipython"
+    "ipython",
+    "docutils~=0.16.0"
+    # had to pin versions because of sphinx list rendering bug
+    # https://stackoverflow.com/questions/67542699/readthedocs-sphinx-not-rendering-bullet-list-from-rst-file
 ]
 
 [project.urls]
@@ -143,6 +146,9 @@ testpaths = ["tests"]
 filterwarnings = [
     "error",
     "ignore:Numba not installed, falling back to slower:UserWarning",
+]
+addopts = [
+    "--benchmark-min-rounds=1"
 ]
 
 # https://mypy.readthedocs.io/en/stable/config_file.html

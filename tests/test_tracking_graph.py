@@ -16,21 +16,21 @@ def nx_comp1():
     """
     cells = [
         {"id": "1_0", "t": 0, "y": 1, "x": 1},
-        {"id": "1_1", "t": 1, "y": 1, "x": 1, "division": True},
+        {"id": "1_1", "t": 1, "y": 1, "x": 1, "is_tp_division": True},
         {"id": "1_2", "t": 2, "y": 1, "x": 0},
         {"id": "1_3", "t": 2, "y": 1, "x": 2},
         {"id": "1_4", "t": 3, "y": 1, "x": 2},
     ]
 
     edges = [
-        {"source": "1_0", "target": "1_1"},
-        {"source": "1_1", "target": "1_2"},
+        {"source": "1_0", "target": "1_1", "is_tp": True},
+        {"source": "1_1", "target": "1_2", "is_tp": False},
         {"source": "1_1", "target": "1_3"},
         {"source": "1_3", "target": "1_4"},
     ]
     graph = nx.DiGraph()
     graph.add_nodes_from([(cell["id"], cell) for cell in cells])
-    graph.add_edges_from([(edge["source"], edge["target"]) for edge in edges])
+    graph.add_edges_from([(edge["source"], edge["target"], edge) for edge in edges])
     return graph
 
 
@@ -48,7 +48,7 @@ def nx_comp2():
     cells = [
         {"id": "2_0", "t": 0, "y": 2, "x": 1},
         {"id": "2_1", "t": 1, "y": 2, "x": 1},
-        {"id": "2_2", "t": 2, "y": 2, "x": 1, "division": True},
+        {"id": "2_2", "t": 2, "y": 2, "x": 1, "is_tp_division": True},
         {"id": "2_3", "t": 3, "y": 1, "x": 1},
         {"id": "2_4", "t": 3, "y": 3, "x": 1},
     ]
@@ -63,6 +63,40 @@ def nx_comp2():
     graph.add_nodes_from([(cell["id"], cell) for cell in cells])
     graph.add_edges_from([(edge["source"], edge["target"]) for edge in edges])
     return graph
+
+
+@pytest.fixture
+def nx_merge():
+    """
+    3_0--3_1--\\
+              3_2--3_3
+    3_4--3_5--/
+    """
+    cells = [
+        {"id": "3_0", "t": 0, "x": 0, "y": 0},
+        {"id": "3_1", "t": 1, "x": 0, "y": 0},
+        {"id": "3_2", "t": 2, "x": 0, "y": 0},
+        {"id": "3_3", "t": 3, "x": 0, "y": 0},
+        {"id": "3_4", "t": 0, "x": 0, "y": 0},
+        {"id": "3_5", "t": 1, "x": 0, "y": 0},
+    ]
+
+    edges = [
+        {"source": "3_0", "target": "3_1"},
+        {"source": "3_1", "target": "3_2"},
+        {"source": "3_2", "target": "3_3"},
+        {"source": "3_4", "target": "3_5"},
+        {"source": "3_5", "target": "3_2"},
+    ]
+    graph = nx.DiGraph()
+    graph.add_nodes_from([(cell["id"], cell) for cell in cells])
+    graph.add_edges_from([(edge["source"], edge["target"]) for edge in edges])
+    return graph
+
+
+@pytest.fixture
+def merge_graph(nx_merge):
+    return TrackingGraph(nx_merge)
 
 
 @pytest.fixture
@@ -86,22 +120,28 @@ def test_constructor(nx_comp1):
         3: ["1_4"],
     }
 
-    # raise AssertionError if frame key not present or overlaps with
-    # reserved values
+    # raise AssertionError if frame key not present or ValueError if overlaps
+    # with reserved values
     with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, frame_key="f")
-    with pytest.raises(AssertionError):
-        TrackingGraph(nx_comp1, frame_key=NodeAttr.FALSE_NEG.value)
+    with pytest.raises(ValueError):
+        TrackingGraph(nx_comp1, frame_key=NodeAttr.FALSE_NEG)
     with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, location_keys=["x", "y", "z"])
-    with pytest.raises(AssertionError):
-        TrackingGraph(nx_comp1, location_keys=["x", NodeAttr.FALSE_NEG.value])
+    with pytest.raises(ValueError):
+        TrackingGraph(nx_comp1, location_keys=["x", NodeAttr.FALSE_NEG])
 
 
 def test_get_cells_by_frame(simple_graph):
     assert simple_graph.get_nodes_in_frame(0) == ["1_0"]
     assert simple_graph.get_nodes_in_frame(2) == ["1_2", "1_3"]
     assert simple_graph.get_nodes_in_frame(5) == []
+
+
+def test_get_nodes_by_roi(simple_graph):
+    assert simple_graph.get_nodes_by_roi(t=(0, 1)) == ["1_0"]
+    assert simple_graph.get_nodes_by_roi(x=(1, None)) == ["1_0", "1_1", "1_3", "1_4"]
+    assert simple_graph.get_nodes_by_roi(x=(None, 2), t=(1, None)) == ["1_1", "1_2"]
 
 
 def test_get_location(nx_comp1):
@@ -113,14 +153,30 @@ def test_get_location(nx_comp1):
     assert graph2.get_location("1_4") == [1, 2]
 
 
+def test_get_nodes_with_flag(simple_graph):
+    assert simple_graph.get_nodes_with_flag(NodeAttr.TP_DIV) == ["1_1"]
+    assert simple_graph.get_nodes_with_flag(NodeAttr.FP_DIV) == []
+    with pytest.raises(ValueError):
+        assert simple_graph.get_nodes_with_flag("is_tp_division")
+
+
+def test_get_edges_with_flag(simple_graph):
+    assert simple_graph.get_edges_with_flag(EdgeAttr.TRUE_POS) == [("1_0", "1_1")]
+    assert simple_graph.get_edges_with_flag(EdgeAttr.FALSE_NEG) == []
+    with pytest.raises(ValueError):
+        assert simple_graph.get_nodes_with_flag("is_tp")
+
+
 def test_get_nodes_with_attribute(simple_graph):
-    assert simple_graph.get_nodes_with_attribute("division") == ["1_1"]
+    assert simple_graph.get_nodes_with_attribute("is_tp_division") == ["1_1"]
     assert simple_graph.get_nodes_with_attribute("null") == []
-    assert simple_graph.get_nodes_with_attribute("division", criterion=lambda x: x) == [
-        "1_1"
-    ]
+    assert simple_graph.get_nodes_with_attribute(
+        "is_tp_division", criterion=lambda x: x
+    ) == ["1_1"]
     assert (
-        simple_graph.get_nodes_with_attribute("division", criterion=lambda x: not x)
+        simple_graph.get_nodes_with_attribute(
+            "is_tp_division", criterion=lambda x: not x
+        )
         == []
     )
     assert simple_graph.get_nodes_with_attribute("x", criterion=lambda x: x > 1) == [
@@ -146,10 +202,19 @@ def test_get_divisions(complex_graph):
     assert complex_graph.get_divisions() == ["1_1", "2_2"]
 
 
-def test_get_preds(simple_graph):
+def test_get_merges(merge_graph):
+    assert merge_graph.get_merges() == ["3_2"]
+
+
+def test_get_preds(simple_graph, merge_graph):
+    # Division graph
     assert simple_graph.get_preds("1_0") == []
     assert simple_graph.get_preds("1_1") == ["1_0"]
     assert simple_graph.get_preds("1_2") == ["1_1"]
+
+    # Merge graph
+    assert merge_graph.get_preds("3_3") == ["3_2"]
+    assert merge_graph.get_preds("3_2") == ["3_1", "3_5"]
 
 
 def test_get_succs(simple_graph):
@@ -180,7 +245,7 @@ def test_get_and_set_node_attributes(simple_graph):
         "t": 1,
         "y": 1,
         "x": 1,
-        "division": True,
+        "is_tp_division": True,
     }
 
     simple_graph.set_node_attribute("1_0", NodeAttr.FALSE_POS, value=False)
@@ -197,9 +262,25 @@ def test_get_and_set_node_attributes(simple_graph):
 
 def test_get_and_set_edge_attributes(simple_graph):
     print(simple_graph.edges())
-    assert simple_graph.edges()[("1_0", "1_1")] == {}
+    assert EdgeAttr.TRUE_POS not in simple_graph.edges()[("1_1", "1_3")]
 
-    simple_graph.set_edge_attribute(("1_0", "1_1"), EdgeAttr.TRUE_POS, value=False)
-    assert simple_graph.edges()[("1_0", "1_1")] == {EdgeAttr.TRUE_POS: False}
+    simple_graph.set_edge_attribute(("1_1", "1_3"), EdgeAttr.TRUE_POS, value=False)
+    assert simple_graph.edges()[("1_1", "1_3")][EdgeAttr.TRUE_POS] is False
     with pytest.raises(ValueError):
-        simple_graph.set_edge_attribute(("1_0", "1_1"), "x", 2)
+        simple_graph.set_edge_attribute(("1_1", "1_3"), "x", 2)
+
+
+def test_get_tracklets(simple_graph):
+    tracklets = simple_graph.get_tracklets()
+    for tracklet in tracklets:
+        start_nodes = [n for n, d in tracklet.graph.in_degree() if d == 0]
+        assert len(start_nodes) == 1
+        end_nodes = [n for n, d in tracklet.graph.out_degree() if d == 0]
+        assert len(end_nodes)
+
+        if start_nodes[0] == "1_0":
+            assert end_nodes[0] == "1_1"
+        elif start_nodes[0] == "1_2":
+            assert end_nodes[0] == "1_2"
+        elif start_nodes[0] == "1_3":
+            assert end_nodes[0] == "1_4"
