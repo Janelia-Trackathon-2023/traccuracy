@@ -68,6 +68,40 @@ def nx_comp2():
 
 
 @pytest.fixture
+def nx_merge():
+    """
+    3_0--3_1--\\
+              3_2--3_3
+    3_4--3_5--/
+    """
+    cells = [
+        {"id": "3_0", "t": 0, "x": 0, "y": 0},
+        {"id": "3_1", "t": 1, "x": 0, "y": 0},
+        {"id": "3_2", "t": 2, "x": 0, "y": 0},
+        {"id": "3_3", "t": 3, "x": 0, "y": 0},
+        {"id": "3_4", "t": 0, "x": 0, "y": 0},
+        {"id": "3_5", "t": 1, "x": 0, "y": 0},
+    ]
+
+    edges = [
+        {"source": "3_0", "target": "3_1"},
+        {"source": "3_1", "target": "3_2"},
+        {"source": "3_2", "target": "3_3"},
+        {"source": "3_4", "target": "3_5"},
+        {"source": "3_5", "target": "3_2"},
+    ]
+    graph = nx.DiGraph()
+    graph.add_nodes_from([(cell["id"], cell) for cell in cells])
+    graph.add_edges_from([(edge["source"], edge["target"]) for edge in edges])
+    return graph
+
+
+@pytest.fixture
+def merge_graph(nx_merge):
+    return TrackingGraph(nx_merge)
+
+
+@pytest.fixture
 def simple_graph(nx_comp1):
     return TrackingGraph(nx_comp1)
 
@@ -174,10 +208,19 @@ def test_get_divisions(complex_graph):
     assert complex_graph.get_divisions() == ["1_1", "2_2"]
 
 
-def test_get_preds(simple_graph):
+def test_get_merges(merge_graph):
+    assert merge_graph.get_merges() == ["3_2"]
+
+
+def test_get_preds(simple_graph, merge_graph):
+    # Division graph
     assert simple_graph.get_preds("1_0") == []
     assert simple_graph.get_preds("1_1") == ["1_0"]
     assert simple_graph.get_preds("1_2") == ["1_1"]
+
+    # Merge graph
+    assert merge_graph.get_preds("3_3") == ["3_2"]
+    assert merge_graph.get_preds("3_2") == ["3_1", "3_5"]
 
 
 def test_get_succs(simple_graph):

@@ -103,7 +103,7 @@ def test_ctc_metrics(benchmark, ctc_matched):
     assert ctc_results["fp_edges"] == 60
     assert ctc_results["fp_nodes"] == 0
     assert ctc_results["ns_nodes"] == 0
-    assert ctc_results["ws_edges"] == 51
+    assert ctc_results["ws_edges"] == 47
 
 
 def test_ctc_div_metrics(benchmark, ctc_matched):
