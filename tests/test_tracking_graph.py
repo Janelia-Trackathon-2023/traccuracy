@@ -1,3 +1,5 @@
+from collections import Counter
+
 import networkx as nx
 import pytest
 from traccuracy import EdgeAttr, NodeAttr, TrackingGraph
@@ -114,10 +116,10 @@ def test_constructor(nx_comp1):
     assert tracking_graph.start_frame == 0
     assert tracking_graph.end_frame == 4
     assert tracking_graph.nodes_by_frame == {
-        0: ["1_0"],
-        1: ["1_1"],
-        2: ["1_2", "1_3"],
-        3: ["1_4"],
+        0: {"1_0"},
+        1: {"1_1"},
+        2: {"1_2", "1_3"},
+        3: {"1_4"},
     }
 
     # raise AssertionError if frame key not present or ValueError if overlaps
@@ -134,14 +136,18 @@ def test_constructor(nx_comp1):
 
 def test_get_cells_by_frame(simple_graph):
     assert simple_graph.get_nodes_in_frame(0) == ["1_0"]
-    assert simple_graph.get_nodes_in_frame(2) == ["1_2", "1_3"]
+    assert Counter(simple_graph.get_nodes_in_frame(2)) == Counter(["1_2", "1_3"])
     assert simple_graph.get_nodes_in_frame(5) == []
 
 
 def test_get_nodes_by_roi(simple_graph):
     assert simple_graph.get_nodes_by_roi(t=(0, 1)) == ["1_0"]
-    assert simple_graph.get_nodes_by_roi(x=(1, None)) == ["1_0", "1_1", "1_3", "1_4"]
-    assert simple_graph.get_nodes_by_roi(x=(None, 2), t=(1, None)) == ["1_1", "1_2"]
+    assert Counter(simple_graph.get_nodes_by_roi(x=(1, None))) == Counter(
+        ["1_0", "1_1", "1_3", "1_4"]
+    )
+    assert Counter(simple_graph.get_nodes_by_roi(x=(None, 2), t=(1, None))) == Counter(
+        ["1_1", "1_2"]
+    )
 
 
 def test_get_location(nx_comp1):
@@ -219,7 +225,7 @@ def test_get_preds(simple_graph, merge_graph):
 
 def test_get_succs(simple_graph):
     assert simple_graph.get_succs("1_0") == ["1_1"]
-    assert simple_graph.get_succs("1_1") == ["1_2", "1_3"]
+    assert Counter(simple_graph.get_succs("1_1")) == Counter(["1_2", "1_3"])
     assert simple_graph.get_succs("1_2") == []
 
 
