@@ -48,7 +48,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "IPython.sphinxext.ipython_console_highlighting",  # code highlighting in notebooks
-    "m2r2",  # include md files in rst files
+    "myst_parser",  # include md files in rst files
     "autoapi.extension",  # autobuild api docs
     "nbsphinx",  # add notebooks to docs
     "nbsphinx_link",  # add notebooks to docs

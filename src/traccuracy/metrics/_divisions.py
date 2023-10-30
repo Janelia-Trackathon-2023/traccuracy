@@ -13,6 +13,7 @@ Temporal tolerance for correct divisions is implemented to allow for cases in
 which the exact frame that a division event occurs is somewhat arbitrary due to
 a high frame rate or variable segmentation or detection. Consider the following
 graphs as an example::
+
     G1
                                 2_4
     1_0 -- 1_1 -- 1_2 -- 1_3 -<
