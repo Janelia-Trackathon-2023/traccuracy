@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from ..matchers._matched import Matched
+if TYPE_CHECKING:
+    from traccuracy.matchers._matched import Matched
 
 
 class Metric(ABC):

@@ -14,7 +14,7 @@ license = { text = "BSD 3-Clause License" }
 authors = [
     { email = "draga.doncilapop1@monash.edu", name = "Draga Doncila Pop" },
     { email = "cmalinmayor@gmail.com", name = "Caroline Malin-Mayor" },
-    { email = "msschwartz21@gmail.com", name = "Morgan Schwartz"}
+    { email = "msschwartz21@gmail.com", name = "Morgan Schwartz" },
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -33,7 +33,7 @@ dependencies = [
     "networkx",
     "pandas",
     "tifffile",
-    "imagecodecs", # required for ctc tiffs
+    "imagecodecs",  # required for ctc tiffs
     "scikit-image",
     "tqdm",
     "typer",
@@ -44,7 +44,13 @@ dependencies = [
 # extras
 # https://peps.python.org/pep-0621/#dependencies-optional-dependencies
 [project.optional-dependencies]
-test = ["pytest>=6.0", "pytest-cov", "pytest-benchmark", "pytest-timeout", "tabulate"]
+test = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "pytest-benchmark",
+    "pytest-timeout",
+    "tabulate",
+]
 dev = [
     "black",
     "ipython",
@@ -66,7 +72,7 @@ docs = [
     "nbsphinx-link",
     "sphinx-click",
     "ipython",
-    "docutils~=0.16.0"
+    "docutils~=0.16.0",
     # had to pin versions because of sphinx list rendering bug
     # https://stackoverflow.com/questions/67542699/readthedocs-sphinx-not-rendering-bullet-list-from-rst-file
 ]
@@ -83,7 +89,7 @@ traccuracy = "traccuracy.cli:main"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-where = ['src'] #  list of folders that contain packages
+where = ['src']           #  list of folders that contain packages
 include = ['traccuracy*']
 
 [tool.setuptools_scm] # Necessary to enable setuptools_scm for dynamic versioning from tags
@@ -106,14 +112,15 @@ extend-select = [
     "E",    # style errors
     "W",    # style warnings
     "F",    # flakes
-    # "D",    # pydocstyle
     "I",    # isort
-    "U",    # pyupgrade
-    # "S",    # bandit
-    "C",    # flake8-comprehensions
+    "UP",   # pyupgrade
+    "C4",   # flake8-comprehensions
     "B",    # flake8-bugbear
     "A001", # flake8-builtins
     "RUF",  # ruff-specific rules
+    "TID",  # tidy imports
+    "TCH",  # type checking
+    # "D",    # pydocstyle
 ]
 # I do this to get numpy-style docstrings AND retain
 # D417 (Missing argument descriptions in the docstring)
@@ -137,7 +144,8 @@ convention = "google"
 [tool.ruff.per-file-ignores]
 "tests/*.py" = ["D", "S"]
 "setup.py" = ["D"]
-"src/traccuracy/cli.py" = ["B008"]  # Ignore typer functions in function definitions
+# Ignore typer functions in function definitions
+"src/traccuracy/cli.py" = ["B008"]
 
 # https://docs.pytest.org/en/6.2.x/customize.html
 [tool.pytest.ini_options]
@@ -147,9 +155,7 @@ filterwarnings = [
     "error",
     "ignore:Numba not installed, falling back to slower:UserWarning",
 ]
-addopts = [
-    "--benchmark-min-rounds=1"
-]
+addopts = ["--benchmark-min-rounds=1"]
 
 # https://mypy.readthedocs.io/en/stable/config_file.html
 [tool.mypy]

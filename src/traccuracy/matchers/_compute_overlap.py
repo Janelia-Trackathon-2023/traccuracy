@@ -170,7 +170,8 @@ except ImportError:
         warnings.warn(
             "Numba not installed, falling back to slower numpy implementation. "
             "Install numba for a significant speedup.  Set the environment "
-            "variable NO_JIT_WARNING=1 to disable this warning."
+            "variable NO_JIT_WARNING=1 to disable this warning.",
+            stacklevel=2,
         )
 else:
     # compute_overlap 2d and 3d have the same signature

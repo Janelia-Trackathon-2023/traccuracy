@@ -11,7 +11,7 @@ from traccuracy.track_errors.divisions import (
     _get_succ_by_t,
 )
 
-from ..test_utils import get_division_graphs
+from tests.test_utils import get_division_graphs
 
 
 class DummyMatched(Matched):
