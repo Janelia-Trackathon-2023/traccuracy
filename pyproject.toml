@@ -167,17 +167,18 @@ pretty = true
 
 
 # https://coverage.readthedocs.io/en/6.4/config.html
-# [tool.coverage.report]
-# exclude_lines = [
-#     "pragma: no cover",
-#     "if TYPE_CHECKING:",
-#     "@overload",
-#     "except ImportError",
-#     "\\.\\.\\.",
-#     "raise NotImplementedError()",
-# ]
-# [tool.coverage.run]
-# source = ["src"]
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "@overload",
+    "except ImportError",
+    "\\.\\.\\.",
+    "raise NotImplementedError()",
+    "pass",
+]
+[tool.coverage.run]
+source = ["traccuracy"]
 
 # https://github.com/mgedmin/check-manifest#configuration
 # [tool.check-manifest]
