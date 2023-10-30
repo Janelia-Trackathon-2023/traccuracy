@@ -159,13 +159,42 @@ class TrackingGraph:
                 )
         self.location_keys = location_keys
 
-        # Define empty attributes that will be set by update_graph
-        self.graph = None
-        self.nodes_by_frame = None
-        self.start_frame = None
-        self.end_frame = None
+        self.graph = graph
 
-        self._update_graph(graph)
+        # construct dictionaries from attributes to nodes/edges for easy lookup
+        self.nodes_by_frame = {}
+        self.nodes_by_flag = {flag: set() for flag in NodeAttr}
+        self.edges_by_flag = {flag: set() for flag in EdgeAttr}
+        for node, attrs in self.graph.nodes.items():
+            # check that every node has the time frame and location specified
+            assert (
+                self.frame_key in attrs.keys()
+            ), f"Frame key {self.frame_key} not present for node {node}."
+            for key in self.location_keys:
+                assert (
+                    key in attrs.keys()
+                ), f"Location key {key} not present for node {node}."
+
+            # store node id in nodes_by_frame mapping
+            frame = attrs[self.frame_key]
+            if frame not in self.nodes_by_frame.keys():
+                self.nodes_by_frame[frame] = {node}
+            else:
+                self.nodes_by_frame[frame].add(node)
+            # store node id in nodes_by_flag mapping
+            for flag in NodeAttr:
+                if flag in attrs and attrs[flag]:
+                    self.nodes_by_flag[flag].add(node)
+
+        # store edge id in edges_by_flag
+        for edge, attrs in self.graph.edges.items():
+            for flag in EdgeAttr:
+                if flag in attrs and attrs[flag]:
+                    self.edges_by_flag[flag].add(edge)
+
+        # Store first and last frames for reference
+        self.start_frame = min(self.nodes_by_frame.keys())
+        self.end_frame = max(self.nodes_by_frame.keys()) + 1
 
         # Record types of annotations that have been calculated
         self.division_annotations = False
@@ -181,14 +210,15 @@ class TrackingGraph:
                 Will raise KeyError if any of these node_ids are not present.
 
         Returns:
-            dict[hashable, dict]: A dictionary from node ids to node attributes
+            NodeView: Provides set-like operations on the nodes as well as node attribute lookup.
         """
-        nodes = self.graph.nodes.items()
         if limit_to is None:
-            return dict(nodes)
+            return self.graph.nodes
         else:
-            limited_nodes = {_id: data for _id, data in nodes if _id in limit_to}
-            return limited_nodes
+            for node in limit_to:
+                if not self.graph.has_node(node):
+                    raise KeyError(f"Queried node {node} not present in graph.")
+            return self.graph.subgraph(limit_to).nodes
 
     def edges(self, limit_to=None):
         """Get all the edges in the graph, along with their attributes.
@@ -199,14 +229,16 @@ class TrackingGraph:
                 Will raise KeyError if any of these edge ids are not present.
 
         Returns:
-            dict[tuple[hashable], dict]: A dictionary from edge ids to edge attributes
+            OutEdgeView: Provides set-like operations on the edge-tuples as well as edge attribute
+                lookup.
         """
-        edges = self.graph.edges.items()
         if limit_to is None:
-            return dict(edges)
+            return self.graph.edges
         else:
-            limited_edges = {_id: data for _id, data in edges if _id in limit_to}
-            return limited_edges
+            for edge in limit_to:
+                if not self.graph.has_edge(*edge):
+                    raise KeyError(f"Queried edge {edge} not present in graph.")
+            return self.graph.edge_subgraph(limit_to).edges
 
     def get_nodes_in_frame(self, frame):
         """Get the node ids of all nodes in the given frame.
@@ -220,7 +252,7 @@ class TrackingGraph:
             list of node_ids: A list of node ids for all nodes in frame.
         """
         if frame in self.nodes_by_frame.keys():
-            return self.nodes_by_frame[frame]
+            return list(self.nodes_by_frame[frame])
         else:
             return []
 
@@ -247,12 +279,7 @@ class TrackingGraph:
         """
         if not isinstance(attr, NodeAttr):
             raise ValueError(f"Function takes NodeAttr arguments, not {type(attr)}.")
-        nodes_with_flag = [
-            node
-            for node, attrs in self.nodes().items()
-            if attr in attrs.keys() and attrs[attr] is True
-        ]
-        return nodes_with_flag
+        return list(self.nodes_by_flag[attr])
 
     def get_edges_with_flag(self, attr):
         """Get all edges with specified EdgeAttr set to True.
@@ -266,12 +293,7 @@ class TrackingGraph:
         """
         if not isinstance(attr, EdgeAttr):
             raise ValueError(f"Function takes EdgeAttr arguments, not {type(attr)}.")
-        edges_with_flag = [
-            edge
-            for edge, attrs in self.edges().items()
-            if attr in attrs.keys() and attrs[attr] is True
-        ]
-        return edges_with_flag
+        return list(self.edges_by_flag[attr])
 
     def get_nodes_by_roi(self, **kwargs):
         """Gets the nodes in a given region of interest (ROI). The ROI is
@@ -289,6 +311,7 @@ class TrackingGraph:
         Returns:
             list of hashable: A list of node_ids for all nodes in the ROI.
         """
+        frames = None
         dimensions = []
         for dim, limit in kwargs.items():
             if not (dim == self.frame_key or dim in self.location_keys):
@@ -297,9 +320,25 @@ class TrackingGraph:
                     f" {self.frame_key} or one of the location keys"
                     f" {self.location_keys}."
                 )
-            dimensions.append((dim, limit[0], limit[1]))
+            if dim == self.frame_key:
+                frames = list(limit)
+            else:
+                dimensions.append((dim, limit[0], limit[1]))
         nodes = []
-        for node, attrs in self.graph.nodes().items():
+        if frames:
+            if frames[0] is None:
+                frames[0] = self.start_frame
+            if frames[1] is None:
+                frames[1] = self.end_frame
+            possible_nodes = []
+            for frame in range(frames[0], frames[1]):
+                if frame in self.nodes_by_frame:
+                    possible_nodes.extend(self.nodes_by_frame[frame])
+        else:
+            possible_nodes = self.graph.nodes()
+
+        for node in possible_nodes:
+            attrs = self.graph.nodes[node]
             inside = True
             for dim, start, end in dimensions:
                 if start is not None and attrs[dim] < start:
@@ -447,41 +486,27 @@ class TrackingGraph:
 
         new_graph = self.graph.subgraph(nodes).copy()
         new_trackgraph = copy.deepcopy(self)
-        new_trackgraph._update_graph(new_graph)
+        new_trackgraph.graph = new_graph
+        for frame, nodes_in_frame in self.nodes_by_frame.items():
+            new_nodes_in_frame = nodes_in_frame.intersection(nodes)
+            if new_nodes_in_frame:
+                new_trackgraph.nodes_by_frame[frame] = new_nodes_in_frame
+            else:
+                del new_trackgraph.nodes_by_frame[frame]
+
+        for attr in NodeAttr:
+            new_trackgraph.nodes_by_flag[attr] = self.nodes_by_flag[attr].intersection(
+                nodes
+            )
+        for attr in EdgeAttr:
+            new_trackgraph.edges_by_flag[attr] = self.edges_by_flag[attr].intersection(
+                nodes
+            )
+
+        new_trackgraph.start_frame = min(new_trackgraph.nodes_by_frame.keys())
+        new_trackgraph.end_frame = max(new_trackgraph.nodes_by_frame.keys()) + 1
 
         return new_trackgraph
-
-    def _update_graph(self, graph):
-        """Given a new graph, which is expected to be a subgraph of the current graph,
-        update attributes which are dependent on the graph.
-
-        Args:
-            graph (nx.DiGraph): A networkx graph that is a subgraph of the original graph
-        """
-        self.graph = graph
-
-        # construct a dictionary from frames to node ids for easy lookup
-        self.nodes_by_frame = {}
-        for node, attrs in self.graph.nodes.items():
-            # check that every node has the time frame and location specified
-            assert (
-                self.frame_key in attrs.keys()
-            ), f"Frame key {self.frame_key} not present for node {node}."
-            for key in self.location_keys:
-                assert (
-                    key in attrs.keys()
-                ), f"Location key {key} not present for node {node}."
-
-            # store node id in nodes_by_frame mapping
-            frame = attrs[self.frame_key]
-            if frame not in self.nodes_by_frame.keys():
-                self.nodes_by_frame[frame] = [node]
-            else:
-                self.nodes_by_frame[frame].append(node)
-
-        # Store first and last frames for reference
-        self.start_frame = min(self.nodes_by_frame.keys())
-        self.end_frame = max(self.nodes_by_frame.keys()) + 1
 
     def set_node_attribute(self, ids, attr, value=True):
         """Set an attribute flag for a set of nodes specified by
@@ -507,6 +532,10 @@ class TrackingGraph:
             )
         for _id in ids:
             self.graph.nodes[_id][attr] = value
+            if value:
+                self.nodes_by_flag[attr].add(_id)
+            else:
+                self.nodes_by_flag[attr].discard(_id)
 
     def set_edge_attribute(self, ids, attr, value=True):
         """Set an attribute flag for a set of edges specified by
@@ -532,6 +561,60 @@ class TrackingGraph:
             )
         for _id in ids:
             self.graph.edges[_id][attr] = value
+            if value:
+                self.edges_by_flag[attr].add(_id)
+            else:
+                self.edges_by_flag[attr].discard(_id)
+
+    def get_node_attribute(self, _id, attr):
+        """Get the boolean value of a given attribute for a given node.
+
+        Args:
+            _id (hashable): node id
+            attr (NodeAttr): Node attribute to fetch the value of
+
+        Raises:
+            ValueError: if attr is not a NodeAttr
+
+        Returns:
+            bool: The value of the attribute for that node. If the attribute
+                is not present on the graph, the value is presumed False.
+        """
+        if not isinstance(attr, NodeAttr):
+            raise ValueError(
+                f"Provided attribute {attr} is not of type NodeAttr. "
+                "Please use the enum instead of passing string values, "
+                "and add new attributes to the class to avoid key collision."
+            )
+
+        if attr not in self.graph.nodes[_id]:
+            return False
+        return self.graph.nodes[_id][attr]
+
+    def get_edge_attribute(self, _id, attr):
+        """Get the boolean value of a given attribute for a given edge.
+
+        Args:
+            _id (hashable): node id
+            attr (EdgeAttr): Edge attribute to fetch the value of
+
+        Raises:
+            ValueError: if attr is not a EdgeAttr
+
+        Returns:
+            bool: The value of the attribute for that edge. If the attribute
+                is not present on the graph, the value is presumed False.
+        """
+        if not isinstance(attr, EdgeAttr):
+            raise ValueError(
+                f"Provided attribute {attr} is not of type EdgeAttr. "
+                "Please use the enum instead of passing string values, "
+                "and add new attributes to the class to avoid key collision."
+            )
+
+        if attr not in self.graph.edges[_id]:
+            return False
+        return self.graph.edges[_id][attr]
 
     def get_tracklets(self):
         """Gets a list of new TrackingGraph objects containing all tracklets of the current graph.
