@@ -31,27 +31,26 @@ def download_gt_data(url):
             zip_ref.extractall(data_dir)
 
 
-# TODO look into fixture with params for 2d/3d
-@pytest.fixture(scope="module")
-def gt_data_2d():
-    url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N2DL-HeLa.zip"
-    path = "downloads/Fluo-N2DL-HeLa/01_GT/TRA"
+def gt_data(url, path):
     download_gt_data(url)
     return load_ctc_data(
         os.path.join(ROOT_DIR, path),
         os.path.join(ROOT_DIR, path, "man_track.txt"),
     )
+
+
+@pytest.fixture(scope="module")
+def gt_data_2d():
+    url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N2DL-HeLa.zip"
+    path = "downloads/Fluo-N2DL-HeLa/01_GT/TRA"
+    return gt_data(url, path)
 
 
 @pytest.fixture(scope="module")
 def gt_data_3d():
     url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N3DH-CE.zip"
     path = "downloads/Fluo-N3DH-CE/01_GT/TRA"
-    download_gt_data(url)
-    return load_ctc_data(
-        os.path.join(ROOT_DIR, path),
-        os.path.join(ROOT_DIR, path, "man_track.txt"),
-    )
+    return gt_data(url, path)
 
 
 @pytest.fixture(scope="module")
