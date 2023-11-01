@@ -6,6 +6,7 @@
 [![CI](https://github.com/Janelia-Trackathon-2023/traccuracy/actions/workflows/ci.yml/badge.svg)](https://github.com/Janelia-Trackathon-2023/traccuracy/actions/workflows/ci.yml)
 [![Benchmarking](https://github.com/Janelia-Trackathon-2023/traccuracy/actions/workflows/benchmark-report.yml/badge.svg)](https://janelia-trackathon-2023.github.io/traccuracy/dev/bench/)
 [![Documentation Status](https://readthedocs.org/projects/traccuracy/badge/?version=latest)](https://traccuracy.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/Janelia-Trackathon-2023/traccuracy/branch/main/graph/badge.svg)](https://codecov.io/gh/Janelia-Trackathon-2023/traccuracy)
 
 
 `traccuracy` provides a suite of benchmarking functions that can be used to evaluate cell
