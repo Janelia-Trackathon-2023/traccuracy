@@ -12,7 +12,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def download_gt_data():
-    # Download GT data -- look into cacheing this in github actions
+    # Download GT data -- look into caching this in github actions
     url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N2DL-HeLa.zip"
     data_dir = os.path.join(ROOT_DIR, "downloads")
 
