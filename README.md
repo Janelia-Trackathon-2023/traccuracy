@@ -36,7 +36,7 @@ Matchers take a ground truth and a predicted TrackingGraph with optional segment
 Metrics are then computed on the matched graphs, and a summary is printed out.
 
 The `traccuracy` library has a command line interface for running common metrics
-pipelines, documented [here](https://traccuracy.readthedocs.io/en/latest/cli.html), and a flexible Python API, shown in [this](https://traccuracy.readthedocs.io/en/latest/examples/ctc.html) example notebook.
+pipelines, [documented here](https://traccuracy.readthedocs.io/en/latest/cli.html), and a flexible Python API, shown in [this](https://traccuracy.readthedocs.io/en/latest/examples/ctc.html) example notebook.
 
 
 ## Implemented Metrics

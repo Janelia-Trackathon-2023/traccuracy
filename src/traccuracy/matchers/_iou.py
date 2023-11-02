@@ -52,8 +52,8 @@ def match_iou(gt, pred, threshold=0.6):
     and that the label is recorded on each node using label_key
 
     Args:
-        gt (TrackingGraph): Tracking data object containing graph and segmentations
-        pred (TrackingGraph): Tracking data object containing graph and segmentations
+        gt (traccuracy.TrackingGraph): Tracking data object containing graph and segmentations
+        pred (traccuracy.TrackingGraph): Tracking data object containing graph and segmentations
         threshold (float, optional): Minimum IoU for matching cells. Defaults to 0.6.
 
     Returns:

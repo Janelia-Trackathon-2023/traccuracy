@@ -90,7 +90,7 @@ class TrackingGraph:
     time frame and location of each node is not mutated after construction,
     although non-spatiotemporal attributes of nodes and edges can be modified freely.
 
-    Attributes
+    Attributes:
         start_frame: int, the first frame with a node in the graph
         end_frame: int, the end of the span of frames containing nodes
             (one frame after the last frame that contains a node)
@@ -304,7 +304,7 @@ class TrackingGraph:
         signify an unbounded ROI on that side.
 
         For example, if frame_key='t' and location_keys=('x', 'y'):
-            `graph.get_nodes_by_roi(t=(10, None), x=(0, 100))`
+        `graph.get_nodes_by_roi(t=(10, None), x=(0, 100))`
         would return all nodes with time >= 10, and 0 <= x < 100, with no limit
         on the y values.
 
