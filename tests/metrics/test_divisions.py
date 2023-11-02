@@ -2,7 +2,7 @@ from traccuracy import TrackingGraph
 from traccuracy.matchers._matched import Matched
 from traccuracy.metrics._divisions import DivisionMetrics
 
-from ..test_utils import get_division_graphs
+from tests.test_utils import get_division_graphs
 
 
 class DummyMatched(Matched):

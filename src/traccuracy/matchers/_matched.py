@@ -1,7 +1,9 @@
 import logging
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from traccuracy._tracking_graph import TrackingGraph
+if TYPE_CHECKING:
+    from traccuracy._tracking_graph import TrackingGraph
 
 logger = logging.getLogger(__name__)
 
