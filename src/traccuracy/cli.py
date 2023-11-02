@@ -41,7 +41,7 @@ def run_ctc(
     """
     Run TRA and DET metric on gt and pred data using CTC matching.
 
-    If --gt_track_path and --pred_track_path are not passed, we find *_track.txt
+    If --gt_track_path and --pred_track_path are not passed, we find ``*_track.txt``
     files in the data directories. If more than one such file is present, or
     no such files are present, an error is raised.
 
@@ -99,7 +99,7 @@ def run_aogm(
 ):
     """Run general AOGM measure on gt and pred data using CTC matching.
 
-    If gt_track_path and pred_track_path are not passed, we find *_track.txt
+    If gt_track_path and pred_track_path are not passed, we find ``*_track.txt``
     files in the data directories. If more than one such file is present, or
     no such files are present, an error is raised.
 
@@ -163,7 +163,7 @@ def run_divisions_on_iou(
 ):
     """Run division metrics on gt and pred data using IOU matching.
 
-    If --gt_track_path and --pred_track_path are not passed, we find *_track.txt
+    If --gt_track_path and --pred_track_path are not passed, we find ``*_track.txt``
     files in the data directories. If more than one such file is present, or
     no such files are present, an error is raised.
 
@@ -222,7 +222,7 @@ def run_divisions_on_ctc(
 ):
     """Run division metrics on gt and pred data using CTC matching.
 
-    If --gt_track_path and --pred_track_path are not passed, we find *_track.txt
+    If --gt_track_path and --pred_track_path are not passed, we find ``*_track.txt``
     files in the data directories. If more than one such file is present, or
     no such files are present, an error is raised.
 

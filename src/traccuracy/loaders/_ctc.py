@@ -163,7 +163,7 @@ def load_ctc_data(data_dir, track_path=None):
     Args:
         data_dir (str): Path to directory containing CTC tiffs.
         track_path (optional, str): Path to CTC track file. If not passed,
-        finds '*_track.txt' in data_dir.
+            finds `*_track.txt` in data_dir.
 
     Returns:
         TrackingData: Object containing segmentations and TrackingGraph.

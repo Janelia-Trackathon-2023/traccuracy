@@ -1,6 +1,6 @@
 """This submodule classifies division errors in tracking graphs
 
-Each division is classifed as one of the following:
+Each division is classified as one of the following:
 - true positive
 - false positive
 - false negative
@@ -13,6 +13,7 @@ Temporal tolerance for correct divisions is implemented to allow for cases in
 which the exact frame that a division event occurs is somewhat arbitrary due to
 a high frame rate or variable segmentation or detection. Consider the following
 graphs as an example::
+
     G1
                                 2_4
     1_0 -- 1_1 -- 1_2 -- 1_3 -<
@@ -47,7 +48,7 @@ class DivisionMetrics(Metric):
 
         - Division Recall
         - Division Precision
-        - Divison F1 Score
+        - Division F1 Score
         - Mitotic Branching Correctness: TP / (TP + FP + FN) as defined by Ulicna, K.,
           Vallardi, G., Charras, G. & Lowe, A. R. Automated deep lineage tree analysis
           using a Bayesian single cell tracking approach. Frontiers in Computer Science
@@ -55,7 +56,7 @@ class DivisionMetrics(Metric):
 
         Args:
             matched_data (Matched): Matched object for set of GT and Pred data
-                Must meet the `needs_one_to_one` critera
+                Must meet the `needs_one_to_one` criteria
             frame_buffer (tuple(int), optional): Tuple of integers. Value used as n_frames
                 to tolerate in correct_shifted_divisions. Defaults to (0).
         """
@@ -63,7 +64,7 @@ class DivisionMetrics(Metric):
         super().__init__(matched_data)
 
     def compute(self):
-        """Runs `_evalute_division_events` and calculates summary metrics for each frame buffer
+        """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer
 
         Returns:
             dict: Returns a nested dictionary with one dictionary per frame buffer value
