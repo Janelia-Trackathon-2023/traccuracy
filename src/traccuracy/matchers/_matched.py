@@ -23,8 +23,8 @@ class Matcher(ABC):
         with a new copy of each TrackingGraph
 
         Args:
-            gt_graph (TrackingGraph): Tracking graph object for the gt
-            pred_graph (TrackingGraph): Tracking graph object for the pred
+            gt_graph (traccuracy.TrackingGraph): Tracking graph object for the gt
+            pred_graph (traccuracy.TrackingGraph): Tracking graph object for the pred
 
         Returns:
             matched (Matched): Matched data object
@@ -68,8 +68,8 @@ class Matched:
     Each TrackingGraph will be a new copy on the original object
 
     Args:
-        gt_graph (TrackingGraph): Tracking graph object for the gt
-        pred_graph (TrackingGraph): Tracking graph object for the pred
+        gt_graph (traccuracy.TrackingGraph): Tracking graph object for the gt
+        pred_graph (traccuracy.TrackingGraph): Tracking graph object for the pred
 
     """
 
