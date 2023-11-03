@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from traccuracy._utils import get_relevant_kwargs, validate_matched_data
 
 if TYPE_CHECKING:
-
     from traccuracy import TrackingGraph
     from traccuracy.matchers._matched import Matched
     from traccuracy.metrics._base import Metric
