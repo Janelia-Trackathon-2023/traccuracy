@@ -96,7 +96,7 @@ class CTCMatched(Matched):
         return mapping
 
 
-def detection_test(gt_blob: "np.ndarray", comp_blob: "np.ndarray") -> int:
+def detection_test(gt_blob: np.ndarray, comp_blob: np.ndarray) -> int:
     """Check if computed marker overlaps majority of the reference marker.
 
     Given a reference marker and computer marker in original coordinates,

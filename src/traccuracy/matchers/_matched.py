@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
@@ -9,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class Matched(ABC):
-    def __init__(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+    def __init__(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Matched class which takes TrackingData objects for gt and pred, and computes matching.
 
         Each current matching method will be a subclass of Matched e.g. CTCMatched or IOUMatched.

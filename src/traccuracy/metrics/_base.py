@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
@@ -12,7 +14,7 @@ class Metric(ABC):
     supports_many_to_one = False
     supports_many_to_many = False
 
-    def __init__(self, matched_data: "Matched"):
+    def __init__(self, matched_data: Matched):
         """Add Matched class which takes TrackingData objects for gt and pred,and computes matching
 
         Each current matching method will be a subclass of Matched e.g. CTCMatched or IOUMatched.

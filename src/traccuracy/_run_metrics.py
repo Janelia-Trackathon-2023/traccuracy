@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from traccuracy._utils import get_relevant_kwargs, validate_matched_data
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Type
 
     from traccuracy import TrackingGraph
     from traccuracy.matchers._matched import Matched
@@ -11,13 +12,13 @@ if TYPE_CHECKING:
 
 
 def run_metrics(
-    gt_data: "TrackingGraph",
-    pred_data: "TrackingGraph",
-    matcher: "Type[Matched]",
-    metrics: "List[Type[Metric]]",
-    matcher_kwargs: "Optional[Dict]" = None,
-    metrics_kwargs: "Optional[Dict]" = None,  # weights
-) -> "Dict":
+    gt_data: TrackingGraph,
+    pred_data: TrackingGraph,
+    matcher: type[Matched],
+    metrics: list[type[Metric]],
+    matcher_kwargs: dict | None = None,
+    metrics_kwargs: dict | None = None,  # weights
+) -> dict:
     """Compute given metrics on data using the given matcher.
 
     An error will be thrown if the given matcher is not compatible with

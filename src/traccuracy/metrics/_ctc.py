@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from traccuracy._tracking_graph import EdgeAttr, NodeAttr
@@ -14,7 +16,7 @@ class AOGMMetrics(Metric):
 
     def __init__(
         self,
-        matched_data: "Matched",
+        matched_data: Matched,
         vertex_ns_weight=1,
         vertex_fp_weight=1,
         vertex_fn_weight=1,
@@ -71,7 +73,7 @@ class AOGMMetrics(Metric):
 
 
 class CTCMetrics(AOGMMetrics):
-    def __init__(self, matched_data: "Matched"):
+    def __init__(self, matched_data: Matched):
         vertex_weight_ns = 5
         vertex_weight_fn = 10
         vertex_weight_fp = 1
