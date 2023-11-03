@@ -18,7 +18,9 @@ class Matcher(ABC):
     on a particular dataset
     """
 
-    def compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
+    def compute_mapping(
+        self, gt_graph: TrackingGraph, pred_graph: TrackingGraph
+    ) -> Matched:
         """Run the matching on a given set of gt and pred TrackingGraph and returns a Matched object
         with a new copy of each TrackingGraph
 
@@ -52,7 +54,9 @@ class Matcher(ABC):
         return matched
 
     @abstractmethod
-    def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
+    def _compute_mapping(
+        self, gt_graph: TrackingGraph, pred_graph: TrackingGraph
+    ) -> Matched:
         """Computes a mapping of nodes in gt to nodes in pred and returns a Matched object
 
         Raises:
