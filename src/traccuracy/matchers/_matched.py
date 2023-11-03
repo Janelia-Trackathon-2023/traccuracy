@@ -1,45 +1,82 @@
+import copy
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import Any
 
-if TYPE_CHECKING:
-    from traccuracy._tracking_graph import TrackingGraph
+from traccuracy._tracking_graph import TrackingGraph
 
 logger = logging.getLogger(__name__)
 
 
-class Matched(ABC):
-    def __init__(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
-        """Matched class which takes TrackingData objects for gt and pred, and computes matching.
+class Matcher(ABC):
+    """The Matcher base class provides a wrapper around the compute_mapping method
 
-        Each current matching method will be a subclass of Matched e.g. CTCMatched or IOUMatched.
-        The Matched objects will store both gt and pred data, as well as the mapping,
-        and any additional private attributes that may be needed/used e.g. detection matrices.
+    Each Matcher subclass will implement its own kwargs as needed.
+    In use, the Matcher object will be initialized with kwargs prior to running compute_mapping
+    on a particular dataset
+    """
+
+    def compute_mapping(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+        """Run the matching on a given set of gt and pred TrackingGraph and returns a Matched object
+        with a new copy of each TrackingGraph
 
         Args:
             gt_graph (TrackingGraph): Tracking graph object for the gt
             pred_graph (TrackingGraph): Tracking graph object for the pred
-        """
-        self.gt_graph = gt_graph
-        self.pred_graph = pred_graph
 
-        self.mapping = self.compute_mapping()
+        Returns:
+            matched (Matched): Matched data object
+
+        Raises:
+            ValueError: gt and pred must be a TrackingGraph object
+        """
+        if not isinstance(gt_graph, TrackingGraph) or not isinstance(
+            pred_graph, TrackingGraph
+        ):
+            raise ValueError(
+                "Input data must be a TrackingData object with a graph and segmentations"
+            )
+
+        matched = self._compute_mapping(gt_graph, pred_graph)
 
         # Report matching performance
-        total_gt = len(self.gt_graph.nodes())
-        matched_gt = len({m[0] for m in self.mapping})
-        total_pred = len(self.pred_graph.nodes())
-        matched_pred = len({m[1] for m in self.mapping})
+        total_gt = len(matched.gt_graph.nodes())
+        matched_gt = len({m[0] for m in matched.mapping})
+        total_pred = len(matched.pred_graph.nodes())
+        matched_pred = len({m[1] for m in matched.mapping})
         logger.info(f"Matched {matched_gt} out of {total_gt} ground truth nodes.")
         logger.info(f"Matched {matched_pred} out of {total_pred} predicted nodes.")
 
-    @abstractmethod
-    def compute_mapping(self):
-        """Computes a mapping of nodes in gt to nodes in pred
+        return matched
 
-        The mapping must be a list of tuples, e.g. [(gt_node, pred_node)]
+    @abstractmethod
+    def _compute_mapping(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+        """Computes a mapping of nodes in gt to nodes in pred and returns a Matched object
 
         Raises:
             NotImplementedError
         """
         raise NotImplementedError
+
+
+class Matched:
+    """Matched data class which stores TrackingGraph objects for gt and pred
+    and the computed mapping
+
+    Each TrackingGraph will be a new copy on the original object
+
+    Args:
+        gt_graph (TrackingGraph): Tracking graph object for the gt
+        pred_graph (TrackingGraph): Tracking graph object for the pred
+
+    """
+
+    def __init__(
+        self,
+        gt_graph: "TrackingGraph",
+        pred_graph: "TrackingGraph",
+        mapping: list[tuple[Any, Any]],
+    ):
+        self.gt_graph = copy.deepcopy(gt_graph)
+        self.pred_graph = copy.deepcopy(pred_graph)
+        self.mapping = mapping

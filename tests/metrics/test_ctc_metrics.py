@@ -1,4 +1,4 @@
-from traccuracy.matchers._ctc import CTCMatched
+from traccuracy.matchers._ctc import CTCMatcher
 from traccuracy.metrics._ctc import CTCMetrics
 
 from tests.test_utils import get_movie_with_graph
@@ -10,7 +10,7 @@ def test_compute_mapping():
     n_labels = 3
     track_graph = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
 
-    matched = CTCMatched(gt_graph=track_graph, pred_graph=track_graph)
+    matched = CTCMatcher().compute_mapping(gt_graph=track_graph, pred_graph=track_graph)
     metric = CTCMetrics(matched)
     assert metric.results
     assert "TRA" in metric.results

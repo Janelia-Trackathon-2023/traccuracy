@@ -1,48 +1,46 @@
+from typing import TYPE_CHECKING
+
 import networkx as nx
 import numpy as np
 from tqdm import tqdm
 
-from traccuracy._tracking_graph import TrackingGraph
+if TYPE_CHECKING:
+    from traccuracy._tracking_graph import TrackingGraph
 
 from ._compute_overlap import get_labels_with_overlap
-from ._matched import Matched
+from ._matched import Matched, Matcher
 
 
-class CTCMatched(Matched):
-    def compute_mapping(self):
-        mapping = self._match_ctc()
-        return mapping
+class CTCMatcher(Matcher):
+    """Match graph nodes based on measure used in cell tracking challenge benchmarking.
 
-    def _match_ctc(self):
-        """Match graph nodes based on measure used in cell tracking challenge benchmarking.
+    A computed marker (segmentation) is matched to a reference marker if the computed
+    marker covers a majority of the reference marker.
 
-        A computed marker (segmentation) is matched to a reference marker if the computed
-        marker covers a majority of the reference marker.
+    Each reference marker can therefore only be matched to one computed marker, but
+    multiple reference markers can be assigned to a single computed marker.
 
-        Each reference marker can therefore only be matched to one computed marker, but
-        multiple reference markers can be assigned to a single computed marker.
+    See https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0144959
+    for complete details.
+    """
 
-        See https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0144959
-        for complete details.
+    def _compute_mapping(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+        """Run ctc matching
+
+        Args:
+            gt_graph (TrackingGraph): Tracking graph object for the gt
+            pred_graph (TrackingGraph): Tracking graph object for the pred
 
         Returns:
-            list[(gt_node, pred_node)]: list of tuples where each tuple contains a gt node
-            and pred node
+            Matched: Matched data object containing the CTC mapping
 
         Raises:
-            ValueError: gt and pred must be a TrackingGraph object
             ValueError: GT and pred segmentations must be the same shape
         """
-        if not isinstance(self.gt_graph, TrackingGraph) or not isinstance(
-            self.pred_graph, TrackingGraph
-        ):
-            raise ValueError(
-                "Input data must be a TrackingData object with a graph and segmentations"
-            )
-        gt = self.gt_graph
-        pred = self.pred_graph
-        gt_label_key = self.gt_graph.label_key
-        pred_label_key = self.pred_graph.label_key
+        gt = gt_graph
+        pred = pred_graph
+        gt_label_key = gt_graph.label_key
+        pred_label_key = pred_graph.label_key
         G_gt, mask_gt = gt, gt.segmentation
         G_pred, mask_pred = pred, pred.segmentation
 
@@ -93,7 +91,8 @@ class CTCMatched(Matched):
                     mapping.append(
                         (gt_label_to_id[gt_label], pred_label_to_id[pred_label])
                     )
-        return mapping
+
+        return Matched(gt_graph, pred_graph, mapping)
 
 
 def detection_test(gt_blob: "np.ndarray", comp_blob: "np.ndarray") -> int:

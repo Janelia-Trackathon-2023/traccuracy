@@ -5,21 +5,12 @@ from traccuracy.metrics._divisions import DivisionMetrics
 from tests.test_utils import get_division_graphs
 
 
-class DummyMatched(Matched):
-    def __init__(self, gt_data, pred_data, mapper):
-        self.mapper = mapper
-        super().__init__(gt_data, pred_data)
-
-    def compute_mapping(self):
-        return self.mapper
-
-
 def test_DivisionMetrics():
     g_gt, g_pred, mapper = get_division_graphs()
-    matched = DummyMatched(
+    matched = Matched(
         TrackingGraph(g_gt),
         TrackingGraph(g_pred),
-        mapper=mapper,
+        mapper,
     )
     frame_buffer = (0, 1, 2)
 
