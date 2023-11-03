@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import logging
 from abc import ABC, abstractmethod
@@ -16,7 +18,7 @@ class Matcher(ABC):
     on a particular dataset
     """
 
-    def compute_mapping(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+    def compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Run the matching on a given set of gt and pred TrackingGraph and returns a Matched object
         with a new copy of each TrackingGraph
 
@@ -50,7 +52,7 @@ class Matcher(ABC):
         return matched
 
     @abstractmethod
-    def _compute_mapping(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+    def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Computes a mapping of nodes in gt to nodes in pred and returns a Matched object
 
         Raises:
@@ -73,8 +75,8 @@ class Matched:
 
     def __init__(
         self,
-        gt_graph: "TrackingGraph",
-        pred_graph: "TrackingGraph",
+        gt_graph: TrackingGraph,
+        pred_graph: TrackingGraph,
         mapping: list[tuple[Any, Any]],
     ):
         self.gt_graph = copy.deepcopy(gt_graph)
