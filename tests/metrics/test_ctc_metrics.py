@@ -11,9 +11,9 @@ def test_compute_mapping():
     track_graph = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
 
     matched = CTCMatched(gt_graph=track_graph, pred_graph=track_graph)
-    metric = CTCMetrics(matched)
-    assert metric.results
-    assert "TRA" in metric.results
-    assert "DET" in metric.results
-    assert metric.results["TRA"] == 1
-    assert metric.results["DET"] == 1
+    results = CTCMetrics().compute(matched)
+    assert results
+    assert "TRA" in results
+    assert "DET" in results
+    assert results["TRA"] == 1
+    assert results["DET"] == 1
