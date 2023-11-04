@@ -1,14 +1,17 @@
 import networkx as nx
 import numpy as np
 import pytest
-
-from tests.test_utils import get_division_graphs
 from traccuracy import NodeAttr, TrackingGraph
 from traccuracy.matchers._matched import Matched
-from traccuracy.track_errors.divisions import (_classify_divisions,
-                                               _correct_shifted_divisions,
-                                               _evaluate_division_events,
-                                               _get_pred_by_t, _get_succ_by_t)
+from traccuracy.track_errors.divisions import (
+    _classify_divisions,
+    _correct_shifted_divisions,
+    _evaluate_division_events,
+    _get_pred_by_t,
+    _get_succ_by_t,
+)
+
+from tests.test_utils import get_division_graphs
 
 
 class DummyMatched(Matched):

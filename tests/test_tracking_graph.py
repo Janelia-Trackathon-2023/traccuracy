@@ -2,7 +2,6 @@ from collections import Counter
 
 import networkx as nx
 import pytest
-
 from traccuracy import EdgeAttr, NodeAttr, TrackingGraph
 
 

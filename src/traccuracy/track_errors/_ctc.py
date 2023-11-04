@@ -90,7 +90,6 @@ def get_edge_errors(matched_data: "Matched"):
 
     # intertrack edges = connection between parent and daughter
     for graph in [comp_graph, gt_graph]:
-
         for parent in graph.get_divisions():
             for daughter in graph.get_succs(parent):
                 graph.set_edge_attribute(
@@ -115,8 +114,12 @@ def get_edge_errors(matched_data: "Matched"):
             comp_graph.set_edge_attribute(edge, EdgeAttr.FALSE_POS, True)
         else:
             # check if semantics are correct
-            is_parent_gt = gt_graph.get_edge_attribute(expected_gt_edge, EdgeAttr.INTERTRACK_EDGE)
-            is_parent_comp = comp_graph.get_edge_attribute(edge, EdgeAttr.INTERTRACK_EDGE)
+            is_parent_gt = gt_graph.get_edge_attribute(
+                expected_gt_edge, EdgeAttr.INTERTRACK_EDGE
+            )
+            is_parent_comp = comp_graph.get_edge_attribute(
+                edge, EdgeAttr.INTERTRACK_EDGE
+            )
             if is_parent_gt != is_parent_comp:
                 comp_graph.set_edge_attribute(edge, EdgeAttr.WRONG_SEMANTIC, True)
 
@@ -124,10 +127,9 @@ def get_edge_errors(matched_data: "Matched"):
     for edge in tqdm(gt_graph.edges(), "Evaluating FN edges"):
         source, target = edge[0], edge[1]
         # this edge is adjacent to an edge we didn't detect, so it definitely is an fn
-        if (
-            gt_graph.get_node_attribute(source, NodeAttr.FALSE_NEG)
-            or gt_graph.get_node_attribute(target, NodeAttr.FALSE_NEG)
-        ):
+        if gt_graph.get_node_attribute(
+            source, NodeAttr.FALSE_NEG
+        ) or gt_graph.get_node_attribute(target, NodeAttr.FALSE_NEG):
             gt_graph.set_edge_attribute(edge, EdgeAttr.FALSE_NEG, True)
             continue
 
