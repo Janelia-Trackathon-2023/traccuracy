@@ -201,44 +201,22 @@ class TrackingGraph:
         self.node_errors = False
         self.edge_errors = False
 
-    def nodes(self, limit_to=None):
+    def nodes(self):
         """Get all the nodes in the graph, along with their attributes.
-
-        Args:
-            limit_to (list[hashable], optional): Limit returned dictionary
-                to nodes with the provided ids. Defaults to None.
-                Will raise KeyError if any of these node_ids are not present.
 
         Returns:
             NodeView: Provides set-like operations on the nodes as well as node attribute lookup.
         """
-        if limit_to is None:
-            return self.graph.nodes
-        else:
-            for node in limit_to:
-                if not self.graph.has_node(node):
-                    raise KeyError(f"Queried node {node} not present in graph.")
-            return self.graph.subgraph(limit_to).nodes
+        return self.graph.nodes
 
-    def edges(self, limit_to=None):
+    def edges(self):
         """Get all the edges in the graph, along with their attributes.
-
-        Args:
-            limit_to (list[tuple[hashable]], optional): Limit returned dictionary
-                to edges with the provided ids. Defaults to None.
-                Will raise KeyError if any of these edge ids are not present.
 
         Returns:
             OutEdgeView: Provides set-like operations on the edge-tuples as well as edge attribute
                 lookup.
         """
-        if limit_to is None:
-            return self.graph.edges
-        else:
-            for edge in limit_to:
-                if not self.graph.has_edge(*edge):
-                    raise KeyError(f"Queried edge {edge} not present in graph.")
-            return self.graph.edge_subgraph(limit_to).edges
+        return self.graph.edges
 
     def get_nodes_in_frame(self, frame):
         """Get the node ids of all nodes in the given frame.
@@ -295,62 +273,6 @@ class TrackingGraph:
             raise ValueError(f"Function takes EdgeAttr arguments, not {type(attr)}.")
         return list(self.edges_by_flag[attr])
 
-    def get_nodes_by_roi(self, **kwargs):
-        """Gets the nodes in a given region of interest (ROI). The ROI is
-        defined by keyword arguments that correspond to the frame key and
-        location keys, where each argument should be a (start, end) tuple
-        (the end is exclusive). Dimensions that are not passed as arguments
-        are unbounded. None can be passed as an element of the tuple to
-        signify an unbounded ROI on that side.
-
-        For example, if frame_key='t' and location_keys=('x', 'y'):
-        `graph.get_nodes_by_roi(t=(10, None), x=(0, 100))`
-        would return all nodes with time >= 10, and 0 <= x < 100, with no limit
-        on the y values.
-
-        Returns:
-            list of hashable: A list of node_ids for all nodes in the ROI.
-        """
-        frames = None
-        dimensions = []
-        for dim, limit in kwargs.items():
-            if not (dim == self.frame_key or dim in self.location_keys):
-                raise ValueError(
-                    f"Provided argument {dim} is neither the frame key"
-                    f" {self.frame_key} or one of the location keys"
-                    f" {self.location_keys}."
-                )
-            if dim == self.frame_key:
-                frames = list(limit)
-            else:
-                dimensions.append((dim, limit[0], limit[1]))
-        nodes = []
-        if frames:
-            if frames[0] is None:
-                frames[0] = self.start_frame
-            if frames[1] is None:
-                frames[1] = self.end_frame
-            possible_nodes = []
-            for frame in range(frames[0], frames[1]):
-                if frame in self.nodes_by_frame:
-                    possible_nodes.extend(self.nodes_by_frame[frame])
-        else:
-            possible_nodes = self.graph.nodes()
-
-        for node in possible_nodes:
-            attrs = self.graph.nodes[node]
-            inside = True
-            for dim, start, end in dimensions:
-                if start is not None and attrs[dim] < start:
-                    inside = False
-                    break
-                if end is not None and attrs[dim] >= end:
-                    inside = False
-                    break
-            if inside:
-                nodes.append(node)
-        return nodes
-
     def get_nodes_with_attribute(self, attr, criterion=None, limit_to=None):
         """Get the node_ids of all nodes who have an attribute, optionally
         limiting to nodes whose value at that attribute meet a given criteria.
@@ -383,38 +305,6 @@ class TrackingGraph:
                 if criterion is None or criterion(attributes[attr]):
                     nodes.append(node)
         return nodes
-
-    def get_edges_with_attribute(self, attr, criterion=None, limit_to=None):
-        """Get the edge_ids of all edges who have an attribute, optionally
-        limiting to edges whose value at that attribute meet a given criteria.
-
-        For example, get all edges that have an attribute called "fp",
-        or where the value for "fp" == True.
-
-        Args:
-            attr (str): the name of the attribute to search for in the edge metadata
-            criterion ((any)->bool, optional): A function that takes a value and returns
-                a boolean. If provided, edges will only be returned if the value at
-                edge[attr] meets this criterion. Defaults to None.
-            limit_to (list[hashable], optional): If provided the function will only
-                return edge ids in this list. Will raise KeyError if ids provided here
-                are not present.
-
-        Returns:
-            list of hashable: A list of edge_ids which have the given attribute
-                (and optionally have values at that attribute that meet the given criterion,
-                and/or are in the list of edge ids.)
-        """
-        if not limit_to:
-            limit_to = self.graph.edges.keys()
-
-        edges = []
-        for edge in limit_to:
-            attributes = self.graph.edges[edge]
-            if attr in attributes.keys():
-                if criterion is None or criterion(attributes[attr]):
-                    edges.append(edge)
-        return edges
 
     def get_divisions(self):
         """Get all nodes that have at least two edges pointing to the next time frame
