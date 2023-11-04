@@ -37,9 +37,6 @@ def get_vertex_errors(matched_data: "Matched"):
         logger.info("Node errors already calculated. Skipping graph annotation")
         return
 
-    comp_graph.set_node_attribute(list(comp_graph.nodes()), NodeAttr.TRUE_POS, False)
-    comp_graph.set_node_attribute(list(comp_graph.nodes()), NodeAttr.NON_SPLIT, False)
-
     # will flip this when we come across the vertex in the mapping
     comp_graph.set_node_attribute(list(comp_graph.nodes()), NodeAttr.FALSE_POS, True)
     gt_graph.set_node_attribute(list(gt_graph.nodes()), NodeAttr.FALSE_NEG, True)
@@ -88,19 +85,11 @@ def get_edge_errors(matched_data: "Matched"):
         comp_graph.get_nodes_with_flag(NodeAttr.TRUE_POS)
     ).graph
 
-    comp_graph.set_edge_attribute(list(comp_graph.edges()), EdgeAttr.FALSE_POS, False)
-    comp_graph.set_edge_attribute(
-        list(comp_graph.edges()), EdgeAttr.WRONG_SEMANTIC, False
-    )
-    gt_graph.set_edge_attribute(list(gt_graph.edges()), EdgeAttr.FALSE_NEG, False)
-
     gt_comp_mapping = {gt: comp for gt, comp in node_mapping if comp in induced_graph}
     comp_gt_mapping = {comp: gt for gt, comp in node_mapping if comp in induced_graph}
 
     # intertrack edges = connection between parent and daughter
     for graph in [comp_graph, gt_graph]:
-        # Set to False by default
-        graph.set_edge_attribute(list(graph.edges()), EdgeAttr.INTERTRACK_EDGE, False)
 
         for parent in graph.get_divisions():
             for daughter in graph.get_succs(parent):
@@ -126,8 +115,8 @@ def get_edge_errors(matched_data: "Matched"):
             comp_graph.set_edge_attribute(edge, EdgeAttr.FALSE_POS, True)
         else:
             # check if semantics are correct
-            is_parent_gt = gt_graph.edges()[expected_gt_edge][EdgeAttr.INTERTRACK_EDGE]
-            is_parent_comp = comp_graph.edges()[edge][EdgeAttr.INTERTRACK_EDGE]
+            is_parent_gt = gt_graph.get_edge_attribute(expected_gt_edge, EdgeAttr.INTERTRACK_EDGE)
+            is_parent_comp = comp_graph.get_edge_attribute(edge, EdgeAttr.INTERTRACK_EDGE)
             if is_parent_gt != is_parent_comp:
                 comp_graph.set_edge_attribute(edge, EdgeAttr.WRONG_SEMANTIC, True)
 
@@ -136,8 +125,8 @@ def get_edge_errors(matched_data: "Matched"):
         source, target = edge[0], edge[1]
         # this edge is adjacent to an edge we didn't detect, so it definitely is an fn
         if (
-            gt_graph.nodes()[source][NodeAttr.FALSE_NEG]
-            or gt_graph.nodes()[target][NodeAttr.FALSE_NEG]
+            gt_graph.get_node_attribute(source, NodeAttr.FALSE_NEG)
+            or gt_graph.get_node_attribute(target, NodeAttr.FALSE_NEG)
         ):
             gt_graph.set_edge_attribute(edge, EdgeAttr.FALSE_NEG, True)
             continue
