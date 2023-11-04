@@ -1,17 +1,14 @@
 import networkx as nx
 import numpy as np
 import pytest
-from traccuracy import NodeAttr, TrackingGraph
-from traccuracy.matchers._matched import Matched
-from traccuracy.track_errors.divisions import (
-    _classify_divisions,
-    _correct_shifted_divisions,
-    _evaluate_division_events,
-    _get_pred_by_t,
-    _get_succ_by_t,
-)
 
 from tests.test_utils import get_division_graphs
+from traccuracy import NodeAttr, TrackingGraph
+from traccuracy.matchers._matched import Matched
+from traccuracy.track_errors.divisions import (_classify_divisions,
+                                               _correct_shifted_divisions,
+                                               _evaluate_division_events,
+                                               _get_pred_by_t, _get_succ_by_t)
 
 
 class DummyMatched(Matched):
@@ -185,8 +182,8 @@ class Test_correct_shifted_divisions:
         ng_pred = new_matched.pred_graph
         ng_gt = new_matched.gt_graph
 
-        assert ng_pred.nodes()["1_3"][NodeAttr.FP_DIV] is True
-        assert ng_gt.nodes()["1_1"][NodeAttr.FN_DIV] is True
+        assert ng_pred.get_node_attribute("1_3", NodeAttr.FP_DIV) is True
+        assert ng_gt.get_node_attribute("1_1", NodeAttr.FN_DIV) is True
         assert len(ng_gt.get_nodes_with_flag(NodeAttr.TP_DIV)) == 0
 
     def test_fn_early(self):
@@ -203,10 +200,10 @@ class Test_correct_shifted_divisions:
         ng_pred = new_matched.pred_graph
         ng_gt = new_matched.gt_graph
 
-        assert ng_pred.nodes()["1_3"][NodeAttr.FP_DIV] is False
-        assert ng_gt.nodes()["1_1"][NodeAttr.FN_DIV] is False
-        assert ng_pred.nodes()["1_3"][NodeAttr.TP_DIV] is True
-        assert ng_gt.nodes()["1_1"][NodeAttr.TP_DIV] is True
+        assert ng_pred.get_node_attribute("1_3", NodeAttr.FP_DIV) is False
+        assert ng_gt.get_node_attribute("1_1", NodeAttr.FN_DIV) is False
+        assert ng_pred.get_node_attribute("1_3", NodeAttr.TP_DIV) is True
+        assert ng_gt.get_node_attribute("1_1", NodeAttr.TP_DIV) is True
 
     def test_fp_early(self):
         # Early division in pred
@@ -222,10 +219,10 @@ class Test_correct_shifted_divisions:
         ng_pred = new_matched.pred_graph
         ng_gt = new_matched.gt_graph
 
-        assert ng_pred.nodes()["1_1"][NodeAttr.FP_DIV] is False
-        assert ng_gt.nodes()["1_3"][NodeAttr.FN_DIV] is False
-        assert ng_pred.nodes()["1_1"][NodeAttr.TP_DIV] is True
-        assert ng_gt.nodes()["1_3"][NodeAttr.TP_DIV] is True
+        assert ng_pred.get_node_attribute("1_1", NodeAttr.FP_DIV) is False
+        assert ng_gt.get_node_attribute("1_3", NodeAttr.FN_DIV) is False
+        assert ng_pred.get_node_attribute("1_1", NodeAttr.TP_DIV) is True
+        assert ng_gt.get_node_attribute("1_3", NodeAttr.TP_DIV) is True
 
 
 def test_evaluate_division_events():

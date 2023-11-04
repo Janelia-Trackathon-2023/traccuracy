@@ -1,5 +1,6 @@
 import networkx as nx
 import numpy as np
+
 from traccuracy._tracking_graph import EdgeAttr, NodeAttr, TrackingGraph
 from traccuracy.matchers._matched import Matched
 from traccuracy.track_errors._ctc import get_edge_errors, get_vertex_errors
@@ -49,17 +50,17 @@ def test_get_vertex_errors():
     assert len(G_comp.get_nodes_with_flag(NodeAttr.FALSE_POS)) == 2
     assert len(G_gt.get_nodes_with_flag(NodeAttr.FALSE_NEG)) == 3
 
-    assert gt_g.nodes[15][NodeAttr.FALSE_NEG]
-    assert not gt_g.nodes[17][NodeAttr.FALSE_NEG]
+    assert G_gt.get_node_attribute(15, NodeAttr.FALSE_NEG)
+    assert not G_gt.get_node_attribute(17, NodeAttr.FALSE_NEG)
 
-    assert comp_g.nodes[3][NodeAttr.NON_SPLIT]
-    assert not comp_g.nodes[7][NodeAttr.NON_SPLIT]
+    assert G_comp.get_node_attribute(3, NodeAttr.NON_SPLIT)
+    assert not G_comp.get_node_attribute(7, NodeAttr.NON_SPLIT)
 
-    assert comp_g.nodes[7][NodeAttr.TRUE_POS]
-    assert not comp_g.nodes[3][NodeAttr.TRUE_POS]
+    assert G_comp.get_node_attribute(7, NodeAttr.TRUE_POS)
+    assert not G_comp.get_node_attribute(3, NodeAttr.TRUE_POS)
 
-    assert comp_g.nodes[10][NodeAttr.FALSE_POS]
-    assert not comp_g.nodes[7][NodeAttr.FALSE_POS]
+    assert G_comp.get_node_attribute(10, NodeAttr.FALSE_POS)
+    assert not G_comp.get_node_attribute(7, NodeAttr.FALSE_POS)
 
 
 def test_assign_edge_errors():
@@ -99,9 +100,10 @@ def test_assign_edge_errors():
     matched_data.mapping = mapping
 
     get_edge_errors(matched_data)
-
-    assert comp_g.edges[(7, 8)][EdgeAttr.FALSE_POS]
-    assert gt_g.edges[(17, 18)][EdgeAttr.FALSE_NEG]
+    matched_comp = matched_data.pred_graph
+    matched_gt = matched_data.gt_graph
+    assert matched_comp.get_edge_attribute((7, 8), EdgeAttr.FALSE_POS)
+    assert matched_gt.get_edge_attribute((17, 18), EdgeAttr.FALSE_NEG)
 
 
 def test_assign_edge_errors_semantics():
@@ -138,7 +140,8 @@ def test_assign_edge_errors_semantics():
 
     matched_data = DummyMatched(TrackingGraph(gt), TrackingGraph(comp))
     matched_data.mapping = mapping
+    matched_comp = matched_data.pred_graph
 
     get_edge_errors(matched_data)
 
-    assert comp.edges[("1_2", "1_3")][EdgeAttr.WRONG_SEMANTIC]
+    assert matched_comp.get_edge_attribute(("1_2", "1_3"), EdgeAttr.WRONG_SEMANTIC)
