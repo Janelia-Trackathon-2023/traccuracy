@@ -3,8 +3,8 @@
 Definitions (Bise et al., 2011; Chen, 2021; Fukai et al., 2022):
 
 - TE for a single ground truth track T^g_j is calculated by finding the predicted track T^p_k
-  that overlaps with T^g_j in the largest number of the frames and then dividing the overlap frame counts
-  by the total frame counts for T^g_j.
+  that overlaps with T^g_j in the largest number of the frames and then dividing 
+  the overlap frame counts by the total frame counts for T^g_j.
   The TE for the total dataset is calculated as the mean of TEs for all ground truth tracks,
   weighted by the length of the tracks.
 
