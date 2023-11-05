@@ -11,6 +11,7 @@ Definitions (Bise et al., 2011; Chen, 2021; Fukai et al., 2022):
 - TP is defined analogously, with T^g_j and T^p_j being swapped in the definition.
 """
 
+from itertools import product
 from typing import TYPE_CHECKING, Any, List, Tuple
 
 from traccuracy._tracking_graph import TrackingGraph
@@ -71,17 +72,25 @@ def _calc_overlap_score(
     correct_count = 0
     total_count = 0
     # iterate over the reference tracklets
+
+    def map_node(node):
+        return [n_to for (n_from, n_to) in mapping if n_from == node]
+
     for reference_tracklet in reference_tracklets:
         # find the overlap tracklet with the largest overlap
-        reference_tracklet_nodes_mapped = [
-            n_to for (n_from, n_to) in mapping if n_from in reference_tracklet.nodes()
-        ]
+        reference_tracklet_edges_mapped = []
+        for node1, node2 in reference_tracklet.edges():
+            mapped_nodes1 = map_node(node1)
+            mapped_nodes2 = map_node(node2)
+            if mapped_nodes1 and mapped_nodes2:
+                for n1, n2 in product(mapped_nodes1, mapped_nodes2):
+                    reference_tracklet_edges_mapped.append((n1, n2))
         overlaps = [
-            len(set(reference_tracklet_nodes_mapped) & set(overlap_tracklet.nodes()))
+            len(set(reference_tracklet_edges_mapped) & set(overlap_tracklet.edges()))
             for overlap_tracklet in overlap_tracklets
         ]
         max_overlap = max(overlaps)
         correct_count += max_overlap
-        total_count += len(reference_tracklet_nodes_mapped)
+        total_count += len(reference_tracklet_edges_mapped)
 
     return correct_count / total_count if total_count > 0 else -1
