@@ -616,7 +616,7 @@ class TrackingGraph:
             return False
         return self.graph.edges[_id][attr]
 
-    def get_tracklets(self, include_intertrack_edges:bool=False):
+    def get_tracklets(self, include_intertrack_edges: bool = False):
         """Gets a list of new TrackingGraph objects containing all tracklets of the current graph.
 
         Tracklet is defined as all connected components between divisions (daughter to next
@@ -631,11 +631,10 @@ class TrackingGraph:
             for daughter in self.get_succs(parent):
                 graph_copy.remove_edge(parent, daughter)
                 removed_edges.append((parent, daughter))
-                
 
         # Extract subgraphs (aka tracklets) and return as new track graphs
         tracklets = nx.weakly_connected_components(graph_copy)
-        
+
         if include_intertrack_edges:
             # Add back intertrack edges
             for tracklet in tracklets:
