@@ -8,15 +8,12 @@ Definitions (Bise et al., 2011; Chen, 2021; Fukai et al., 2022):
 """
 
 from typing import TYPE_CHECKING
-from typing import Dict
-from typing import Optional
-from typing import Sequence
+from typing import List, Tuple, Any
 
-import networkx as nx
-import numpy as np
-import pandas as pd
+from traccuracy._tracking_graph import TrackingGraph
 
 from ._base import Metric
+
 
 if TYPE_CHECKING:
     from ._base import Matched
@@ -28,55 +25,51 @@ class TrackOverlapMetrics(Metric):
         super().__init__(matched_data)
 
     def compute(self):
-            
-        self.data.gt_graph
         
         # requires tracklets that also have the splitting and merging edges
-        gt_tree = nx.from_edgelist(order_edges(true_edges), create_using=nx.DiGraph)
-        pred_tree = nx.from_edgelist(
-            order_edges(predicted_edges), create_using=nx.DiGraph
-        )
-        gt_track_df, gt_split_df, _gt_merge_df = convert_tree_to_dataframe(gt_tree)
-        pred_track_df, pred_split_df, _pred_merge_df = convert_tree_to_dataframe(
-            pred_tree
-        )
-        gt_track_df = gt_track_df.reset_index()
-        pred_track_df = pred_track_df.reset_index()
-
-        gt_track_df = _add_split_edges(gt_track_df, gt_split_df)
-        pred_track_df = _add_split_edges(pred_track_df, pred_split_df)
-        
         # edgess are a list of edges, grouped by the tracks
-        gt_edgess = _df_to_edges(gt_track_df)
-        pred_edgess = _df_to_edges(pred_track_df)
+        gt_tracklets = self.data.gt_graph.get_tracklets(include_intertrack_edges=True)
+        pred_tracklets = self.data.pred_graph.get_tracklets(include_intertrack_edges=True)
         
-        # filter out edges that are not in the include_frames and exclude_true_edges
-        filter_edges = (
-            lambda e: e[0][0] in include_frames and e not in exclude_true_edges
-        )
-        pred_edgess = [
-            [e for e in edges if filter_edges(e)] for edges in pred_edgess
-        ]
-        gt_edgess = [[e for e in edges if filter_edges(e)] for edges in gt_edgess]
+        gt_pred_mapping = self.data.mapping
+        pred_gt_mapping = [(pred_node, gt_node) for gt_node, pred_node in gt_pred_mapping]
         
         # calculate track purity and target effectiveness
-        track_purity = _calc_overlap_score(pred_edgess, gt_edgess)
-        target_effectiveness = _calc_overlap_score(gt_edgess, pred_edgess)
+        track_purity = _calc_overlap_score(pred_tracklets, gt_tracklets, pred_gt_mapping)
+        target_effectiveness = _calc_overlap_score(gt_tracklets, pred_tracklets, gt_pred_mapping)
         return {
             "track_purity": track_purity,
             "target_effectiveness": target_effectiveness,
         }
 
-def _calc_overlap_score(reference_edgess, overlap_edgess):
+
+def _calc_overlap_score(reference_tracklets: List[TrackingGraph],
+                        overlap_tracklets: List[TrackingGraph], 
+                        mapping: List[Tuple[Any, Any]]):
+    """ Calculate weighted sum of the length of the longest overlap tracklet for each reference tracklet.
+    
+     Args:
+        reference_tracklets (List[TrackingGraph]): The reference tracklets
+        overlap_tracklets (List[TrackingGraph]): The tracklets that overlap with the reference tracklets
+        mapping (List[Tuple[Any, Any]]): Mapping between the reference tracklet nodes and the overlap tracklet nodes
+
+    
+    """
     correct_count = 0
-    for reference_edges in reference_edgess:
+    total_count = 0
+    # iterate over the reference tracklets
+    for reference_tracklet in reference_tracklets:
+        # find the overlap tracklet with the largest overlap
+        reference_tracklet_nodes_mapped = [ 
+            n_to for (n_from, n_to) in mapping if n_from in reference_tracklet.nodes()
+        ]
         overlaps = [
-            len(set(reference_edges) & set(overlap_edges))
-            for overlap_edges in overlap_edgess
+            len(set(reference_tracklet_nodes_mapped) & set(overlap_tracklet.nodes()))
+            for overlap_tracklet in overlap_tracklets
         ]
         max_overlap = max(overlaps)
         correct_count += max_overlap
-    total_count = sum([len(reference_edges) for reference_edges in reference_edgess])
-    return correct_count / total_count if total_count > 0 else -1
+        total_count += len(reference_tracklet_nodes_mapped)
 
+    return correct_count / total_count if total_count > 0 else -1
 
