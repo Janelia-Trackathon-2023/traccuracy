@@ -2,10 +2,10 @@
 
 Definitions (Bise et al., 2011; Chen, 2021; Fukai et al., 2022):
 
-- TE for a single ground truth track T^g_j is calculated by finding the predicted track T^p_k 
-  that overlaps with T^g_j in the largest number of the frames and then dividing the overlap frame counts 
-  by the total frame counts for T^g_j. 
-  The TE for the total dataset is calculated as the mean of TEs for all ground truth tracks, 
+- TE for a single ground truth track T^g_j is calculated by finding the predicted track T^p_k
+  that overlaps with T^g_j in the largest number of the frames and then dividing the overlap frame counts
+  by the total frame counts for T^g_j.
+  The TE for the total dataset is calculated as the mean of TEs for all ground truth tracks,
   weighted by the length of the tracks.
 
 - TP is defined analogously, with T^g_j and T^p_j being swapped in the definition.
@@ -58,13 +58,13 @@ def _calc_overlap_score(
     overlap_tracklets: List[TrackingGraph],
     mapping: List[Tuple[Any, Any]],
 ):
-    """Calculate weighted sum of the length of the longest overlap tracklet 
+    """Calculate weighted sum of the length of the longest overlap tracklet
     for each reference tracklet.
 
     Args:
        reference_tracklets (List[TrackingGraph]): The reference tracklets
        overlap_tracklets (List[TrackingGraph]): The tracklets that overlap
-       mapping (List[Tuple[Any, Any]]): Mapping between the reference tracklet nodes 
+       mapping (List[Tuple[Any, Any]]): Mapping between the reference tracklet nodes
        and the overlap tracklet nodes
 
     """
