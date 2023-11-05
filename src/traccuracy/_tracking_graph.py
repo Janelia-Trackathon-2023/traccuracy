@@ -636,10 +636,11 @@ class TrackingGraph:
         tracklets = nx.weakly_connected_components(graph_copy)
 
         if include_intertrack_edges:
+            tracklets = list(tracklets)
             # Add back intertrack edges
             for tracklet in tracklets:
                 for parent, daughter in removed_edges:
-                    if daughter in tracklet.nodes:
-                        tracklet.add_edge(parent, daughter)
+                    if daughter in tracklet:
+                        tracklet.add(parent)
 
         return [self.get_subgraph(g) for g in tracklets]
