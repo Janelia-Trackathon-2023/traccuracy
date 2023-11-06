@@ -84,3 +84,11 @@ def test_track_overlap_metrics(test_trees) -> None:
         "track_purity": 7 / 9,
         "target_effectiveness": 6 / 11,
     }
+
+    metric = TrackOverlapMetrics(matched, include_division_edges=False)
+    assert metric.results
+
+    assert metric.results == {
+        "track_purity": 5 / 7,
+        "target_effectiveness": 6 / 9,
+    }

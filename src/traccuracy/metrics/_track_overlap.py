@@ -25,15 +25,27 @@ if TYPE_CHECKING:
 class TrackOverlapMetrics(Metric):
     supports_many_to_one = True
 
-    def __init__(self, matched_data: "Matched"):
+    def __init__(self, matched_data: "Matched", include_division_edges: bool = True):
+        """Calculate metrics for longest track overlaps.
+
+        - Target Effectiveness
+        - Track Purity
+
+        Args:
+            matched_data (Matched): Matched object for set of GT and Pred data
+            include_division_edges (bool, optional): If True, include edges at division.
+        """
+        self.include_division_edges = include_division_edges
         super().__init__(matched_data)
 
     def compute(self):
         # requires tracklets that also have the splitting and merging edges
         # edgess are a list of edges, grouped by the tracks
-        gt_tracklets = self.data.gt_graph.get_tracklets(include_intertrack_edges=True)
+        gt_tracklets = self.data.gt_graph.get_tracklets(
+            include_division_edges=self.include_division_edges
+        )
         pred_tracklets = self.data.pred_graph.get_tracklets(
-            include_intertrack_edges=True
+            include_division_edges=self.include_division_edges
         )
 
         gt_pred_mapping = self.data.mapping
