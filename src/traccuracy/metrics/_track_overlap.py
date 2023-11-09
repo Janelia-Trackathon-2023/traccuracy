@@ -26,9 +26,9 @@ class TrackOverlapMetrics(Metric):
     """Calculate metrics for longest track overlaps.
 
     - Target Effectiveness: fraction of longest overlapping prediction
-                            tracklets onto each GT tracklet
+                            tracklets on each GT tracklet
     - Track Purity : fraction of longest overlapping GT
-                     tracklets onto each prediction tracklet
+                     tracklets on each prediction tracklet
 
     Args:
         matched_data (Matched): Matched object for set of GT and Pred data
@@ -57,10 +57,10 @@ class TrackOverlapMetrics(Metric):
 
         # calculate track purity and target effectiveness
         track_purity = _calc_overlap_score(
-            pred_tracklets, gt_tracklets, pred_gt_mapping
+            pred_tracklets, gt_tracklets, gt_pred_mapping
         )
         target_effectiveness = _calc_overlap_score(
-            gt_tracklets, pred_tracklets, gt_pred_mapping
+            gt_tracklets, pred_tracklets, pred_gt_mapping
         )
         return {
             "track_purity": track_purity,
@@ -71,7 +71,7 @@ class TrackOverlapMetrics(Metric):
 def _calc_overlap_score(
     reference_tracklets: List[TrackingGraph],
     overlap_tracklets: List[TrackingGraph],
-    mapping: List[Tuple[Any, Any]],
+    overlap_reference_mapping: List[Tuple[Any, Any]],
 ):
     """Calculate weighted sum of the length of the longest overlap tracklet
     for each reference tracklet.
@@ -87,24 +87,33 @@ def _calc_overlap_score(
     total_count = 0
     # iterate over the reference tracklets
 
-    def map_node(node):
-        return [n_to for (n_from, n_to) in mapping if n_from == node]
+    def map_node(overlap_node):
+        return [
+            n_reference
+            for (n_overlap, n_reference) in overlap_reference_mapping
+            if n_overlap == overlap_node
+        ]
 
-    for reference_tracklet in reference_tracklets:
-        # find the overlap tracklet with the largest overlap
-        reference_tracklet_edges_mapped = []
-        for node1, node2 in reference_tracklet.edges():
+    # calculate all overlapping edges mapped onto GT ids
+    overlap_tracklets_edges_mapped = []
+    for overlap_tracklet in overlap_tracklets:
+        edges = []
+        for node1, node2 in overlap_tracklet.edges():
             mapped_nodes1 = map_node(node1)
             mapped_nodes2 = map_node(node2)
             if mapped_nodes1 and mapped_nodes2:
                 for n1, n2 in product(mapped_nodes1, mapped_nodes2):
-                    reference_tracklet_edges_mapped.append((n1, n2))
+                    edges.append((n1, n2))
+        overlap_tracklets_edges_mapped.append(edges)
+
+    for reference_tracklet in reference_tracklets:
+        # find the overlap tracklet with the largest overlap
         overlaps = [
-            len(set(reference_tracklet_edges_mapped) & set(overlap_tracklet.edges()))
-            for overlap_tracklet in overlap_tracklets
+            len(set(reference_tracklet.edges()) & set(edges))
+            for edges in overlap_tracklets_edges_mapped
         ]
         max_overlap = max(overlaps)
         correct_count += max_overlap
-        total_count += len(reference_tracklet_edges_mapped)
+        total_count += len(reference_tracklet.edges())
 
     return correct_count / total_count if total_count > 0 else -1
