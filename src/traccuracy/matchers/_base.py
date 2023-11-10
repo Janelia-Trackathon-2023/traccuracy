@@ -41,7 +41,10 @@ class Matcher(ABC):
                 "Input data must be a TrackingData object with a graph and segmentations"
             )
 
-        matched = self._compute_mapping(gt_graph, pred_graph)
+        # Copy graphs to avoid possible changes to graphs while computing mapping
+        matched = self._compute_mapping(
+            copy.deepcopy(gt_graph), copy.deepcopy(pred_graph)
+        )
 
         # Report matching performance
         total_gt = len(matched.gt_graph.nodes())
@@ -74,7 +77,8 @@ class Matched:
     Args:
         gt_graph (traccuracy.TrackingGraph): Tracking graph object for the gt
         pred_graph (traccuracy.TrackingGraph): Tracking graph object for the pred
-
+        mapping (list[tuple[Any, Any]]): List of tuples where each tuple maps
+            a gt node to a pred node
     """
 
     def __init__(
@@ -83,6 +87,6 @@ class Matched:
         pred_graph: TrackingGraph,
         mapping: list[tuple[Any, Any]],
     ):
-        self.gt_graph = copy.deepcopy(gt_graph)
-        self.pred_graph = copy.deepcopy(pred_graph)
+        self.gt_graph = gt_graph
+        self.pred_graph = pred_graph
         self.mapping = mapping
