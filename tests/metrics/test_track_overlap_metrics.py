@@ -96,11 +96,11 @@ simple2["pred_edges"].extend(
 )
 simple2["results_with_division_edges"] = {
     "track_purity": 7 / 11,
-    "target_effectiveness": 6 / 11,
+    "target_effectiveness": 5 / 11,
 }
 simple2["results_without_division_edges"] = {
-    "track_purity": 5 / 9,
-    "target_effectiveness": 6 / 9,
+    "track_purity": 5 / 7,
+    "target_effectiveness": 5 / 9,
 }
 TEST_TREES.append(simple2)
 assert TEST_TREES[0] != TEST_TREES[1]
