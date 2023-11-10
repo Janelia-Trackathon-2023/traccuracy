@@ -65,17 +65,50 @@ TEST_TREES = [
             "target_effectiveness": 6 / 9,
         },
     },
-    #    {
-    #        "name" : "overlap",
-    #        "gt_edges" : [
-    #            ("0_0", "1_0"),
-    #            ("1_0", "2_0"),
-    #            ("2_0", "3_0"),
-    #            ("1_0", "2_1"),
-    #            ("2_1", "3_1"),
-    #        ],
-    #
-    #    }
+    {
+        "name": "overlap",
+        # 0 - 0 - 0 - 0
+        #       |
+        #       - 1 - 1
+        "gt_edges": [
+            ("0_0", "1_0"),
+            ("1_0", "2_0"),
+            ("2_0", "3_0"),
+            ("1_0", "2_1"),
+            ("2_1", "3_1"),
+        ],
+        # 0 - 0 - 0
+        #       |
+        #       - 1 - 1
+        #     2 - 2 - 2
+        # (2 and 1 overlap)
+        "pred_edges": [
+            ("0_0", "1_0"),
+            ("1_0", "2_0"),
+            ("1_0", "2_1"),
+            ("2_1", "3_1"),
+            ("1_2", "2_2"),
+            ("2_2", "3_2"),
+        ],
+        "mapping": [  # GT to pred mapping
+            ("0_0", "0_0"),
+            ("1_0", "1_0"),
+            ("2_0", "2_0"),
+            ("3_0", "3_0"),
+            ("2_1", "2_1"),
+            ("3_1", "3_1"),
+            ("2_1", "2_2"),
+            ("3_1", "3_2"),
+        ],
+        "results_with_division_edges": {
+            "track_purity": 5 / 6,
+            "target_effectiveness": 4 / 5,
+        },
+        "results_without_division_edges": {
+            "track_purity": 3 / 4,
+            "target_effectiveness": 2 / 3,
+        },
+    },
 ]
 
 simple2 = deepcopy(TEST_TREES[0])
@@ -110,7 +143,10 @@ assert TEST_TREES[0] != TEST_TREES[1]
 def test_track_overlap_metrics(data) -> None:
     g_gt = add_frame(nx.from_edgelist(data["gt_edges"], create_using=nx.DiGraph))
     g_pred = add_frame(nx.from_edgelist(data["pred_edges"], create_using=nx.DiGraph))
-    mapping = [(n, n) for n in g_gt.nodes]
+    if "mapping" in data:
+        mapping = data["mapping"]
+    else:
+        mapping = [(n, n) for n in g_gt.nodes]
 
     matched = DummyMatched(
         TrackingGraph(g_gt),
