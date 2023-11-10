@@ -140,13 +140,18 @@ assert TEST_TREES[0] != TEST_TREES[1]
 
 
 @pytest.mark.parametrize("data", TEST_TREES)
-def test_track_overlap_metrics(data) -> None:
+@pytest.mark.parametrize("inverse", [False, True])
+def test_track_overlap_metrics(data, inverse) -> None:
     g_gt = add_frame(nx.from_edgelist(data["gt_edges"], create_using=nx.DiGraph))
     g_pred = add_frame(nx.from_edgelist(data["pred_edges"], create_using=nx.DiGraph))
     if "mapping" in data:
         mapping = data["mapping"]
     else:
         mapping = [(n, n) for n in g_gt.nodes]
+
+    if inverse:
+        g_gt, g_pred = g_pred, g_gt
+        mapping = [(b, a) for a, b in mapping]
 
     matched = DummyMatched(
         TrackingGraph(g_gt),
@@ -157,13 +162,21 @@ def test_track_overlap_metrics(data) -> None:
     metric = TrackOverlapMetrics(matched)
     assert metric.results
 
-    assert (
-        metric.results == data["results_with_division_edges"]
-    ), f"{data['name']} failed with division edges"
+    expected = data["results_with_division_edges"]
+    if inverse:
+        expected = {
+            "track_purity": expected["target_effectiveness"],
+            "target_effectiveness": expected["track_purity"],
+        }
+    assert metric.results == expected, f"{data['name']} failed with division edges"
 
     metric = TrackOverlapMetrics(matched, include_division_edges=False)
     assert metric.results
 
-    assert (
-        metric.results == data["results_without_division_edges"]
-    ), f"{data['name']} failed without division edges"
+    expected = data["results_without_division_edges"]
+    if inverse:
+        expected = {
+            "track_purity": expected["target_effectiveness"],
+            "target_effectiveness": expected["track_purity"],
+        }
+    assert metric.results == expected, f"{data['name']} failed without division edges"
