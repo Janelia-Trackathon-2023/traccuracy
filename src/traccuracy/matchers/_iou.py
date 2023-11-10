@@ -3,8 +3,8 @@ from tqdm import tqdm
 
 from traccuracy._tracking_graph import TrackingGraph
 
+from ._base import Matched, Matcher
 from ._compute_overlap import get_labels_with_overlap
-from ._matched import Matched, Matcher
 
 
 def _match_nodes(gt, res, threshold=1):

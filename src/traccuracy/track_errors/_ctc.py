@@ -7,7 +7,7 @@ from tqdm import tqdm
 from traccuracy import EdgeAttr, NodeAttr
 
 if TYPE_CHECKING:
-    from traccuracy.matchers._matched import Matched
+    from traccuracy.matchers._base import Matched
 
 logger = logging.getLogger(__name__)
 

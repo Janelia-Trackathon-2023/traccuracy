@@ -7,8 +7,8 @@ from tqdm import tqdm
 if TYPE_CHECKING:
     from traccuracy._tracking_graph import TrackingGraph
 
+from ._base import Matched, Matcher
 from ._compute_overlap import get_labels_with_overlap
-from ._matched import Matched, Matcher
 
 
 class CTCMatcher(Matcher):

@@ -8,7 +8,7 @@ from traccuracy._tracking_graph import NodeAttr
 from traccuracy._utils import find_gt_node_matches, find_pred_node_matches
 
 if TYPE_CHECKING:
-    from traccuracy.matchers._matched import Matched
+    from traccuracy.matchers._base import Matched
 
 logger = logging.getLogger(__name__)
 

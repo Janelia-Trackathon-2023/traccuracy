@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from typing import Dict, List, Optional, Type
 
     from traccuracy import TrackingGraph
-    from traccuracy.matchers._matched import Matcher
+    from traccuracy.matchers._base import Matcher
     from traccuracy.metrics._base import Metric
 
 
