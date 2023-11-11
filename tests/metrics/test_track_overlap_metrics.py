@@ -3,7 +3,7 @@ from copy import deepcopy
 import networkx as nx
 import pytest
 from traccuracy import TrackingGraph
-from traccuracy.metrics._track_overlap import TrackOverlapMetrics
+from traccuracy.metrics._track_overlap import TrackOverlapMetrics, _mapping_to_dict
 
 from tests.test_utils import DummyMatched
 
@@ -180,3 +180,9 @@ def test_track_overlap_metrics(data, inverse) -> None:
             "target_effectiveness": expected["track_purity"],
         }
     assert metric.results == expected, f"{data['name']} failed without division edges"
+
+
+def test_mapping_to_dict():
+    mapping = [("1", "2"), ("2", "3"), ("1", "3"), ("2", "3")]
+    mapping_dict = _mapping_to_dict(mapping)
+    assert mapping_dict == {"1": ["2", "3"], "2": ["3", "3"]}
