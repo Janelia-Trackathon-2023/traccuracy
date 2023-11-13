@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import pytest
 from traccuracy import NodeAttr, TrackingGraph
-from traccuracy.matchers._base import Matched
+from traccuracy.matchers import Matched
 from traccuracy.track_errors.divisions import (
     _classify_divisions,
     _correct_shifted_divisions,

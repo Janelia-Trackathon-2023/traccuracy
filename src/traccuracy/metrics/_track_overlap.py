@@ -19,7 +19,7 @@ from traccuracy._tracking_graph import TrackingGraph
 from ._base import Metric
 
 if TYPE_CHECKING:
-    from ._base import Matched
+    from traccuracy.matchers import Matched
 
 
 def _mapping_to_dict(mapping: List[Tuple[Any, Any]]) -> Dict[Any, List[Any]]:

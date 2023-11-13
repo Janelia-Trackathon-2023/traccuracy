@@ -3,7 +3,7 @@ from copy import deepcopy
 import networkx as nx
 import pytest
 from traccuracy import TrackingGraph
-from traccuracy.matchers._base import Matched
+from traccuracy.matchers import Matched
 from traccuracy.metrics._track_overlap import TrackOverlapMetrics, _mapping_to_dict
 
 
