@@ -1,17 +1,7 @@
 from traccuracy import TrackingGraph
-from traccuracy.matchers._matched import Matched
 from traccuracy.metrics._divisions import DivisionMetrics
 
-from tests.test_utils import get_division_graphs
-
-
-class DummyMatched(Matched):
-    def __init__(self, gt_data, pred_data, mapper):
-        self.mapper = mapper
-        super().__init__(gt_data, pred_data)
-
-    def compute_mapping(self):
-        return self.mapper
+from tests.test_utils import DummyMatched, get_division_graphs
 
 
 def test_DivisionMetrics():
