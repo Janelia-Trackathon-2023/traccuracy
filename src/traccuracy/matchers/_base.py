@@ -72,7 +72,7 @@ class Matched:
     """Matched data class which stores TrackingGraph objects for gt and pred
     and the computed mapping
 
-    Each TrackingGraph will be a new copy on the original object
+    Each TrackingGraph will be a new copy of the original object
 
     Args:
         gt_graph (traccuracy.TrackingGraph): Tracking graph object for the gt
