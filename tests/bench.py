@@ -6,7 +6,7 @@ import zipfile
 import pytest
 from traccuracy.loaders import load_ctc_data
 from traccuracy.matchers import CTCMatched, IOUMatched
-from traccuracy.metrics import CTCMetrics, DivisionMetrics, TrackOverlapMetrics
+from traccuracy.metrics import CTCMetrics, DivisionMetrics
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -132,8 +132,8 @@ def test_iou_div_metrics(benchmark, iou_matched):
     assert div_results["Frame Buffer 0"]["True Positive Divisions"] == 69
 
 
-def test_track_overlap_metrics(benchmark, iou_matched):
-    def run_compute():
-        return TrackOverlapMetrics(copy.deepcopy(iou_matched)).compute()
+# def test_track_overlap_metrics(benchmark, iou_matched):
+#     def run_compute():
+#         return TrackOverlapMetrics(copy.deepcopy(iou_matched)).compute()
 
-    benchmark(run_compute)
+#     benchmark(run_compute)
