@@ -49,7 +49,7 @@ def run_ctc(
 
     Raises ValueError: if any --loader besides ctc is passed.
     """
-    from traccuracy.matchers import CTCMatched
+    from traccuracy.matchers import CTCMatcher
     from traccuracy.metrics import CTCMetrics
 
     if loader != "ctc":
@@ -57,7 +57,7 @@ def run_ctc(
             f"Only cell tracking challenge (ctc) loader is available, but {loader} was passed."
         )
     gt_data, pred_data = load_all_ctc(gt_dir, pred_dir, gt_track_path, pred_track_path)
-    result = run_metrics(gt_data, pred_data, CTCMatched, [CTCMetrics])
+    result = run_metrics(gt_data, pred_data, CTCMatcher, [CTCMetrics])
     with open(out_path, "w") as fp:
         json.dump(result, fp)
     logger.info(f'TRA: {result["CTCMetrics"]["TRA"]}')
@@ -109,7 +109,7 @@ def run_aogm(
 
     Raises ValueError: if any --loader besides ctc is passed.
     """
-    from traccuracy.matchers import CTCMatched
+    from traccuracy.matchers import CTCMatcher
     from traccuracy.metrics import AOGMMetrics
 
     if loader != "ctc":
@@ -120,7 +120,7 @@ def run_aogm(
     result = run_metrics(
         gt_data,
         pred_data,
-        CTCMatched,
+        CTCMatcher,
         [AOGMMetrics],
         metrics_kwargs={
             "vertex_ns_weight": vertex_ns_weight,
@@ -173,7 +173,7 @@ def run_divisions_on_iou(
 
     Raises ValueError: if any --loader besides ctc is passed.
     """
-    from traccuracy.matchers import IOUMatched
+    from traccuracy.matchers import IOUMatcher
     from traccuracy.metrics import DivisionMetrics
 
     if loader != "ctc":
@@ -185,7 +185,7 @@ def run_divisions_on_iou(
     result = run_metrics(
         gt_data,
         pred_data,
-        IOUMatched,
+        IOUMatcher,
         [DivisionMetrics],
         matcher_kwargs={"iou_threshold": match_threshold},
         metrics_kwargs={
@@ -232,7 +232,7 @@ def run_divisions_on_ctc(
 
     Raises ValueError: if any --loader besides ctc is passed.
     """
-    from traccuracy.matchers import CTCMatched
+    from traccuracy.matchers import CTCMatcher
     from traccuracy.metrics import DivisionMetrics
 
     if loader != "ctc":
@@ -244,7 +244,7 @@ def run_divisions_on_ctc(
     result = run_metrics(
         gt_data,
         pred_data,
-        CTCMatched,
+        CTCMatcher,
         [DivisionMetrics],
         metrics_kwargs={
             "frame_buffer": frame_buffer_tuple,

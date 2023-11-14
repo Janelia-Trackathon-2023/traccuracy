@@ -2,19 +2,17 @@ import networkx as nx
 import numpy as np
 import pytest
 from traccuracy._tracking_graph import TrackingGraph
-from traccuracy.matchers._ctc import CTCMatched
+from traccuracy.matchers._ctc import CTCMatcher
 
 from tests.test_utils import get_annotated_movie
 
 
 def test_match_ctc():
-    # Bad input
-    with pytest.raises(ValueError):
-        CTCMatched("not tracking data", "not tracking data")
+    matcher = CTCMatcher()
 
     # shapes don't match
     with pytest.raises(ValueError):
-        CTCMatched(
+        matcher.compute_mapping(
             TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10))),
             TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5))),
         )
@@ -37,7 +35,7 @@ def test_match_ctc():
             attrs[f"{i}_{t}"] = {"t": t, "y": 0, "x": 0, "segmentation_id": i}
     nx.set_node_attributes(g, attrs)
 
-    matched = CTCMatched(
+    matched = matcher.compute_mapping(
         TrackingGraph(g, segmentation=movie),
         TrackingGraph(g, segmentation=movie),
     )
