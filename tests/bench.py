@@ -94,7 +94,7 @@ def test_ctc_matched(benchmark, gt_data, pred_data):
 @pytest.mark.timeout(300)
 def test_ctc_metrics(benchmark, ctc_matched):
     def run_compute():
-        return CTCMetrics(copy.deepcopy(ctc_matched)).compute()
+        return CTCMetrics().compute(copy.deepcopy(ctc_matched))
 
     ctc_results = benchmark.pedantic(run_compute, rounds=1, iterations=1)
 
@@ -108,7 +108,7 @@ def test_ctc_metrics(benchmark, ctc_matched):
 
 def test_ctc_div_metrics(benchmark, ctc_matched):
     def run_compute():
-        return DivisionMetrics(copy.deepcopy(ctc_matched)).compute()
+        return DivisionMetrics().compute(copy.deepcopy(ctc_matched))
 
     div_results = benchmark(run_compute)
 
@@ -123,7 +123,7 @@ def test_iou_matched(benchmark, gt_data, pred_data):
 
 def test_iou_div_metrics(benchmark, iou_matched):
     def run_compute():
-        return DivisionMetrics(copy.deepcopy(iou_matched)).compute()
+        return DivisionMetrics().compute(copy.deepcopy(iou_matched))
 
     div_results = benchmark(run_compute)
 

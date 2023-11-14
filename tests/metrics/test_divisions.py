@@ -14,8 +14,7 @@ def test_DivisionMetrics():
     )
     frame_buffer = (0, 1, 2)
 
-    metrics = DivisionMetrics(matched, frame_buffer=frame_buffer)
-    results = metrics.compute()
+    results = DivisionMetrics(frame_buffer=frame_buffer).compute(matched)
 
     for name, r in results.items():
         buffer = int(name[-1:])

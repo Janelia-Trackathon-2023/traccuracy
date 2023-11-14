@@ -50,6 +50,6 @@ def run_metrics(
     results = {}
     for _metric in metrics:
         relevant_kwargs = metric_kwarg_dict[_metric]
-        result = _metric(matched, **relevant_kwargs)
-        results[_metric.__name__] = result.results
+        result = _metric(**relevant_kwargs).compute(matched)
+        results[_metric.__name__] = result
     return results
