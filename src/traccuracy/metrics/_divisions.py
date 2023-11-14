@@ -42,7 +42,7 @@ from traccuracy.track_errors.divisions import _evaluate_division_events
 from ._base import Metric
 
 if TYPE_CHECKING:
-    from ._base import Matched
+    from traccuracy.matchers import Matched
 
 
 class DivisionMetrics(Metric):
