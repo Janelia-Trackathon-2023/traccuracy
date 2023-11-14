@@ -6,14 +6,14 @@ if TYPE_CHECKING:
     from typing import Dict, List, Optional, Type
 
     from traccuracy import TrackingGraph
-    from traccuracy.matchers._matched import Matched
+    from traccuracy.matchers._base import Matcher
     from traccuracy.metrics._base import Metric
 
 
 def run_metrics(
     gt_data: "TrackingGraph",
     pred_data: "TrackingGraph",
-    matcher: "Type[Matched]",
+    matcher: "Type[Matcher]",
     metrics: "List[Type[Metric]]",
     matcher_kwargs: "Optional[Dict]" = None,
     metrics_kwargs: "Optional[Dict]" = None,  # weights
@@ -29,7 +29,7 @@ def run_metrics(
     Args:
         gt_data (TrackingData): ground truth graph and optionally segmentation
         pred_data (TrackingData): predicted graph and optionally segmentation
-        matcher (Matched): matching class to use to create correspondence
+        matcher (traccuracy.matchers.Matched): matching class to use to create correspondence
         metrics (List[Metric]): list of metrics to compute as class names
         matcher_kwargs (optional, dict): Dictionary of keyword argument for the
             matcher class
@@ -42,7 +42,7 @@ def run_metrics(
     """
     if matcher_kwargs is None:
         matcher_kwargs = {}
-    matched = matcher(gt_data, pred_data, **matcher_kwargs)
+    matched = matcher(**matcher_kwargs).compute_mapping(gt_data, pred_data)
     validate_matched_data(matched, metrics)
     metric_kwarg_dict = {
         m_class: get_relevant_kwargs(m_class, metrics_kwargs) for m_class in metrics

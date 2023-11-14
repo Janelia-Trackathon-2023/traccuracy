@@ -2,7 +2,6 @@ import networkx as nx
 import numpy as np
 import skimage as sk
 from traccuracy._tracking_graph import TrackingGraph
-from traccuracy.matchers._matched import Matched
 
 
 def get_annotated_image(img_size=256, num_labels=3, sequential=True, seed=1):
@@ -149,12 +148,3 @@ def get_division_graphs():
     mapper = [("1_0", "1_0"), ("1_1", "1_1"), ("2_4", "2_4"), ("3_4", "3_4")]
 
     return G1, G2, mapper
-
-
-class DummyMatched(Matched):
-    def __init__(self, gt_data, pred_data, mapper):
-        self.mapper = mapper
-        super().__init__(gt_data, pred_data)
-
-    def compute_mapping(self):
-        return self.mapper

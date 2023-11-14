@@ -25,7 +25,7 @@ def validate_matched_data(matched_data, metrics):
     """Validate that given matcher supports requirements of each metric.
 
     Args:
-        matched_data (Matched): matching class with mapping between gt and pred
+        matched_data (traccuracy.matcher.Matched): matching class with mapping between gt and pred
         metrics (List[Metric]): list of metrics to compute as class names
     """
     ...

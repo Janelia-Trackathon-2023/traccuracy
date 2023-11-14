@@ -3,9 +3,8 @@ from copy import deepcopy
 import networkx as nx
 import pytest
 from traccuracy import TrackingGraph
+from traccuracy.matchers import Matched
 from traccuracy.metrics._track_overlap import TrackOverlapMetrics, _mapping_to_dict
-
-from tests.test_utils import DummyMatched
 
 
 def add_frame(tree):
@@ -153,10 +152,10 @@ def test_track_overlap_metrics(data, inverse) -> None:
         g_gt, g_pred = g_pred, g_gt
         mapping = [(b, a) for a, b in mapping]
 
-    matched = DummyMatched(
+    matched = Matched(
         TrackingGraph(g_gt),
         TrackingGraph(g_pred),
-        mapper=mapping,
+        mapping,
     )
 
     metric = TrackOverlapMetrics()
