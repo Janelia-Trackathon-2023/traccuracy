@@ -29,7 +29,7 @@ def run_metrics(
     Args:
         gt_data (TrackingData): ground truth graph and optionally segmentation
         pred_data (TrackingData): predicted graph and optionally segmentation
-        matcher (Matched): matching class to use to create correspondence
+        matcher (traccuracy.matchers.Matched): matching class to use to create correspondence
         metrics (List[Metric]): list of metrics to compute as class names
         matcher_kwargs (optional, dict): Dictionary of keyword argument for the
             matcher class

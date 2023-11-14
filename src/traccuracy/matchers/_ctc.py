@@ -32,7 +32,7 @@ class CTCMatcher(Matcher):
             pred_graph (TrackingGraph): Tracking graph object for the pred
 
         Returns:
-            Matched: Matched data object containing the CTC mapping
+            traccuracy.matchers.Matched: Matched data object containing the CTC mapping
 
         Raises:
             ValueError: GT and pred segmentations must be the same shape

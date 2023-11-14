@@ -51,7 +51,7 @@ class TrackOverlapMetrics(Metric):
                      tracklets on each prediction tracklet
 
     Args:
-        matched_data (Matched): Matched object for set of GT and Pred data
+        matched_data (traccuracy.matchers.Matched): Matched object for set of GT and Pred data
         include_division_edges (bool, optional): If True, include edges at division.
 
     """
