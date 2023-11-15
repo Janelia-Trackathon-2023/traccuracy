@@ -57,7 +57,7 @@ def run_ctc(
             f"Only cell tracking challenge (ctc) loader is available, but {loader} was passed."
         )
     gt_data, pred_data = load_all_ctc(gt_dir, pred_dir, gt_track_path, pred_track_path)
-    result = run_metrics(gt_data, pred_data, CTCMatcher, [CTCMetrics])
+    result = run_metrics(gt_data, pred_data, CTCMatcher(), [CTCMetrics()])
     with open(out_path, "w") as fp:
         json.dump(result, fp)
     logger.info(f'TRA: {result["CTCMetrics"]["TRA"]}')
@@ -120,16 +120,17 @@ def run_aogm(
     result = run_metrics(
         gt_data,
         pred_data,
-        CTCMatcher,
-        [AOGMMetrics],
-        metrics_kwargs={
-            "vertex_ns_weight": vertex_ns_weight,
-            "vertex_fp_weight": vertex_fp_weight,
-            "vertex_fn_weight": vertex_fn_weight,
-            "edge_fp_weight": edge_fp_weight,
-            "edge_fn_weight": edge_fn_weight,
-            "edge_ws_weight": edge_ws_weight,
-        },
+        CTCMatcher(),
+        [
+            AOGMMetrics(
+                vertex_ns_weight=vertex_ns_weight,
+                vertex_fp_weight=vertex_fp_weight,
+                vertex_fn_weight=vertex_fn_weight,
+                edge_fp_weight=edge_fp_weight,
+                edge_fn_weight=edge_fn_weight,
+                edge_ws_weight=edge_ws_weight,
+            )
+        ],
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)
@@ -185,12 +186,8 @@ def run_divisions_on_iou(
     result = run_metrics(
         gt_data,
         pred_data,
-        IOUMatcher,
-        [DivisionMetrics],
-        matcher_kwargs={"iou_threshold": match_threshold},
-        metrics_kwargs={
-            "frame_buffer": frame_buffer_tuple,
-        },
+        IOUMatcher(iou_threshold=match_threshold),
+        [DivisionMetrics(frame_buffer=frame_buffer_tuple)],
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)
@@ -244,11 +241,8 @@ def run_divisions_on_ctc(
     result = run_metrics(
         gt_data,
         pred_data,
-        CTCMatcher,
-        [DivisionMetrics],
-        metrics_kwargs={
-            "frame_buffer": frame_buffer_tuple,
-        },
+        CTCMatcher(),
+        [DivisionMetrics(frame_buffer=frame_buffer_tuple)],
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)
