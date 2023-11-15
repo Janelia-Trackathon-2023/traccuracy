@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from traccuracy._utils import get_relevant_kwargs, validate_matched_data
+from traccuracy._utils import get_relevant_kwargs
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Type
@@ -43,7 +43,6 @@ def run_metrics(
     if matcher_kwargs is None:
         matcher_kwargs = {}
     matched = matcher(**matcher_kwargs).compute_mapping(gt_data, pred_data)
-    validate_matched_data(matched, metrics)
     metric_kwarg_dict = {
         m_class: get_relevant_kwargs(m_class, metrics_kwargs) for m_class in metrics
     }
