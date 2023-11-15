@@ -1,7 +1,8 @@
-from test_utils import get_movie_with_graph
 from traccuracy import run_metrics
 from traccuracy.matchers import CTCMatcher
 from traccuracy.metrics import CTCMetrics
+
+from tests.test_utils import get_movie_with_graph
 
 
 def test_run_metrics():
