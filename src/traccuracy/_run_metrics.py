@@ -21,9 +21,9 @@ def run_metrics(
     e.g. false positive/false negative detection and edge counts.
 
     Args:
-        gt_data (TrackingGraph): ground truth graph and optionally segmentation
-        pred_data (TrackingGraph): predicted graph and optionally segmentation
-        matcher (traccuracy.matchers.Matcher): instantiated matcher object
+        gt_data (traccuracy.TrackingGraph): ground truth graph and optionally segmentation
+        pred_data (traccuracy.TrackingGraph): predicted graph and optionally segmentation
+        matcher (Matcher): instantiated matcher object
         metrics (List[Metric]): list of instantiated metrics objects to compute
 
     Returns:
