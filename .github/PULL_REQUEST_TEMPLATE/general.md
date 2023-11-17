@@ -1,3 +1,12 @@
+---
+name: General Pull Request
+about: Bugfixes, enhancements, documentation, etc.
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 # Proposed Change
 Briefly describe the contribution. If it resolves an issue or feature request, be sure to link to that issue.
 

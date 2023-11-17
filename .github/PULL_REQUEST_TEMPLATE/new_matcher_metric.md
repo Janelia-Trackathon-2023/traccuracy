@@ -1,3 +1,12 @@
+---
+name: New Matcher or Metric
+about: A new Matcher or Metric class
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 # Proposed Matcher or Metric Addition
 - [ ] Matcher
 - [ ] Metric
