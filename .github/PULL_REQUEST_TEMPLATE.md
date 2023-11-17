@@ -1,12 +1,3 @@
----
-name: General Pull Request
-about: Bugfixes, enhancements, documentation, etc.
-title: ''
-labels: ''
-assignees: ''
-
----
-
 If you are implementing a new matcher or metric, please append this `&template=new_matcher_metric.md` to your url to load the correct template.
 
 # Proposed Change
