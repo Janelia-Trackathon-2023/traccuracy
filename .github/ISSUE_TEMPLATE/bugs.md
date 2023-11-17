@@ -16,7 +16,7 @@ assignees: ''
 Describe what you were trying to get done.
 Tell us what happened, what went wrong, and what you expected to happen.
 
-# What I Did
+# Minimal example to reproduce the bug
 
 ```
 Paste the command(s) you ran and the output.
