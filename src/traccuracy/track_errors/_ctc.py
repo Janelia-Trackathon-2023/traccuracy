@@ -7,7 +7,7 @@ from tqdm import tqdm
 from traccuracy import EdgeAttr, NodeAttr
 
 if TYPE_CHECKING:
-    from traccuracy.matchers._matched import Matched
+    from traccuracy.matchers import Matched
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ def get_vertex_errors(matched_data: "Matched"):
 
     Parameters
     ----------
-    matched_data: Matched
+    matched_data: traccuracy.matchers.Matched
         Matched data object containing gt and pred graphs with their associated mapping
     """
     comp_graph = matched_data.pred_graph

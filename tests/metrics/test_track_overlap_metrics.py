@@ -3,9 +3,8 @@ from copy import deepcopy
 import networkx as nx
 import pytest
 from traccuracy import TrackingGraph
+from traccuracy.matchers import Matched
 from traccuracy.metrics._track_overlap import TrackOverlapMetrics, _mapping_to_dict
-
-from tests.test_utils import DummyMatched
 
 
 def add_frame(tree):
@@ -153,14 +152,15 @@ def test_track_overlap_metrics(data, inverse) -> None:
         g_gt, g_pred = g_pred, g_gt
         mapping = [(b, a) for a, b in mapping]
 
-    matched = DummyMatched(
+    matched = Matched(
         TrackingGraph(g_gt),
         TrackingGraph(g_pred),
-        mapper=mapping,
+        mapping,
     )
 
-    metric = TrackOverlapMetrics(matched)
-    assert metric.results
+    metric = TrackOverlapMetrics()
+    results = metric.compute(matched)
+    assert results
 
     expected = data["results_with_division_edges"]
     if inverse:
@@ -168,10 +168,11 @@ def test_track_overlap_metrics(data, inverse) -> None:
             "track_purity": expected["target_effectiveness"],
             "target_effectiveness": expected["track_purity"],
         }
-    assert metric.results == expected, f"{data['name']} failed with division edges"
+    assert results == expected, f"{data['name']} failed with division edges"
 
-    metric = TrackOverlapMetrics(matched, include_division_edges=False)
-    assert metric.results
+    metric = TrackOverlapMetrics(include_division_edges=False)
+    results = metric.compute(matched)
+    assert results
 
     expected = data["results_without_division_edges"]
     if inverse:
@@ -179,7 +180,7 @@ def test_track_overlap_metrics(data, inverse) -> None:
             "track_purity": expected["target_effectiveness"],
             "target_effectiveness": expected["track_purity"],
         }
-    assert metric.results == expected, f"{data['name']} failed without division edges"
+    assert results == expected, f"{data['name']} failed without division edges"
 
 
 def test_mapping_to_dict():

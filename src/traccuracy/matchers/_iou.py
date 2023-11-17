@@ -3,8 +3,8 @@ from tqdm import tqdm
 
 from traccuracy._tracking_graph import TrackingGraph
 
+from ._base import Matched, Matcher
 from ._compute_overlap import get_labels_with_overlap
-from ._matched import Matched
 
 
 def _match_nodes(gt, res, threshold=1):
@@ -98,29 +98,36 @@ def match_iou(gt, pred, threshold=0.6):
     return mapper
 
 
-class IOUMatched(Matched):
-    def __init__(self, gt_graph, pred_graph, iou_threshold=0.6):
+class IOUMatcher(Matcher):
+    def __init__(self, iou_threshold=0.6):
         """Constructs a mapping between gt and pred nodes using the IoU of the segmentations
 
         Lower values for iou_threshold will be more permissive of imperfect matches
 
         Args:
-            gt_graph (TrackingGraph): TrackingGraph for the ground truth with segmentations
-            pred_graph (TrackingGraph): TrackingGraph for the prediction with segmentations
             iou_threshold (float, optional): Minimum IoU value to assign a match. Defaults to 0.6.
-
-        Raises:
-            ValueError: Segmentation data must be provided for both gt and pred data
         """
         self.iou_threshold = iou_threshold
 
+    def _compute_mapping(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+        """Computes IOU mapping for a set of grpahs
+
+        Args:
+            gt_graph (TrackingGraph): Tracking graph object for the gt with segmentation data
+            pred_graph (TrackingGraph): Tracking graph object for the pred with segmentation data
+
+        Raises:
+            ValueError: Segmentation data must be provided for both gt and pred data
+
+        Returns:
+            Matched: Matched data object containing IOU mapping
+        """
         # Check that segmentations exist in the data
         if gt_graph.segmentation is None or pred_graph.segmentation is None:
             raise ValueError(
                 "Segmentation data must be provided for both gt and pred data"
             )
 
-        super().__init__(gt_graph, pred_graph)
+        mapping = match_iou(gt_graph, pred_graph, threshold=self.iou_threshold)
 
-    def compute_mapping(self):
-        return match_iou(self.gt_graph, self.pred_graph, threshold=self.iou_threshold)
+        return Matched(gt_graph, pred_graph, mapping)

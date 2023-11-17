@@ -10,19 +10,19 @@ Definitions (Bise et al., 2011; Chen, 2021; Fukai et al., 2022):
 
 - TP is defined analogously, with T^g_j and T^p_j being swapped in the definition.
 """
+from __future__ import annotations
 
 from itertools import groupby, product
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple
-
-from traccuracy._tracking_graph import TrackingGraph
+from typing import TYPE_CHECKING, Any
 
 from ._base import Metric
 
 if TYPE_CHECKING:
-    from ._base import Matched
+    from traccuracy._tracking_graph import TrackingGraph
+    from traccuracy.matchers import Matched
 
 
-def _mapping_to_dict(mapping: List[Tuple[Any, Any]]) -> Dict[Any, List[Any]]:
+def _mapping_to_dict(mapping: list[tuple[Any, Any]]) -> dict[Any, list[Any]]:
     """Convert mapping list of tuples to dictionary.
 
     Args:
@@ -51,28 +51,27 @@ class TrackOverlapMetrics(Metric):
                      tracklets on each prediction tracklet
 
     Args:
-        matched_data (Matched): Matched object for set of GT and Pred data
+        matched_data (traccuracy.matchers.Matched): Matched object for set of GT and Pred data
         include_division_edges (bool, optional): If True, include edges at division.
 
     """
 
     supports_many_to_one = True
 
-    def __init__(self, matched_data: "Matched", include_division_edges: bool = True):
+    def __init__(self, include_division_edges: bool = True):
         self.include_division_edges = include_division_edges
-        super().__init__(matched_data)
 
-    def compute(self):
-        gt_tracklets = self.data.gt_graph.get_tracklets(
+    def compute(self, matched: Matched) -> dict:
+        gt_tracklets = matched.gt_graph.get_tracklets(
             include_division_edges=self.include_division_edges
         )
-        pred_tracklets = self.data.pred_graph.get_tracklets(
+        pred_tracklets = matched.pred_graph.get_tracklets(
             include_division_edges=self.include_division_edges
         )
 
-        gt_pred_mapping = _mapping_to_dict(self.data.mapping)
+        gt_pred_mapping = _mapping_to_dict(matched.mapping)
         pred_gt_mapping = _mapping_to_dict(
-            [(pred_node, gt_node) for gt_node, pred_node in self.data.mapping]
+            [(pred_node, gt_node) for gt_node, pred_node in matched.mapping]
         )
 
         # calculate track purity and target effectiveness
@@ -89,18 +88,18 @@ class TrackOverlapMetrics(Metric):
 
 
 def _calc_overlap_score(
-    reference_tracklets: List[TrackingGraph],
-    overlap_tracklets: List[TrackingGraph],
-    overlap_reference_mapping: Dict[Any, List[Any]],
+    reference_tracklets: list[TrackingGraph],
+    overlap_tracklets: list[TrackingGraph],
+    overlap_reference_mapping: dict[Any, list[Any]],
 ):
     """Calculate weighted sum of the length of the longest overlap tracklet
     for each reference tracklet.
 
     Args:
-       reference_tracklets (List[TrackingGraph]): The reference tracklets
-       overlap_tracklets (List[TrackingGraph]): The tracklets that overlap
-       overlap_reference_mapping (Dict[Any, List[Any]]): Mapping as a dict
-       from the overlap tracklet nodes to the reference tracklet nodes
+        reference_tracklets (List[TrackingGraph]): The reference tracklets
+        overlap_tracklets (List[TrackingGraph]): The tracklets that overlap
+        overlap_reference_mapping (Dict[Any, List[Any]]): Mapping as a dict
+            from the overlap tracklet nodes to the reference tracklet nodes
 
     """
     correct_count = 0

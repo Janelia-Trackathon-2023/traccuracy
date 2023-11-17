@@ -5,7 +5,7 @@ import zipfile
 
 import pytest
 from traccuracy.loaders import load_ctc_data
-from traccuracy.matchers import CTCMatched, IOUMatched
+from traccuracy.matchers import CTCMatcher, IOUMatcher
 from traccuracy.metrics import CTCMetrics, DivisionMetrics
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -51,12 +51,12 @@ def pred_data():
 
 @pytest.fixture(scope="module")
 def ctc_matched(gt_data, pred_data):
-    return CTCMatched(gt_data, pred_data)
+    return CTCMatcher().compute_mapping(gt_data, pred_data)
 
 
 @pytest.fixture(scope="module")
 def iou_matched(gt_data, pred_data):
-    return IOUMatched(gt_data, pred_data, iou_threshold=0.1)
+    return IOUMatcher(iou_threshold=0.1).compute_mapping(gt_data, pred_data)
 
 
 def test_load_gt_data(benchmark):
@@ -88,13 +88,13 @@ def test_load_pred_data(benchmark):
 
 
 def test_ctc_matched(benchmark, gt_data, pred_data):
-    benchmark(CTCMatched, gt_data, pred_data)
+    benchmark(CTCMatcher().compute_mapping, gt_data, pred_data)
 
 
 @pytest.mark.timeout(300)
 def test_ctc_metrics(benchmark, ctc_matched):
     def run_compute():
-        return CTCMetrics(copy.deepcopy(ctc_matched)).compute()
+        return CTCMetrics().compute(copy.deepcopy(ctc_matched))
 
     ctc_results = benchmark.pedantic(run_compute, rounds=1, iterations=1)
 
@@ -108,7 +108,7 @@ def test_ctc_metrics(benchmark, ctc_matched):
 
 def test_ctc_div_metrics(benchmark, ctc_matched):
     def run_compute():
-        return DivisionMetrics(copy.deepcopy(ctc_matched)).compute()
+        return DivisionMetrics().compute(copy.deepcopy(ctc_matched))
 
     div_results = benchmark(run_compute)
 
@@ -118,12 +118,12 @@ def test_ctc_div_metrics(benchmark, ctc_matched):
 
 
 def test_iou_matched(benchmark, gt_data, pred_data):
-    benchmark(IOUMatched, gt_data, pred_data, iou_threshold=0.5)
+    benchmark(IOUMatcher(iou_threshold=0.1).compute_mapping, gt_data, pred_data)
 
 
 def test_iou_div_metrics(benchmark, iou_matched):
     def run_compute():
-        return DivisionMetrics(copy.deepcopy(iou_matched)).compute()
+        return DivisionMetrics().compute(copy.deepcopy(iou_matched))
 
     div_results = benchmark(run_compute)
 
