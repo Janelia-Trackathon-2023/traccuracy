@@ -1,4 +1,5 @@
 import glob
+import logging
 import os
 
 import networkx as nx
@@ -9,6 +10,8 @@ from tifffile import imread
 from tqdm import tqdm
 
 from traccuracy._tracking_graph import TrackingGraph
+
+logger = logging.getLogger(__name__)
 
 
 def load_tiffs(data_dir):
@@ -157,13 +160,54 @@ def ctc_to_graph(df, detections):
     return G
 
 
-def load_ctc_data(data_dir, track_path=None):
+def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame):
+    """Sanity checks for valid CTC format.
+
+    Args:
+        tracks (pd.DataFrame): Tracks in CTC format with columns Cell_ID, Start, End, Parent_ID.
+        detections (pd.DataFrame): Detections extracted from masks, containing columns
+            segmentation_id, t.
+    """
+    logger.info("Running CTC format checks")
+    if tracks["Cell_ID"].min() < 1:
+        raise ValueError("Cell_IDs in tracks file must be positive integers.")
+    if len(tracks["Cell_ID"]) < len(tracks["Cell_ID"].unique()):
+        raise ValueError("Cell_IDs in tracks file must be unique integers.")
+
+    for _, row in tracks.iterrows():
+        if row["Parent_ID"] != 0:
+            if row["Parent_ID"] not in tracks["Cell_ID"].values:
+                raise ValueError(
+                    f"Parent_ID {row['Parent_ID']} is not present in tracks."
+                )
+            parent_end = tracks[tracks["Cell_ID"] == row["Parent_ID"]]["End"].iloc[0]
+            if parent_end >= row["Start"]:
+                raise ValueError(
+                    f"Invalid tracklet connection: Parent_ID {row['Parent_ID']} ends at "
+                    f"{parent_end}, but Cell_ID {row['Cell_ID']} starts at {row['Start']}."
+                )
+
+    for t in range(tracks["Start"].min(), tracks["End"].max()):
+        track_ids = set(
+            tracks[(tracks["Start"] <= t) & (tracks["End"] >= t)]["Cell_ID"]
+        )
+        det_ids = set(detections[(detections["t"] == t)]["segmentation_id"])
+        if not track_ids.issubset(det_ids):
+            raise ValueError(f"Missing IDs in masks at t={t}: {track_ids - det_ids}")
+        if not det_ids.issubset(track_ids):
+            raise ValueError(
+                f"IDs {det_ids - track_ids} at t={t} not represented in tracks file."
+            )
+
+
+def load_ctc_data(data_dir, track_path=None, run_checks=True):
     """Read the CTC segmentations and track file and create TrackingData.
 
     Args:
         data_dir (str): Path to directory containing CTC tiffs.
         track_path (optional, str): Path to CTC track file. If not passed,
             finds `*_track.txt` in data_dir.
+        run_checks (optional, bool): If True, runs checks on the data to ensure valid CTC format.
 
     Returns:
         TrackingData: Object containing segmentations and TrackingGraph.
@@ -189,6 +233,8 @@ def load_ctc_data(data_dir, track_path=None):
 
     masks = load_tiffs(data_dir)
     detections = get_node_attributes(masks)
+    if run_checks:
+        _check_ctc(tracks, detections)
 
     G = ctc_to_graph(tracks, detections)
 
