@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+If you are implementing a new matcher or metric, please append this `&template=new_matcher_metric.md` to your url to load the correct template.
+
 # Proposed Change
 Briefly describe the contribution. If it resolves an issue or feature request, be sure to link to that issue.
 
