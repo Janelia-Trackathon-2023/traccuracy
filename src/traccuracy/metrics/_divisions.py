@@ -57,7 +57,7 @@ class DivisionMetrics(Metric):
         3, 734559 (2021).
 
     Args:
-        matched_data (Matched): Matched object for set of GT and Pred data
+        matched_data (traccuracy.matchers.Matched): Matched object for set of GT and Pred data
             Must meet the `needs_one_to_one` criteria
         frame_buffer (tuple(int), optional): Tuple of integers. Value used as n_frames
             to tolerate in correct_shifted_divisions. Defaults to (0).
