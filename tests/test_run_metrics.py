@@ -1,3 +1,4 @@
+import pytest
 from traccuracy import run_metrics
 from traccuracy.matchers._base import Matched, Matcher
 from traccuracy.metrics._base import Metric
@@ -19,8 +20,11 @@ class DummyMetricParam(Metric):
 
 
 class DummyMatcher(Matcher):
-    def __init__(self, mapping=[]):
-        self.mapping = mapping
+    def __init__(self, mapping=None):
+        if mapping:
+            self.mapping = mapping
+        else:
+            self.mapping = []
 
     def _compute_mapping(self, gt_graph, pred_graph):
         return Matched(gt_graph, pred_graph, self.mapping)
@@ -30,21 +34,21 @@ def test_run_metrics():
     graph = get_movie_with_graph()
     mapping = [(n, n) for n in graph.nodes()]
 
-    # # Check matcher input -- not instantiated
-    # with pytest.raises(TypeError):
-    #     run_metrics(graph, graph, DummyMatcher, [DummyMetric()])
+    # Check matcher input -- not instantiated
+    with pytest.raises(TypeError):
+        run_metrics(graph, graph, DummyMatcher, [DummyMetric()])
 
-    # # Check matcher input -- wrong type
-    # with pytest.raises(TypeError):
-    #     run_metrics(graph, graph, 'rando', DummyMetric())
+    # Check matcher input -- wrong type
+    with pytest.raises(TypeError):
+        run_metrics(graph, graph, "rando", DummyMetric())
 
-    # # Check metric input -- not instantiated
-    # with pytest.raises(TypeError):
-    #     run_metrics(graph, graph, DummyMatcher(), [DummyMetric])
+    # Check metric input -- not instantiated
+    with pytest.raises(TypeError):
+        run_metrics(graph, graph, DummyMatcher(), [DummyMetric])
 
-    # # Check metric input -- wrong type
-    # with pytest.raises(TypeError):
-    #     run_metrics(graph, graph, DummyMatcher(), [DummyMetric(), 'rando'])
+    # Check metric input -- wrong type
+    with pytest.raises(TypeError):
+        run_metrics(graph, graph, DummyMatcher(), [DummyMetric(), "rando"])
 
     # One metric
     results = run_metrics(graph, graph, DummyMatcher(mapping), [DummyMetric()])
