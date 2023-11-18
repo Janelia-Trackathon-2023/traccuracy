@@ -5,9 +5,9 @@ Note: These are annotated on the parent nodes.
 True Positive
 -------------
 
-A true positive division is a division event in which the parent and both daughters match between the ground truth and predicted graphs. True positive divisions are annotated on both the ground truth and predicted graphs.
+A true positive division is a division event in which the parent and both daughters match between the ground truth and predicted graphs. True positive divisions are annotated on the parent node on both the ground truth and predicted graphs.
 
-The ``frame_buffer`` parameter allows for divisions to be classified as true positives if they occur within the specified number of frames of tolerance. This feature is useful in cases where the detection algorithm may split a cell into two detections before or after the split is annotated in the ground truth dataset.
+The ``frame_buffer`` parameter allows for divisions to be classified as true positives if they occur within the specified number of frames of tolerance. This feature is useful in cases where the exact frame that a division event occurs is somewhat arbitrary due to a high frame rate or variable segmentation or detection.wo detections before or after the split is annotated in the ground truth dataset.
 
 For the given ground truth graph, the subsequent predicted graphs show examples of true positive divisions events with different ``frame_buffer`` specifications.
 
@@ -34,6 +34,8 @@ Predicted -- true positive with ``frame_buffer=1``::
                               2_4
   1_0 -- 1_1 -- 1_2 -- 1_3 -<
                               3_4
+
+After classifying basic division errors, we consider all false positive and false negative divisions. If a pair of errors occurs within the specified frame buffer, the pair is considered a true positive division if the parent nodes and daughter nodes match. We determine the "parent node" of the late division by traversing back along the graph until we find the node in the same frame as the parent node of the early division. We repeat the process for finding daughters of the early division, by advancing along the graph to find nodes in the same frame as the late division daughters.
 
 False Negative
 --------------
