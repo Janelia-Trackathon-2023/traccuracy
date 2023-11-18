@@ -46,6 +46,9 @@ class Matcher(ABC):
             copy.deepcopy(gt_graph), copy.deepcopy(pred_graph)
         )
 
+        # Record matcher info on Matched object
+        matched.matcher = self.info
+
         # Report matching performance
         total_gt = len(matched.gt_graph.nodes())
         matched_gt = len({m[0] for m in matched.mapping})
@@ -67,6 +70,10 @@ class Matcher(ABC):
         """
         raise NotImplementedError
 
+    @property
+    def info(self):
+        return {"name": self.__class__.__name__, **self.__dict__}
+
 
 class Matched:
     """Matched data class which stores TrackingGraph objects for gt and pred
@@ -79,6 +86,8 @@ class Matched:
         pred_graph (traccuracy.TrackingGraph): Tracking graph object for the pred
         mapping (list[tuple[Any, Any]]): List of tuples where each tuple maps
             a gt node to a pred node
+        matcher (optional, dict): Dictionary containing name and parameters from
+            the matcher that generated the mapping
     """
 
     def __init__(
@@ -86,7 +95,9 @@ class Matched:
         gt_graph: TrackingGraph,
         pred_graph: TrackingGraph,
         mapping: list[tuple[Any, Any]],
+        matcher: dict | None = None,
     ):
         self.gt_graph = gt_graph
         self.pred_graph = pred_graph
         self.mapping = mapping
+        self.matcher = matcher
