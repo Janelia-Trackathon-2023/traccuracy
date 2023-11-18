@@ -13,7 +13,7 @@ def run_metrics(
     pred_data: "TrackingGraph",
     matcher: "Matcher",
     metrics: "List[Metric]",
-) -> "Dict":
+) -> "List[Dict]":
     """Compute given metrics on data using the given matcher.
 
     The returned result dictionary will contain all metrics computed by
@@ -45,6 +45,7 @@ def run_metrics(
     results = []
     for _metric in metrics:
         result = _metric.compute(matched)
-        report = {_metric.__class__.__name__: result, "parameters": _metric.__dict__}
-        results.append(report)
+        metric_dict = _metric.__dict__
+        metric_dict["name"] = _metric.__class__.__name__
+        results.append({"results": result, "metric": metric_dict})
     return results

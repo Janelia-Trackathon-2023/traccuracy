@@ -54,7 +54,7 @@ def test_run_metrics():
     results = run_metrics(graph, graph, DummyMatcher(mapping), [DummyMetric()])
     assert isinstance(results, list)
     assert len(results) == 1
-    assert "DummyMetric" in results[0]
+    assert results[0]["metric"]["name"] == "DummyMetric"
 
     # Duplicate metric with different params
     results = run_metrics(
@@ -64,7 +64,7 @@ def test_run_metrics():
         [DummyMetricParam("param1"), DummyMetricParam("param2")],
     )
     assert len(results) == 2
-    assert "DummyMetricParam" in results[0]
-    assert results[0]["parameters"] == {"param": "param1"}
-    assert "DummyMetricParam" in results[1]
-    assert results[1]["parameters"] == {"param": "param2"}
+    assert results[0]["metric"]["name"] == "DummyMetricParam"
+    assert results[0]["metric"].get("param") == "param1"
+    assert results[1]["metric"]["name"] == "DummyMetricParam"
+    assert results[1]["metric"].get("param") == "param2"
