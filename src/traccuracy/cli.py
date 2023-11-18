@@ -60,8 +60,8 @@ def run_ctc(
     result = run_metrics(gt_data, pred_data, CTCMatcher(), [CTCMetrics()])
     with open(out_path, "w") as fp:
         json.dump(result, fp)
-    logger.info(f'TRA: {result["CTCMetrics"]["TRA"]}')
-    logger.info(f'DET: {result["CTCMetrics"]["DET"]}')
+    logger.info(f'TRA: {result[0]["results"]["TRA"]}')
+    logger.info(f'DET: {result[0]["results"]["DET"]}')
 
 
 @app.command()
@@ -134,7 +134,7 @@ def run_aogm(
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)
-    logger.info(f'AOGM: {result["AOGMMetrics"]["AOGM"]}')
+    logger.info(f'AOGM: {result[0]["results"]["AOGM"]}')
 
 
 @app.command()
@@ -192,7 +192,7 @@ def run_divisions_on_iou(
     with open(out_path, "w") as fp:
         json.dump(result, fp)
     res_str = ""
-    for frame_buffer, res_dict in result["DivisionMetrics"].items():
+    for frame_buffer, res_dict in result[0]["results"].items():
         res_str += f'{frame_buffer} F1: {res_dict["Division F1"]}\n'
     logger.info(res_str)
 
@@ -247,7 +247,7 @@ def run_divisions_on_ctc(
     with open(out_path, "w") as fp:
         json.dump(result, fp)
     res_str = ""
-    for frame_buffer, res_dict in result["DivisionMetrics"].items():
+    for frame_buffer, res_dict in result[0]["results"].items():
         res_str += f'{frame_buffer} F1: {res_dict["Division F1"]}\n'
     logger.info(res_str)
 
