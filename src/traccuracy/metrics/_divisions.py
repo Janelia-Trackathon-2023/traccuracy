@@ -57,8 +57,6 @@ class DivisionMetrics(Metric):
         3, 734559 (2021).
 
     Args:
-        matched_data (Matched): Matched object for set of GT and Pred data
-            Must meet the `needs_one_to_one` criteria
         frame_buffer (tuple(int), optional): Tuple of integers. Value used as n_frames
             to tolerate in correct_shifted_divisions. Defaults to (0).
     """
@@ -70,6 +68,10 @@ class DivisionMetrics(Metric):
 
     def compute(self, data: Matched):
         """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer
+
+        Args:
+            matched_data (traccuracy.matchers.Matched): Matched object for set of GT and Pred data
+                Must meet the `needs_one_to_one` criteria
 
         Returns:
             dict: Returns a nested dictionary with one dictionary per frame buffer value
