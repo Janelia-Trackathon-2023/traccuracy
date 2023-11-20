@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from tqdm import tqdm
 
-from traccuracy import EdgeAttr, NodeAttr
+from traccuracy._tracking_graph import EdgeAttr, NodeAttr
 
 if TYPE_CHECKING:
     from traccuracy.matchers import Matched

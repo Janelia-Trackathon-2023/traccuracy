@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from traccuracy import TrackingGraph
+from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.matchers._base import Matcher
 from traccuracy.metrics._base import Metric
 
