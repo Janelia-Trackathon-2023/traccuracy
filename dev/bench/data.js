@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1700251501642,
+  "lastUpdate": 1700510062603,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1460,6 +1460,79 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.026600280616226067",
             "extra": "mean: 253.1025282499968 msec\nrounds: 4"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d4ee393b1dbddd3955d99e686719fa464c0a4d55",
+          "message": "Merge pull request #124 from Janelia-Trackathon-2023/docs-fixes\n\nFix subclass docstrings for sphinx autoapi",
+          "timestamp": "2023-11-20T11:52:33-08:00",
+          "tree_id": "742ee63151fd7347343dba8b920012f2eaff1e51",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/d4ee393b1dbddd3955d99e686719fa464c0a4d55"
+        },
+        "date": 1700510062131,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_data",
+            "value": 0.7864971433421004,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.2714604349999945 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_data",
+            "value": 0.8687202155039128,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.1511186019999968 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matched",
+            "value": 0.4457788672373546,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 2.2432647070000087 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics",
+            "value": 1.8740503144615528,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 533.6036030000173 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_div_metrics",
+            "value": 3.5064516455630224,
+            "unit": "iter/sec",
+            "range": "stddev: 0.04095443679380986",
+            "extra": "mean: 285.18858979999777 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matched",
+            "value": 0.10491661207423435,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 9.531379066 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics",
+            "value": 3.6788592309583636,
+            "unit": "iter/sec",
+            "range": "stddev: 0.027845127822246935",
+            "extra": "mean: 271.82339339999544 msec\nrounds: 5"
           }
         ]
       }
