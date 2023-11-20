@@ -70,8 +70,8 @@ class DivisionMetrics(Metric):
         """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer
 
         Args:
-        matched_data (traccuracy.matchers.Matched): Matched object for set of GT and Pred data
-            Must meet the `needs_one_to_one` criteria
+            matched_data (traccuracy.matchers.Matched): Matched object for set of GT and Pred data
+                Must meet the `needs_one_to_one` criteria
 
         Returns:
             dict: Returns a nested dictionary with one dictionary per frame buffer value
