@@ -27,8 +27,7 @@ def run_metrics(
         metrics (List[Metric]): list of instantiated metrics objects to compute
 
     Returns:
-        Dict: dictionary of metrics indexed by metric name. Dictionary will be
-            nested for metrics that return multiple values.
+        List[Dict]: List of dictionaries with one dictionary per Metric object
     """
     if not isinstance(gt_data, TrackingGraph) or not isinstance(
         pred_data, TrackingGraph
