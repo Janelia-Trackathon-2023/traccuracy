@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import networkx as nx
@@ -24,7 +26,7 @@ class CTCMatcher(Matcher):
     for complete details.
     """
 
-    def _compute_mapping(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+    def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Run ctc matching
 
         Args:
