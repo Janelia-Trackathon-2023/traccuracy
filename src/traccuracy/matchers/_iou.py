@@ -76,24 +76,40 @@ def match_iou(gt, pred, threshold=0.6):
     # Get overlaps for each frame
     frame_range = range(gt.start_frame, gt.end_frame)
     total = len(list(frame_range))
+
+    def construct_time_to_seg_id_map(graph):
+        """ 
+        Args:
+            graph(TrackingGraph)
+        
+        Returns a dictionary {time: {segmentation_id: node_id}}
+        """
+        time_to_seg_id_map = {}
+        for node_id, data in graph.nodes(data=True):
+            time = data[graph.frame_key]
+            seg_id = data[graph.label_key]
+            seg_id_to_node_id_map = time_to_seg_id_map.get(time, {})
+            assert seg_id not in seg_id_to_node_id_map,\
+                f"Segmentation ID {seg_id} occurred twice in frame {time}."
+            seg_id_to_node_id_map[seg_id] = node_id
+            time_to_seg_id_map[time] = seg_id_to_node_id_map
+        return time_to_seg_id_map
+    
+    gt_time_to_seg_id_map = construct_time_to_seg_id_map(gt)
+    pred_time_to_seg_id_map = construct_time_to_seg_id_map(pred)
+    
     for i, t in tqdm(enumerate(frame_range), desc="Matching frames", total=total):
         matches = _match_nodes(
             gt.segmentation[i], pred.segmentation[i], threshold=threshold
         )
+        gt_seg_to_node_map = gt_time_to_seg_id_map[t]
+        pred_seg_to_node_map = pred_time_to_seg_id_map[t]
 
         # Construct node id tuple for each match
-        for gt_id, pred_id in zip(*matches):
+        for gt_seg_id, pred_seg_id in zip(*matches):
             # Find node id based on time and segmentation label
-            gt_node = gt.get_nodes_with_attribute(
-                gt.label_key,
-                criterion=lambda x: x == gt_id,  # noqa
-                limit_to=gt.get_nodes_in_frame(t),
-            )[0]
-            pred_node = pred.get_nodes_with_attribute(
-                pred.label_key,
-                criterion=lambda x: x == pred_id,  # noqa
-                limit_to=pred.get_nodes_in_frame(t),
-            )[0]
+            gt_node = gt_seg_to_node_map[gt_seg_id]
+            pred_node = pred_seg_to_node_map[pred_seg_id]
             mapper.append((gt_node, pred_node))
     return mapper
 
