@@ -40,13 +40,13 @@ class Metric(ABC):
 
 
 class Results:
-
-    def __init__(self,
-                 matcher: dict = None,
-                 metric: dict = None,
-                 gt_name: str = None,
-                 pred_name: str = None
-                 ):
+    def __init__(
+        self,
+        matcher: dict = None,
+        metric: dict = None,
+        gt_name: str = None,
+        pred_name: str = None,
+    ):
         self.matcher = matcher
         self.metric = metric
         self.gt_name = gt_name
@@ -57,16 +57,14 @@ class Results:
         return __version__
 
     def to_dict(self):
-        output = {
-            "version": self.version
-        }
+        output = {"version": self.version}
         if self.matcher:
-            output['matcher'] = self.matcher
+            output["matcher"] = self.matcher
         if self.metric:
-            output['metric'] = self.metric
+            output["metric"] = self.metric
         if self.gt_name:
-            output['gt'] = self.gt_name
+            output["gt"] = self.gt_name
         if self.pred_name:
-            output['pred'] = self.pred_name
+            output["pred"] = self.pred_name
 
         return output
