@@ -68,7 +68,7 @@ class DivisionMetrics(Metric):
     def __init__(self, frame_buffer=(0,)):
         self.frame_buffer = frame_buffer
 
-    def compute(self, data: Matched):
+    def _compute(self, data: Matched):
         """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer
 
         Returns:
