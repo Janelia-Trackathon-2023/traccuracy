@@ -38,8 +38,8 @@ def get_vertex_errors(matched_data: "Matched"):
         return
 
     # will flip this when we come across the vertex in the mapping
-    comp_graph.set_node_attribute(list(comp_graph.nodes()), NodeAttr.FALSE_POS, True)
-    gt_graph.set_node_attribute(list(gt_graph.nodes()), NodeAttr.FALSE_NEG, True)
+    comp_graph.set_node_attribute(list(comp_graph.nodes), NodeAttr.FALSE_POS, True)
+    gt_graph.set_node_attribute(list(gt_graph.nodes), NodeAttr.FALSE_NEG, True)
 
     # we need to know how many computed vertices are "non-split", so we make
     # a mapping of gt vertices to their matched comp vertices
@@ -110,7 +110,7 @@ def get_edge_errors(matched_data: "Matched"):
         target_gt_id = comp_gt_mapping[target]
 
         expected_gt_edge = (source_gt_id, target_gt_id)
-        if expected_gt_edge not in gt_graph.edges():
+        if expected_gt_edge not in gt_graph.edges:
             comp_graph.set_edge_attribute(edge, EdgeAttr.FALSE_POS, True)
         else:
             # check if semantics are correct
@@ -124,7 +124,7 @@ def get_edge_errors(matched_data: "Matched"):
                 comp_graph.set_edge_attribute(edge, EdgeAttr.WRONG_SEMANTIC, True)
 
     # fn edges - edges in gt_graph that aren't in induced graph
-    for edge in tqdm(gt_graph.edges(), "Evaluating FN edges"):
+    for edge in tqdm(gt_graph.edges, "Evaluating FN edges"):
         source, target = edge[0], edge[1]
         # this edge is adjacent to an edge we didn't detect, so it definitely is an fn
         if gt_graph.get_node_attribute(

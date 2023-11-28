@@ -201,6 +201,7 @@ class TrackingGraph:
         self.node_errors = False
         self.edge_errors = False
 
+    @property
     def nodes(self):
         """Get all the nodes in the graph, along with their attributes.
 
@@ -209,6 +210,7 @@ class TrackingGraph:
         """
         return self.graph.nodes
 
+    @property
     def edges(self):
         """Get all the edges in the graph, along with their attributes.
 

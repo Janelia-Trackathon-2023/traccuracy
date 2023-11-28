@@ -26,9 +26,9 @@ class Matched(ABC):
         self.mapping = self.compute_mapping()
 
         # Report matching performance
-        total_gt = len(self.gt_graph.nodes())
+        total_gt = len(self.gt_graph.nodes)
         matched_gt = len({m[0] for m in self.mapping})
-        total_pred = len(self.pred_graph.nodes())
+        total_pred = len(self.pred_graph.nodes)
         matched_pred = len({m[1] for m in self.mapping})
         logger.info(f"Matched {matched_gt} out of {total_gt} ground truth nodes.")
         logger.info(f"Matched {matched_pred} out of {total_pred} predicted nodes.")
