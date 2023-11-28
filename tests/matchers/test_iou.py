@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import pytest
 from traccuracy._tracking_graph import TrackingGraph
-from traccuracy.matchers._iou import IOUMatched, _match_nodes, match_iou
+from traccuracy.matchers._iou import IOUMatcher, _match_nodes, match_iou
 
 from tests.test_utils import get_annotated_image, get_movie_with_graph
 
@@ -68,8 +68,10 @@ class TestIOUMatched:
         track_graph = get_movie_with_graph()
         data = TrackingGraph(track_graph.graph)
 
+        matcher = IOUMatcher()
+
         with pytest.raises(ValueError):
-            IOUMatched(data, data)
+            matcher.compute_mapping(data, data)
 
     def test_compute_mapping(self):
         # Test 2d data
@@ -79,7 +81,8 @@ class TestIOUMatched:
             ndims=3, n_frames=n_frames, n_labels=n_labels
         )
 
-        matched = IOUMatched(gt_graph=track_graph, pred_graph=track_graph)
+        matcher = IOUMatcher()
+        matched = matcher.compute_mapping(gt_graph=track_graph, pred_graph=track_graph)
 
         # Check for correct number of pairs
         assert len(matched.mapping) == n_frames * n_labels
