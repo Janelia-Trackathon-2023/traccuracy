@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1700514804253,
+  "lastUpdate": 1701140560161,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1606,6 +1606,79 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.02782634119324373",
             "extra": "mean: 276.6947105999918 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "66853113+pre-commit-ci[bot]@users.noreply.github.com",
+            "name": "pre-commit-ci[bot]",
+            "username": "pre-commit-ci[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2ed94df23575a8a93cc82e82adb0c2fd9315d691",
+          "message": "ci(pre-commit.ci): autoupdate (#113)\n\nupdates:\r\n- [github.com/crate-ci/typos: v1.16.21 → v1.16.23](https://github.com/crate-ci/typos/compare/v1.16.21...v1.16.23)\r\n- [github.com/astral-sh/ruff-pre-commit: v0.1.3 → v0.1.4](https://github.com/astral-sh/ruff-pre-commit/compare/v0.1.3...v0.1.4)\r\n\r\nCo-authored-by: pre-commit-ci[bot] <66853113+pre-commit-ci[bot]@users.noreply.github.com>\r\nCo-authored-by: Draga Doncila Pop <17995243+DragaDoncila@users.noreply.github.com>",
+          "timestamp": "2023-11-28T14:00:59+11:00",
+          "tree_id": "86ea1c5292bd6f9a8b035093d43588e0636bc4f9",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/2ed94df23575a8a93cc82e82adb0c2fd9315d691"
+        },
+        "date": 1701140559706,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_data",
+            "value": 0.76483486846922,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.307471770999996 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_data",
+            "value": 0.8437890924322348,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.1851302759999953 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matched",
+            "value": 0.4457106910855777,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 2.2436078380000026 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics",
+            "value": 1.8614257643506527,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 537.2226060000003 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_div_metrics",
+            "value": 3.622413629270416,
+            "unit": "iter/sec",
+            "range": "stddev: 0.03202086546226646",
+            "extra": "mean: 276.05903200000057 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matched",
+            "value": 0.11082435035857705,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 9.02328772300001 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics",
+            "value": 3.6660173064875976,
+            "unit": "iter/sec",
+            "range": "stddev: 0.029746176415754364",
+            "extra": "mean: 272.77558079999835 msec\nrounds: 5"
           }
         ]
       }
