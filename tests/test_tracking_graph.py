@@ -154,37 +154,6 @@ def test_get_edges_with_flag(simple_graph):
         assert simple_graph.get_nodes_with_flag("is_tp")
 
 
-def test_get_nodes_with_attribute(simple_graph):
-    assert simple_graph.get_nodes_with_attribute("is_tp_division") == ["1_1"]
-    assert simple_graph.get_nodes_with_attribute("null") == []
-    assert simple_graph.get_nodes_with_attribute(
-        "is_tp_division", criterion=lambda x: x
-    ) == ["1_1"]
-    assert (
-        simple_graph.get_nodes_with_attribute(
-            "is_tp_division", criterion=lambda x: not x
-        )
-        == []
-    )
-    assert simple_graph.get_nodes_with_attribute("x", criterion=lambda x: x > 1) == [
-        "1_3",
-        "1_4",
-    ]
-    assert simple_graph.get_nodes_with_attribute(
-        "x", criterion=lambda x: x > 1, limit_to=["1_3"]
-    ) == [
-        "1_3",
-    ]
-    assert (
-        simple_graph.get_nodes_with_attribute(
-            "x", criterion=lambda x: x > 1, limit_to=["1_0"]
-        )
-        == []
-    )
-    with pytest.raises(KeyError):
-        simple_graph.get_nodes_with_attribute("x", limit_to=["5"])
-
-
 def test_get_divisions(complex_graph):
     assert complex_graph.get_divisions() == ["1_1", "2_2"]
 

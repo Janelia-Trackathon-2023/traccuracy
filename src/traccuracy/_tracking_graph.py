@@ -275,38 +275,6 @@ class TrackingGraph:
             raise ValueError(f"Function takes EdgeAttr arguments, not {type(attr)}.")
         return list(self.edges_by_flag[attr])
 
-    def get_nodes_with_attribute(self, attr, criterion=None, limit_to=None):
-        """Get the node_ids of all nodes who have an attribute, optionally
-        limiting to nodes whose value at that attribute meet a given criteria.
-
-        For example, get all nodes that have an attribute called "division",
-        or where the value for "division" == True.
-        This also works on location keys, for example to get all nodes with y > 100.
-
-        Args:
-            attr (str): the name of the attribute to search for in the node metadata
-            criterion ((any)->bool, optional): A function that takes a value and returns
-                a boolean. If provided, nodes will only be returned if the value at
-                node[attr] meets this criterion. Defaults to None.
-            limit_to (list[hashable], optional): If provided the function will only
-                return node ids in this list. Will raise KeyError if ids provided here
-                are not present.
-
-        Returns:
-            list of hashable: A list of node_ids which have the given attribute
-                (and optionally have values at that attribute that meet the given criterion,
-                and/or are in the list of node ids.)
-        """
-        if not limit_to:
-            limit_to = self.graph.nodes.keys()
-
-        nodes = []
-        for node in limit_to:
-            attributes = self.graph.nodes[node]
-            if attr in attributes.keys():
-                if criterion is None or criterion(attributes[attr]):
-                    nodes.append(node)
-        return nodes
 
     def get_divisions(self):
         """Get all nodes that have at least two edges pointing to the next time frame
