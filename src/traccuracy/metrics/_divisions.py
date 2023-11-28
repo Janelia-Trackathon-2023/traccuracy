@@ -90,15 +90,9 @@ class DivisionMetrics(Metric):
         }
 
     def _calculate_metrics(self, g_gt, g_pred):
-        tp_division_count = len(
-            g_gt.get_nodes_with_flag(NodeAttr.TP_DIV)
-        )
-        fn_division_count = len(
-            g_gt.get_nodes_with_flag(NodeAttr.FN_DIV)
-        )
-        fp_division_count = len(
-            g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)
-        )
+        tp_division_count = len(g_gt.get_nodes_with_flag(NodeAttr.TP_DIV))
+        fn_division_count = len(g_gt.get_nodes_with_flag(NodeAttr.FN_DIV))
+        fp_division_count = len(g_pred.get_nodes_with_flag(NodeAttr.FP_DIV))
 
         try:
             recall = tp_division_count / (tp_division_count + fn_division_count)

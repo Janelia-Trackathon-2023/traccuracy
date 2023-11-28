@@ -133,4 +133,6 @@ def test_assign_edge_errors_semantics():
 
     get_edge_errors(matched_data)
 
-    assert matched_data.pred_graph.get_edge_attribute(("1_2", "1_3"), EdgeAttr.WRONG_SEMANTIC)
+    assert matched_data.pred_graph.get_edge_attribute(
+        ("1_2", "1_3"), EdgeAttr.WRONG_SEMANTIC
+    )

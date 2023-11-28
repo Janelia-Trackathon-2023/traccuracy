@@ -275,7 +275,6 @@ class TrackingGraph:
             raise ValueError(f"Function takes EdgeAttr arguments, not {type(attr)}.")
         return list(self.edges_by_flag[attr])
 
-
     def get_divisions(self):
         """Get all nodes that have at least two edges pointing to the next time frame
 
