@@ -215,11 +215,11 @@ def test_get_and_set_flag_on_node(simple_graph):
 
     simple_graph.set_flag_on_all_nodes(NodeAttr.FALSE_POS, value=False)
     for node in simple_graph.nodes:
-        assert simple_graph.get_node_attribute(node, NodeAttr.FALSE_POS) == False
+        assert simple_graph.nodes[node][NodeAttr.FALSE_POS] == False
 
     simple_graph.set_flag_on_all_nodes(NodeAttr.FALSE_POS, value=True)
     for node in simple_graph.nodes:
-        assert simple_graph.get_node_attribute(node, NodeAttr.FALSE_POS) == True
+        assert simple_graph.nodes[node][NodeAttr.FALSE_POS] == True
 
     with pytest.raises(ValueError):
         simple_graph.set_flag_on_node("1_0", "x", 2)
@@ -234,11 +234,11 @@ def test_get_and_set_flag_on_edge(simple_graph):
 
     simple_graph.set_flag_on_all_edges(EdgeAttr.FALSE_POS, value=False)
     for edge in simple_graph.edges:
-        assert simple_graph.get_edge_attribute(edge, EdgeAttr.FALSE_POS) == False
+        assert simple_graph.edges[edge][EdgeAttr.FALSE_POS] == False
 
     simple_graph.set_flag_on_all_edges(EdgeAttr.FALSE_POS, value=True)
     for edge in simple_graph.edges:
-        assert simple_graph.get_edge_attribute(edge, EdgeAttr.FALSE_POS) == True
+        assert simple_graph.edges[edge][EdgeAttr.FALSE_POS] == True
 
     with pytest.raises(ValueError):
         simple_graph.set_flag_on_edge(("1_1", "1_3"), "x", 2)

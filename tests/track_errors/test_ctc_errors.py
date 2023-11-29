@@ -43,17 +43,17 @@ def test_get_vertex_errors():
     assert len(matched_data.pred_graph.get_nodes_with_flag(NodeAttr.FALSE_POS)) == 2
     assert len(matched_data.gt_graph.get_nodes_with_flag(NodeAttr.FALSE_NEG)) == 3
 
-    assert matched_data.gt_graph.get_node_attribute(15, NodeAttr.FALSE_NEG)
-    assert not matched_data.gt_graph.get_node_attribute(17, NodeAttr.FALSE_NEG)
+    assert matched_data.gt_graph.nodes[15][NodeAttr.FALSE_NEG]
+    assert not matched_data.gt_graph.nodes[17][NodeAttr.FALSE_NEG]
 
-    assert matched_data.pred_graph.get_node_attribute(3, NodeAttr.NON_SPLIT)
-    assert not matched_data.pred_graph.get_node_attribute(7, NodeAttr.NON_SPLIT)
+    assert matched_data.pred_graph.nodes[3][NodeAttr.NON_SPLIT]
+    assert not matched_data.pred_graph.nodes[7][NodeAttr.NON_SPLIT]
 
-    assert matched_data.pred_graph.get_node_attribute(7, NodeAttr.TRUE_POS)
-    assert not matched_data.pred_graph.get_node_attribute(3, NodeAttr.TRUE_POS)
+    assert matched_data.pred_graph.nodes[7][NodeAttr.TRUE_POS]
+    assert not matched_data.pred_graph.nodes[3][NodeAttr.TRUE_POS]
 
-    assert matched_data.pred_graph.get_node_attribute(10, NodeAttr.FALSE_POS)
-    assert not matched_data.pred_graph.get_node_attribute(7, NodeAttr.FALSE_POS)
+    assert matched_data.pred_graph.nodes[10][NodeAttr.FALSE_POS]
+    assert not matched_data.pred_graph.nodes[7][NodeAttr.FALSE_POS]
 
 
 def test_assign_edge_errors():
@@ -93,8 +93,8 @@ def test_assign_edge_errors():
 
     get_edge_errors(matched_data)
 
-    assert matched_data.pred_graph.get_edge_attribute((7, 8), EdgeAttr.FALSE_POS)
-    assert matched_data.gt_graph.get_edge_attribute((17, 18), EdgeAttr.FALSE_NEG)
+    assert matched_data.pred_graph.edges[(7, 8)][EdgeAttr.FALSE_POS]
+    assert matched_data.gt_graph.edges[(17, 18)][EdgeAttr.FALSE_NEG]
 
 
 def test_assign_edge_errors_semantics():
@@ -133,6 +133,4 @@ def test_assign_edge_errors_semantics():
 
     get_edge_errors(matched_data)
 
-    assert matched_data.pred_graph.get_edge_attribute(
-        ("1_2", "1_3"), EdgeAttr.WRONG_SEMANTIC
-    )
+    assert matched_data.pred_graph.edges[("1_2", "1_3")][EdgeAttr.WRONG_SEMANTIC]
