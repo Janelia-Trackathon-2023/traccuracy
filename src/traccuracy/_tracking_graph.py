@@ -481,7 +481,6 @@ class TrackingGraph:
         else:
             self.edges_by_flag[flag] = set()
 
-
     def get_tracklets(self, include_division_edges: bool = False):
         """Gets a list of new TrackingGraph objects containing all tracklets of the current graph.
 

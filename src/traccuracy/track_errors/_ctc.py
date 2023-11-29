@@ -38,7 +38,7 @@ def get_vertex_errors(matched_data: Matched):
     if comp_graph.node_errors and gt_graph.node_errors:
         logger.info("Node errors already calculated. Skipping graph annotation")
         return
-    
+
     comp_graph.set_flag_on_all_nodes(NodeAttr.TRUE_POS, False)
     comp_graph.set_flag_on_all_nodes(NodeAttr.NON_SPLIT, False)
 
@@ -100,7 +100,7 @@ def get_edge_errors(matched_data: Matched):
 
     # intertrack edges = connection between parent and daughter
     for graph in [comp_graph, gt_graph]:
-         # Set to False by default
+        # Set to False by default
         graph.set_flag_on_all_edges(EdgeAttr.INTERTRACK_EDGE, False)
 
         for parent in graph.get_divisions():
