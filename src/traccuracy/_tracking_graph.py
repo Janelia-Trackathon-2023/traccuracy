@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 import copy
 import enum
 import logging
 
 import networkx as nx
+from typing import Hashable
 
 logger = logging.getLogger(__name__)
 
@@ -367,63 +370,114 @@ class TrackingGraph:
 
         return new_trackgraph
 
-    def set_node_attribute(self, ids, attr, value=True):
-        """Set an attribute flag for a set of nodes specified by
-        ids. If an id is not found in the graph, a KeyError will be raised.
-        If the key already exists, the existing value will be overwritten.
+    def set_flag_on_node(self, _id: Hashable, flag: NodeAttr, value: bool=True):
+        """Set an attribute flag for a single node. 
+        If the id is not found in the graph, a KeyError will be raised.
+        If the flag already exists, the existing value will be overwritten.
 
         Args:
-            ids (hashable | list[hashable]): The node id or list of node ids
-                to set the attribute for.
-            attr (traccuracy.NodeAttr): The node attribute to set. Must be
+            _id (Hashable): The node id on which to set the flag.
+            flag (traccuracy.NodeAttr): The node flag to set. Must be
                 of type NodeAttr - you may not not pass strings, even if they
                 are included in the NodeAttr enum values.
             value (bool, optional): Attributes are flags and can only be set to
                 True or False. Defaults to True.
+        
+        Raises:
+            KeyError if the provided id is not in the graph.
+            ValueError if the provided flag is not a NodeAttr
         """
-        if not isinstance(ids, list):
-            ids = [ids]
-        if not isinstance(attr, NodeAttr):
+        if not isinstance(flag, NodeAttr):
             raise ValueError(
-                f"Provided attribute {attr} is not of type NodeAttr. "
+                f"Provided  flag {flag} is not of type NodeAttr. "
                 "Please use the enum instead of passing string values, "
                 "and add new attributes to the class to avoid key collision."
             )
-        for _id in ids:
-            self.graph.nodes[_id][attr] = value
-            if value:
-                self.nodes_by_flag[attr].add(_id)
-            else:
-                self.nodes_by_flag[attr].discard(_id)
-
-    def set_edge_attribute(self, ids, attr, value=True):
-        """Set an attribute flag for a set of edges specified by
-        ids. If an edge is not found in the graph, a KeyError will be raised.
-        If the key already exists, the existing value will be overwritten.
+        self.graph.nodes[_id][flag] = value
+        if value:
+            self.nodes_by_flag[flag].add(_id)
+        else:
+            self.nodes_by_flag[flag].discard(_id)
+    
+    def set_flag_on_all_nodes(self, flag: NodeAttr, value: bool=True):
+        """Set an attribute flag for all nodes in the graph. 
+        If the flag already exists, the existing values will be overwritten.
 
         Args:
-            ids (tuple(hashable) | list[tuple(hashable)]): The edge id or list of edge ids
-                to set the attribute for. Edge ids are a 2-tuple of node ids.
-            attr (traccuracy.EdgeAttr): The edge attribute to set. Must be
-                of type EdgeAttr - you may not pass strings, even if they are
-                included in the EdgeAttr enum values.
-            value (bool): Attributes are flags and can only be set to
-                True or False. Defaults to True.
+            flag (traccuracy.NodeAttr): The node flag to set. Must be
+                of type NodeAttr - you may not not pass strings, even if they
+                are included in the NodeAttr enum values.
+            value (bool, optional): Flags can only be set to True or False.
+                Defaults to True.
+        
+        Raises:
+            ValueError if the provided flag is not a NodeAttr.
         """
-        if not isinstance(ids, list):
-            ids = [ids]
-        if not isinstance(attr, EdgeAttr):
+        if not isinstance(flag, NodeAttr):
             raise ValueError(
-                f"Provided attribute {attr} is not of type EdgeAttr. "
+                f"Provided  flag {flag} is not of type NodeAttr. "
                 "Please use the enum instead of passing string values, "
                 "and add new attributes to the class to avoid key collision."
             )
-        for _id in ids:
-            self.graph.edges[_id][attr] = value
-            if value:
-                self.edges_by_flag[attr].add(_id)
-            else:
-                self.edges_by_flag[attr].discard(_id)
+        nx.set_node_attributes(self.graph, value, name=flag)
+        if value:
+            self.nodes_by_flag[flag].update(self.graph.nodes)
+        else:
+            self.nodes_by_flag[flag] = set()
+
+    def set_flag_on_edge(self, _id: tuple(Hashable), flag: EdgeAttr, value: bool=True):
+        """Set an attribute flag for an edge. 
+        If the flag already exists, the existing value will be overwritten.
+
+        Args:
+            ids (tuple(Hashable)): The edge id or list of edge ids
+                to set the attribute for. Edge ids are a 2-tuple of node ids.
+            flag (traccuracy.EdgeAttr): The edge flag to set. Must be
+                of type EdgeAttr - you may not pass strings, even if they are
+                included in the EdgeAttr enum values.
+            value (bool): Flags can only be set to True or False. 
+                Defaults to True.
+
+        Raises:
+            KeyError if edge with _id not in graph.
+        """
+        if not isinstance(flag, EdgeAttr):
+            raise ValueError(
+                f"Provided attribute {flag} is not of type EdgeAttr. "
+                "Please use the enum instead of passing string values, "
+                "and add new attributes to the class to avoid key collision."
+            )
+        self.graph.edges[_id][flag] = value
+        if value:
+            self.edges_by_flag[flag].add(_id)
+        else:
+            self.edges_by_flag[flag].discard(_id)
+        
+    def set_flag_on_all_edges(self, flag: EdgeAttr, value: bool=True):
+        """Set an attribute flag for all edges in the graph. 
+        If the flag already exists, the existing values will be overwritten.
+
+        Args:
+            flag (traccuracy.EdgeAttr): The edge flag to set. Must be
+                of type EdgeAttr - you may not not pass strings, even if they
+                are included in the EdgeAttr enum values.
+            value (bool, optional): Flags can only be set to True or False.
+                Defaults to True.
+        
+        Raises:
+            ValueError if the provided flag is not an EdgeAttr.
+        """
+        if not isinstance(flag, EdgeAttr):
+            raise ValueError(
+                f"Provided  flag {flag} is not of type EdgeAttr. "
+                "Please use the enum instead of passing string values, "
+                "and add new attributes to the class to avoid key collision."
+            )
+        nx.set_edge_attributes(self.graph, value, name=flag)
+        if value:
+            self.edges_by_flag[flag].update(self.graph.edges)
+        else:
+            self.edges_by_flag[flag] = set()
 
     def get_node_attribute(self, _id, attr):
         """Get the boolean value of a given attribute for a given node.

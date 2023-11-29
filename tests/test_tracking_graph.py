@@ -194,7 +194,7 @@ def test_get_connected_components(complex_graph, nx_comp1, nx_comp2):
     assert track2.graph.edges == nx_comp2.edges
 
 
-def test_get_and_set_node_attributes(simple_graph):
+def test_get_and_set_flag_on_node(simple_graph):
     assert simple_graph.nodes()["1_0"] == {"id": "1_0", "t": 0, "y": 1, "x": 1}
     assert simple_graph.nodes()["1_1"] == {
         "id": "1_1",
@@ -204,7 +204,7 @@ def test_get_and_set_node_attributes(simple_graph):
         "is_tp_division": True,
     }
 
-    simple_graph.set_node_attribute("1_0", NodeAttr.FALSE_POS, value=False)
+    simple_graph.set_flag_on_node("1_0", NodeAttr.FALSE_POS, value=False)
     assert simple_graph.nodes()["1_0"] == {
         "id": "1_0",
         "t": 0,
@@ -212,18 +212,36 @@ def test_get_and_set_node_attributes(simple_graph):
         "x": 1,
         NodeAttr.FALSE_POS: False,
     }
+
+    simple_graph.set_flag_on_all_nodes(NodeAttr.FALSE_POS, value=False)
+    for node in simple_graph.nodes:
+        assert simple_graph.get_node_attribute(node, NodeAttr.FALSE_POS) == False
+    
+    simple_graph.set_flag_on_all_nodes(NodeAttr.FALSE_POS, value=True)
+    for node in simple_graph.nodes:
+        assert simple_graph.get_node_attribute(node, NodeAttr.FALSE_POS) == True
+    
     with pytest.raises(ValueError):
-        simple_graph.set_node_attribute("1_0", "x", 2)
+        simple_graph.set_flag_on_node("1_0", "x", 2)
 
 
-def test_get_and_set_edge_attributes(simple_graph):
+def test_get_and_set_flag_on_edge(simple_graph):
     print(simple_graph.edges())
     assert EdgeAttr.TRUE_POS not in simple_graph.edges()[("1_1", "1_3")]
 
-    simple_graph.set_edge_attribute(("1_1", "1_3"), EdgeAttr.TRUE_POS, value=False)
+    simple_graph.set_flag_on_edge(("1_1", "1_3"), EdgeAttr.TRUE_POS, value=False)
     assert simple_graph.edges()[("1_1", "1_3")][EdgeAttr.TRUE_POS] is False
+
+    simple_graph.set_flag_on_all_edges(EdgeAttr.FALSE_POS, value=False)
+    for edge in simple_graph.edges:
+        assert simple_graph.get_edge_attribute(edge, EdgeAttr.FALSE_POS) == False
+    
+    simple_graph.set_flag_on_all_edges(EdgeAttr.FALSE_POS, value=True)
+    for edge in simple_graph.edges:
+        assert simple_graph.get_edge_attribute(edge, EdgeAttr.FALSE_POS) == True
+
     with pytest.raises(ValueError):
-        simple_graph.set_edge_attribute(("1_1", "1_3"), "x", 2)
+        simple_graph.set_flag_on_edge(("1_1", "1_3"), "x", 2)
 
 
 def test_get_tracklets(simple_graph):

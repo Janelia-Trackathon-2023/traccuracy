@@ -40,8 +40,8 @@ def get_vertex_errors(matched_data: Matched):
         return
 
     # will flip this when we come across the vertex in the mapping
-    comp_graph.set_node_attribute(list(comp_graph.nodes), NodeAttr.FALSE_POS, True)
-    gt_graph.set_node_attribute(list(gt_graph.nodes), NodeAttr.FALSE_NEG, True)
+    comp_graph.set_flag_on_all_nodes(NodeAttr.FALSE_POS, True)
+    gt_graph.set_flag_on_all_nodes(NodeAttr.FALSE_NEG, True)
 
     # we need to know how many computed vertices are "non-split", so we make
     # a mapping of gt vertices to their matched comp vertices
@@ -54,15 +54,16 @@ def get_vertex_errors(matched_data: Matched):
         gt_ids = dict_mapping[pred_id]
         if len(gt_ids) == 1:
             gid = gt_ids[0]
-            comp_graph.set_node_attribute(pred_id, NodeAttr.TRUE_POS, True)
-            comp_graph.set_node_attribute(pred_id, NodeAttr.FALSE_POS, False)
-            gt_graph.set_node_attribute(gid, NodeAttr.FALSE_NEG, False)
+            comp_graph.set_flag_on_node(pred_id, NodeAttr.TRUE_POS, True)
+            comp_graph.set_flag_on_node(pred_id, NodeAttr.FALSE_POS, False)
+            gt_graph.set_flag_on_node(gid, NodeAttr.FALSE_NEG, False)
         elif len(gt_ids) > 1:
-            comp_graph.set_node_attribute(pred_id, NodeAttr.NON_SPLIT, True)
-            comp_graph.set_node_attribute(pred_id, NodeAttr.FALSE_POS, False)
+            comp_graph.set_flag_on_node(pred_id, NodeAttr.NON_SPLIT, True)
+            comp_graph.set_flag_on_node(pred_id, NodeAttr.FALSE_POS, False)
             # number of split operations that would be required to correct the vertices
             ns_count += len(gt_ids) - 1
-            gt_graph.set_node_attribute(gt_ids, NodeAttr.FALSE_NEG, False)
+            for gt_id in gt_ids:
+                gt_graph.set_flag_on_node(gt_id, NodeAttr.FALSE_NEG, False)
 
     # Record presence of annotations on the TrackingGraph
     comp_graph.node_errors = True
@@ -94,13 +95,13 @@ def get_edge_errors(matched_data: Matched):
     for graph in [comp_graph, gt_graph]:
         for parent in graph.get_divisions():
             for daughter in graph.get_succs(parent):
-                graph.set_edge_attribute(
+                graph.set_flag_on_edge(
                     (parent, daughter), EdgeAttr.INTERTRACK_EDGE, True
                 )
 
         for merge in graph.get_merges():
             for parent in graph.get_preds(merge):
-                graph.set_edge_attribute(
+                graph.set_flag_on_edge(
                     (parent, merge), EdgeAttr.INTERTRACK_EDGE, True
                 )
 
@@ -113,7 +114,7 @@ def get_edge_errors(matched_data: Matched):
 
         expected_gt_edge = (source_gt_id, target_gt_id)
         if expected_gt_edge not in gt_graph.edges:
-            comp_graph.set_edge_attribute(edge, EdgeAttr.FALSE_POS, True)
+            comp_graph.set_flag_on_edge(edge, EdgeAttr.FALSE_POS, True)
         else:
             # check if semantics are correct
             is_parent_gt = gt_graph.get_edge_attribute(
@@ -123,7 +124,7 @@ def get_edge_errors(matched_data: Matched):
                 edge, EdgeAttr.INTERTRACK_EDGE
             )
             if is_parent_gt != is_parent_comp:
-                comp_graph.set_edge_attribute(edge, EdgeAttr.WRONG_SEMANTIC, True)
+                comp_graph.set_flag_on_edge(edge, EdgeAttr.WRONG_SEMANTIC, True)
 
     # fn edges - edges in gt_graph that aren't in induced graph
     for edge in tqdm(gt_graph.edges, "Evaluating FN edges"):
@@ -132,7 +133,7 @@ def get_edge_errors(matched_data: Matched):
         if gt_graph.get_node_attribute(
             source, NodeAttr.FALSE_NEG
         ) or gt_graph.get_node_attribute(target, NodeAttr.FALSE_NEG):
-            gt_graph.set_edge_attribute(edge, EdgeAttr.FALSE_NEG, True)
+            gt_graph.set_flag_on_edge(edge, EdgeAttr.FALSE_NEG, True)
             continue
 
         source_comp_id = gt_comp_mapping[source]
@@ -140,7 +141,7 @@ def get_edge_errors(matched_data: Matched):
 
         expected_comp_edge = (source_comp_id, target_comp_id)
         if expected_comp_edge not in induced_graph.edges:
-            gt_graph.set_edge_attribute(edge, EdgeAttr.FALSE_NEG, True)
+            gt_graph.set_flag_on_edge(edge, EdgeAttr.FALSE_NEG, True)
 
     gt_graph.edge_errors = True
     comp_graph.edge_errors = True

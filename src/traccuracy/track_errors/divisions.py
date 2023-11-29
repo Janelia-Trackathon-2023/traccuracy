@@ -62,7 +62,7 @@ def _classify_divisions(matched_data: Matched):
         pred_node = _find_gt_node_matches(gt_node)
         # No matching node so division missed
         if pred_node is None:
-            g_gt.set_node_attribute(gt_node, NodeAttr.FN_DIV, True)
+            g_gt.set_flag_on_node(gt_node, NodeAttr.FN_DIV, True)
         # Check if the division has the correct daughters
         else:
             succ_gt = g_gt.get_succs(gt_node)
@@ -73,18 +73,19 @@ def _classify_divisions(matched_data: Matched):
 
             # If daughters are same, division is correct
             if Counter(succ_gt) == Counter(succ_pred):
-                g_gt.set_node_attribute(gt_node, NodeAttr.TP_DIV, True)
-                g_pred.set_node_attribute(pred_node, NodeAttr.TP_DIV, True)
+                g_gt.set_flag_on_node(gt_node, NodeAttr.TP_DIV, True)
+                g_pred.set_flag_on_node(pred_node, NodeAttr.TP_DIV, True)
             # If daughters are at all mismatched, division is false negative
             else:
-                g_gt.set_node_attribute(gt_node, NodeAttr.FN_DIV, True)
+                g_gt.set_flag_on_node(gt_node, NodeAttr.FN_DIV, True)
 
         # Remove res division to record that we have classified it
         if pred_node in div_pred:
             div_pred.remove(pred_node)
 
     # Any remaining pred divisions are false positives
-    g_pred.set_node_attribute(div_pred, NodeAttr.FP_DIV, True)
+    for fp_div in div_pred:
+        g_pred.set_flag_on_node(fp_div, NodeAttr.FP_DIV, True)
 
     # Set division annotation flag
     g_gt.division_annotations = True
@@ -228,12 +229,12 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
 
         if correct:
             # Remove error annotations from pred graph
-            g_pred.set_node_attribute(fp_node, NodeAttr.FP_DIV, False)
-            g_gt.set_node_attribute(fn_node, NodeAttr.FN_DIV, False)
+            g_pred.set_flag_on_node(fp_node, NodeAttr.FP_DIV, False)
+            g_gt.set_flag_on_node(fn_node, NodeAttr.FN_DIV, False)
 
             # Add the tp divisions annotations
-            g_gt.set_node_attribute(fn_node, NodeAttr.TP_DIV, True)
-            g_pred.set_node_attribute(fp_node, NodeAttr.TP_DIV, True)
+            g_gt.set_flag_on_node(fn_node, NodeAttr.TP_DIV, True)
+            g_pred.set_flag_on_node(fp_node, NodeAttr.TP_DIV, True)
 
     return new_matched
 
