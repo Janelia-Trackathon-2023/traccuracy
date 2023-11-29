@@ -105,14 +105,11 @@ def match_iou(gt, pred, threshold=0.6):
         matches = _match_nodes(
             gt.segmentation[i], pred.segmentation[i], threshold=threshold
         )
-        gt_seg_to_node_map = gt_time_to_seg_id_map[t]
-        pred_seg_to_node_map = pred_time_to_seg_id_map[t]
-
         # Construct node id tuple for each match
         for gt_seg_id, pred_seg_id in zip(*matches):
             # Find node id based on time and segmentation label
-            gt_node = gt_seg_to_node_map[gt_seg_id]
-            pred_node = pred_seg_to_node_map[pred_seg_id]
+            gt_node = gt_time_to_seg_id_map[t][gt_seg_id]
+            pred_node = pred_time_to_seg_id_map[t][pred_seg_id]
             mapper.append((gt_node, pred_node))
     return mapper
 
