@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 from tqdm import tqdm
 
@@ -110,7 +112,7 @@ class IOUMatcher(Matcher):
     def __init__(self, iou_threshold=0.6):
         self.iou_threshold = iou_threshold
 
-    def _compute_mapping(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+    def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Computes IOU mapping for a set of grpahs
 
         Args:

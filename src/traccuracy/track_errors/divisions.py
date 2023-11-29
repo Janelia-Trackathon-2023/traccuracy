@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import itertools
 import logging
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _classify_divisions(matched_data: "Matched"):
+def _classify_divisions(matched_data: Matched):
     """Identify each division as a true positive, false positive or false negative
 
     This function only works on node mappers that are one-to-one
@@ -139,7 +141,7 @@ def _get_succ_by_t(g, node, delta_frames):
     return node
 
 
-def _correct_shifted_divisions(matched_data: "Matched", n_frames=1):
+def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
     """Allows for divisions to occur within a frame buffer and still be correct
 
     This implementation asserts that the parent lineages and daughter lineages must match.
@@ -236,7 +238,7 @@ def _correct_shifted_divisions(matched_data: "Matched", n_frames=1):
     return new_matched
 
 
-def _evaluate_division_events(matched_data: "Matched", frame_buffer=(0)):
+def _evaluate_division_events(matched_data: Matched, frame_buffer=(0)):
     """Classify division errors and correct shifted divisions according to frame_buffer
 
     Note: A copy of matched_data will be created for each frame_buffer other than 0.
