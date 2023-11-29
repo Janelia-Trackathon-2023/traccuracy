@@ -47,7 +47,7 @@ class Matcher(ABC):
         )
 
         # Record matcher info on Matched object
-        matched.matcher = self.info
+        matched.matcher_info = self.info
 
         # Report matching performance
         total_gt = len(matched.gt_graph.nodes())
@@ -86,7 +86,7 @@ class Matched:
         pred_graph (traccuracy.TrackingGraph): Tracking graph object for the pred
         mapping (list[tuple[Any, Any]]): List of tuples where each tuple maps
             a gt node to a pred node
-        matcher (optional, dict): Dictionary containing name and parameters from
+        matcher_info (optional, dict): Dictionary containing name and parameters from
             the matcher that generated the mapping
     """
 
@@ -95,9 +95,9 @@ class Matched:
         gt_graph: TrackingGraph,
         pred_graph: TrackingGraph,
         mapping: list[tuple[Any, Any]],
-        matcher: dict | None = None,
+        matcher_info: dict | None = None,
     ):
         self.gt_graph = gt_graph
         self.pred_graph = pred_graph
         self.mapping = mapping
-        self.matcher = matcher
+        self.matcher_info = matcher_info

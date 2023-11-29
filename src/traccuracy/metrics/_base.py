@@ -49,8 +49,8 @@ class Metric(ABC):
 
         results = Results(
             results=res_dict,
-            matcher=matched.matcher,
-            metric=self.info,
+            matcher_info=matched.matcher_info,
+            metric_info=self.info,
             gt_name=matched.gt_graph.name,
             pred_name=matched.pred_graph.name,
         )
@@ -65,14 +65,14 @@ class Results:
     def __init__(
         self,
         results: dict | None = None,
-        matcher: dict | None = None,
-        metric: dict | None = None,
+        matcher_info: dict | None = None,
+        metric_info: dict | None = None,
         gt_name: str | None = None,
         pred_name: str | None = None,
     ):
         self.results = results
-        self.matcher = matcher
-        self.metric = metric
+        self.matcher_info = matcher_info
+        self.metric_info = metric_info
         self.gt_name = gt_name
         self.pred_name = pred_name
 
@@ -84,10 +84,10 @@ class Results:
         output = {"version": self.version}
         if self.results:
             output["results"] = self.results
-        if self.matcher:
-            output["matcher"] = self.matcher
-        if self.metric:
-            output["metric"] = self.metric
+        if self.matcher_info:
+            output["matcher"] = self.matcher_info
+        if self.metric_info:
+            output["metric"] = self.metric_info
         if self.gt_name:
             output["gt"] = self.gt_name
         if self.pred_name:

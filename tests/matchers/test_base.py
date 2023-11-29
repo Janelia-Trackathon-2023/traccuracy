@@ -26,9 +26,11 @@ def test_matched_info():
     matcher = DummyMatcherParam()
     # Check for parameter key
     assert "param" in matcher.info
+    assert "mapping" not in matcher.info
 
     # Check that matcher info is assigned to matched object
     graph = get_movie_with_graph()
     matched = matcher.compute_mapping(graph, graph)
-    assert matched.matcher is not None
-    assert matched.matcher["name"] == "DummyMatcherParam"
+    assert matched.matcher_info is not None
+    assert matched.matcher_info["name"] == "DummyMatcherParam"
+    assert "mapping" not in matched.matcher_info
