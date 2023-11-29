@@ -68,4 +68,3 @@ def test_run_metrics():
     assert results[0]["metric"].get("param") == "param1"
     assert results[1]["metric"]["name"] == "DummyMetricParam"
     assert results[1]["metric"].get("param") == "param2"
-    print(results)

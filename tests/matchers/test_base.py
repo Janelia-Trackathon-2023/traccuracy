@@ -23,9 +23,9 @@ def test_matched_info():
     # Only one key because there are no parameters
     assert len(matcher.info.keys()) == 1
 
-    matcher = DummyMatcherParam()
+    matcher = DummyMatcherParam(param="not-default")
     # Check for parameter key
-    assert "param" in matcher.info
+    assert matcher.info["param"] == "not-default"
     assert "mapping" not in matcher.info
 
     # Check that matcher info is assigned to matched object
