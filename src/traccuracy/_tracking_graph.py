@@ -3,9 +3,9 @@ from __future__ import annotations
 import copy
 import enum
 import logging
+from typing import Hashable
 
 import networkx as nx
-from typing import Hashable
 
 logger = logging.getLogger(__name__)
 
@@ -370,8 +370,8 @@ class TrackingGraph:
 
         return new_trackgraph
 
-    def set_flag_on_node(self, _id: Hashable, flag: NodeAttr, value: bool=True):
-        """Set an attribute flag for a single node. 
+    def set_flag_on_node(self, _id: Hashable, flag: NodeAttr, value: bool = True):
+        """Set an attribute flag for a single node.
         If the id is not found in the graph, a KeyError will be raised.
         If the flag already exists, the existing value will be overwritten.
 
@@ -382,7 +382,7 @@ class TrackingGraph:
                 are included in the NodeAttr enum values.
             value (bool, optional): Attributes are flags and can only be set to
                 True or False. Defaults to True.
-        
+
         Raises:
             KeyError if the provided id is not in the graph.
             ValueError if the provided flag is not a NodeAttr
@@ -398,9 +398,9 @@ class TrackingGraph:
             self.nodes_by_flag[flag].add(_id)
         else:
             self.nodes_by_flag[flag].discard(_id)
-    
-    def set_flag_on_all_nodes(self, flag: NodeAttr, value: bool=True):
-        """Set an attribute flag for all nodes in the graph. 
+
+    def set_flag_on_all_nodes(self, flag: NodeAttr, value: bool = True):
+        """Set an attribute flag for all nodes in the graph.
         If the flag already exists, the existing values will be overwritten.
 
         Args:
@@ -409,7 +409,7 @@ class TrackingGraph:
                 are included in the NodeAttr enum values.
             value (bool, optional): Flags can only be set to True or False.
                 Defaults to True.
-        
+
         Raises:
             ValueError if the provided flag is not a NodeAttr.
         """
@@ -425,8 +425,10 @@ class TrackingGraph:
         else:
             self.nodes_by_flag[flag] = set()
 
-    def set_flag_on_edge(self, _id: tuple(Hashable), flag: EdgeAttr, value: bool=True):
-        """Set an attribute flag for an edge. 
+    def set_flag_on_edge(
+        self, _id: tuple(Hashable), flag: EdgeAttr, value: bool = True
+    ):
+        """Set an attribute flag for an edge.
         If the flag already exists, the existing value will be overwritten.
 
         Args:
@@ -435,7 +437,7 @@ class TrackingGraph:
             flag (traccuracy.EdgeAttr): The edge flag to set. Must be
                 of type EdgeAttr - you may not pass strings, even if they are
                 included in the EdgeAttr enum values.
-            value (bool): Flags can only be set to True or False. 
+            value (bool): Flags can only be set to True or False.
                 Defaults to True.
 
         Raises:
@@ -452,9 +454,9 @@ class TrackingGraph:
             self.edges_by_flag[flag].add(_id)
         else:
             self.edges_by_flag[flag].discard(_id)
-        
-    def set_flag_on_all_edges(self, flag: EdgeAttr, value: bool=True):
-        """Set an attribute flag for all edges in the graph. 
+
+    def set_flag_on_all_edges(self, flag: EdgeAttr, value: bool = True):
+        """Set an attribute flag for all edges in the graph.
         If the flag already exists, the existing values will be overwritten.
 
         Args:
@@ -463,7 +465,7 @@ class TrackingGraph:
                 are included in the EdgeAttr enum values.
             value (bool, optional): Flags can only be set to True or False.
                 Defaults to True.
-        
+
         Raises:
             ValueError if the provided flag is not an EdgeAttr.
         """
