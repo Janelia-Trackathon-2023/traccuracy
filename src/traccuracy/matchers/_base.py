@@ -72,6 +72,7 @@ class Matcher(ABC):
 
     @property
     def info(self):
+        """Dictionary of Matcher name and any parameters"""
         return {"name": self.__class__.__name__, **self.__dict__}
 
 

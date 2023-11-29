@@ -58,10 +58,22 @@ class Metric(ABC):
 
     @property
     def info(self):
+        """Dictionary with Matcher name and any parameters"""
         return {"name": self.__class__.__name__, **self.__dict__}
 
 
 class Results:
+    """The Results object collects information about the pipeline used
+    to generate the metric results
+
+    Args:
+        results (optional, dict): Dictionary with metric output
+        matcher_info (optional, dict): Dictionary with matcher name and parameters
+        metric_info (optional, dict): Dictionary with metric name and parameters
+        gt_name (optional, str): Name of the ground truth data
+        pred_name (optional, str): Name of the predicted data
+    """
+
     def __init__(
         self,
         results: dict | None = None,
@@ -77,10 +89,16 @@ class Results:
         self.pred_name = pred_name
 
     @property
-    def version(self):
+    def version(self) -> str:
+        """Return current traccuracy version"""
         return __version__
 
     def to_dict(self):
+        """Returns all attributes that are not None as a dictionary
+
+        Returns:
+            dict: Dictionary of Results attributes
+        """
         output = {"version": self.version}
         if self.results:
             output["results"] = self.results
