@@ -426,13 +426,13 @@ class TrackingGraph:
             self.nodes_by_flag[flag] = set()
 
     def set_flag_on_edge(
-        self, _id: tuple(Hashable), flag: EdgeAttr, value: bool = True
+        self, _id: tuple[Hashable], flag: EdgeAttr, value: bool = True
     ):
         """Set an attribute flag for an edge.
         If the flag already exists, the existing value will be overwritten.
 
         Args:
-            ids (tuple(Hashable)): The edge id or list of edge ids
+            ids (tuple[Hashable]): The edge id or list of edge ids
                 to set the attribute for. Edge ids are a 2-tuple of node ids.
             flag (traccuracy.EdgeAttr): The edge flag to set. Must be
                 of type EdgeAttr - you may not pass strings, even if they are
