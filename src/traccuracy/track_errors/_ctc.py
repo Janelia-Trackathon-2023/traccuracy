@@ -101,9 +101,7 @@ def get_edge_errors(matched_data: Matched):
 
         for merge in graph.get_merges():
             for parent in graph.get_preds(merge):
-                graph.set_flag_on_edge(
-                    (parent, merge), EdgeAttr.INTERTRACK_EDGE, True
-                )
+                graph.set_flag_on_edge((parent, merge), EdgeAttr.INTERTRACK_EDGE, True)
 
     # fp edges - edges in induced_graph that aren't in gt_graph
     for edge in tqdm(induced_graph.edges, "Evaluating FP edges"):
