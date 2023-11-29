@@ -7,7 +7,7 @@ from tests.test_utils import get_movie_with_graph
 
 
 class DummyMetric(Metric):
-    def compute(self, matched):
+    def _compute(self, matched):
         return {}
 
 
@@ -15,7 +15,7 @@ class DummyMetricParam(Metric):
     def __init__(self, param="value"):
         self.param = param
 
-    def compute(self, matched):
+    def _compute(self, matched):
         return {}
 
 
