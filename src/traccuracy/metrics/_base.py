@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from importlib.metadata import version
 from typing import TYPE_CHECKING
 
-from traccuracy import __version__
-
 if TYPE_CHECKING:
-    from traccuracy.matchers import Matched
+    from traccuracy.matchers._base import Matched
 
 
 class Metric(ABC):
@@ -26,6 +25,9 @@ class Metric(ABC):
     def _compute(self, matched: Matched) -> dict:
         """The compute methods of Metric objects return a dictionary with counts and statistics.
 
+        Args:
+            matched (traccuracy.matchers.Matched): Matched data object to compute metrics on
+
         Raises:
             NotImplementedError
 
@@ -39,7 +41,7 @@ class Metric(ABC):
         and associated metadata
 
         Args:
-            matched (Matched): Matched data object to compute metrics on
+            matched (traccuracy.matchers.Matched): Matched data object to compute metrics on
 
         Returns:
             Results: Object containing metric results and associated pipeline metadata
@@ -91,7 +93,7 @@ class Results:
     @property
     def version(self) -> str:
         """Return current traccuracy version"""
-        return __version__
+        return version("traccuracy")
 
     def to_dict(self):
         """Returns all attributes that are not None as a dictionary
