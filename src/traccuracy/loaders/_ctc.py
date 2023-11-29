@@ -158,7 +158,7 @@ def ctc_to_graph(df, detections):
 
 
 def load_ctc_data(data_dir, track_path=None, name=None):
-    """Read the CTC segmentations and track file and create TrackingGata.
+    """Read the CTC segmentations and track file and create TrackingGraph.
 
     Args:
         data_dir (str): Path to directory containing CTC tiffs.
@@ -167,7 +167,7 @@ def load_ctc_data(data_dir, track_path=None, name=None):
         name (optional, str): Name of data to store in TrackingGraph
 
     Returns:
-        TrackingGraph: Object containing segmentations and graph.
+        traccuracy.TrackingGraph: Object containing segmentations and graph.
 
     Raises:
         ValueError: If the Parent_ID is not in any previous frames.
