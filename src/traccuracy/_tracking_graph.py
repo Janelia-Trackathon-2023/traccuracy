@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import enum
 import logging
-from typing import Hashable, Tuple
+from typing import Hashable
 
 import networkx as nx
 
@@ -426,7 +426,7 @@ class TrackingGraph:
             self.nodes_by_flag[flag] = set()
 
     def set_flag_on_edge(
-        self, _id: Tuple(Hashable), flag: EdgeAttr, value: bool = True
+        self, _id: tuple(Hashable), flag: EdgeAttr, value: bool = True
     ):
         """Set an attribute flag for an edge.
         If the flag already exists, the existing value will be overwritten.
