@@ -69,18 +69,18 @@ class Results:
     to generate the metric results
 
     Args:
-        results (optional, dict): Dictionary with metric output
-        matcher_info (optional, dict): Dictionary with matcher name and parameters
-        metric_info (optional, dict): Dictionary with metric name and parameters
+        results (dict): Dictionary with metric output
+        matcher_info (dict): Dictionary with matcher name and parameters
+        metric_info (dict): Dictionary with metric name and parameters
         gt_name (optional, str): Name of the ground truth data
         pred_name (optional, str): Name of the predicted data
     """
 
     def __init__(
         self,
-        results: dict | None = None,
-        matcher_info: dict | None = None,
-        metric_info: dict | None = None,
+        results: dict,
+        matcher_info: dict | None,
+        metric_info: dict,
         gt_name: str | None = None,
         pred_name: str | None = None,
     ):
@@ -102,12 +102,6 @@ class Results:
             dict: Dictionary of Results attributes
         """
         output = {"version": self.version}
-        if self.results:
-            output["results"] = self.results
-        if self.matcher_info:
-            output["matcher"] = self.matcher_info
-        if self.metric_info:
-            output["metric"] = self.metric_info
         if self.gt_name:
             output["gt"] = self.gt_name
         if self.pred_name:
