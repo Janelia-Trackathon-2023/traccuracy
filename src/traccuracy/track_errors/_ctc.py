@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING
@@ -12,7 +14,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def evaluate_ctc_events(matched_data: "Matched"):
+def evaluate_ctc_events(matched_data: Matched):
     """Annotates ground truth and predicted graph with node and edge error types
 
     Annotations are made in place
@@ -21,7 +23,7 @@ def evaluate_ctc_events(matched_data: "Matched"):
     get_edge_errors(matched_data)
 
 
-def get_vertex_errors(matched_data: "Matched"):
+def get_vertex_errors(matched_data: Matched):
     """Count vertex errors and assign class to each comp/gt node.
 
     Parameters
@@ -67,7 +69,7 @@ def get_vertex_errors(matched_data: "Matched"):
     gt_graph.node_errors = True
 
 
-def get_edge_errors(matched_data: "Matched"):
+def get_edge_errors(matched_data: Matched):
     comp_graph = matched_data.pred_graph
     gt_graph = matched_data.gt_graph
     node_mapping = matched_data.mapping

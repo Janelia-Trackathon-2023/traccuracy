@@ -1,19 +1,16 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
 
 from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.matchers._base import Matcher
 from traccuracy.metrics._base import Metric
 
-if TYPE_CHECKING:
-    from typing import Dict, List
-
 
 def run_metrics(
-    gt_data: "TrackingGraph",
-    pred_data: "TrackingGraph",
-    matcher: "Matcher",
-    metrics: "List[Metric]",
-) -> "List[Dict]":
+    gt_data: TrackingGraph,
+    pred_data: TrackingGraph,
+    matcher: Matcher,
+    metrics: list[Metric],
+) -> list[dict]:
     """Compute given metrics on data using the given matcher.
 
     The returned result dictionary will contain all metrics computed by
