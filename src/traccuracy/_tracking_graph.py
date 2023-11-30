@@ -3,9 +3,13 @@ from __future__ import annotations
 import copy
 import enum
 import logging
-from typing import Hashable
+from typing import TYPE_CHECKING, Hashable
 
 import networkx as nx
+
+if TYPE_CHECKING:
+    import numpy as np
+    from networkx.classes.reportviews import NodeView, OutEdgeView
 
 logger = logging.getLogger(__name__)
 
@@ -104,11 +108,11 @@ class TrackingGraph:
 
     def __init__(
         self,
-        graph,
-        segmentation=None,
-        frame_key="t",
-        label_key="segmentation_id",
-        location_keys=("x", "y"),
+        graph: nx.DiGraph,
+        segmentation: np.ndarray | None = None,
+        frame_key: str = "t",
+        label_key: str = "segmentation_id",
+        location_keys: tuple[str, ...] = ("x", "y"),
     ):
         """A directed graph representing a tracking solution where edges go
         forward in time.
@@ -161,9 +165,13 @@ class TrackingGraph:
         self.graph = graph
 
         # construct dictionaries from attributes to nodes/edges for easy lookup
-        self.nodes_by_frame = {}
-        self.nodes_by_flag = {flag: set() for flag in NodeFlag}
-        self.edges_by_flag = {flag: set() for flag in EdgeFlag}
+        self.nodes_by_frame: dict[int, set[Hashable]] = {}
+        self.nodes_by_flag: dict[NodeFlag, set[Hashable]] = {
+            flag: set() for flag in NodeFlag
+        }
+        self.edges_by_flag: dict[EdgeFlag, set[tuple[Hashable, Hashable]]] = {
+            flag: set() for flag in EdgeFlag
+        }
         for node, attrs in self.graph.nodes.items():
             # check that every node has the time frame and location specified
             assert (
@@ -181,15 +189,15 @@ class TrackingGraph:
             else:
                 self.nodes_by_frame[frame].add(node)
             # store node id in nodes_by_flag mapping
-            for flag in NodeFlag:
-                if flag in attrs and attrs[flag]:
-                    self.nodes_by_flag[flag].add(node)
+            for node_flag in NodeFlag:
+                if node_flag in attrs and attrs[node_flag]:
+                    self.nodes_by_flag[node_flag].add(node)
 
         # store edge id in edges_by_flag
         for edge, attrs in self.graph.edges.items():
-            for flag in EdgeFlag:
-                if flag in attrs and attrs[flag]:
-                    self.edges_by_flag[flag].add(edge)
+            for edge_flag in EdgeFlag:
+                if edge_flag in attrs and attrs[edge_flag]:
+                    self.edges_by_flag[edge_flag].add(edge)
 
         # Store first and last frames for reference
         self.start_frame = min(self.nodes_by_frame.keys())
@@ -201,7 +209,7 @@ class TrackingGraph:
         self.edge_errors = False
 
     @property
-    def nodes(self):
+    def nodes(self) -> NodeView:
         """Get all the nodes in the graph, along with their attributes.
 
         Returns:
@@ -210,7 +218,7 @@ class TrackingGraph:
         return self.graph.nodes
 
     @property
-    def edges(self):
+    def edges(self) -> OutEdgeView:
         """Get all the edges in the graph, along with their attributes.
 
         Returns:
@@ -219,7 +227,7 @@ class TrackingGraph:
         """
         return self.graph.edges
 
-    def get_nodes_in_frame(self, frame):
+    def get_nodes_in_frame(self, frame: int) -> list[Hashable]:
         """Get the node ids of all nodes in the given frame.
 
         Args:
@@ -235,7 +243,7 @@ class TrackingGraph:
         else:
             return []
 
-    def get_location(self, node_id):
+    def get_location(self, node_id: Hashable) -> list[float]:
         """Get the spatial location of the node with node_id using self.location_keys.
 
         Args:
@@ -246,35 +254,35 @@ class TrackingGraph:
         """
         return [self.graph.nodes[node_id][key] for key in self.location_keys]
 
-    def get_nodes_with_flag(self, attr):
+    def get_nodes_with_flag(self, flag: NodeFlag) -> list[Hashable]:
         """Get all nodes with specified NodeFlag set to True.
 
         Args:
-            attr (traccuracy.NodeFlag): the node attribute to query for
+            flag (traccuracy.NodeFlag): the node flag to query for
 
         Returns:
-            (List(hashable)): A list of node_ids which have the given attribute
+            (List(hashable)): A list of node_ids which have the given flag
                 and the value is True.
         """
-        if not isinstance(attr, NodeFlag):
-            raise ValueError(f"Function takes NodeFlag arguments, not {type(attr)}.")
-        return list(self.nodes_by_flag[attr])
+        if not isinstance(flag, NodeFlag):
+            raise ValueError(f"Function takes NodeFlag arguments, not {type(flag)}.")
+        return list(self.nodes_by_flag[flag])
 
-    def get_edges_with_flag(self, attr):
+    def get_edges_with_flag(self, flag: EdgeFlag) -> list[tuple[Hashable, Hashable]]:
         """Get all edges with specified EdgeFlag set to True.
 
         Args:
-            attr (traccuracy.EdgeFlag): the edge attribute to query for
+            flag (traccuracy.EdgeFlag): the edge flag to query for
 
         Returns:
-            (List(hashable)): A list of edge ids which have the given attribute
+            (List(hashable)): A list of edge ids which have the given flag
                 and the value is True.
         """
-        if not isinstance(attr, EdgeFlag):
-            raise ValueError(f"Function takes EdgeFlag arguments, not {type(attr)}.")
-        return list(self.edges_by_flag[attr])
+        if not isinstance(flag, EdgeFlag):
+            raise ValueError(f"Function takes EdgeFlag arguments, not {type(flag)}.")
+        return list(self.edges_by_flag[flag])
 
-    def get_divisions(self):
+    def get_divisions(self) -> list[Hashable]:
         """Get all nodes that have at least two edges pointing to the next time frame
 
         Returns:
@@ -282,7 +290,7 @@ class TrackingGraph:
         """
         return [node for node, degree in self.graph.out_degree() if degree >= 2]
 
-    def get_merges(self):
+    def get_merges(self) -> list[Hashable]:
         """Get all nodes that have at least two incoming edges from the previous time frame
 
         Returns:
@@ -290,7 +298,7 @@ class TrackingGraph:
         """
         return [node for node, degree in self.graph.in_degree() if degree >= 2]
 
-    def get_preds(self, node):
+    def get_preds(self, node: Hashable) -> list[Hashable]:
         """Get all predecessors of the given node.
 
         A predecessor node is any node from a previous time point that has an edge to
@@ -306,7 +314,7 @@ class TrackingGraph:
         """
         return [pred for pred, _ in self.graph.in_edges(node)]
 
-    def get_succs(self, node):
+    def get_succs(self, node: Hashable) -> list[Hashable]:
         """Get all successor nodes of the given node.
 
         A successor node is any node from a later time point that has an edge
@@ -322,7 +330,7 @@ class TrackingGraph:
         """
         return [succ for _, succ in self.graph.out_edges(node)]
 
-    def get_connected_components(self):
+    def get_connected_components(self) -> list[TrackingGraph]:
         """Get a list of TrackingGraphs, each corresponding to one track
         (i.e., a connected component in the track graph).
 
@@ -335,7 +343,7 @@ class TrackingGraph:
 
         return [self.get_subgraph(g) for g in nx.weakly_connected_components(graph)]
 
-    def get_subgraph(self, nodes):
+    def get_subgraph(self, nodes: list[Hashable]) -> TrackingGraph:
         """Returns a new TrackingGraph with the subgraph defined by the list of nodes
 
         Args:
@@ -352,21 +360,23 @@ class TrackingGraph:
             else:
                 del new_trackgraph.nodes_by_frame[frame]
 
-        for flag in NodeFlag:
-            new_trackgraph.nodes_by_flag[flag] = self.nodes_by_flag[flag].intersection(
-                nodes
-            )
-        for flag in EdgeFlag:
-            new_trackgraph.edges_by_flag[flag] = self.edges_by_flag[flag].intersection(
-                nodes
-            )
+        for node_flag in NodeFlag:
+            new_trackgraph.nodes_by_flag[node_flag] = self.nodes_by_flag[
+                node_flag
+            ].intersection(nodes)
+        for edge_flag in EdgeFlag:
+            new_trackgraph.edges_by_flag[edge_flag] = self.edges_by_flag[
+                edge_flag
+            ].intersection(nodes)
 
         new_trackgraph.start_frame = min(new_trackgraph.nodes_by_frame.keys())
         new_trackgraph.end_frame = max(new_trackgraph.nodes_by_frame.keys()) + 1
 
         return new_trackgraph
 
-    def set_flag_on_node(self, _id: Hashable, flag: NodeFlag, value: bool = True):
+    def set_flag_on_node(
+        self, _id: Hashable, flag: NodeFlag, value: bool = True
+    ) -> None:
         """Set an attribute flag for a single node.
         If the id is not found in the graph, a KeyError will be raised.
         If the flag already exists, the existing value will be overwritten.
@@ -394,7 +404,7 @@ class TrackingGraph:
         else:
             self.nodes_by_flag[flag].discard(_id)
 
-    def set_flag_on_all_nodes(self, flag: NodeFlag, value: bool = True):
+    def set_flag_on_all_nodes(self, flag: NodeFlag, value: bool = True) -> None:
         """Set an attribute flag for all nodes in the graph.
         If the flag already exists, the existing values will be overwritten.
 
@@ -421,7 +431,7 @@ class TrackingGraph:
 
     def set_flag_on_edge(
         self, _id: tuple[Hashable, Hashable], flag: EdgeFlag, value: bool = True
-    ):
+    ) -> None:
         """Set an attribute flag for an edge.
         If the flag already exists, the existing value will be overwritten.
 
@@ -448,7 +458,7 @@ class TrackingGraph:
         else:
             self.edges_by_flag[flag].discard(_id)
 
-    def set_flag_on_all_edges(self, flag: EdgeFlag, value: bool = True):
+    def set_flag_on_all_edges(self, flag: EdgeFlag, value: bool = True) -> None:
         """Set an attribute flag for all edges in the graph.
         If the flag already exists, the existing values will be overwritten.
 
@@ -474,7 +484,9 @@ class TrackingGraph:
         else:
             self.edges_by_flag[flag] = set()
 
-    def get_tracklets(self, include_division_edges: bool = False):
+    def get_tracklets(
+        self, include_division_edges: bool = False
+    ) -> list[TrackingGraph]:
         """Gets a list of new TrackingGraph objects containing all tracklets of the current graph.
 
         Tracklet is defined as all connected components between divisions (daughter to next
