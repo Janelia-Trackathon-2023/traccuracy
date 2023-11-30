@@ -101,7 +101,12 @@ class Results:
         Returns:
             dict: Dictionary of Results attributes
         """
-        output = {"version": self.version}
+        output = {
+            "version": self.version,
+            "results": self.results,
+            "matcher": self.matcher_info,
+            "metric": self.metric_info,
+        }
         if self.gt_name:
             output["gt"] = self.gt_name
         if self.pred_name:
