@@ -126,5 +126,4 @@ def _calc_overlap_score(
         max_overlap = max(overlaps)
         correct_count += max_overlap
         total_count += len(reference_tracklet.edges())
-
     return correct_count / total_count if total_count > 0 else -1
