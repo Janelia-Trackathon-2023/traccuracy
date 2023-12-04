@@ -65,6 +65,7 @@ def test_ctc_single_nodes():
     # This should raise an error if there are no times for single nodes
     TrackingGraph(G)
 
+
 def test_ctc_with_gap_closing():
     data = [
         {"Cell_ID": 1, "Start": 0, "End": 1, "Parent_ID": 0},
@@ -80,6 +81,7 @@ def test_ctc_with_gap_closing():
     )
     assert G.has_edge("1_1", "3_3")
     assert G.has_edge("2_1", "4_6")
+
 
 def test_load_data():
     test_dir = os.path.abspath(__file__)
