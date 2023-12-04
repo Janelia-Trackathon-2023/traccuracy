@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import networkx as nx
@@ -24,7 +26,7 @@ class CTCMatcher(Matcher):
     for complete details.
     """
 
-    def _compute_mapping(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+    def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Run ctc matching
 
         Args:
@@ -95,7 +97,7 @@ class CTCMatcher(Matcher):
         return Matched(gt_graph, pred_graph, mapping)
 
 
-def detection_test(gt_blob: "np.ndarray", comp_blob: "np.ndarray") -> int:
+def detection_test(gt_blob: np.ndarray, comp_blob: np.ndarray) -> int:
     """Check if computed marker overlaps majority of the reference marker.
 
     Given a reference marker and computer marker in original coordinates,

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from traccuracy._tracking_graph import EdgeAttr, NodeAttr
@@ -32,7 +34,7 @@ class AOGMMetrics(Metric):
             "ws": edge_ws_weight,
         }
 
-    def compute(self, data: "Matched"):
+    def compute(self, data: Matched):
         evaluate_ctc_events(data)
 
         vertex_error_counts = {
@@ -84,7 +86,7 @@ class CTCMetrics(AOGMMetrics):
             edge_ws_weight=edge_weight_ws,
         )
 
-    def compute(self, data: "Matched"):
+    def compute(self, data: Matched):
         # AOGM-0 is the cost of creating the gt graph from scratch
         gt_graph = data.gt_graph.graph
         n_nodes = gt_graph.number_of_nodes()
