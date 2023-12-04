@@ -148,3 +148,106 @@ def get_division_graphs():
     mapper = [("1_0", "1_0"), ("1_1", "1_1"), ("2_4", "2_4"), ("3_4", "3_4")]
 
     return G1, G2, mapper
+
+
+def get_gap_close_graphs():
+    """
+    G1
+                                      3_5 -- 3_6 -- -- -- 5_10                   
+    1_0 -- 1_1 -- -- -- 2_3 -- 2_4 -<
+                                      4_5 -- 4_6
+    G2
+                                      2_5 -- 2_6 -- -- -- 4_10                   
+    1_0 -- 1_1 -- 1_2 -- 1_3 -- 1_4 -<
+                                      3_5 -- 3_6
+    """
+    G1 = nx.DiGraph()
+    G1.add_edge("1_0", "1_1")
+    # gap closing edge
+    G1.add_edge("1_1", "2_3")
+    G1.add_edge("2_3", "2_4")
+    # Divide to generate 3 lineage
+    G1.add_edge("2_4", "3_5")
+    G1.add_edge("3_5", "3_6")
+    # gap closing edge
+    G1.add_edge("3_6", "5_10")
+    # Divide to generate 4 lineage
+    G1.add_edge("2_4", "4_5")
+    G1.add_edge("4_5", "4_6")
+
+    attrs = {}
+    for node in G1.nodes:
+        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
+    nx.set_node_attributes(G1, attrs)
+
+    G2 = nx.DiGraph()
+    G2.add_edge("1_0", "1_1")
+    # missing gap closing edge
+    G2.add_edge("1_1", "1_2")
+    G2.add_edge("1_2", "1_3")
+    G2.add_edge("1_3", "1_4")
+    # Divide to generate 2 lineage
+    G2.add_edge("1_4", "2_5")
+    G2.add_edge("2_5", "2_6")
+    # correct gap closing edge
+    G2.add_edge("2_6", "4_10")
+    # Divide to generate 3 lineage
+    G2.add_edge("1_4", "3_5")
+    G2.add_edge("3_5", "3_6")
+
+    attrs = {}
+    for node in G2.nodes:
+        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
+    nx.set_node_attributes(G2, attrs)
+
+    # G1, G2 mapper
+    mapper = [("1_0", "1_0"), ("1_1", "1_1"), ("2_3", "1_3"), ("2_4", "1_4"), ("3_5", "2_5"), ("3_6", "2_6"), ("5_10", "4_10"), ("4_5", "3_5"), ("4_6", "3_6")]
+
+    return G1, G2, mapper
+
+def get_division_gap_close_graphs():
+    """
+    G1
+                   -- -- 2_3 -- 2_4
+    1_0 -- 1_1 -<
+                  3_2 -- 3_3 -- 3_4
+    G2
+                  2_2 -- 2_3 -- 2_4
+    1_0 -- 1_1 -<
+                  3_2  -- -- -- 4_4
+    """
+
+    G1 = nx.DiGraph()
+    G1.add_edge("1_0", "1_1")
+    # gap division
+    G1.add_edge("1_1", "2_3")
+    G1.add_edge("2_3", "2_4")
+    # divide into 3 lineage
+    G1.add_edge("1_1", "3_2")
+    G1.add_edge("3_2", "3_3")
+    G1.add_edge("3_3", "3_4")
+
+    attrs = {}
+    for node in G1.nodes:
+        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
+    nx.set_node_attributes(G1, attrs)
+
+    G2 = nx.DiGraph()
+    G2.add_edge("1_0", "1_1")
+    # Divide to generate 2 lineage
+    G2.add_edge("1_1", "2_2")
+    G2.add_edge("2_2", "2_3")
+    G2.add_edge("2_3", "2_4")
+    # Divide to generate 3 lineage
+    G2.add_edge("1_1", "3_2")
+    # incorrect gap closing edge
+    G2.add_edge("3_2", "4_4")
+
+    attrs = {}
+    for node in G2.nodes:
+        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
+    nx.set_node_attributes(G2, attrs)
+
+    mapper = [("1_0", "1_0"), ("1_1", "1_1"), ("2_3", "2_3"), ("2_4", "2_4"), ("3_2", "3_2"), ("3_4", "4_4")]
+
+    return G1, G2, mapper

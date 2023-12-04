@@ -11,7 +11,7 @@ from traccuracy.track_errors.divisions import (
     _get_succ_by_t,
 )
 
-from tests.test_utils import get_division_graphs
+from tests.test_utils import get_division_graphs, get_division_gap_close_graphs
 
 
 @pytest.fixture
@@ -220,3 +220,29 @@ def test_evaluate_division_events():
     results = _evaluate_division_events(matched_data, frame_buffer=frame_buffer)
 
     assert np.all([isinstance(k, int) for k in results.keys()])
+
+def test_gap_close_divisions():
+    g_gt, g_pred, mapper = get_division_gap_close_graphs()
+    matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
+    _classify_divisions(matched_data)
+
+    # missing gap close div edge so FN DIV
+    assert g_gt.nodes['1_1'][NodeAttr.FN_DIV]
+    
+    # fix division, assert it's identified correctly
+    g_pred.remove_node('2_2')
+    g_pred.add_edge('1_1', '2_3')
+    # mapper doesn't need to change as removed node was always missing
+    matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
+    _classify_divisions(matched_data)
+    assert g_gt.nodes['1_1'][NodeAttr.TP_DIV]
+    assert g_gt.nodes['1_1'][NodeAttr.TP_DIV]
+
+    g_gt, g_pred, mapper = get_division_gap_close_graphs()
+    # remove gt division
+    g_gt.remove_edge('1_1', '2_3')
+    g_gt.remove_edge('1_1', '3_2')
+    matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
+    _classify_divisions(matched_data)
+    # assert fp division classified correctly
+    assert g_pred.nodes['1_1'][NodeAttr.FP_DIV]
