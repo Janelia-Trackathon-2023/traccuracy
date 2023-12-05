@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 from tqdm import tqdm
 
@@ -99,17 +101,18 @@ def match_iou(gt, pred, threshold=0.6):
 
 
 class IOUMatcher(Matcher):
+    """Constructs a mapping between gt and pred nodes using the IoU of the segmentations
+
+    Lower values for iou_threshold will be more permissive of imperfect matches
+
+    Args:
+        iou_threshold (float, optional): Minimum IoU value to assign a match. Defaults to 0.6.
+    """
+
     def __init__(self, iou_threshold=0.6):
-        """Constructs a mapping between gt and pred nodes using the IoU of the segmentations
-
-        Lower values for iou_threshold will be more permissive of imperfect matches
-
-        Args:
-            iou_threshold (float, optional): Minimum IoU value to assign a match. Defaults to 0.6.
-        """
         self.iou_threshold = iou_threshold
 
-    def _compute_mapping(self, gt_graph: "TrackingGraph", pred_graph: "TrackingGraph"):
+    def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Computes IOU mapping for a set of grpahs
 
         Args:
