@@ -135,21 +135,25 @@ def test_constructor(nx_comp1):
 
 
 def test_get_cells_by_frame(simple_graph):
-    assert simple_graph.get_nodes_in_frame(0) == ["1_0"]
+    assert Counter(simple_graph.get_nodes_in_frame(0)) == Counter({"1_0"})
     assert Counter(simple_graph.get_nodes_in_frame(2)) == Counter(["1_2", "1_3"])
-    assert simple_graph.get_nodes_in_frame(5) == []
+    assert Counter(simple_graph.get_nodes_in_frame(5)) == Counter([])
 
 
 def test_get_nodes_with_flag(simple_graph):
-    assert simple_graph.get_nodes_with_flag(NodeFlag.TP_DIV) == ["1_1"]
-    assert simple_graph.get_nodes_with_flag(NodeFlag.FP_DIV) == []
+    assert Counter(simple_graph.get_nodes_with_flag(NodeFlag.TP_DIV)) == Counter(
+        ["1_1"]
+    )
+    assert Counter(simple_graph.get_nodes_with_flag(NodeFlag.FP_DIV)) == Counter([])
     with pytest.raises(ValueError):
         assert simple_graph.get_nodes_with_flag("is_tp_division")
 
 
 def test_get_edges_with_flag(simple_graph):
-    assert simple_graph.get_edges_with_flag(EdgeFlag.TRUE_POS) == [("1_0", "1_1")]
-    assert simple_graph.get_edges_with_flag(EdgeFlag.FALSE_NEG) == []
+    assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.TRUE_POS)) == Counter(
+        [("1_0", "1_1")]
+    )
+    assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.FALSE_NEG)) == Counter([])
     with pytest.raises(ValueError):
         assert simple_graph.get_nodes_with_flag("is_tp")
 

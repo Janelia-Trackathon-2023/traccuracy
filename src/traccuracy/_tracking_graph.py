@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import enum
 import logging
-from typing import TYPE_CHECKING, Hashable
+from typing import TYPE_CHECKING, Hashable, Iterable
 
 import networkx as nx
 
@@ -227,21 +227,21 @@ class TrackingGraph:
         """
         return self.graph.edges
 
-    def get_nodes_in_frame(self, frame: int) -> list[Hashable]:
+    def get_nodes_in_frame(self, frame: int) -> set[Hashable]:
         """Get the node ids of all nodes in the given frame.
 
         Args:
             frame (int): The frame to return all node ids for.
                 If the provided frame is outside of the range
-                (self.start_frame, self.end_frame), returns an empty list.
+                (self.start_frame, self.end_frame), returns an empty iterable.
 
         Returns:
-            list of node_ids: A list of node ids for all nodes in frame.
+            Iterable[Hashable]: An iterable of node ids for all nodes in frame.
         """
         if frame in self.nodes_by_frame.keys():
-            return list(self.nodes_by_frame[frame])
+            return self.nodes_by_frame[frame]
         else:
-            return []
+            return set()
 
     def get_location(self, node_id: Hashable) -> list[float]:
         """Get the spatial location of the node with node_id using self.location_keys.
@@ -254,33 +254,33 @@ class TrackingGraph:
         """
         return [self.graph.nodes[node_id][key] for key in self.location_keys]
 
-    def get_nodes_with_flag(self, flag: NodeFlag) -> list[Hashable]:
+    def get_nodes_with_flag(self, flag: NodeFlag) -> set[Hashable]:
         """Get all nodes with specified NodeFlag set to True.
 
         Args:
             flag (traccuracy.NodeFlag): the node flag to query for
 
         Returns:
-            (List(hashable)): A list of node_ids which have the given flag
+            (List(hashable)): An iterable of node_ids which have the given flag
                 and the value is True.
         """
         if not isinstance(flag, NodeFlag):
             raise ValueError(f"Function takes NodeFlag arguments, not {type(flag)}.")
-        return list(self.nodes_by_flag[flag])
+        return self.nodes_by_flag[flag]
 
-    def get_edges_with_flag(self, flag: EdgeFlag) -> list[tuple[Hashable, Hashable]]:
+    def get_edges_with_flag(self, flag: EdgeFlag) -> set[tuple[Hashable, Hashable]]:
         """Get all edges with specified EdgeFlag set to True.
 
         Args:
             flag (traccuracy.EdgeFlag): the edge flag to query for
 
         Returns:
-            (List(hashable)): A list of edge ids which have the given flag
+            (List(hashable)): An iterable of edge ids which have the given flag
                 and the value is True.
         """
         if not isinstance(flag, EdgeFlag):
             raise ValueError(f"Function takes EdgeFlag arguments, not {type(flag)}.")
-        return list(self.edges_by_flag[flag])
+        return self.edges_by_flag[flag]
 
     def get_divisions(self) -> list[Hashable]:
         """Get all nodes that have at least two edges pointing to the next time frame
@@ -343,7 +343,7 @@ class TrackingGraph:
 
         return [self.get_subgraph(g) for g in nx.weakly_connected_components(graph)]
 
-    def get_subgraph(self, nodes: list[Hashable]) -> TrackingGraph:
+    def get_subgraph(self, nodes: Iterable[Hashable]) -> TrackingGraph:
         """Returns a new TrackingGraph with the subgraph defined by the list of nodes
 
         Args:
