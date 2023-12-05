@@ -91,9 +91,6 @@ def ctc_to_graph(df, detections):
 
     Returns:
         networkx.Graph: Graph representation of the CTC data.
-
-    Raises:
-        ValueError: If the Parent_ID is not in any previous frames.
     """
     edges = []
 
@@ -163,10 +160,20 @@ def ctc_to_graph(df, detections):
 def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame):
     """Sanity checks for valid CTC format.
 
+    Checks for:
+    - Tracklet IDs in tracks file must be unique and positive
+    - Parent tracklet IDs must exist in the tracks file
+    - Intertracklet edges must be directed forward in time.
+    - In each time point, the set of segmentation IDs present in the detections must equal the set
+    of tracklet IDs in the tracks file that overlap this time point.
+
+
     Args:
         tracks (pd.DataFrame): Tracks in CTC format with columns Cell_ID, Start, End, Parent_ID.
         detections (pd.DataFrame): Detections extracted from masks, containing columns
             segmentation_id, t.
+    Raises:
+        ValueError: If any of the checks fail.
     """
     logger.info("Running CTC format checks")
     if tracks["Cell_ID"].min() < 1:
@@ -183,8 +190,9 @@ def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame):
             parent_end = tracks[tracks["Cell_ID"] == row["Parent_ID"]]["End"].iloc[0]
             if parent_end >= row["Start"]:
                 raise ValueError(
-                    f"Invalid tracklet connection: Parent_ID {row['Parent_ID']} ends at "
-                    f"{parent_end}, but Cell_ID {row['Cell_ID']} starts at {row['Start']}."
+                    f"Invalid tracklet connection: Daughter tracklet with ID {row['Cell_ID']} "
+                    f"starts at t={row['Start']}, "
+                    f"but parent tracklet with ID {row['Parent_ID']} only ends at t={parent_end}."
                 )
 
     for t in range(tracks["Start"].min(), tracks["End"].max()):
@@ -207,13 +215,16 @@ def load_ctc_data(data_dir, track_path=None, run_checks=True):
         data_dir (str): Path to directory containing CTC tiffs.
         track_path (optional, str): Path to CTC track file. If not passed,
             finds `*_track.txt` in data_dir.
-        run_checks (optional, bool): If True, runs checks on the data to ensure valid CTC format.
+        run_checks (optional, bool): If set to `True` (default), runs checks on the data to ensure
+            valid CTC format.
 
     Returns:
         TrackingData: Object containing segmentations and TrackingGraph.
 
     Raises:
-        ValueError: If the Parent_ID is not in any previous frames.
+        ValueError:
+            If `run_checks` is True, whenever any of the CTC format checks are violated.
+            If `run_checks` is False, whenever any other Exception occurs while creating the graph.
     """
     names = ["Cell_ID", "Start", "End", "Parent_ID"]
     if not track_path:
@@ -236,6 +247,13 @@ def load_ctc_data(data_dir, track_path=None, run_checks=True):
     if run_checks:
         _check_ctc(tracks, detections)
 
-    G = ctc_to_graph(tracks, detections)
+    try:
+        G = ctc_to_graph(tracks, detections)
+    except BaseException as e:
+        logger.error(e)
+        raise ValueError(
+            "Error in converting CTC to graph. "
+            "Consider setting `run_checks=True` for detailed error message."
+        ) from e
 
     return TrackingGraph(G, segmentation=masks)
