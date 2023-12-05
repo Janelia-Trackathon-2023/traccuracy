@@ -5,7 +5,7 @@ import os
 import networkx as nx
 import numpy as np
 import pandas as pd
-from skimage.measure import regionprops_table
+from skimage.measure import label, regionprops_table
 from tifffile import imread
 from tqdm import tqdm
 
@@ -157,23 +157,26 @@ def ctc_to_graph(df, detections):
     return G
 
 
-def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame):
+def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame, masks: np.ndarray):
     """Sanity checks for valid CTC format.
 
-    Checks for:
+    Hard checks (throws exception):
     - Tracklet IDs in tracks file must be unique and positive
     - Parent tracklet IDs must exist in the tracks file
     - Intertracklet edges must be directed forward in time.
     - In each time point, the set of segmentation IDs present in the detections must equal the set
     of tracklet IDs in the tracks file that overlap this time point.
 
+    Soft checks (prints warning):
+    - No duplicate tracklet IDs (non-connected pixels with same ID) in a single timepoint.
 
     Args:
         tracks (pd.DataFrame): Tracks in CTC format with columns Cell_ID, Start, End, Parent_ID.
         detections (pd.DataFrame): Detections extracted from masks, containing columns
             segmentation_id, t.
+        masks (np.ndarray): Set of masks with time in the first axis.
     Raises:
-        ValueError: If any of the checks fail.
+        ValueError: If any of the hard checks fail.
     """
     logger.info("Running CTC format checks")
     if tracks["Cell_ID"].min() < 1:
@@ -206,6 +209,12 @@ def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame):
             raise ValueError(
                 f"IDs {det_ids - track_ids} at t={t} not represented in tracks file."
             )
+
+    for t, frame in enumerate(masks):
+        _, n_components = label(frame, return_num=True)
+        n_labels = len(detections[detections["t"] == t])
+        if n_labels < n_components:
+            logger.warning(f"{n_components - n_labels} non-connected masks at t={t}.")
 
 
 def load_ctc_data(data_dir, track_path=None, run_checks=True):
@@ -245,7 +254,7 @@ def load_ctc_data(data_dir, track_path=None, run_checks=True):
     masks = load_tiffs(data_dir)
     detections = get_node_attributes(masks)
     if run_checks:
-        _check_ctc(tracks, detections)
+        _check_ctc(tracks, detections, masks)
 
     try:
         G = ctc_to_graph(tracks, detections)
