@@ -237,7 +237,7 @@ def test_gap_close_divisions():
     matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
     _classify_divisions(matched_data)
     assert g_gt.nodes["1_1"][NodeAttr.TP_DIV]
-    assert g_gt.nodes["1_1"][NodeAttr.TP_DIV]
+    assert g_pred.nodes["1_1"][NodeAttr.TP_DIV]
 
     g_gt, g_pred, mapper = get_division_gap_close_graphs()
     # remove gt division
