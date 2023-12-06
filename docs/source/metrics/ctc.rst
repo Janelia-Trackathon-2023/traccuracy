@@ -49,7 +49,7 @@ computed by the general AOGM metric. Edge error weights are as follows:
 See Track Errors for the definition of each error type.
 
 To compute the TRA score, the weighted sum of all node and edge errors in the solution (:math:`AOGM`)
-is normalized to a 0-1 value using a maximum potential error. The maximum potential error (:math: `AOGM_{0}`) is again 
+is normalized to a 0-1 value using a maximum potential error. The maximum potential error (:math:`AOGM_{0}`) is again 
 defined based on the weighted error sum of an empty solution graph i.e. assume all nodes and edges in the ground truth 
 are False Negative, and computed the weighted sum of errors on this graph.
 
