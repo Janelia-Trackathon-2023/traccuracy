@@ -1,5 +1,5 @@
 CTC/AOGM Metrics
-===========
+=================
 
 These metrics are an implementation of the Cell Segmentation \& Tracking Challenge TRA and DET metrics, 
 as described on the Challenge `website <http://celltrackingchallenge.net/evaluation-methodology/>`_,
