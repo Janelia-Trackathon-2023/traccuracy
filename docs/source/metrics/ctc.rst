@@ -15,8 +15,12 @@ and annotates node errors.
 
 Each type of node error is weighted based on how difficult it would be for a human to correct
 the error by hand. The original Cell Tracking Challenge weights are used for all error types:
-Non-Split nodes are weighted 5, False Negative nodes are weighted 10, and False Positive
-nodes are weighted 1. See Track Errors for the definition of each error type.
+
+* Non-Split nodes are weighted 5
+* False Negative nodes are weighted 10
+* False Positive nodes are weighted 1 
+
+See Track Errors for the definition of each error type.
 
 To compute the DET score for a dataset, the weighted sum of all node errors in the solution (:math:`AOGM-D`)
 is normalized to a 0-1 value using a maximum potential error. The maximum potential error
