@@ -38,5 +38,27 @@ The final DET score is therefore:
 TRA
 -----------------------
 
+The TRA measure assesses the solution's detection *and* tracking performance and therefore
+includes both the node errors specified in DET (with identical weights) and the edge errors
+computed by the general AOGM metric. Edge error weights are as follows:
+
+* Wrong-Semantic edges are weighted 1
+* False Negative edges are weighed 1.5
+* False Positive edges are weighted 1
+
+See Track Errors for the definition of each error type.
+
+To compute the TRA score, the weighted sum of all node and edge errors in the solution (:math:`AOGM`)
+is normalized to a 0-1 value using a maximum potential error. The maximum potential error (:math: `AOGM_{0}`) is again 
+defined based on the weighted error sum of an empty solution graph i.e. assume all nodes and edges in the ground truth 
+are False Negative, and computed the weighted sum of errors on this graph.
+
+The final TRA score is therefore:
+
+.. math::
+
+    TRA = 1 - min(AOGM, AOGM_{0}) / AOGM_{0}
+
+
 AOGM
 -----------------------
