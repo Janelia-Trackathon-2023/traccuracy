@@ -14,7 +14,7 @@ from traccuracy._tracking_graph import TrackingGraph
 logger = logging.getLogger(__name__)
 
 
-def load_tiffs(data_dir):
+def _load_tiffs(data_dir):
     """Load a directory of individual frames into a stack.
 
     Args:
@@ -55,7 +55,7 @@ def _detections_from_image(stack, idx):
     return pd.DataFrame(props)
 
 
-def get_node_attributes(masks):
+def _get_node_attributes(masks):
     """Calculates x,y,z,t,label for each detection in a movie.
 
     Args:
@@ -86,7 +86,7 @@ def ctc_to_graph(df, detections):
 
     Args:
         data (pd.DataFrame): DataFrame of CTC-style info
-        detections (pd.DataFrame): Dataframe from get_node_attributes with position
+        detections (pd.DataFrame): Dataframe from _get_node_attributes with position
             and segmentation label for each cell detection
 
     Returns:
@@ -251,8 +251,8 @@ def load_ctc_data(data_dir, track_path=None, run_checks=True):
 
     tracks = pd.read_csv(track_path, header=None, sep=" ", names=names)
 
-    masks = load_tiffs(data_dir)
-    detections = get_node_attributes(masks)
+    masks = _load_tiffs(data_dir)
+    detections = _get_node_attributes(masks)
     if run_checks:
         _check_ctc(tracks, detections, masks)
 
