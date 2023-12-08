@@ -36,6 +36,7 @@ def gt_data():
     return load_ctc_data(
         os.path.join(ROOT_DIR, "downloads/Fluo-N2DL-HeLa/01_GT/TRA"),
         os.path.join(ROOT_DIR, "downloads/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt"),
+        run_checks=False,
     )
 
 
@@ -46,6 +47,7 @@ def pred_data():
         os.path.join(
             ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES/res_track.txt"
         ),
+        run_checks=False,
     )
 
 
