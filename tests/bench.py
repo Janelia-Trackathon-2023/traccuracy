@@ -3,8 +3,14 @@ import os
 import urllib.request
 import zipfile
 
+import pandas as pd
 import pytest
-from traccuracy.loaders import load_ctc_data
+from traccuracy.loaders import (
+    _check_ctc,
+    _get_node_attributes,
+    _load_tiffs,
+    load_ctc_data,
+)
 from traccuracy.matchers import CTCMatcher, IOUMatcher
 from traccuracy.metrics import CTCMetrics, DivisionMetrics
 
@@ -70,6 +76,7 @@ def test_load_gt_data(benchmark):
             "downloads/Fluo-N2DL-HeLa/01_GT/TRA",
             "downloads/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt",
         ),
+        kwargs={"run_checks": False},
         rounds=1,
         iterations=1,
     )
@@ -84,9 +91,29 @@ def test_load_pred_data(benchmark):
                 ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES/res_track.txt"
             ),
         ),
+        kwargs={"run_checks": False},
         rounds=1,
         iterations=1,
     )
+
+
+def test_ctc_checks(benchmark):
+    names = ["Cell_ID", "Start", "End", "Parent_ID"]
+
+    tracks = pd.read_csv(
+        os.path.join(
+            ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES/res_track.txt"
+        ),
+        header=None,
+        sep=" ",
+        names=names,
+    )
+
+    masks = _load_tiffs(
+        os.path.join(ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES")
+    )
+    detections = _get_node_attributes(masks)
+    benchmark(_check_ctc, tracks, detections, masks)
 
 
 def test_ctc_matched(benchmark, gt_data, pred_data):
