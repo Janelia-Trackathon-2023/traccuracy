@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1701901415538,
+  "lastUpdate": 1702208171302,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -1825,6 +1825,86 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.029693741218863617",
             "extra": "mean: 272.6475656000048 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bgallusser@googlemail.com",
+            "name": "Benjamin Gallusser",
+            "username": "bentaculum"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ad3f68d2f89ac718475111b5cb08776057760f12",
+          "message": "Add CTC format checks in loader (#119)\n\n* Add CTC format checks in loader\r\n\r\n- unique positive integer track IDs\r\n- indicated parent IDs present\r\n- parent tracklet ends before child tracklet starts (gaps possible)\r\n- masks contain all detections as indicated in tracks file, and vice versa.\r\n\r\n* Add complete object name for docs cross referencing\r\n\r\n* Update docstrings and error messages\r\n\r\n* Add soft connected component check for CTC data\r\n\r\n* Remove ctc checks in benchmarking\r\n\r\n* Expose helper functions in ctc loader\r\n\r\n* Add separate benchmark for ctc loader checks\r\n\r\n---------\r\n\r\nCo-authored-by: msschwartz21 <msschwartz21@gmail.com>",
+          "timestamp": "2023-12-10T12:34:25+01:00",
+          "tree_id": "72b3ca9e243cbe8233ee06a77fbab8b68b657308",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/ad3f68d2f89ac718475111b5cb08776057760f12"
+        },
+        "date": 1702208170897,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_data",
+            "value": 0.762385353948531,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.3116726270000072 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_data",
+            "value": 0.8637356685825222,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.1577616120000016 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks",
+            "value": 2.4750245438283627,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0037961304042288015",
+            "extra": "mean: 404.036397333338 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matched",
+            "value": 0.4426554114811742,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 2.2590935839999986 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics",
+            "value": 1.8813036641988345,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 531.5462989999844 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_div_metrics",
+            "value": 3.5590558873373035,
+            "unit": "iter/sec",
+            "range": "stddev: 0.023191451229756913",
+            "extra": "mean: 280.9733905999849 msec\nrounds: 5"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matched",
+            "value": 0.11205782058934108,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 8.923964385000005 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics",
+            "value": 3.760784196765182,
+            "unit": "iter/sec",
+            "range": "stddev: 0.03187056641937951",
+            "extra": "mean: 265.90198949999433 msec\nrounds: 4"
           }
         ]
       }
