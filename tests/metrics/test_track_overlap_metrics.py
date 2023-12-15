@@ -159,7 +159,7 @@ def test_track_overlap_metrics(data, inverse) -> None:
     )
 
     metric = TrackOverlapMetrics()
-    results = metric.compute(matched)
+    results = metric._compute(matched)
     assert results
 
     expected = data["results_with_division_edges"]
@@ -171,7 +171,7 @@ def test_track_overlap_metrics(data, inverse) -> None:
     assert results == expected, f"{data['name']} failed with division edges"
 
     metric = TrackOverlapMetrics(include_division_edges=False)
-    results = metric.compute(matched)
+    results = metric._compute(matched)
     assert results
 
     expected = data["results_without_division_edges"]

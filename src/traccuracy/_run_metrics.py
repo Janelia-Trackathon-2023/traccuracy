@@ -41,7 +41,5 @@ def run_metrics(
     results = []
     for _metric in metrics:
         result = _metric.compute(matched)
-        metric_dict = _metric.__dict__
-        metric_dict["name"] = _metric.__class__.__name__
-        results.append({"results": result, "metric": metric_dict})
+        results.append(result.to_dict())
     return results

@@ -217,18 +217,19 @@ def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame, masks: np.ndarray
             logger.warning(f"{n_components - n_labels} non-connected masks at t={t}.")
 
 
-def load_ctc_data(data_dir, track_path=None, run_checks=True):
+def load_ctc_data(data_dir, track_path=None, name=None, run_checks=True):
     """Read the CTC segmentations and track file and create TrackingData.
 
     Args:
         data_dir (str): Path to directory containing CTC tiffs.
         track_path (optional, str): Path to CTC track file. If not passed,
             finds `*_track.txt` in data_dir.
+        name (optional, str): Name of data to store in TrackingGraph
         run_checks (optional, bool): If set to `True` (default), runs checks on the data to ensure
             valid CTC format.
 
     Returns:
-        TrackingData: Object containing segmentations and TrackingGraph.
+        traccuracy.TrackingGraph: Object containing segmentations and graph.
 
     Raises:
         ValueError:
@@ -265,4 +266,4 @@ def load_ctc_data(data_dir, track_path=None, run_checks=True):
             "Consider setting `run_checks=True` for detailed error message."
         ) from e
 
-    return TrackingGraph(G, segmentation=masks)
+    return TrackingGraph(G, segmentation=masks, name=name)
