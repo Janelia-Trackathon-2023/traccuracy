@@ -62,3 +62,15 @@ The final TRA score is therefore:
 
 AOGM
 -----------------------
+
+The AOGM metric is a generalized graph measure that allows users to define their own
+error weights for each type of node and edge error. The AOGM is simply the 
+weighted sum of all errors. This means that unlike the TRA and DET metrics,
+the AOGM is **not** normalized to 0-1. The AOGM ranges between 0 (when
+the predicted solution and ground truth are identical) and infinity (because in theory
+an infinitely large predicted graph could be matched against ground truth), where
+larger numbers mean more errors.
+
+Note that the same process used to normalize TRA and DET can be used to normalize the
+generalized AOGM - once the weights are chosen, compute the error sum of an empty solution
+and use this to normalize the error sum of the predicted solution.
