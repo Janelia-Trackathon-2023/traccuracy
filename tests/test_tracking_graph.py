@@ -198,7 +198,7 @@ def test_get_connected_components(complex_graph, nx_comp1, nx_comp2):
     assert track2.graph.edges == nx_comp2.edges
 
 
-def test_get_and_set_flag_on_node(simple_graph):
+def test_set_flag_on_node(simple_graph):
     assert simple_graph.nodes()["1_0"] == {"id": "1_0", "t": 0, "y": 1, "x": 1}
     assert simple_graph.nodes()["1_1"] == {
         "id": "1_1",
@@ -244,7 +244,7 @@ def test_get_and_set_flag_on_node(simple_graph):
         simple_graph.set_flag_on_node("1_0", "x", 2)
 
 
-def test_get_and_set_flag_on_edge(simple_graph):
+def test_set_flag_on_edge(simple_graph):
     edge_id = ("1_1", "1_3")
     assert EdgeFlag.TRUE_POS not in simple_graph.edges()[edge_id]
 
