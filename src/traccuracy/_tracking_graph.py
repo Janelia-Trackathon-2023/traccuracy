@@ -110,6 +110,7 @@ class TrackingGraph:
         frame_key="t",
         label_key="segmentation_id",
         location_keys=("x", "y"),
+        name=None,
     ):
         """A directed graph representing a tracking solution where edges go
         forward in time.
@@ -137,6 +138,8 @@ class TrackingGraph:
                 graph that contains the spatial location of the node. Every
                 node must have a value stored at each of these keys.
                 Defaults to ('x', 'y').
+            name (str, optional): User specified name that will be included in result
+                outputs associated with this object
         """
         self.segmentation = segmentation
         if NodeAttr.has_value(frame_key):
@@ -158,6 +161,7 @@ class TrackingGraph:
                     "annotation. Please change the location key."
                 )
         self.location_keys = location_keys
+        self.name = name
 
         self.graph = graph
 

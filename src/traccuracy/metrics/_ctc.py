@@ -34,7 +34,7 @@ class AOGMMetrics(Metric):
             "ws": edge_ws_weight,
         }
 
-    def compute(self, data: Matched):
+    def _compute(self, data: Matched):
         evaluate_ctc_events(data)
 
         vertex_error_counts = {
@@ -86,7 +86,7 @@ class CTCMetrics(AOGMMetrics):
             edge_ws_weight=edge_weight_ws,
         )
 
-    def compute(self, data: Matched):
+    def _compute(self, data: Matched):
         # AOGM-0 is the cost of creating the gt graph from scratch
         gt_graph = data.gt_graph.graph
         n_nodes = gt_graph.number_of_nodes()
@@ -98,7 +98,7 @@ class CTCMetrics(AOGMMetrics):
                 + f" {n_edges} edges with {self.v_weights['fn']} vertex FN weight and"
                 + f" {self.e_weights['fn']} edge FN weight"
             )
-        errors = super().compute(data)
+        errors = super()._compute(data)
         aogm = errors["AOGM"]
         tra = 1 - min(aogm, aogm_0) / aogm_0
         errors["TRA"] = tra

@@ -127,12 +127,12 @@ def test_ctc_metrics(benchmark, ctc_matched):
 
     ctc_results = benchmark.pedantic(run_compute, rounds=1, iterations=1)
 
-    assert ctc_results["fn_edges"] == 87
-    assert ctc_results["fn_nodes"] == 39
-    assert ctc_results["fp_edges"] == 60
-    assert ctc_results["fp_nodes"] == 0
-    assert ctc_results["ns_nodes"] == 0
-    assert ctc_results["ws_edges"] == 47
+    assert ctc_results.results["fn_edges"] == 87
+    assert ctc_results.results["fn_nodes"] == 39
+    assert ctc_results.results["fp_edges"] == 60
+    assert ctc_results.results["fp_nodes"] == 0
+    assert ctc_results.results["ns_nodes"] == 0
+    assert ctc_results.results["ws_edges"] == 47
 
 
 def test_ctc_div_metrics(benchmark, ctc_matched):
@@ -141,9 +141,9 @@ def test_ctc_div_metrics(benchmark, ctc_matched):
 
     div_results = benchmark(run_compute)
 
-    assert div_results["Frame Buffer 0"]["False Negative Divisions"] == 18
-    assert div_results["Frame Buffer 0"]["False Positive Divisions"] == 30
-    assert div_results["Frame Buffer 0"]["True Positive Divisions"] == 76
+    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 18
+    assert div_results.results["Frame Buffer 0"]["False Positive Divisions"] == 30
+    assert div_results.results["Frame Buffer 0"]["True Positive Divisions"] == 76
 
 
 def test_iou_matched(benchmark, gt_data, pred_data):
@@ -156,6 +156,6 @@ def test_iou_div_metrics(benchmark, iou_matched):
 
     div_results = benchmark(run_compute)
 
-    assert div_results["Frame Buffer 0"]["False Negative Divisions"] == 25
-    assert div_results["Frame Buffer 0"]["False Positive Divisions"] == 31
-    assert div_results["Frame Buffer 0"]["True Positive Divisions"] == 69
+    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 25
+    assert div_results.results["Frame Buffer 0"]["False Positive Divisions"] == 31
+    assert div_results.results["Frame Buffer 0"]["True Positive Divisions"] == 69
