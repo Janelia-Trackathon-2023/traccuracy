@@ -208,6 +208,16 @@ def test_get_and_set_flag_on_node(simple_graph):
         "is_tp_division": True,
     }
 
+    simple_graph.set_flag_on_node("1_0", NodeFlag.FALSE_POS, value=True)
+    assert simple_graph.nodes()["1_0"] == {
+        "id": "1_0",
+        "t": 0,
+        "y": 1,
+        "x": 1,
+        NodeFlag.FALSE_POS: True,
+    }
+    assert "1_0" in simple_graph.nodes_by_flag[NodeFlag.FALSE_POS]
+
     simple_graph.set_flag_on_node("1_0", NodeFlag.FALSE_POS, value=False)
     assert simple_graph.nodes()["1_0"] == {
         "id": "1_0",
@@ -216,33 +226,47 @@ def test_get_and_set_flag_on_node(simple_graph):
         "x": 1,
         NodeFlag.FALSE_POS: False,
     }
-
-    simple_graph.set_flag_on_all_nodes(NodeFlag.FALSE_POS, value=False)
-    for node in simple_graph.nodes:
-        assert simple_graph.nodes[node][NodeFlag.FALSE_POS] is False
+    assert "1_0" not in simple_graph.nodes_by_flag[NodeFlag.FALSE_POS]
 
     simple_graph.set_flag_on_all_nodes(NodeFlag.FALSE_POS, value=True)
     for node in simple_graph.nodes:
         assert simple_graph.nodes[node][NodeFlag.FALSE_POS] is True
+    assert Counter(simple_graph.nodes_by_flag[NodeFlag.FALSE_POS]) == Counter(
+        list(simple_graph.nodes())
+    )
+
+    simple_graph.set_flag_on_all_nodes(NodeFlag.FALSE_POS, value=False)
+    for node in simple_graph.nodes:
+        assert simple_graph.nodes[node][NodeFlag.FALSE_POS] is False
+    assert not simple_graph.nodes_by_flag[NodeFlag.FALSE_POS]
 
     with pytest.raises(ValueError):
         simple_graph.set_flag_on_node("1_0", "x", 2)
 
 
 def test_get_and_set_flag_on_edge(simple_graph):
-    print(simple_graph.edges())
-    assert EdgeFlag.TRUE_POS not in simple_graph.edges()[("1_1", "1_3")]
+    edge_id = ("1_1", "1_3")
+    assert EdgeFlag.TRUE_POS not in simple_graph.edges()[edge_id]
 
-    simple_graph.set_flag_on_edge(("1_1", "1_3"), EdgeFlag.TRUE_POS, value=False)
-    assert simple_graph.edges()[("1_1", "1_3")][EdgeFlag.TRUE_POS] is False
+    simple_graph.set_flag_on_edge(edge_id, EdgeFlag.TRUE_POS, value=True)
+    assert simple_graph.edges()[edge_id][EdgeFlag.TRUE_POS] is True
+    assert edge_id in simple_graph.edges_by_flag[EdgeFlag.TRUE_POS]
 
-    simple_graph.set_flag_on_all_edges(EdgeFlag.FALSE_POS, value=False)
-    for edge in simple_graph.edges:
-        assert simple_graph.edges[edge][EdgeFlag.FALSE_POS] is False
+    simple_graph.set_flag_on_edge(edge_id, EdgeFlag.TRUE_POS, value=False)
+    assert simple_graph.edges()[edge_id][EdgeFlag.TRUE_POS] is False
+    assert edge_id not in simple_graph.edges_by_flag[EdgeFlag.TRUE_POS]
 
     simple_graph.set_flag_on_all_edges(EdgeFlag.FALSE_POS, value=True)
     for edge in simple_graph.edges:
         assert simple_graph.edges[edge][EdgeFlag.FALSE_POS] is True
+    assert Counter(simple_graph.edges_by_flag[EdgeFlag.FALSE_POS]) == Counter(
+        list(simple_graph.edges)
+    )
+
+    simple_graph.set_flag_on_all_edges(EdgeFlag.FALSE_POS, value=False)
+    for edge in simple_graph.edges:
+        assert simple_graph.edges[edge][EdgeFlag.FALSE_POS] is False
+    assert not simple_graph.edges_by_flag[EdgeFlag.FALSE_POS]
 
     with pytest.raises(ValueError):
         simple_graph.set_flag_on_edge(("1_1", "1_3"), "x", 2)
