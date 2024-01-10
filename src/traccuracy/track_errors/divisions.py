@@ -238,7 +238,7 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
     return new_matched
 
 
-def _evaluate_division_events(matched_data: Matched, frame_buffer=(0)):
+def _evaluate_division_events(matched_data: Matched, max_frame_buffer=0):
     """Classify division errors and correct shifted divisions according to frame_buffer
 
     Note: A copy of matched_data will be created for each frame_buffer other than 0.
@@ -247,8 +247,9 @@ def _evaluate_division_events(matched_data: Matched, frame_buffer=(0)):
     Args:
         matched_data (Matched): Matched data object containing gt and pred graphs
             with their associated mapping
-        frame_buffer (tuple, optional): Tuple of integers. Value used as n_frames
-            to tolerate in correct_shifted_divisions. Defaults to (0).
+        max_frame_buffer (int, optional): Maximum value of frame buffer to use in correcting
+            shifted divisions. Divisions will be evaluated for all integer values of frame
+            buffer between 0 and max_frame_buffer
 
     Returns:
         dict {frame_buffer: matched_data}: A dictionary where each key corresponds to a frame
@@ -262,11 +263,7 @@ def _evaluate_division_events(matched_data: Matched, frame_buffer=(0)):
     div_annotations[0] = matched_data
 
     # Correct shifted divisions for each nonzero value in frame_buffer
-    for delta in frame_buffer:
-        # Skip 0 because we used that in baseline classification
-        if delta == 0:
-            continue
-
+    for delta in range(1, max_frame_buffer + 1):
         corrected_matched = _correct_shifted_divisions(matched_data, n_frames=delta)
         div_annotations[delta] = corrected_matched
 
