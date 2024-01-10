@@ -6,7 +6,7 @@ import logging
 from collections import Counter
 from typing import TYPE_CHECKING
 
-from traccuracy._tracking_graph import NodeAttr
+from traccuracy._tracking_graph import NodeFlag
 from traccuracy._utils import find_gt_node_matches, find_pred_node_matches
 
 if TYPE_CHECKING:
@@ -62,29 +62,30 @@ def _classify_divisions(matched_data: Matched):
         pred_node = _find_gt_node_matches(gt_node)
         # No matching node so division missed
         if pred_node is None:
-            g_gt.set_node_attribute(gt_node, NodeAttr.FN_DIV, True)
+            g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV, True)
         # Check if the division has the correct daughters
         else:
-            succ_gt = g_gt.get_succs(gt_node)
+            succ_gt = g_gt.graph.successors(gt_node)
             # Map pred succ nodes onto gt, unmapped nodes will return as None
             succ_pred = [
-                _find_pred_node_matches(n) for n in g_pred.get_succs(pred_node)
+                _find_pred_node_matches(n) for n in g_pred.graph.successors(pred_node)
             ]
 
             # If daughters are same, division is correct
             if Counter(succ_gt) == Counter(succ_pred):
-                g_gt.set_node_attribute(gt_node, NodeAttr.TP_DIV, True)
-                g_pred.set_node_attribute(pred_node, NodeAttr.TP_DIV, True)
+                g_gt.set_flag_on_node(gt_node, NodeFlag.TP_DIV, True)
+                g_pred.set_flag_on_node(pred_node, NodeFlag.TP_DIV, True)
             # If daughters are at all mismatched, division is false negative
             else:
-                g_gt.set_node_attribute(gt_node, NodeAttr.FN_DIV, True)
+                g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV, True)
 
         # Remove res division to record that we have classified it
         if pred_node in div_pred:
             div_pred.remove(pred_node)
 
     # Any remaining pred divisions are false positives
-    g_pred.set_node_attribute(div_pred, NodeAttr.FP_DIV, True)
+    for fp_div in div_pred:
+        g_pred.set_flag_on_node(fp_div, NodeFlag.FP_DIV, True)
 
     # Set division annotation flag
     g_gt.division_annotations = True
@@ -106,7 +107,7 @@ def _get_pred_by_t(g, node, delta_frames):
         hashable: Node key of predecessor in target frame
     """
     for _ in range(delta_frames):
-        nodes = g.get_preds(node)
+        nodes = list(g.graph.predecessors(node))
         # Exit if there are no predecessors
         if len(nodes) == 0:
             return None
@@ -132,7 +133,7 @@ def _get_succ_by_t(g, node, delta_frames):
         hashable: Node id of successor
     """
     for _ in range(delta_frames):
-        nodes = g.get_succs(node)
+        nodes = list(g.graph.successors(node))
         # Exit if there are no successors another division
         if len(nodes) == 0 or len(nodes) >= 2:
             return None
@@ -170,8 +171,8 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
     ):
         raise ValueError("Mapping must be one-to-one")
 
-    fp_divs = g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)
-    fn_divs = g_gt.get_nodes_with_flag(NodeAttr.FN_DIV)
+    fp_divs = g_pred.get_nodes_with_flag(NodeFlag.FP_DIV)
+    fn_divs = g_gt.get_nodes_with_flag(NodeFlag.FN_DIV)
 
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
@@ -195,9 +196,9 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
             # Check if daughters match
             fp_succ = [
                 _get_succ_by_t(g_pred, node, t_fn - t_fp)
-                for node in g_pred.get_succs(fp_node)
+                for node in g_pred.graph.successors(fp_node)
             ]
-            fn_succ = g_gt.get_succs(fn_node)
+            fn_succ = g_gt.graph.successors(fn_node)
             if Counter(fp_succ) != Counter(fn_succ):
                 # Daughters don't match so division cannot match
                 continue
@@ -216,9 +217,9 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
             # Check if daughters match
             fn_succ = [
                 _get_succ_by_t(g_gt, node, t_fp - t_fn)
-                for node in g_gt.get_succs(fn_node)
+                for node in g_gt.graph.successors(fn_node)
             ]
-            fp_succ = g_pred.get_succs(fp_node)
+            fp_succ = g_pred.graph.successors(fp_node)
             if Counter(fp_succ) != Counter(fn_succ):
                 # Daughters don't match so division cannot match
                 continue
@@ -228,12 +229,12 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
 
         if correct:
             # Remove error annotations from pred graph
-            g_pred.set_node_attribute(fp_node, NodeAttr.FP_DIV, False)
-            g_gt.set_node_attribute(fn_node, NodeAttr.FN_DIV, False)
+            g_pred.set_flag_on_node(fp_node, NodeFlag.FP_DIV, False)
+            g_gt.set_flag_on_node(fn_node, NodeFlag.FN_DIV, False)
 
             # Add the tp divisions annotations
-            g_gt.set_node_attribute(fn_node, NodeAttr.TP_DIV, True)
-            g_pred.set_node_attribute(fp_node, NodeAttr.TP_DIV, True)
+            g_gt.set_flag_on_node(fn_node, NodeFlag.TP_DIV, True)
+            g_pred.set_flag_on_node(fp_node, NodeFlag.TP_DIV, True)
 
     return new_matched
 

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Hashable
+
 import numpy as np
 from tqdm import tqdm
 
@@ -46,6 +48,35 @@ def _match_nodes(gt, res, threshold=1):
     return gtcells, rescells
 
 
+def _construct_time_to_seg_id_map(
+    graph: TrackingGraph,
+) -> dict[int, dict[Hashable, Hashable]]:
+    """For each time frame in the graph, create a mapping from segmentation ids
+    (the ids in the segmentation array, stored in graph.label_key) to the
+    node ids (the ids of the TrackingGraph nodes).
+
+    Args:
+        graph(TrackingGraph): a tracking graph with a label_key on each node
+
+    Returns:
+      dict[int, dict[Hashable, Hashable]]: a dictionary from {time: {segmentation_id: node_id}}
+
+    Raises:
+        AssertionError: If two nodes in a time frame have the same segmentation_id
+    """
+    time_to_seg_id_map: dict[int, dict[Hashable, Hashable]] = {}
+    for node_id, data in graph.nodes(data=True):
+        time = data[graph.frame_key]
+        seg_id = data[graph.label_key]
+        seg_id_to_node_id_map = time_to_seg_id_map.get(time, {})
+        assert (
+            seg_id not in seg_id_to_node_id_map
+        ), f"Segmentation ID {seg_id} occurred twice in frame {time}."
+        seg_id_to_node_id_map[seg_id] = node_id
+        time_to_seg_id_map[time] = seg_id_to_node_id_map
+    return time_to_seg_id_map
+
+
 def match_iou(gt, pred, threshold=0.6):
     """Identifies pairs of cells between gt and pred that have iou > threshold
 
@@ -78,24 +109,19 @@ def match_iou(gt, pred, threshold=0.6):
     # Get overlaps for each frame
     frame_range = range(gt.start_frame, gt.end_frame)
     total = len(list(frame_range))
+
+    gt_time_to_seg_id_map = _construct_time_to_seg_id_map(gt)
+    pred_time_to_seg_id_map = _construct_time_to_seg_id_map(pred)
+
     for i, t in tqdm(enumerate(frame_range), desc="Matching frames", total=total):
         matches = _match_nodes(
             gt.segmentation[i], pred.segmentation[i], threshold=threshold
         )
-
         # Construct node id tuple for each match
-        for gt_id, pred_id in zip(*matches):
+        for gt_seg_id, pred_seg_id in zip(*matches):
             # Find node id based on time and segmentation label
-            gt_node = gt.get_nodes_with_attribute(
-                gt.label_key,
-                criterion=lambda x: x == gt_id,  # noqa
-                limit_to=gt.get_nodes_in_frame(t),
-            )[0]
-            pred_node = pred.get_nodes_with_attribute(
-                pred.label_key,
-                criterion=lambda x: x == pred_id,  # noqa
-                limit_to=pred.get_nodes_in_frame(t),
-            )[0]
+            gt_node = gt_time_to_seg_id_map[t][gt_seg_id]
+            pred_node = pred_time_to_seg_id_map[t][pred_seg_id]
             mapper.append((gt_node, pred_node))
     return mapper
 

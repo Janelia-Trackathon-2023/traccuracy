@@ -50,9 +50,9 @@ class Matcher(ABC):
         matched.matcher_info = self.info
 
         # Report matching performance
-        total_gt = len(matched.gt_graph.nodes())
+        total_gt = len(matched.gt_graph.nodes)
         matched_gt = len({m[0] for m in matched.mapping})
-        total_pred = len(matched.pred_graph.nodes())
+        total_pred = len(matched.pred_graph.nodes)
         matched_pred = len({m[1] for m in matched.mapping})
         logger.info(f"Matched {matched_gt} out of {total_gt} ground truth nodes.")
         logger.info(f"Matched {matched_pred} out of {total_pred} predicted nodes.")
