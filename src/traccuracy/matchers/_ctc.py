@@ -37,7 +37,7 @@ class CTCMatcher(Matcher):
             traccuracy.matchers.Matched: Matched data object containing the CTC mapping
 
         Raises:
-            ValueError: GT and pred segmentations must be the same shape
+            ValueError: if GT and pred segmentations are None or are not the same shape
         """
         gt = gt_graph
         pred = pred_graph
@@ -45,6 +45,9 @@ class CTCMatcher(Matcher):
         pred_label_key = pred_graph.label_key
         G_gt, mask_gt = gt, gt.segmentation
         G_pred, mask_pred = pred, pred.segmentation
+
+        if mask_gt is None or mask_pred is None:
+            raise ValueError("Segmentation is None, cannot perform matching")
 
         if mask_gt.shape != mask_pred.shape:
             raise ValueError("Segmentation shapes must match between gt and pred")

@@ -36,7 +36,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from traccuracy._tracking_graph import NodeAttr
+from traccuracy._tracking_graph import NodeFlag
 from traccuracy.track_errors.divisions import _evaluate_division_events
 
 from ._base import Metric
@@ -91,15 +91,9 @@ class DivisionMetrics(Metric):
         }
 
     def _calculate_metrics(self, g_gt, g_pred):
-        tp_division_count = len(
-            g_gt.get_nodes_with_attribute(NodeAttr.TP_DIV, lambda x: x)
-        )
-        fn_division_count = len(
-            g_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x)
-        )
-        fp_division_count = len(
-            g_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x)
-        )
+        tp_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.TP_DIV))
+        fn_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.FN_DIV))
+        fp_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.FP_DIV))
 
         try:
             recall = tp_division_count / (tp_division_count + fn_division_count)

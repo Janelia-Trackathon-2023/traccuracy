@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from traccuracy._tracking_graph import EdgeAttr, NodeAttr
+from traccuracy._tracking_graph import EdgeFlag, NodeFlag
 from traccuracy.track_errors._ctc import evaluate_ctc_events
 
 from ._base import Metric
@@ -38,14 +38,14 @@ class AOGMMetrics(Metric):
         evaluate_ctc_events(data)
 
         vertex_error_counts = {
-            "ns": len(data.pred_graph.get_nodes_with_flag(NodeAttr.NON_SPLIT)),
-            "fp": len(data.pred_graph.get_nodes_with_flag(NodeAttr.FALSE_POS)),
-            "fn": len(data.gt_graph.get_nodes_with_flag(NodeAttr.FALSE_NEG)),
+            "ns": len(data.pred_graph.get_nodes_with_flag(NodeFlag.NON_SPLIT)),
+            "fp": len(data.pred_graph.get_nodes_with_flag(NodeFlag.FALSE_POS)),
+            "fn": len(data.gt_graph.get_nodes_with_flag(NodeFlag.FALSE_NEG)),
         }
         edge_error_counts = {
-            "ws": len(data.pred_graph.get_edges_with_flag(EdgeAttr.WRONG_SEMANTIC)),
-            "fp": len(data.pred_graph.get_edges_with_flag(EdgeAttr.FALSE_POS)),
-            "fn": len(data.gt_graph.get_edges_with_flag(EdgeAttr.FALSE_NEG)),
+            "ws": len(data.pred_graph.get_edges_with_flag(EdgeFlag.WRONG_SEMANTIC)),
+            "fp": len(data.pred_graph.get_edges_with_flag(EdgeFlag.FALSE_POS)),
+            "fn": len(data.gt_graph.get_edges_with_flag(EdgeFlag.FALSE_NEG)),
         }
         error_sum = get_weighted_error_sum(
             vertex_error_counts,
