@@ -104,13 +104,13 @@ def get_edge_errors(matched_data: Matched):
         graph.set_flag_on_all_edges(EdgeFlag.INTERTRACK_EDGE, False)
 
         for parent in graph.get_divisions():
-            for daughter in graph.get_succs(parent):
+            for daughter in graph.graph.successors(parent):
                 graph.set_flag_on_edge(
                     (parent, daughter), EdgeFlag.INTERTRACK_EDGE, True
                 )
 
         for merge in graph.get_merges():
-            for parent in graph.get_preds(merge):
+            for parent in graph.graph.predecessors(merge):
                 graph.set_flag_on_edge((parent, merge), EdgeFlag.INTERTRACK_EDGE, True)
 
     # fp edges - edges in induced_graph that aren't in gt_graph

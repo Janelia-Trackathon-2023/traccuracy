@@ -166,23 +166,6 @@ def test_get_merges(merge_graph):
     assert merge_graph.get_merges() == ["3_2"]
 
 
-def test_get_preds(simple_graph, merge_graph):
-    # Division graph
-    assert simple_graph.get_preds("1_0") == []
-    assert simple_graph.get_preds("1_1") == ["1_0"]
-    assert simple_graph.get_preds("1_2") == ["1_1"]
-
-    # Merge graph
-    assert merge_graph.get_preds("3_3") == ["3_2"]
-    assert merge_graph.get_preds("3_2") == ["3_1", "3_5"]
-
-
-def test_get_succs(simple_graph):
-    assert simple_graph.get_succs("1_0") == ["1_1"]
-    assert Counter(simple_graph.get_succs("1_1")) == Counter(["1_2", "1_3"])
-    assert simple_graph.get_succs("1_2") == []
-
-
 def test_get_connected_components(complex_graph, nx_comp1, nx_comp2):
     tracks = complex_graph.get_connected_components()
     assert len(tracks) == 2

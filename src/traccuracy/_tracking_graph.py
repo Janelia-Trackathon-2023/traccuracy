@@ -302,38 +302,6 @@ class TrackingGraph:
         """
         return [node for node, degree in self.graph.in_degree() if degree >= 2]
 
-    def get_preds(self, node: Hashable) -> list[Hashable]:
-        """Get all predecessors of the given node.
-
-        A predecessor node is any node from a previous time point that has an edge to
-        the given node. In a case where merges are not allowed, each node will have a
-        maximum of one predecessor.
-
-        Args:
-            node (hashable): A node id
-
-        Returns:
-            list of hashable: A list of node ids containing all nodes that
-                have an edge to the given node.
-        """
-        return [pred for pred, _ in self.graph.in_edges(node)]
-
-    def get_succs(self, node: Hashable) -> list[Hashable]:
-        """Get all successor nodes of the given node.
-
-        A successor node is any node from a later time point that has an edge
-        from the given node.  In a case where divisions are not allowed,
-        a node will have a maximum of one successor.
-
-        Args:
-            node (hashable): A node id
-
-        Returns:
-            list of hashable: A list of node ids containing all nodes that have
-                an edge from the given node.
-        """
-        return [succ for _, succ in self.graph.out_edges(node)]
-
     def get_connected_components(self) -> list[TrackingGraph]:
         """Get a list of TrackingGraphs, each corresponding to one track
         (i.e., a connected component in the track graph).
@@ -506,7 +474,7 @@ class TrackingGraph:
         # Remove all intertrack edges from a copy of the original graph
         removed_edges = []
         for parent in self.get_divisions():
-            for daughter in self.get_succs(parent):
+            for daughter in self.graph.successors(parent):
                 graph_copy.remove_edge(parent, daughter)
                 removed_edges.append((parent, daughter))
 
