@@ -4,6 +4,7 @@ import logging
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
+import networkx as nx
 from tqdm import tqdm
 
 from traccuracy._tracking_graph import EdgeFlag, NodeFlag
@@ -87,9 +88,11 @@ def get_edge_errors(matched_data: Matched):
         logger.warning("Node errors have not been annotated. Running node annotation.")
         get_vertex_errors(matched_data)
 
-    induced_graph = comp_graph.get_subgraph(
-        comp_graph.get_nodes_with_flag(NodeFlag.TRUE_POS)
-    ).graph
+    comp_tp_nodes = comp_graph.get_nodes_with_flag(NodeFlag.TRUE_POS)
+    if len(comp_tp_nodes) == 0:
+        induced_graph = nx.DiGraph()
+    else:
+        induced_graph = comp_graph.get_subgraph(comp_tp_nodes).graph
 
     comp_graph.set_flag_on_all_edges(EdgeFlag.FALSE_POS, False)
     comp_graph.set_flag_on_all_edges(EdgeFlag.WRONG_SEMANTIC, False)
