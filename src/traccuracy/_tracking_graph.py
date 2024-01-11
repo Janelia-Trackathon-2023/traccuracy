@@ -316,13 +316,19 @@ class TrackingGraph:
         return [self.get_subgraph(g) for g in nx.weakly_connected_components(graph)]
 
     def get_subgraph(self, nodes: Iterable[Hashable]) -> TrackingGraph:
-        """Returns a new TrackingGraph with the subgraph defined by the list of nodes
+        """Returns a new TrackingGraph with the subgraph defined by the list of nodes.
 
         Args:
-            nodes (list): List of node ids to use in constructing the subgraph
-        """
+            nodes (list): A non-empty list of node ids to use in constructing the subgraph
 
+        Raises:
+            ValueError if nodes is empty
+        """
         new_graph = self.graph.subgraph(nodes).copy()
+        logger.debug(f"Subgraph has {new_graph.number_of_nodes()} nodes")
+        if new_graph.number_of_nodes() == 0:
+            raise ValueError("Cannot pass an empty set of nodes to subgraph")
+
         new_trackgraph = copy.deepcopy(self)
         new_trackgraph.graph = new_graph
         for frame, nodes_in_frame in self.nodes_by_frame.items():
@@ -330,6 +336,7 @@ class TrackingGraph:
             if new_nodes_in_frame:
                 new_trackgraph.nodes_by_frame[frame] = new_nodes_in_frame
             else:
+                logger.debug("Frame {frame} has no nodes in subgraph")
                 del new_trackgraph.nodes_by_frame[frame]
 
         for node_flag in NodeFlag:
@@ -339,7 +346,7 @@ class TrackingGraph:
         for edge_flag in EdgeFlag:
             new_trackgraph.edges_by_flag[edge_flag] = self.edges_by_flag[
                 edge_flag
-            ].intersection(nodes)
+            ].intersection(new_trackgraph.edges)
 
         new_trackgraph.start_frame = min(new_trackgraph.nodes_by_frame.keys())
         new_trackgraph.end_frame = max(new_trackgraph.nodes_by_frame.keys()) + 1
