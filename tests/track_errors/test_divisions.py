@@ -213,10 +213,10 @@ class Test_correct_shifted_divisions:
 
 def test_evaluate_division_events():
     g_gt, g_pred, mapper = get_division_graphs()
-    frame_buffer = (0, 1, 2)
+    frame_buffer = 2
 
     matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
 
-    results = _evaluate_division_events(matched_data, frame_buffer=frame_buffer)
+    results = _evaluate_division_events(matched_data, max_frame_buffer=frame_buffer)
 
     assert np.all([isinstance(k, int) for k in results.keys()])

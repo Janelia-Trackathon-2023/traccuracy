@@ -12,13 +12,13 @@ def test_DivisionMetrics():
         TrackingGraph(g_pred),
         mapper,
     )
-    frame_buffer = (0, 1, 2)
+    frame_buffer = 2
 
-    results = DivisionMetrics(frame_buffer=frame_buffer)._compute(matched)
+    results = DivisionMetrics(max_frame_buffer=frame_buffer)._compute(matched)
 
     for name, r in results.items():
         buffer = int(name[-1:])
-        assert buffer in frame_buffer
+        assert buffer in list(range(frame_buffer + 1))
         if buffer in (0, 1):
             # No corrections
             assert r["True Positive Divisions"] == 0

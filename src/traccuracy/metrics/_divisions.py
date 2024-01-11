@@ -57,14 +57,15 @@ class DivisionMetrics(Metric):
         3, 734559 (2021).
 
     Args:
-        frame_buffer (tuple(int), optional): Tuple of integers. Value used as n_frames
-            to tolerate in correct_shifted_divisions. Defaults to (0).
+        max_frame_buffer (int, optional): Maximum value of frame buffer to use in correcting
+            shifted divisions. Divisions will be evaluated for all integer values of frame
+            buffer between 0 and max_frame_buffer
     """
 
     needs_one_to_one = True
 
-    def __init__(self, frame_buffer=(0,)):
-        self.frame_buffer = frame_buffer
+    def __init__(self, max_frame_buffer=0):
+        self.frame_buffer = max_frame_buffer
 
     def _compute(self, data: Matched):
         """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer
@@ -78,7 +79,7 @@ class DivisionMetrics(Metric):
         """
         div_annotations = _evaluate_division_events(
             data,
-            frame_buffer=self.frame_buffer,
+            max_frame_buffer=self.frame_buffer,
         )
 
         return {
