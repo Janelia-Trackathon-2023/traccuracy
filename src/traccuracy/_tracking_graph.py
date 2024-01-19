@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import enum
 import logging
+from collections import defaultdict
 from typing import TYPE_CHECKING, Hashable, Iterable
 
 import networkx as nx
@@ -169,7 +170,7 @@ class TrackingGraph:
         self.graph = graph
 
         # construct dictionaries from attributes to nodes/edges for easy lookup
-        self.nodes_by_frame: dict[int, set[Hashable]] = {}
+        self.nodes_by_frame: defaultdict[int, set[Hashable]] = defaultdict(set)
         self.nodes_by_flag: dict[NodeFlag, set[Hashable]] = {
             flag: set() for flag in NodeFlag
         }
