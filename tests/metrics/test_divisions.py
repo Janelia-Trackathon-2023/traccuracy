@@ -29,3 +29,34 @@ def test_DivisionMetrics():
             assert r["True Positive Divisions"] == 1
             assert r["False Positive Divisions"] == 0
             assert r["False Negative Divisions"] == 0
+
+    # repeat with not one-to-one mapping
+
+    mapper += [
+        (mapper[0][0], mapper[1][1]),
+        (mapper[3][0], mapper[2][1]),
+    ]
+
+    matched = Matched(
+        TrackingGraph(g_gt),
+        TrackingGraph(g_pred),
+        mapper,
+    )
+
+    results = DivisionMetrics(frame_buffer=frame_buffer)._compute(matched)
+
+    for name, r in results.items():
+        buffer = int(name[-1:])
+        assert buffer in frame_buffer
+        if buffer in (0, 1):
+            # No corrections
+            assert r["True Positive Divisions"] == 0
+            assert r["False Positive Divisions"] == 1
+            assert r["False Negative Divisions"] == 1
+        else:
+            # Correction
+            assert r["True Positive Divisions"] == 0
+            assert r["False Positive Divisions"] == 1
+            assert r["False Negative Divisions"] == 1
+
+    assert False

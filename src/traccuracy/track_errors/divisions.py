@@ -3,14 +3,13 @@ from __future__ import annotations
 import copy
 import itertools
 import logging
+import numpy as np
 from collections import Counter
 from typing import TYPE_CHECKING
 
 from traccuracy._tracking_graph import NodeFlag
 from traccuracy._utils import find_gt_node_matches, find_pred_node_matches
-
-if TYPE_CHECKING:
-    from traccuracy.matchers import Matched
+from traccuracy.matchers import Matched
 
 logger = logging.getLogger(__name__)
 
@@ -36,12 +35,6 @@ def _classify_divisions(matched_data: Matched):
     if g_gt.division_annotations and g_pred.division_annotations:
         logger.info("Division annotations already present. Skipping graph annotation.")
         return
-
-    # Check that mapper is one to one
-    if len(mapper) != len({pair[0] for pair in mapper}) or len(mapper) != len(
-        {pair[1] for pair in mapper}
-    ):
-        raise ValueError("Mapping must be one-to-one")
 
     def _find_gt_node_matches(gt_node):
         match = find_gt_node_matches(mapper, gt_node)
@@ -257,6 +250,33 @@ def _evaluate_division_events(matched_data: Matched, frame_buffer=(0)):
             after division annotations and correction by frame buffer
     """
     div_annotations = {}
+
+    mapping = matched_data.mapping
+
+    # Check that mapper is one to one
+    if len(mapping) != len({pair[0] for pair in mapping}) or len(mapping) != len(
+        {pair[1] for pair in mapping}
+    ):
+        logging.warning("Mapping is not one-to-one, will delete duplicate mappings.")
+
+        map_ids = np.array(mapping)
+        gt_ids = map_ids[:, 0]
+        pred_ids = map_ids[:, 1]
+        multi_gt_ids, counts = np.unique(gt_ids, return_counts=True)
+        multi_gt_ids = set(multi_gt_ids[counts > 1])
+        multi_pred_ids, counts = np.unique(pred_ids, return_counts=True)
+        multi_pred_ids = set(multi_pred_ids[counts > 1])
+
+        mapping = [
+            pair
+            for pair in mapping
+            if pair[0] not in multi_gt_ids and pair[1] not in multi_pred_ids
+        ]
+
+        matched_data = Matched(
+            matched_data.gt_graph,
+            matched_data.pred_graph,
+            mapping)
 
     # Baseline division classification
     _classify_divisions(matched_data)
