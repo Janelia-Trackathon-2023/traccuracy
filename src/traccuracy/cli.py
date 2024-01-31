@@ -187,7 +187,7 @@ def run_divisions_on_iou(
         gt_data,
         pred_data,
         IOUMatcher(iou_threshold=match_threshold),
-        [DivisionMetrics(frame_buffer=frame_buffer_tuple)],
+        [DivisionMetrics(max_frame_buffer=frame_buffer_tuple)],
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)
@@ -242,7 +242,7 @@ def run_divisions_on_ctc(
         gt_data,
         pred_data,
         CTCMatcher(),
-        [DivisionMetrics(frame_buffer=frame_buffer_tuple)],
+        [DivisionMetrics(max_frame_buffer=frame_buffer_tuple)],
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)
