@@ -39,6 +39,7 @@ dependencies = [
     "typer",
     # numba technically optional, will still work without it
     "numba; python_version != '3.11'",
+    "pyarrow",
 ]
 
 # extras
