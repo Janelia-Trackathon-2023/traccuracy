@@ -232,22 +232,6 @@ class TrackingGraph:
         """
         return self.graph.edges
 
-    def get_nodes_in_frame(self, frame: int) -> set[Hashable]:
-        """Get the node ids of all nodes in the given frame.
-
-        Args:
-            frame (int): The frame to return all node ids for.
-                If the provided frame is outside of the range
-                (self.start_frame, self.end_frame), returns an empty iterable.
-
-        Returns:
-            Iterable[Hashable]: An iterable of node ids for all nodes in frame.
-        """
-        if frame in self.nodes_by_frame.keys():
-            return self.nodes_by_frame[frame]
-        else:
-            return set()
-
     def get_location(self, node_id: Hashable) -> list[float]:
         """Get the spatial location of the node with node_id using self.location_keys.
 
