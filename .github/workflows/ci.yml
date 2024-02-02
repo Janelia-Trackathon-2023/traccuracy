@@ -74,7 +74,7 @@ jobs:
           python -m pip install tabulate
 
       - name: Retrieve cached baseline if available
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         id: cache
         with:
           path: baseline.json
@@ -87,7 +87,7 @@ jobs:
           pytest tests/bench.py --benchmark-json baseline.json
 
       - name: Cache baseline results
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           path: baseline.json
