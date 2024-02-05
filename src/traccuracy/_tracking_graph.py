@@ -315,15 +315,10 @@ class TrackingGraph:
         """Returns a new TrackingGraph with the subgraph defined by the list of nodes.
 
         Args:
-            nodes (list): A non-empty list of node ids to use in constructing the subgraph
-
-        Raises:
-            ValueError if nodes is empty
+            nodes (list): A list of node ids to use in constructing the subgraph
         """
         new_graph = self.graph.subgraph(nodes).copy()
         logger.debug(f"Subgraph has {new_graph.number_of_nodes()} nodes")
-        if new_graph.number_of_nodes() == 0:
-            raise ValueError("Cannot pass an empty set of nodes to subgraph")
 
         new_trackgraph = copy.deepcopy(self)
         new_trackgraph.graph = new_graph

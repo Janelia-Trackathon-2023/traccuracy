@@ -191,8 +191,8 @@ def test_get_subgraph(simple_graph):
     )
 
     # test empty target nodes
-    with pytest.raises(ValueError):
-        simple_graph.get_subgraph([])
+    empty_graph = simple_graph.get_subgraph([])
+    assert Counter(empty_graph.nodes) == Counter([])
 
 
 def test_set_flag_on_node(simple_graph):
