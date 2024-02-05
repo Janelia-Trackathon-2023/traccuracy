@@ -113,8 +113,6 @@ def complex_graph(nx_comp1, nx_comp2):
 
 def test_constructor(nx_comp1):
     tracking_graph = TrackingGraph(nx_comp1)
-    assert tracking_graph.start_frame == 0
-    assert tracking_graph.end_frame == 4
     assert tracking_graph.nodes_by_frame == {
         0: {"1_0"},
         1: {"1_1"},
@@ -191,9 +189,6 @@ def test_get_subgraph(simple_graph):
     assert Counter(subgraph.edges_by_flag[EdgeFlag.TRUE_POS]) == Counter(
         [("1_0", "1_1")]
     )
-    # test that start and end frame are updated
-    assert subgraph.start_frame == 0
-    assert subgraph.end_frame == 2
 
     # test empty target nodes
     with pytest.raises(ValueError):

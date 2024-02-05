@@ -203,10 +203,6 @@ class TrackingGraph:
                 if edge_flag in attrs and attrs[edge_flag]:
                     self.edges_by_flag[edge_flag].add(edge)
 
-        # Store first and last frames for reference
-        self.start_frame = min(self.nodes_by_frame.keys())
-        self.end_frame = max(self.nodes_by_frame.keys()) + 1
-
         # Record types of annotations that have been calculated
         self.division_annotations = False
         self.node_errors = False
@@ -347,9 +343,6 @@ class TrackingGraph:
             new_trackgraph.edges_by_flag[edge_flag] = self.edges_by_flag[
                 edge_flag
             ].intersection(new_trackgraph.edges)
-
-        new_trackgraph.start_frame = min(new_trackgraph.nodes_by_frame.keys())
-        new_trackgraph.end_frame = max(new_trackgraph.nodes_by_frame.keys()) + 1
 
         return new_trackgraph
 
