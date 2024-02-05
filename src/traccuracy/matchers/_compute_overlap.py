@@ -46,6 +46,8 @@ def get_labels_with_overlap(gt_frame, res_frame):
     res_box_labels = np.asarray(
         [int(res_prop.label) for res_prop in res_props], dtype=np.uint16
     )
+    if len(gt_props) == 0 or len(res_props) == 0:
+        return [], [], []
 
     if gt_frame.ndim == 3:
         overlaps = compute_overlap_3D(gt_boxes, res_boxes)
