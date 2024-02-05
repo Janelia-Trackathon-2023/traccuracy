@@ -10,6 +10,7 @@ Definitions (Bise et al., 2011; Chen, 2021; Fukai et al., 2022):
 
 - TP is defined analogously, with T^g_j and T^p_j being swapped in the definition.
 """
+
 from __future__ import annotations
 
 from itertools import groupby, product
