@@ -133,9 +133,10 @@ def test_constructor(nx_comp1):
 
 
 def test_get_cells_by_frame(simple_graph):
-    assert Counter(simple_graph.get_nodes_in_frame(0)) == Counter({"1_0"})
-    assert Counter(simple_graph.get_nodes_in_frame(2)) == Counter(["1_2", "1_3"])
-    assert Counter(simple_graph.get_nodes_in_frame(5)) == Counter([])
+    assert Counter(simple_graph.nodes_by_frame[0]) == Counter({"1_0"})
+    assert Counter(simple_graph.nodes_by_frame[2]) == Counter(["1_2", "1_3"])
+    # Test non-existent frame
+    assert Counter(simple_graph.nodes_by_frame[5]) == Counter([])
 
 
 def test_get_nodes_with_flag(simple_graph):

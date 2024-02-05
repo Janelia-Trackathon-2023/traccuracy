@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import enum
 import logging
+from collections import defaultdict
 from typing import TYPE_CHECKING, Hashable, Iterable
 
 import networkx as nx
@@ -169,7 +170,7 @@ class TrackingGraph:
         self.graph = graph
 
         # construct dictionaries from attributes to nodes/edges for easy lookup
-        self.nodes_by_frame: dict[int, set[Hashable]] = {}
+        self.nodes_by_frame: defaultdict[int, set[Hashable]] = defaultdict(set)
         self.nodes_by_flag: dict[NodeFlag, set[Hashable]] = {
             flag: set() for flag in NodeFlag
         }
@@ -226,22 +227,6 @@ class TrackingGraph:
                 lookup.
         """
         return self.graph.edges
-
-    def get_nodes_in_frame(self, frame: int) -> set[Hashable]:
-        """Get the node ids of all nodes in the given frame.
-
-        Args:
-            frame (int): The frame to return all node ids for.
-                If the provided frame is outside of the range
-                (self.start_frame, self.end_frame), returns an empty iterable.
-
-        Returns:
-            Iterable[Hashable]: An iterable of node ids for all nodes in frame.
-        """
-        if frame in self.nodes_by_frame.keys():
-            return self.nodes_by_frame[frame]
-        else:
-            return set()
 
     def get_location(self, node_id: Hashable) -> list[float]:
         """Get the spatial location of the node with node_id using self.location_keys.
