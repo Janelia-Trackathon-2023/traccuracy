@@ -32,6 +32,7 @@ as the parent node of the early division. We repeat the process for finding daug
 of the early division, by advancing along the graph to find nodes in the same frame
 as the late division daughters.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
