@@ -204,10 +204,6 @@ class TrackingGraph:
                 if attrs.get(edge_flag):
                     self.edges_by_flag[edge_flag].add(edge)
 
-        # Store first and last frames for reference
-        self.start_frame = min(self.nodes_by_frame.keys())
-        self.end_frame = max(self.nodes_by_frame.keys()) + 1
-
         # Record types of annotations that have been calculated
         self.division_annotations = False
         self.node_errors = False
@@ -301,13 +297,14 @@ class TrackingGraph:
         return [self.get_subgraph(g) for g in nx.weakly_connected_components(graph)]
 
     def get_subgraph(self, nodes: Iterable[Hashable]) -> TrackingGraph:
-        """Returns a new TrackingGraph with the subgraph defined by the list of nodes
+        """Returns a new TrackingGraph with the subgraph defined by the list of nodes.
 
         Args:
-            nodes (list): List of node ids to use in constructing the subgraph
+            nodes (list): A list of node ids to use in constructing the subgraph
         """
-
         new_graph = self.graph.subgraph(nodes).copy()
+        logger.debug(f"Subgraph has {new_graph.number_of_nodes()} nodes")
+
         new_trackgraph = copy.deepcopy(self)
         new_trackgraph.graph = new_graph
         for frame, nodes_in_frame in self.nodes_by_frame.items():
@@ -315,6 +312,7 @@ class TrackingGraph:
             if new_nodes_in_frame:
                 new_trackgraph.nodes_by_frame[frame] = new_nodes_in_frame
             else:
+                logger.debug("Frame {frame} has no nodes in subgraph")
                 del new_trackgraph.nodes_by_frame[frame]
 
         for node_flag in NodeFlag:
@@ -324,10 +322,7 @@ class TrackingGraph:
         for edge_flag in EdgeFlag:
             new_trackgraph.edges_by_flag[edge_flag] = self.edges_by_flag[
                 edge_flag
-            ].intersection(nodes)
-
-        new_trackgraph.start_frame = min(new_trackgraph.nodes_by_frame.keys())
-        new_trackgraph.end_frame = max(new_trackgraph.nodes_by_frame.keys()) + 1
+            ].intersection(new_trackgraph.edges)
 
         return new_trackgraph
 

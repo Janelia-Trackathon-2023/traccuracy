@@ -113,8 +113,6 @@ def complex_graph(nx_comp1, nx_comp2):
 
 def test_constructor(nx_comp1):
     tracking_graph = TrackingGraph(nx_comp1)
-    assert tracking_graph.start_frame == 0
-    assert tracking_graph.end_frame == 4
     assert tracking_graph.nodes_by_frame == {
         0: {"1_0"},
         1: {"1_1"},
@@ -180,6 +178,22 @@ def test_get_connected_components(complex_graph, nx_comp1, nx_comp2):
     assert track1.graph.edges == nx_comp1.edges
     assert track2.graph.nodes == nx_comp2.nodes
     assert track2.graph.edges == nx_comp2.edges
+
+
+def test_get_subgraph(simple_graph):
+    target_nodes = ("1_0", "1_1")
+    subgraph = simple_graph.get_subgraph(target_nodes)
+    assert len(subgraph.nodes) == 2
+    assert len(subgraph.edges) == 1
+    # test that nodes_by_flag dicts are maintained
+    assert Counter(subgraph.nodes_by_flag[NodeFlag.TP_DIV]) == Counter(["1_1"])
+    assert Counter(subgraph.edges_by_flag[EdgeFlag.TRUE_POS]) == Counter(
+        [("1_0", "1_1")]
+    )
+
+    # test empty target nodes
+    empty_graph = simple_graph.get_subgraph([])
+    assert Counter(empty_graph.nodes) == Counter([])
 
 
 def test_set_flag_on_node(simple_graph):

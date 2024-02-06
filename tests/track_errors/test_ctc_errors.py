@@ -134,3 +134,53 @@ def test_assign_edge_errors_semantics():
     get_edge_errors(matched_data)
 
     assert matched_data.pred_graph.edges[("1_2", "1_3")][EdgeFlag.WRONG_SEMANTIC]
+
+
+def test_ns_vertex_fn_edge():
+    """Minimal Example of Bug when testing for FN edges with a NS Vertex
+    gt      1 - 2 - 3
+            4 - 5 - 6
+
+    comp    1 - 2
+
+    matching [ (1, 1), (4, 1), (2, 2), (5, 2) ]
+    """
+
+    gt_nodes = [
+        (1, {"t": 0, "x": 1, "y": 1}),
+        (2, {"t": 1, "x": 1, "y": 1}),
+        (3, {"t": 2, "x": 1, "y": 1}),
+        (4, {"t": 0, "x": 0, "y": 1}),
+        (5, {"t": 1, "x": 0, "y": 1}),
+        (6, {"t": 2, "x": 0, "y": 1}),
+    ]
+    gt_edges = [
+        (1, 2),
+        (2, 3),
+        (4, 5),
+        (5, 6),
+    ]
+    gt = nx.DiGraph()
+    gt.add_nodes_from(gt_nodes)
+    gt.add_edges_from(gt_edges)
+
+    comp_nodes = [
+        (1, {"t": 0, "x": 0.5, "y": 1}),
+        (2, {"t": 1, "x": 0.5, "y": 1}),
+    ]
+    comp_edges = [
+        (1, 2),
+    ]
+    comp = nx.DiGraph()
+    comp.add_nodes_from(comp_nodes)
+    comp.add_edges_from(comp_edges)
+
+    mapping = [
+        (1, 1),
+        (5, 1),
+        (2, 2),
+        (5, 2),
+    ]
+
+    matched_data = Matched(TrackingGraph(gt), TrackingGraph(comp), mapping)
+    get_edge_errors(matched_data)
