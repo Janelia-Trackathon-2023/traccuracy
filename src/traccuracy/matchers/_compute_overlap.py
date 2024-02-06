@@ -5,6 +5,7 @@ Written by Sergey Karayev
 Licensed under The MIT License [see LICENSE for details]
 Copyright (c) 2015 Microsoft
 """
+
 from typing import Tuple
 
 import numpy as np

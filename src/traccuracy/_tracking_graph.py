@@ -195,13 +195,13 @@ class TrackingGraph:
                 self.nodes_by_frame[frame].add(node)
             # store node id in nodes_by_flag mapping
             for node_flag in NodeFlag:
-                if node_flag in attrs and attrs[node_flag]:
+                if attrs.get(node_flag):
                     self.nodes_by_flag[node_flag].add(node)
 
         # store edge id in edges_by_flag
         for edge, attrs in self.graph.edges.items():
             for edge_flag in EdgeFlag:
-                if edge_flag in attrs and attrs[edge_flag]:
+                if attrs.get(edge_flag):
                     self.edges_by_flag[edge_flag].add(edge)
 
         # Record types of annotations that have been calculated
