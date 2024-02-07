@@ -6,6 +6,8 @@ from traccuracy import TrackingGraph
 from traccuracy.matchers import Matched
 from traccuracy.metrics._track_overlap import TrackOverlapMetrics, _mapping_to_dict
 
+from tests.test_utils import get_gap_close_graphs
+
 
 def add_frame(tree):
     attrs = {}
@@ -181,6 +183,19 @@ def test_track_overlap_metrics(data, inverse) -> None:
             "target_effectiveness": expected["track_purity"],
         }
     assert results == expected, f"{data['name']} failed without division edges"
+
+
+def test_track_overlap_gap_close():
+    g_gt, g_pred, mapping = get_gap_close_graphs()
+    matched = Matched(
+        TrackingGraph(g_gt),
+        TrackingGraph(g_pred),
+        mapping,
+    )
+    metric = TrackOverlapMetrics()
+    results = metric.compute(matched)
+    assert results["track_purity"] == 7 / 9
+    assert results["target_effectiveness"] == 7 / 8
 
 
 def test_mapping_to_dict():
