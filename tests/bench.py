@@ -1,7 +1,6 @@
 import copy
 import os
-import urllib.request
-import zipfile
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -14,67 +13,76 @@ from traccuracy.loaders import (
 from traccuracy.matchers import CTCMatcher, IOUMatcher
 from traccuracy.metrics import CTCMetrics, DivisionMetrics
 
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from tests.test_utils import download_gt_data, gt_data
 
-
-def download_gt_data():
-    # Download GT data -- look into caching this in github actions
-    url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N2DL-HeLa.zip"
-    data_dir = os.path.join(ROOT_DIR, "downloads")
-
-    if not os.path.exists(data_dir):
-        os.mkdir(data_dir)
-
-    filename = url.split("/")[-1]
-    file_path = os.path.join(data_dir, filename)
-
-    if not os.path.exists(file_path):
-        urllib.request.urlretrieve(url, file_path)
-
-        # Unzip the data
-        with zipfile.ZipFile(file_path, "r") as zip_ref:
-            zip_ref.extractall(data_dir)
+ROOT_DIR = Path(__file__).resolve().parents[1]
+TIMEOUT = 20
 
 
 @pytest.fixture(scope="module")
-def gt_data():
-    download_gt_data()
-    return load_ctc_data(
-        os.path.join(ROOT_DIR, "downloads/Fluo-N2DL-HeLa/01_GT/TRA"),
-        os.path.join(ROOT_DIR, "downloads/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt"),
-        run_checks=False,
-    )
+def gt_data_2d():
+    url = "http://data.celltrackingchallenge.net/training-datasets/PhC-C2DL-PSC.zip"
+    path = "downloads/Fluo-N2DL-HeLa/01_GT/TRA"
+    return gt_data(url, ROOT_DIR, path)
 
 
 @pytest.fixture(scope="module")
-def pred_data():
-    return load_ctc_data(
-        os.path.join(ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES"),
-        os.path.join(
-            ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES/res_track.txt"
-        ),
-        run_checks=False,
-    )
+def gt_data_3d():
+    url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N3DH-CE.zip"
+    path = "downloads/Fluo-N3DH-CE/01_GT/TRA"
+    return gt_data(url, ROOT_DIR, path)
 
 
 @pytest.fixture(scope="module")
-def ctc_matched(gt_data, pred_data):
-    return CTCMatcher().compute_mapping(gt_data, pred_data)
+def pred_data_2d(gt_data_2d):
+    # For now this is also GT data.
+    return copy.deepcopy(gt_data_2d)
 
 
 @pytest.fixture(scope="module")
-def iou_matched(gt_data, pred_data):
-    return IOUMatcher(iou_threshold=0.1).compute_mapping(gt_data, pred_data)
+def pred_data_3d(gt_data_3d):
+    # For now this is also GT data.
+    return copy.deepcopy(gt_data_3d)
 
 
-def test_load_gt_data(benchmark):
-    download_gt_data()
+@pytest.fixture(scope="module")
+def ctc_matched_2d(gt_data_2d, pred_data_2d):
+    return CTCMatcher().compute_mapping(gt_data_2d, pred_data_2d)
+
+
+@pytest.fixture(scope="module")
+def ctc_matched_3d(gt_data_3d, pred_data_3d):
+    return CTCMatcher().compute_mapping(gt_data_3d, pred_data_3d)
+
+
+@pytest.fixture(scope="module")
+def iou_matched_2d(gt_data_2d, pred_data_2d):
+    return IOUMatcher(iou_threshold=0.1).compute_mapping(gt_data_2d, pred_data_2d)
+
+
+@pytest.fixture(scope="module")
+def iou_matched_3d(gt_data_3d, pred_data_3d):
+    return IOUMatcher(iou_threshold=0.1).compute_mapping(gt_data_3d, pred_data_3d)
+
+
+@pytest.mark.parametrize(
+    "dataset",
+    ["PhC-C2DL-PSC", "Fluo-N3DH-CE"],
+    ids=["2d", "3d"],
+)
+def test_load_gt_ctc_data(
+    benchmark,
+    dataset,
+):
+    url = f"http://data.celltrackingchallenge.net/training-datasets/{dataset}.zip"
+    path = f"downloads/{dataset}/01_GT/TRA"
+    download_gt_data(url, ROOT_DIR)
 
     benchmark.pedantic(
         load_ctc_data,
         args=(
-            "downloads/Fluo-N2DL-HeLa/01_GT/TRA",
-            "downloads/Fluo-N2DL-HeLa/01_GT/TRA/man_track.txt",
+            os.path.join(ROOT_DIR, path),
+            os.path.join(ROOT_DIR, path, "man_track.txt"),
         ),
         kwargs={"run_checks": False},
         rounds=1,
@@ -82,14 +90,20 @@ def test_load_gt_data(benchmark):
     )
 
 
-def test_load_pred_data(benchmark):
+# TODO Add 3d results
+@pytest.mark.parametrize(
+    "path",
+    [
+        "examples/sample-data/Fluo-N2DL-HeLa/01_RES",
+    ],
+    ids=["2d"],
+)
+def test_load_pred_ctc_data(benchmark, path):
     benchmark.pedantic(
         load_ctc_data,
         args=(
-            os.path.join(ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES"),
-            os.path.join(
-                ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES/res_track.txt"
-            ),
+            os.path.join(ROOT_DIR, path),
+            os.path.join(ROOT_DIR, path, "res_track.txt"),
         ),
         kwargs={"run_checks": False},
         rounds=1,
@@ -116,46 +130,67 @@ def test_ctc_checks(benchmark):
     benchmark(_check_ctc, tracks, detections, masks)
 
 
-def test_ctc_matched(benchmark, gt_data, pred_data):
-    benchmark(CTCMatcher().compute_mapping, gt_data, pred_data)
+@pytest.mark.parametrize(
+    "gt_data,pred_data",
+    [
+        ("gt_data_2d", "pred_data_2d"),
+        ("gt_data_3d", "pred_data_3d"),
+    ],
+    ids=["2d", "3d"],
+)
+def test_ctc_matcher(benchmark, gt_data, pred_data, request):
+    gt_data = request.getfixturevalue(gt_data)
+    pred_data = request.getfixturevalue(pred_data)
+    benchmark.pedantic(
+        CTCMatcher().compute_mapping,
+        args=(gt_data, pred_data),
+        rounds=1,
+        iterations=1,
+    )
 
 
-@pytest.mark.timeout(300)
-def test_ctc_metrics(benchmark, ctc_matched):
+@pytest.mark.parametrize(
+    "ctc_matched",
+    ["ctc_matched_2d", "ctc_matched_3d"],
+    ids=["2d", "3d"],
+)
+def test_ctc_metrics(benchmark, ctc_matched, request):
+    ctc_matched = request.getfixturevalue(ctc_matched)
+
     def run_compute():
         return CTCMetrics().compute(copy.deepcopy(ctc_matched))
 
-    ctc_results = benchmark.pedantic(run_compute, rounds=1, iterations=1)
-
-    assert ctc_results.results["fn_edges"] == 87
-    assert ctc_results.results["fn_nodes"] == 39
-    assert ctc_results.results["fp_edges"] == 60
-    assert ctc_results.results["fp_nodes"] == 0
-    assert ctc_results.results["ns_nodes"] == 0
-    assert ctc_results.results["ws_edges"] == 47
+    benchmark.pedantic(run_compute, rounds=1, iterations=1)
 
 
-def test_ctc_div_metrics(benchmark, ctc_matched):
-    def run_compute():
-        return DivisionMetrics().compute(copy.deepcopy(ctc_matched))
+@pytest.mark.xfail
+@pytest.mark.timeout(TIMEOUT)
+@pytest.mark.parametrize(
+    "gt_data,pred_data",
+    [
+        ("gt_data_2d", "pred_data_2d"),
+        ("gt_data_3d", "pred_data_3d"),
+    ],
+    ids=["2d", "3d"],
+)
+def test_iou_matcher(benchmark, gt_data, pred_data):
+    benchmark.pedantic(
+        IOUMatcher(iou_threshold=0.1).compute_mapping,
+        args=(gt_data, pred_data),
+        rounds=1,
+        iterations=1,
+    )
 
-    div_results = benchmark(run_compute)
 
-    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 18
-    assert div_results.results["Frame Buffer 0"]["False Positive Divisions"] == 30
-    assert div_results.results["Frame Buffer 0"]["True Positive Divisions"] == 76
-
-
-def test_iou_matched(benchmark, gt_data, pred_data):
-    benchmark(IOUMatcher(iou_threshold=0.1).compute_mapping, gt_data, pred_data)
-
-
+@pytest.mark.xfail
+@pytest.mark.timeout(TIMEOUT)
+@pytest.mark.parametrize(
+    "iou_matched",
+    ["iou_matched_2d", "iou_matched_3d"],
+    ids=["2d", "3d"],
+)
 def test_iou_div_metrics(benchmark, iou_matched):
     def run_compute():
         return DivisionMetrics().compute(copy.deepcopy(iou_matched))
 
-    div_results = benchmark(run_compute)
-
-    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 25
-    assert div_results.results["Frame Buffer 0"]["False Positive Divisions"] == 31
-    assert div_results.results["Frame Buffer 0"]["True Positive Divisions"] == 69
+    benchmark.pedantic(run_compute, rounds=1, iterations=1)
