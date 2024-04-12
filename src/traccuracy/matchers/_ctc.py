@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import networkx as nx
 import numpy as np
 from tqdm import tqdm
 
@@ -66,21 +65,17 @@ class CTCMatcher(Matcher):
             pred_frame_nodes = pred.nodes_by_frame[t]
 
             # get the labels for this frame
-            gt_labels = dict(
-                filter(
-                    lambda item: item[0] in gt_frame_nodes,
-                    nx.get_node_attributes(G_gt.graph, gt_label_key).items(),
-                )
-            )
-            gt_label_to_id = {v: k for k, v in gt_labels.items()}
+            gt_label_to_id = {
+                G_gt.graph.nodes[node][gt_label_key]: node
+                for node in gt_frame_nodes
+                if gt_label_key in G_gt.graph.nodes[node]
+            }
 
-            pred_labels = dict(
-                filter(
-                    lambda item: item[0] in pred_frame_nodes,
-                    nx.get_node_attributes(G_pred.graph, pred_label_key).items(),
-                )
-            )
-            pred_label_to_id = {v: k for k, v in pred_labels.items()}
+            pred_label_to_id = {
+                G_pred.graph.nodes[node][pred_label_key]: node
+                for node in pred_frame_nodes
+                if pred_label_key in G_pred.graph.nodes[node]
+            }
 
             (
                 overlapping_gt_labels,
