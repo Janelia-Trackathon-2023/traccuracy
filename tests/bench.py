@@ -67,7 +67,7 @@ def iou_matched_3d(gt_data_3d, pred_data_3d):
 
 @pytest.mark.parametrize(
     "dataset",
-    ["Fluo-N2DL-HeLa", "Fluo-N3DH-CE"],
+    ["PhC-C2DL-PSC", "Fluo-N3DH-CE"],
     ids=["2d", "3d"],
 )
 def test_load_gt_ctc_data(
