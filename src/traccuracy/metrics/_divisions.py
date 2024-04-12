@@ -1,6 +1,6 @@
 """This submodule classifies division errors in tracking graphs
 
-Each division is classifed as one of the following:
+Each division is classified as one of the following:
 - true positive
 - false positive
 - false negative
@@ -13,6 +13,7 @@ Temporal tolerance for correct divisions is implemented to allow for cases in
 which the exact frame that a division event occurs is somewhat arbitrary due to
 a high frame rate or variable segmentation or detection. Consider the following
 graphs as an example::
+
     G1
                                 2_4
     1_0 -- 1_1 -- 1_2 -- 1_3 -<
@@ -32,45 +33,54 @@ of the early division, by advancing along the graph to find nodes in the same fr
 as the late division daughters.
 """
 
+from __future__ import annotations
 
-from traccuracy._tracking_graph import NodeAttr
+from typing import TYPE_CHECKING
+
+from traccuracy._tracking_graph import NodeFlag
 from traccuracy.track_errors.divisions import _evaluate_division_events
 
 from ._base import Metric
 
+if TYPE_CHECKING:
+    from traccuracy.matchers import Matched
+
 
 class DivisionMetrics(Metric):
+    """Classify division events and provide the following summary metrics
+
+    - Division Recall
+    - Division Precision
+    - Division F1 Score
+    - Mitotic Branching Correctness: TP / (TP + FP + FN) as defined by Ulicna, K.,
+        Vallardi, G., Charras, G. & Lowe, A. R. Automated deep lineage tree analysis
+        using a Bayesian single cell tracking approach. Frontiers in Computer Science
+        3, 734559 (2021).
+
+    Args:
+        max_frame_buffer (int, optional): Maximum value of frame buffer to use in correcting
+            shifted divisions. Divisions will be evaluated for all integer values of frame
+            buffer between 0 and max_frame_buffer
+    """
+
     needs_one_to_one = True
 
-    def __init__(self, matched_data, frame_buffer=(0,)):
-        """Classify division events and provide the following summary metrics
+    def __init__(self, max_frame_buffer=0):
+        self.frame_buffer = max_frame_buffer
 
-        - Division Recall
-        - Division Precision
-        - Divison F1 Score
-        - Mitotic Branching Correctness: TP / (TP + FP + FN) as defined by Ulicna, K.,
-          Vallardi, G., Charras, G. & Lowe, A. R. Automated deep lineage tree analysis
-          using a Bayesian single cell tracking approach. Frontiers in Computer Science
-          3, 734559 (2021).
+    def _compute(self, data: Matched):
+        """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer
 
         Args:
-            matched_data (Matched): Matched object for set of GT and Pred data
-                Must meet the `needs_one_to_one` critera
-            frame_buffer (tuple(int), optional): Tuple of integers. Value used as n_frames
-                to tolerate in correct_shifted_divisions. Defaults to (0).
-        """
-        self.frame_buffer = frame_buffer
-        super().__init__(matched_data)
-
-    def compute(self):
-        """Runs `_evalute_division_events` and calculates summary metrics for each frame buffer
+            matched_data (traccuracy.matchers.Matched): Matched object for set of GT and Pred data
+                Must meet the `needs_one_to_one` criteria
 
         Returns:
             dict: Returns a nested dictionary with one dictionary per frame buffer value
         """
         div_annotations = _evaluate_division_events(
-            self.data,
-            frame_buffer=self.frame_buffer,
+            data,
+            max_frame_buffer=self.frame_buffer,
         )
 
         return {
@@ -82,15 +92,9 @@ class DivisionMetrics(Metric):
         }
 
     def _calculate_metrics(self, g_gt, g_pred):
-        tp_division_count = len(
-            g_gt.get_nodes_with_attribute(NodeAttr.TP_DIV, lambda x: x)
-        )
-        fn_division_count = len(
-            g_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x)
-        )
-        fp_division_count = len(
-            g_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x)
-        )
+        tp_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.TP_DIV))
+        fn_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.FN_DIV))
+        fp_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.FP_DIV))
 
         try:
             recall = tp_division_count / (tp_division_count + fn_division_count)

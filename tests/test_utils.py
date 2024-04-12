@@ -6,6 +6,10 @@ from traccuracy._tracking_graph import TrackingGraph
 
 def get_annotated_image(img_size=256, num_labels=3, sequential=True, seed=1):
     np.random.seed(seed)
+    if num_labels == 0:
+        im = np.zeros((img_size, img_size))
+        return im.astype("int32")
+
     num_labels_act = False
     trial = 0
     while num_labels != num_labels_act:

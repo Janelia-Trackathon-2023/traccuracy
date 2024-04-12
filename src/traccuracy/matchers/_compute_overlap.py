@@ -5,6 +5,7 @@ Written by Sergey Karayev
 Licensed under The MIT License [see LICENSE for details]
 Copyright (c) 2015 Microsoft
 """
+
 from typing import Tuple
 
 import numpy as np
@@ -46,6 +47,8 @@ def get_labels_with_overlap(gt_frame, res_frame):
     res_box_labels = np.asarray(
         [int(res_prop.label) for res_prop in res_props], dtype=np.uint16
     )
+    if len(gt_props) == 0 or len(res_props) == 0:
+        return [], [], []
 
     if gt_frame.ndim == 3:
         overlaps = compute_overlap_3D(gt_boxes, res_boxes)
@@ -170,7 +173,8 @@ except ImportError:
         warnings.warn(
             "Numba not installed, falling back to slower numpy implementation. "
             "Install numba for a significant speedup.  Set the environment "
-            "variable NO_JIT_WARNING=1 to disable this warning."
+            "variable NO_JIT_WARNING=1 to disable this warning.",
+            stacklevel=2,
         )
 else:
     # compute_overlap 2d and 3d have the same signature

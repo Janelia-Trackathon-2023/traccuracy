@@ -1,8 +1,8 @@
 import networkx as nx
 import numpy as np
 import pytest
-from traccuracy import NodeAttr, TrackingGraph
-from traccuracy.matchers._matched import Matched
+from traccuracy import NodeFlag, TrackingGraph
+from traccuracy.matchers import Matched
 from traccuracy.track_errors.divisions import (
     _classify_divisions,
     _correct_shifted_divisions,
@@ -11,12 +11,7 @@ from traccuracy.track_errors.divisions import (
     _get_succ_by_t,
 )
 
-from ..test_utils import get_division_graphs
-
-
-class DummyMatched(Matched):
-    def compute_mapping(self):
-        return []
+from tests.test_utils import get_division_graphs
 
 
 @pytest.fixture
@@ -51,22 +46,19 @@ def g():
 def test_classify_divisions_tp(g):
     # Define mapper assuming all nodes match
     mapper = [(n, n) for n in g.nodes]
-    g_gt = TrackingGraph(g.copy())
-    g_pred = TrackingGraph(g.copy())
-    matched_data = DummyMatched(g_gt, g_pred)
-    matched_data.mapping = mapper
+    matched_data = Matched(TrackingGraph(g.copy()), TrackingGraph(g.copy()), mapper)
 
     # Test true positive
     _classify_divisions(matched_data)
 
-    assert len(g_gt.get_nodes_with_flag(NodeAttr.FN_DIV)) == 0
-    assert len(g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)) == 0
-    assert NodeAttr.TP_DIV in g_gt.nodes()["2_2"]
-    assert NodeAttr.TP_DIV in g_pred.nodes()["2_2"]
+    assert len(matched_data.gt_graph.get_nodes_with_flag(NodeFlag.FN_DIV)) == 0
+    assert len(matched_data.pred_graph.get_nodes_with_flag(NodeFlag.FP_DIV)) == 0
+    assert NodeFlag.TP_DIV in matched_data.gt_graph.nodes["2_2"]
+    assert NodeFlag.TP_DIV in matched_data.pred_graph.nodes["2_2"]
 
     # Check division flag
-    assert g_gt.division_annotations
-    assert g_pred.division_annotations
+    assert matched_data.gt_graph.division_annotations
+    assert matched_data.pred_graph.division_annotations
 
 
 def test_classify_divisions_fp(g):
@@ -84,17 +76,14 @@ def test_classify_divisions_fp(g):
     nx.set_node_attributes(h, {"5_3": {"t": 3, "x": 0, "y": 0}})
     mapper = [(n, n) for n in h.nodes]
 
-    g_gt = TrackingGraph(g)
-    g_pred = TrackingGraph(h)
-    matched_data = DummyMatched(g_gt, g_pred)
-    matched_data.mapping = mapper
+    matched_data = Matched(TrackingGraph(g), TrackingGraph(h), mapper)
 
     _classify_divisions(matched_data)
 
-    assert len(g_gt.get_nodes_with_flag(NodeAttr.FN_DIV)) == 0
-    assert NodeAttr.FP_DIV in g_pred.nodes()["1_2"]
-    assert NodeAttr.TP_DIV in g_gt.nodes()["2_2"]
-    assert NodeAttr.TP_DIV in g_pred.nodes()["2_2"]
+    assert len(matched_data.gt_graph.get_nodes_with_flag(NodeFlag.FN_DIV)) == 0
+    assert NodeFlag.FP_DIV in matched_data.pred_graph.nodes["1_2"]
+    assert NodeFlag.TP_DIV in matched_data.gt_graph.nodes["2_2"]
+    assert NodeFlag.TP_DIV in matched_data.pred_graph.nodes["2_2"]
 
 
 def test_classify_divisions_fn(g):
@@ -107,16 +96,13 @@ def test_classify_divisions_fn(g):
     h.remove_nodes_from(["3_3", "4_3"])
     mapper = [(n, n) for n in h.nodes]
 
-    g_gt = TrackingGraph(g)
-    g_pred = TrackingGraph(h)
-    matched_data = DummyMatched(g_gt, g_pred)
-    matched_data.mapping = mapper
+    matched_data = Matched(TrackingGraph(g), TrackingGraph(h), mapper)
 
     _classify_divisions(matched_data)
 
-    assert len(g_pred.get_nodes_with_flag(NodeAttr.FP_DIV)) == 0
-    assert len(g_gt.get_nodes_with_flag(NodeAttr.TP_DIV)) == 0
-    assert NodeAttr.FN_DIV in g_gt.nodes()["2_2"]
+    assert len(matched_data.pred_graph.get_nodes_with_flag(NodeFlag.FP_DIV)) == 0
+    assert len(matched_data.gt_graph.get_nodes_with_flag(NodeFlag.TP_DIV)) == 0
+    assert NodeFlag.FN_DIV in matched_data.gt_graph.nodes["2_2"]
 
 
 @pytest.fixture
@@ -174,67 +160,63 @@ class Test_correct_shifted_divisions:
     def test_no_change(self):
         # Early division in gt
         g_pred, g_gt, mapper = get_division_graphs()
-        g_gt.nodes["1_1"][NodeAttr.FN_DIV] = True
-        g_pred.nodes["1_3"][NodeAttr.FP_DIV] = True
+        g_gt.nodes["1_1"][NodeFlag.FN_DIV] = True
+        g_pred.nodes["1_3"][NodeFlag.FP_DIV] = True
 
-        matched_data = DummyMatched(TrackingGraph(g_gt), TrackingGraph(g_pred))
-        matched_data.mapping = mapper
+        matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
 
         # buffer of 1, no change
         new_matched = _correct_shifted_divisions(matched_data, n_frames=1)
         ng_pred = new_matched.pred_graph
         ng_gt = new_matched.gt_graph
 
-        assert ng_pred.nodes()["1_3"][NodeAttr.FP_DIV] is True
-        assert ng_gt.nodes()["1_1"][NodeAttr.FN_DIV] is True
-        assert len(ng_gt.get_nodes_with_flag(NodeAttr.TP_DIV)) == 0
+        assert ng_pred.nodes["1_3"][NodeFlag.FP_DIV] is True
+        assert ng_gt.nodes["1_1"][NodeFlag.FN_DIV] is True
+        assert len(ng_gt.get_nodes_with_flag(NodeFlag.TP_DIV)) == 0
 
     def test_fn_early(self):
         # Early division in gt
         g_pred, g_gt, mapper = get_division_graphs()
-        g_gt.nodes["1_1"][NodeAttr.FN_DIV] = True
-        g_pred.nodes["1_3"][NodeAttr.FP_DIV] = True
+        g_gt.nodes["1_1"][NodeFlag.FN_DIV] = True
+        g_pred.nodes["1_3"][NodeFlag.FP_DIV] = True
 
-        matched_data = DummyMatched(TrackingGraph(g_gt), TrackingGraph(g_pred))
-        matched_data.mapping = mapper
+        matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
 
         # buffer of 3, corrections
         new_matched = _correct_shifted_divisions(matched_data, n_frames=3)
         ng_pred = new_matched.pred_graph
         ng_gt = new_matched.gt_graph
 
-        assert ng_pred.nodes()["1_3"][NodeAttr.FP_DIV] is False
-        assert ng_gt.nodes()["1_1"][NodeAttr.FN_DIV] is False
-        assert ng_pred.nodes()["1_3"][NodeAttr.TP_DIV] is True
-        assert ng_gt.nodes()["1_1"][NodeAttr.TP_DIV] is True
+        assert ng_pred.nodes["1_3"][NodeFlag.FP_DIV] is False
+        assert ng_gt.nodes["1_1"][NodeFlag.FN_DIV] is False
+        assert ng_pred.nodes["1_3"][NodeFlag.TP_DIV] is True
+        assert ng_gt.nodes["1_1"][NodeFlag.TP_DIV] is True
 
     def test_fp_early(self):
         # Early division in pred
         g_gt, g_pred, mapper = get_division_graphs()
-        g_pred.nodes["1_1"][NodeAttr.FP_DIV] = True
-        g_gt.nodes["1_3"][NodeAttr.FN_DIV] = True
+        g_pred.nodes["1_1"][NodeFlag.FP_DIV] = True
+        g_gt.nodes["1_3"][NodeFlag.FN_DIV] = True
 
-        matched_data = DummyMatched(TrackingGraph(g_gt), TrackingGraph(g_pred))
-        matched_data.mapping = mapper
+        matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
 
         # buffer of 3, corrections
         new_matched = _correct_shifted_divisions(matched_data, n_frames=3)
         ng_pred = new_matched.pred_graph
         ng_gt = new_matched.gt_graph
 
-        assert ng_pred.nodes()["1_1"][NodeAttr.FP_DIV] is False
-        assert ng_gt.nodes()["1_3"][NodeAttr.FN_DIV] is False
-        assert ng_pred.nodes()["1_1"][NodeAttr.TP_DIV] is True
-        assert ng_gt.nodes()["1_3"][NodeAttr.TP_DIV] is True
+        assert ng_pred.nodes["1_1"][NodeFlag.FP_DIV] is False
+        assert ng_gt.nodes["1_3"][NodeFlag.FN_DIV] is False
+        assert ng_pred.nodes["1_1"][NodeFlag.TP_DIV] is True
+        assert ng_gt.nodes["1_3"][NodeFlag.TP_DIV] is True
 
 
 def test_evaluate_division_events():
     g_gt, g_pred, mapper = get_division_graphs()
-    frame_buffer = (0, 1, 2)
+    frame_buffer = 2
 
-    matched_data = DummyMatched(TrackingGraph(g_gt), TrackingGraph(g_pred))
-    matched_data.mapping = mapper
+    matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
 
-    results = _evaluate_division_events(matched_data, frame_buffer=frame_buffer)
+    results = _evaluate_division_events(matched_data, max_frame_buffer=frame_buffer)
 
     assert np.all([isinstance(k, int) for k in results.keys()])

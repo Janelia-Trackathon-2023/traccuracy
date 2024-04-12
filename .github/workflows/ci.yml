@@ -9,6 +9,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # check-manifest:
   #   runs-on: ubuntu-latest
@@ -22,30 +26,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         platform: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache-dependency-path: "pyproject.toml"
           cache: "pip"
 
-      # if running a cron job, we add the --pre flag to test against pre-releases
       - name: Install dependencies
         run: |
           python -m pip install -U pip
           python -m pip install -e .[test]
 
       - name: Test
-        run: pytest --color=yes #--cov --cov-report=xml --cov-report=term-missing
+        run: pytest --color=yes --cov --cov-report=xml --cov-report=term-missing
 
-      # - name: Coverage
-      #   uses: codecov/codecov-action@v3
+      - name: Coverage
+        uses: codecov/codecov-action@v4
 
   benchmark:
     name: Benchmark
@@ -53,12 +56,12 @@ jobs:
     if: github.event_name == 'pull_request'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 50 # this is to make sure we obtain the target base commit
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
           cache-dependency-path: "pyproject.toml"
@@ -71,7 +74,7 @@ jobs:
           python -m pip install tabulate
 
       - name: Retrieve cached baseline if available
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         id: cache
         with:
           path: baseline.json
@@ -84,7 +87,7 @@ jobs:
           pytest tests/bench.py --benchmark-json baseline.json
 
       - name: Cache baseline results
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           path: baseline.json
@@ -114,7 +117,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 

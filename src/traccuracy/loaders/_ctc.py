@@ -1,17 +1,20 @@
 import glob
+import logging
 import os
 
 import networkx as nx
 import numpy as np
 import pandas as pd
-from skimage.measure import regionprops_table
+from skimage.measure import label, regionprops_table
 from tifffile import imread
 from tqdm import tqdm
 
 from traccuracy._tracking_graph import TrackingGraph
 
+logger = logging.getLogger(__name__)
 
-def load_tiffs(data_dir):
+
+def _load_tiffs(data_dir):
     """Load a directory of individual frames into a stack.
 
     Args:
@@ -52,7 +55,7 @@ def _detections_from_image(stack, idx):
     return pd.DataFrame(props)
 
 
-def get_node_attributes(masks):
+def _get_node_attributes(masks):
     """Calculates x,y,z,t,label for each detection in a movie.
 
     Args:
@@ -83,14 +86,11 @@ def ctc_to_graph(df, detections):
 
     Args:
         data (pd.DataFrame): DataFrame of CTC-style info
-        detections (pd.DataFrame): Dataframe from get_node_attributes with position
+        detections (pd.DataFrame): Dataframe from _get_node_attributes with position
             and segmentation label for each cell detection
 
     Returns:
         networkx.Graph: Graph representation of the CTC data.
-
-    Raises:
-        ValueError: If the Parent_ID is not in any previous frames.
     """
     edges = []
 
@@ -157,19 +157,84 @@ def ctc_to_graph(df, detections):
     return G
 
 
-def load_ctc_data(data_dir, track_path=None):
+def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame, masks: np.ndarray):
+    """Sanity checks for valid CTC format.
+
+    Hard checks (throws exception):
+    - Tracklet IDs in tracks file must be unique and positive
+    - Parent tracklet IDs must exist in the tracks file
+    - Intertracklet edges must be directed forward in time.
+    - In each time point, the set of segmentation IDs present in the detections must equal the set
+    of tracklet IDs in the tracks file that overlap this time point.
+
+    Soft checks (prints warning):
+    - No duplicate tracklet IDs (non-connected pixels with same ID) in a single timepoint.
+
+    Args:
+        tracks (pd.DataFrame): Tracks in CTC format with columns Cell_ID, Start, End, Parent_ID.
+        detections (pd.DataFrame): Detections extracted from masks, containing columns
+            segmentation_id, t.
+        masks (np.ndarray): Set of masks with time in the first axis.
+    Raises:
+        ValueError: If any of the hard checks fail.
+    """
+    logger.info("Running CTC format checks")
+    if tracks["Cell_ID"].min() < 1:
+        raise ValueError("Cell_IDs in tracks file must be positive integers.")
+    if len(tracks["Cell_ID"]) < len(tracks["Cell_ID"].unique()):
+        raise ValueError("Cell_IDs in tracks file must be unique integers.")
+
+    for _, row in tracks.iterrows():
+        if row["Parent_ID"] != 0:
+            if row["Parent_ID"] not in tracks["Cell_ID"].values:
+                raise ValueError(
+                    f"Parent_ID {row['Parent_ID']} is not present in tracks."
+                )
+            parent_end = tracks[tracks["Cell_ID"] == row["Parent_ID"]]["End"].iloc[0]
+            if parent_end >= row["Start"]:
+                raise ValueError(
+                    f"Invalid tracklet connection: Daughter tracklet with ID {row['Cell_ID']} "
+                    f"starts at t={row['Start']}, "
+                    f"but parent tracklet with ID {row['Parent_ID']} only ends at t={parent_end}."
+                )
+
+    for t in range(tracks["Start"].min(), tracks["End"].max()):
+        track_ids = set(
+            tracks[(tracks["Start"] <= t) & (tracks["End"] >= t)]["Cell_ID"]
+        )
+        det_ids = set(detections[(detections["t"] == t)]["segmentation_id"])
+        if not track_ids.issubset(det_ids):
+            raise ValueError(f"Missing IDs in masks at t={t}: {track_ids - det_ids}")
+        if not det_ids.issubset(track_ids):
+            raise ValueError(
+                f"IDs {det_ids - track_ids} at t={t} not represented in tracks file."
+            )
+
+    for t, frame in enumerate(masks):
+        _, n_components = label(frame, return_num=True)
+        n_labels = len(detections[detections["t"] == t])
+        if n_labels < n_components:
+            logger.warning(f"{n_components - n_labels} non-connected masks at t={t}.")
+
+
+def load_ctc_data(data_dir, track_path=None, name=None, run_checks=True):
     """Read the CTC segmentations and track file and create TrackingData.
 
     Args:
         data_dir (str): Path to directory containing CTC tiffs.
         track_path (optional, str): Path to CTC track file. If not passed,
-        finds '*_track.txt' in data_dir.
+            finds `*_track.txt` in data_dir.
+        name (optional, str): Name of data to store in TrackingGraph
+        run_checks (optional, bool): If set to `True` (default), runs checks on the data to ensure
+            valid CTC format.
 
     Returns:
-        TrackingData: Object containing segmentations and TrackingGraph.
+        traccuracy.TrackingGraph: Object containing segmentations and graph.
 
     Raises:
-        ValueError: If the Parent_ID is not in any previous frames.
+        ValueError:
+            If `run_checks` is True, whenever any of the CTC format checks are violated.
+            If `run_checks` is False, whenever any other Exception occurs while creating the graph.
     """
     names = ["Cell_ID", "Start", "End", "Parent_ID"]
     if not track_path:
@@ -187,9 +252,18 @@ def load_ctc_data(data_dir, track_path=None):
 
     tracks = pd.read_csv(track_path, header=None, sep=" ", names=names)
 
-    masks = load_tiffs(data_dir)
-    detections = get_node_attributes(masks)
+    masks = _load_tiffs(data_dir)
+    detections = _get_node_attributes(masks)
+    if run_checks:
+        _check_ctc(tracks, detections, masks)
 
-    G = ctc_to_graph(tracks, detections)
+    try:
+        G = ctc_to_graph(tracks, detections)
+    except BaseException as e:
+        logger.error(e)
+        raise ValueError(
+            "Error in converting CTC to graph. "
+            "Consider setting `run_checks=True` for detailed error message."
+        ) from e
 
-    return TrackingGraph(G, segmentation=masks)
+    return TrackingGraph(G, segmentation=masks, name=name)

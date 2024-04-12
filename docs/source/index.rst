@@ -1,4 +1,5 @@
-.. mdinclude:: ../../README.md
+.. include:: ../../README.md
+   :parser: myst_parser.sphinx_
 
 .. toctree::
    :maxdepth: 2
@@ -12,5 +13,5 @@
    :hidden:
    :caption: Traccuracy API:
 
-   autoapi/traccuracy/index
+   autoapi/index
    cli
