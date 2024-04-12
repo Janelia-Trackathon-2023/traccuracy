@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1707235448672,
+  "lastUpdate": 1712929723322,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -2705,6 +2705,86 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.03383164648810717",
             "extra": "mean: 258.773581749999 msec\nrounds: 4"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bgallusser@googlemail.com",
+            "name": "Benjamin Gallusser",
+            "username": "bentaculum"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "46b99883e335eee0b0ded2c7175e5bdc7762d81f",
+          "message": "Speed up CTCMatcher (#148)\n\nFor obtaining single-frame segmentation-label to node id mappings, it is faster (notably for larger graphs) to only get the node attribute dictionaries for the nodes present in the needed frame.\r\n\r\nFor example for PhC-C2DL-PSC, this leads to a ~3x speedup for matching.",
+          "timestamp": "2024-04-12T15:46:56+02:00",
+          "tree_id": "065817d39a8805f84a096c09d030dc2e37e92c79",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/46b99883e335eee0b0ded2c7175e5bdc7762d81f"
+        },
+        "date": 1712929722954,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_data",
+            "value": 0.7676735823431816,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.302636984000003 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_data",
+            "value": 0.8544514512767277,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.170341508000007 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks",
+            "value": 2.1789482993136433,
+            "unit": "iter/sec",
+            "range": "stddev: 0.02193829959276365",
+            "extra": "mean: 458.937001999999 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matched",
+            "value": 0.5772179143945814,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.7324479629999985 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics",
+            "value": 1.8240717159041004,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 548.2240589999776 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_div_metrics",
+            "value": 3.6875063593352624,
+            "unit": "iter/sec",
+            "range": "stddev: 0.03367711156809014",
+            "extra": "mean: 271.18597299999436 msec\nrounds: 4"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matched",
+            "value": 0.11710340885176387,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 8.539461060999997 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics",
+            "value": 3.639406451458339,
+            "unit": "iter/sec",
+            "range": "stddev: 0.041310574731282836",
+            "extra": "mean: 274.7700794999943 msec\nrounds: 4"
           }
         ]
       }
