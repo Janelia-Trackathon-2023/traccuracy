@@ -1,8 +1,49 @@
+import os
+from pathlib import Path
+
+import pytest
 from traccuracy import TrackingGraph
-from traccuracy.matchers import Matched
+from traccuracy.loaders import load_ctc_data
+from traccuracy.matchers import CTCMatcher, IOUMatcher, Matched
 from traccuracy.metrics._divisions import DivisionMetrics
 
-from tests.test_utils import get_division_graphs
+from tests.test_utils import get_division_graphs, gt_data
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+
+
+@pytest.fixture(scope="module")
+def gt_hela():
+    url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N2DL-HeLa.zip"
+    path = "downloads/Fluo-N2DL-HeLa/01_GT/TRA"
+    return gt_data(url, ROOT_DIR, path)
+
+
+@pytest.fixture(scope="module")
+def pred_hela():
+    path = "examples/sample-data/Fluo-N2DL-HeLa/01_RES"
+    return load_ctc_data(
+        os.path.join(ROOT_DIR, path),
+        os.path.join(ROOT_DIR, path, "res_track.txt"),
+    )
+
+
+def test_ctc_div_metrics(gt_hela, pred_hela):
+    ctc_matched = CTCMatcher().compute_mapping(gt_hela, pred_hela)
+    div_results = DivisionMetrics().compute(ctc_matched)
+
+    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 18
+    assert div_results.results["Frame Buffer 0"]["False Positive Divisions"] == 30
+    assert div_results.results["Frame Buffer 0"]["True Positive Divisions"] == 76
+
+
+def test_iou_div_metrics(gt_hela, pred_hela):
+    iou_matched = IOUMatcher(iou_threshold=0.1).compute_mapping(gt_hela, pred_hela)
+    div_results = DivisionMetrics().compute(iou_matched)
+
+    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 25
+    assert div_results.results["Frame Buffer 0"]["False Positive Divisions"] == 31
+    assert div_results.results["Frame Buffer 0"]["True Positive Divisions"] == 69
 
 
 def test_DivisionMetrics():
