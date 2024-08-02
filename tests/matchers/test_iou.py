@@ -60,7 +60,7 @@ def test__match_nodes():
     # Check for direct match
     assert (1, 3) in matches
     # Check that only one of the merge matches is present
-    assert (2, 4) in matches or (2, 5) in matches
+    assert ((2, 4) in matches) != ((2, 5) in matches)
 
 
 def test__construct_time_to_seg_id_map():
