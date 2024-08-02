@@ -311,7 +311,6 @@ class TrackingGraph:
             nodes (list): A list of node ids to use in constructing the subgraph
         """
         new_graph = self.graph.subgraph(nodes).copy()
-        logger.debug(f"Subgraph has {new_graph.number_of_nodes()} nodes")
 
         new_trackgraph = copy.deepcopy(self)
         new_trackgraph.graph = new_graph
@@ -320,7 +319,6 @@ class TrackingGraph:
             if new_nodes_in_frame:
                 new_trackgraph.nodes_by_frame[frame] = new_nodes_in_frame
             else:
-                logger.debug("Frame {frame} has no nodes in subgraph")
                 del new_trackgraph.nodes_by_frame[frame]
 
         for node_flag in NodeFlag:
