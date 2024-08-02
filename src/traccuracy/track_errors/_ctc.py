@@ -141,8 +141,12 @@ def get_edge_errors(matched_data: Matched):
             gt_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_NEG, True)
             continue
 
-        source_comp_id = gt_comp_mapping[source]
-        target_comp_id = gt_comp_mapping[target]
+        source_comp_id = gt_comp_mapping.get(source, None)
+        target_comp_id = gt_comp_mapping.get(target, None)
+
+        if source_comp_id is None or target_comp_id is None:
+            gt_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_NEG, True)
+            continue
 
         expected_comp_edge = (source_comp_id, target_comp_id)
         if expected_comp_edge not in induced_graph.edges:
