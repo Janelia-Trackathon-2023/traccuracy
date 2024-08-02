@@ -12,7 +12,7 @@ from ._base import Matched, Matcher
 from ._compute_overlap import get_labels_with_overlap
 
 
-def _match_nodes(gt, res, threshold=0.5, one_to_one=False, unmapped_cost=4):
+def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
     """Identify overlapping objects according to IoU and a threshold for minimum overlap.
 
     QUESTION: Does this rely on sequential segmentation labels
@@ -25,8 +25,6 @@ def _match_nodes(gt, res, threshold=0.5, one_to_one=False, unmapped_cost=4):
             For imperfect segmentations try 0.6-0.8 to get better matching
         one_to_one (optional, bool): If True, forces the mapping to be one-to-one by running
             linear assignment on the thresholded iou array. Default False.
-        unmapped_cost (float, optional): Cost of an unassigned cell.
-            Lower values leads to more unassigned cells. Defaults to 4.
 
     Returns:
         gtcells (np arr): Array of overlapping ids in the gt frame.
@@ -44,7 +42,7 @@ def _match_nodes(gt, res, threshold=0.5, one_to_one=False, unmapped_cost=4):
         iou[iou_gt_idx, iou_res_idx] = intersection.sum() / union.sum()
 
     if one_to_one:
-        pairs = _one_to_one_assignment(iou, unmapped_cost=unmapped_cost)
+        pairs = _one_to_one_assignment(iou)
     else:
         pairs = np.where(iou >= threshold)
 
@@ -132,7 +130,7 @@ def _construct_time_to_seg_id_map(
     return time_to_seg_id_map
 
 
-def match_iou(gt, pred, threshold=0.6, one_to_one=False, unmapped_cost=4):
+def match_iou(gt, pred, threshold=0.6, one_to_one=False):
     """Identifies pairs of cells between gt and pred that have iou > threshold
 
     This can return more than one match for any node
@@ -145,8 +143,6 @@ def match_iou(gt, pred, threshold=0.6, one_to_one=False, unmapped_cost=4):
         threshold (float, optional): Minimum IoU for matching cells. Defaults to 0.6.
         one_to_one (optional, bool): If True, forces the mapping to be one-to-one by running
             linear assignment on the thresholded iou array. Default False.
-        unmapped_cost (float, optional): Cost of an unassigned cell.
-            Lower values leads to more unassigned cells. Defaults to 4.
 
     Returns:
         list[(gt_node, pred_node)]: list of tuples where each tuple contains a gt node and pred node
@@ -178,7 +174,6 @@ def match_iou(gt, pred, threshold=0.6, one_to_one=False, unmapped_cost=4):
             pred.segmentation[i],
             threshold=threshold,
             one_to_one=one_to_one,
-            unmapped_cost=unmapped_cost,
         )
         # Construct node id tuple for each match
         for gt_seg_id, pred_seg_id in zip(*matches):
@@ -198,14 +193,11 @@ class IOUMatcher(Matcher):
         iou_threshold (float, optional): Minimum IoU value to assign a match. Defaults to 0.6.
         one_to_one (optional, bool): If True, forces the mapping to be one-to-one by running
             linear assignment on the thresholded iou array. Default False.
-        unmapped_cost (float, optional): Cost of an unassigned cell.
-            Lower values leads to more unassigned cells. Defaults to 4.
     """
 
-    def __init__(self, iou_threshold=0.6, one_to_one=False, unmapped_cost=4):
+    def __init__(self, iou_threshold=0.6, one_to_one=False):
         self.iou_threshold = iou_threshold
         self.one_to_one = one_to_one
-        self.unmapped_cost = unmapped_cost
 
     def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Computes IOU mapping for a set of grpahs
