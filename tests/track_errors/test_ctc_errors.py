@@ -183,4 +183,27 @@ def test_ns_vertex_fn_edge():
     ]
 
     matched_data = Matched(TrackingGraph(gt), TrackingGraph(comp), mapping)
+    get_vertex_errors(matched_data)
     get_edge_errors(matched_data)
+
+    print("Computed)")
+
+    for node in comp.nodes:
+        print(node, comp.nodes[node])
+        assert comp.nodes[node][NodeFlag.NON_SPLIT]
+    for edge in comp_edges:
+        print(edge, comp.edges[edge])
+        assert comp.edges[edge][EdgeFlag.FALSE_POS]
+
+    print("GT")
+    for node in [1, 2, 4, 5]:
+        print(node, gt.nodes[node])
+        assert gt.nodes[node][NodeFlag.NON_SPLIT]
+
+    for node in [3, 6]:
+        print(node, gt.nodes[node])
+        assert gt.nodes[node][NodeFlag.FALSE_NEG]
+
+    for edge in gt_edges:
+        print(edge, gt.edges[edge])
+        assert gt.edges[edge][EdgeFlag.FALSE_NEG]
