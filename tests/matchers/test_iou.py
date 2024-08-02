@@ -12,6 +12,28 @@ from traccuracy.matchers._iou import (
 from tests.test_utils import get_annotated_image, get_movie_with_graph
 
 
+def get_two_to_one(w, h, imw, imh):
+    """Basic two cell merge/split
+
+    Mapping [(1,3), (2,4), (2,5)]
+
+    """
+    x = np.random.randint(2, imw - w * 2)
+    y = np.random.randint(2, imh - h * 2)
+
+    merge = np.zeros((imw, imh))
+    merge[0:2, 0:2] = 1
+    merge[x : x + w, y : y + h] = 2
+    merge[x + w : x + 2 * w, y : y + h] = 2
+
+    split = np.zeros((imw, imh))
+    split[0:2, 0:2] = 3
+    split[x : x + w, y : y + h] = 4
+    split[x + w : x + 2 * w, y : y + h] = 5
+
+    return merge.astype("int"), split.astype("int")
+
+
 def test__match_nodes():
     # creat dummy image to test against
     num_labels = 5
@@ -24,6 +46,21 @@ def test__match_nodes():
     # test different movies (no assertions about matching)
     y2 = get_annotated_image(img_size=256, num_labels=num_labels, seed=10)
     gtcells, rescells = _match_nodes(y1, y2)
+
+    # Test for merge without forcing one to one
+    im1, im2 = get_two_to_one(10, 10, 30, 30)
+    gtcells, rescells = _match_nodes(im1, im2, threshold=0.4)
+    for gt_cell, res_cell in zip(gtcells, rescells):
+        assert (int(gt_cell), int(res_cell)) in [(1, 3), (2, 4), (2, 5)]
+
+    # Test for merge and force one to one
+    gtcells, rescells = _match_nodes(im1, im2, threshold=0.4, one_to_one=True)
+    # Create match tuples
+    matches = list(zip(gtcells, rescells))
+    # Check for direct match
+    assert (1, 3) in matches
+    # Check that only one of the merge matches is present
+    assert ((2, 4) in matches) != ((2, 5) in matches)
 
 
 def test__construct_time_to_seg_id_map():
