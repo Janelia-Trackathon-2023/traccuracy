@@ -54,9 +54,7 @@ def test__match_nodes():
         assert (int(gt_cell), int(res_cell)) in [(1, 3), (2, 4), (2, 5)]
 
     # Test for merge and force one to one
-    gtcells, rescells = _match_nodes(
-        im1, im2, threshold=0.4, one_to_one=True, unmapped_cost=4
-    )
+    gtcells, rescells = _match_nodes(im1, im2, threshold=0.4, one_to_one=True)
     # Create match tuples
     matches = list(zip(gtcells, rescells))
     # Check for direct match
