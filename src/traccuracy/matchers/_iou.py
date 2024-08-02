@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Hashable
 
 import numpy as np
+from scipy.optimize import linear_sum_assignment
 from tqdm import tqdm
 
 from traccuracy._tracking_graph import TrackingGraph
@@ -11,7 +12,7 @@ from ._base import Matched, Matcher
 from ._compute_overlap import get_labels_with_overlap
 
 
-def _match_nodes(gt, res, threshold=1):
+def _match_nodes(gt, res, threshold=0.5, one_to_one=False, unmapped_cost=4):
     """Identify overlapping objects according to IoU and a threshold for minimum overlap.
 
     QUESTION: Does this rely on sequential segmentation labels
@@ -22,6 +23,11 @@ def _match_nodes(gt, res, threshold=1):
         threshold (optional, float): threshold value for IoU to count as same cell. Default 1.
             If segmentations are identical, 1 works well.
             For imperfect segmentations try 0.6-0.8 to get better matching
+        one_to_one (optional, bool): If True, forces the mapping to be one-to-one by running
+            linear assignment on the thresholded iou array. Default False.
+        unmapped_cost (float, optional): Cost of an unassigned cell.
+            Lower values leads to more unassigned cells. Defaults to 4.
+
     Returns:
         gtcells (np arr): Array of overlapping ids in the gt frame.
         rescells (np arr): Array of overlapping ids in the res frame.
@@ -37,7 +43,10 @@ def _match_nodes(gt, res, threshold=1):
         union = np.logical_or(gt == iou_gt_idx, res == iou_res_idx)
         iou[iou_gt_idx, iou_res_idx] = intersection.sum() / union.sum()
 
-    pairs = np.where(iou >= threshold)
+    if one_to_one:
+        pairs = _one_to_one_assignment(iou, unmapped_cost=unmapped_cost)
+    else:
+        pairs = np.where(iou >= threshold)
 
     # Catch the case where there are no overlaps
     if len(pairs) < 2:
@@ -46,6 +55,52 @@ def _match_nodes(gt, res, threshold=1):
         gtcells, rescells = pairs[0], pairs[1]
 
     return gtcells, rescells
+
+
+def _one_to_one_assignment(iou, unmapped_cost=4):
+    """Perform linear assignment on the iou matrix to create a one-to-one
+    mapping
+
+    Args:
+        iou (np.array): Array containing thresholded iou values
+        unmapped_cost (float, optional): Cost of an unassigned cell.
+            Lower values leads to more unassigned cells. Defaults to 4.
+
+    Returns:
+        tuple: Tuple of two arrays, one for indices of each axis
+    """
+    # Determine number of objects in zeroth and first axis
+    # Exclude the background which is currently included in iou matrix
+    n0 = iou.shape[0] - 1
+    n1 = iou.shape[1] - 1
+    n_obj = n0 + n1
+    matrix = np.ones((n_obj, n_obj))
+
+    # Assign 1 - iou to top left and bottom right
+    cost = 1 - iou[1:, 1:]
+    matrix[:n0, :n1] = cost
+    matrix[n_obj - n1 :, n_obj - n0 :] = cost.T
+
+    # Calculate diagonal corners
+    bl = unmapped_cost * np.eye(n1) + np.ones((n1, n1)) - np.eye(n1)
+    tr = unmapped_cost * np.eye(n0) + np.ones((n0, n0)) - np.eye(n0)
+
+    # Assign diagonals to cm
+    matrix[n_obj - n1 :, :n1] = bl
+    matrix[:n0, n_obj - n0 :] = tr
+
+    results = linear_sum_assignment(matrix)
+
+    # Map results back to cost matrix
+    assignment_matrix = np.zeros_like(matrix)
+    assignment_matrix[results] = 1
+
+    # Pull out only the direct matches from the top left corner
+    matches = np.nonzero(assignment_matrix[:n0, :n1])
+
+    # Add 1 to all indices to correct for removing the background previously
+    matches = (matches[0] + 1, matches[1] + 1)
+    return matches
 
 
 def _construct_time_to_seg_id_map(
@@ -77,7 +132,7 @@ def _construct_time_to_seg_id_map(
     return time_to_seg_id_map
 
 
-def match_iou(gt, pred, threshold=0.6):
+def match_iou(gt, pred, threshold=0.6, one_to_one=False, unmapped_cost=4):
     """Identifies pairs of cells between gt and pred that have iou > threshold
 
     This can return more than one match for any node
@@ -88,6 +143,10 @@ def match_iou(gt, pred, threshold=0.6):
         gt (traccuracy.TrackingGraph): Tracking data object containing graph and segmentations
         pred (traccuracy.TrackingGraph): Tracking data object containing graph and segmentations
         threshold (float, optional): Minimum IoU for matching cells. Defaults to 0.6.
+        one_to_one (optional, bool): If True, forces the mapping to be one-to-one by running
+            linear assignment on the thresholded iou array. Default False.
+        unmapped_cost (float, optional): Cost of an unassigned cell.
+            Lower values leads to more unassigned cells. Defaults to 4.
 
     Returns:
         list[(gt_node, pred_node)]: list of tuples where each tuple contains a gt node and pred node
@@ -115,7 +174,11 @@ def match_iou(gt, pred, threshold=0.6):
 
     for i, t in tqdm(enumerate(frame_range), desc="Matching frames", total=total):
         matches = _match_nodes(
-            gt.segmentation[i], pred.segmentation[i], threshold=threshold
+            gt.segmentation[i],
+            pred.segmentation[i],
+            threshold=threshold,
+            one_to_one=one_to_one,
+            unmapped_cost=unmapped_cost,
         )
         # Construct node id tuple for each match
         for gt_seg_id, pred_seg_id in zip(*matches):
@@ -133,10 +196,16 @@ class IOUMatcher(Matcher):
 
     Args:
         iou_threshold (float, optional): Minimum IoU value to assign a match. Defaults to 0.6.
+        one_to_one (optional, bool): If True, forces the mapping to be one-to-one by running
+            linear assignment on the thresholded iou array. Default False.
+        unmapped_cost (float, optional): Cost of an unassigned cell.
+            Lower values leads to more unassigned cells. Defaults to 4.
     """
 
-    def __init__(self, iou_threshold=0.6):
+    def __init__(self, iou_threshold=0.6, one_to_one=False, unmapped_cost=4):
         self.iou_threshold = iou_threshold
+        self.one_to_one = one_to_one
+        self.unmapped_cost = unmapped_cost
 
     def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Computes IOU mapping for a set of grpahs
@@ -157,6 +226,11 @@ class IOUMatcher(Matcher):
                 "Segmentation data must be provided for both gt and pred data"
             )
 
-        mapping = match_iou(gt_graph, pred_graph, threshold=self.iou_threshold)
+        mapping = match_iou(
+            gt_graph,
+            pred_graph,
+            threshold=self.iou_threshold,
+            one_to_one=self.one_to_one,
+        )
 
         return Matched(gt_graph, pred_graph, mapping)
