@@ -79,9 +79,12 @@ def _one_to_one_assignment(iou, unmapped_cost=4):
     matrix[:n0, :n1] = cost
     matrix[n_obj - n1 :, n_obj - n0 :] = cost.T
 
-    # Calculate diagonal corners
-    bl = unmapped_cost * np.eye(n1) + np.ones((n1, n1)) - np.eye(n1)
-    tr = unmapped_cost * np.eye(n0) + np.ones((n0, n0)) - np.eye(n0)
+    # Calculate unassigned corners, with base cost of 10*unmapped cost
+    # Diagonals are set to unmapped_cost
+    bl = np.full((n1, n1), unmapped_cost * 10)
+    np.fill_diagonal(bl, unmapped_cost)
+    tr = np.full((n0, n0), unmapped_cost * 10)
+    np.fill_diagonal(tr, unmapped_cost)
 
     # Assign diagonals to cm
     matrix[n_obj - n1 :, :n1] = bl
