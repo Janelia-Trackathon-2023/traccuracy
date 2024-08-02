@@ -88,7 +88,7 @@ def get_edge_errors(matched_data: Matched):
         get_vertex_errors(matched_data)
 
     comp_tp_nodes = comp_graph.get_nodes_with_flag(NodeFlag.TRUE_POS)
-    induced_graph = comp_graph.graph.subgraph(comp_tp_nodes)
+    induced_graph = comp_graph.get_subgraph(comp_tp_nodes).graph
 
     comp_graph.set_flag_on_all_edges(EdgeFlag.FALSE_POS, False)
     comp_graph.set_flag_on_all_edges(EdgeFlag.WRONG_SEMANTIC, False)
