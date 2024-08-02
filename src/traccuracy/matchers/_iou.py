@@ -107,13 +107,13 @@ def match_iou(gt, pred, threshold=0.6):
         raise ValueError("Segmentation shapes must match between gt and pred")
 
     # Get overlaps for each frame
-    gt_frames = sorted(gt.nodes_by_frame.keys())
-    total = len(gt_frames)
+    frame_range = range(gt.start_frame, gt.end_frame)
+    total = len(list(frame_range))
 
     gt_time_to_seg_id_map = _construct_time_to_seg_id_map(gt)
     pred_time_to_seg_id_map = _construct_time_to_seg_id_map(pred)
 
-    for i, t in tqdm(enumerate(gt_frames), desc="Matching frames", total=total):
+    for i, t in tqdm(enumerate(frame_range), desc="Matching frames", total=total):
         matches = _match_nodes(
             gt.segmentation[i], pred.segmentation[i], threshold=threshold
         )

@@ -54,10 +54,9 @@ class CTCMatcher(Matcher):
 
         mapping = []
         # Get overlaps for each frame
-        gt_frames = sorted(gt.nodes_by_frame.keys())
         for i, t in enumerate(
             tqdm(
-                gt_frames,
+                range(gt.start_frame, gt.end_frame),
                 desc="Matching frames",
             )
         ):
