@@ -52,8 +52,11 @@ class CTCMatcher(Matcher):
         if mask_gt.shape != mask_pred.shape:
             raise ValueError("Segmentation shapes must match between gt and pred")
 
-        mapping = []
+        mapping: list[tuple] = []
         # Get overlaps for each frame
+        if gt.start_frame is None or gt.end_frame is None:
+            return Matched(gt_graph, pred_graph, mapping)
+
         for i, t in enumerate(
             tqdm(
                 range(gt.start_frame, gt.end_frame),
