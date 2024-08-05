@@ -30,6 +30,8 @@ def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
         gtcells (np arr): Array of overlapping ids in the gt frame.
         rescells (np arr): Array of overlapping ids in the res frame.
     """
+    if threshold == 0.0 and not one_to_one:
+        raise ValueError("Threshold of 0 is not valid unless one_to_one is True")
     iou = np.zeros((np.max(gt) + 1, np.max(res) + 1))
 
     overlapping_gt_labels, overlapping_res_labels, _ = get_labels_with_overlap(gt, res)
