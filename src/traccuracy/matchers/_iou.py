@@ -41,12 +41,14 @@ def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
         iou_res_idx = overlapping_res_labels[index]
         intersection = np.logical_and(gt == iou_gt_idx, res == iou_res_idx)
         union = np.logical_or(gt == iou_gt_idx, res == iou_res_idx)
-        iou[iou_gt_idx, iou_res_idx] = intersection.sum() / union.sum()
+        iou_value = intersection.sum() / union.sum()
+        if iou_value >= threshold:
+            iou[iou_gt_idx, iou_res_idx] = iou_value
 
     if one_to_one:
         pairs = _one_to_one_assignment(iou)
     else:
-        pairs = np.where(iou >= threshold)
+        pairs = np.where(iou)
 
     # Catch the case where there are no overlaps
     if len(pairs) < 2:
