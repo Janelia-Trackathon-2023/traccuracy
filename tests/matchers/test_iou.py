@@ -78,22 +78,26 @@ def test__match_nodes():
     # Check that only one of the merge matches is present
     assert ((2, 4) in matches) != ((2, 5) in matches)
 
+    with pytest.raises(ValueError):
+        # Test that threshold 0 is not valid when not one-to-one
+        gtcells, rescells = _match_nodes(im1, im2, threshold=0.0)
+
 
 def test__match_nodes_threshold():
     im1, im2 = get_two_to_one(10, 10, 30, 30)
     # Test high threshold
-    gtcells, rescells = _match_nodes(im1, im2, threshold=0.7)
+    gtcells, rescells = _match_nodes(im1, im2, threshold=1)
     # Create match tuples
     matches = list(zip(gtcells, rescells))
     # Check that nothing is matched
-    assert len(matches) == 0
+    assert len(matches) == 1
 
     # Test for high threshold and one to one
     gtcells, rescells = _match_nodes(im1, im2, threshold=0.7, one_to_one=True)
     # Create match tuples
     matches = list(zip(gtcells, rescells))
     # Check that nothing is matched
-    assert len(matches) == 0
+    assert len(matches) == 1
 
 
 def test__match_nodes_non_sequential():
@@ -101,8 +105,8 @@ def test__match_nodes_non_sequential():
 
     im1, im2 = get_no_overlap(30, 30)
 
-    # Test that phantom segmentations are not matched, even with threshold 0
-    gtcells, rescells = _match_nodes(im1, im2, threshold=0.0)
+    # Test that phantom segmentations are not matched
+    gtcells, rescells = _match_nodes(im1, im2, threshold=0.1)
     # Create match tuples
     matches = list(zip(gtcells, rescells))
     # Check that nothing is matched
