@@ -80,6 +80,8 @@ def _one_to_one_assignment(iou, unmapped_cost=4):
 
     # Assign 1 - iou to top left and bottom right
     cost = 1 - iou[1:, 1:]
+    # increase the cost for those with no IOU to higher than the unmapped cost
+    cost[cost == 1] = unmapped_cost + 1
     matrix[:n0, :n1] = cost
     matrix[n_obj - n1 :, n_obj - n0 :] = cost.T
 
