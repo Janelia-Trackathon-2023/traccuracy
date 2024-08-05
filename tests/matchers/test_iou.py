@@ -34,6 +34,22 @@ def get_two_to_one(w, h, imw, imh):
     return merge.astype("int"), split.astype("int")
 
 
+def get_no_overlap(imw, imh):
+    """two non-overlapping segmentations that start at high number labels
+
+    Mapping []
+
+    """
+
+    im1 = np.zeros((imw, imh))
+    im1[0:2, 0:2] = 100
+
+    im2 = np.zeros((imw, imh))
+    im2[4:6, 4:6] = 222
+
+    return im1.astype("int"), im2.astype("int")
+
+
 def test__match_nodes():
     # creat dummy image to test against
     num_labels = 5
@@ -61,6 +77,44 @@ def test__match_nodes():
     assert (1, 3) in matches
     # Check that only one of the merge matches is present
     assert ((2, 4) in matches) != ((2, 5) in matches)
+
+
+def test__match_nodes_threshold():
+    im1, im2 = get_two_to_one(10, 10, 30, 30)
+    # Test high threshold
+    gtcells, rescells = _match_nodes(im1, im2, threshold=0.7)
+    # Create match tuples
+    matches = list(zip(gtcells, rescells))
+    # Check that nothing is matched
+    assert len(matches) == 0
+
+    # Test for high threshold and one to one
+    gtcells, rescells = _match_nodes(im1, im2, threshold=0.7, one_to_one=True)
+    # Create match tuples
+    matches = list(zip(gtcells, rescells))
+    # Check that nothing is matched
+    assert len(matches) == 0
+
+
+def test__match_nodes_non_sequential():
+    # test when the segmentation ids are high numbers (the lower numbers should never appear)
+
+    im1, im2 = get_no_overlap(30, 30)
+
+    # Test that phantom segmentations are not matched, even with threshold 0
+    gtcells, rescells = _match_nodes(im1, im2, threshold=0.0)
+    # Create match tuples
+    matches = list(zip(gtcells, rescells))
+    # Check that nothing is matched
+    assert len(matches) == 0
+
+    # Test that with one-to-one, phantom segmentations are not matched,
+    # even with threshold 0
+    gtcells, rescells = _match_nodes(im1, im2, threshold=0.0, one_to_one=True)
+    # Create match tuples
+    matches = list(zip(gtcells, rescells))
+    # Check that nothing is matched
+    assert len(matches) == 0
 
 
 def test__construct_time_to_seg_id_map():
