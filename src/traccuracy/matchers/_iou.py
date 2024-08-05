@@ -30,7 +30,10 @@ def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
         gtcells (np arr): Array of overlapping ids in the gt frame.
         rescells (np arr): Array of overlapping ids in the res frame.
     """
-    iou = np.zeros((np.max(gt) + 1, np.max(res) + 1))
+    if threshold == 0.0 and not one_to_one:
+        raise ValueError("Threshold of 0 is not valid unless one_to_one is True")
+    # casting to int to avoid issue #152 (result is float with numpy<2, dtype=uint64)
+    iou = np.zeros((int(np.max(gt) + 1), int(np.max(res) + 1)))
 
     overlapping_gt_labels, overlapping_res_labels, _ = get_labels_with_overlap(gt, res)
 
@@ -39,12 +42,14 @@ def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
         iou_res_idx = overlapping_res_labels[index]
         intersection = np.logical_and(gt == iou_gt_idx, res == iou_res_idx)
         union = np.logical_or(gt == iou_gt_idx, res == iou_res_idx)
-        iou[iou_gt_idx, iou_res_idx] = intersection.sum() / union.sum()
+        iou_value = intersection.sum() / union.sum()
+        if iou_value >= threshold:
+            iou[iou_gt_idx, iou_res_idx] = iou_value
 
     if one_to_one:
         pairs = _one_to_one_assignment(iou)
     else:
-        pairs = np.where(iou >= threshold)
+        pairs = np.where(iou)
 
     # Catch the case where there are no overlaps
     if len(pairs) < 2:
@@ -76,6 +81,8 @@ def _one_to_one_assignment(iou, unmapped_cost=4):
 
     # Assign 1 - iou to top left and bottom right
     cost = 1 - iou[1:, 1:]
+    # increase the cost for those with no IOU to higher than the unmapped cost
+    cost[cost == 1] = unmapped_cost + 1
     matrix[:n0, :n1] = cost
     matrix[n_obj - n1 :, n_obj - n0 :] = cost.T
 
