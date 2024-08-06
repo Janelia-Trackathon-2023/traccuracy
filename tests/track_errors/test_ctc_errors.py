@@ -191,6 +191,7 @@ def test_ns_vertex_fn_edge():
     for edge in comp_edges:
         assert not comp.edges[edge][EdgeFlag.FALSE_POS]
 
+    # https://github.com/Janelia-Trackathon-2023/traccuracy/pull/141#issuecomment-2265990197
     if False:  # TODO: Fix this in a separate PR
         for node in [1, 2, 4, 5]:
             assert gt.nodes[node][NodeFlag.FALSE_NEG]
