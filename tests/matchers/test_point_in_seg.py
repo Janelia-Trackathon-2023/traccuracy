@@ -1,18 +1,17 @@
 import networkx as nx
-import numpy as np
 import pytest
 from skimage.measure import regionprops
 from traccuracy._tracking_graph import TrackingGraph
-from traccuracy.matchers._iou import (
-    IOUMatcher,
-    _construct_time_to_seg_id_map,
-    match_iou,
+from traccuracy.matchers._point_in_seg import (
+    GTPointInSegMatcher,
+    PredPointInSegMatcher,
+    match_point_in_seg,
 )
 
 from tests.test_utils import get_annotated_image, get_movie_with_graph
 
 
-def test__points_to_seg():
+def test_match_point_in_seg():
     # creat dummy image to test against
     num_labels = 5
     y1 = get_annotated_image(img_size=256, num_labels=num_labels, seed=1)
@@ -24,9 +23,9 @@ def test__points_to_seg():
         node_id = i
         attrs = {"t": t}
         pos_labels = ["y", "x"]
+        centroid = regionprop.centroid  # [z,] y, x
         for label, value in zip(pos_labels, centroid):
             attrs[label] = value
-        centroid = regionprop.centroid  # [z,] y, x
         pred_graph.add_node(node_id, **attrs)
 
     # remove one node
@@ -34,7 +33,7 @@ def test__points_to_seg():
     pred_graph.remove_node(to_remove)
 
     # duplicate one node
-    to_dup = list(pred_graph.nodes)[0]
+    to_dup = next(iter(pred_graph.nodes))
     data_to_dup = {
         "t": pred_graph.nodes[to_dup]["t"],
         "y": pred_graph.nodes[to_dup]["y"],
@@ -46,41 +45,12 @@ def test__points_to_seg():
     # TODO
 
 
-def test__construct_time_to_seg_id_map():
+def test_match_point_in_seg_2d():
     # Test 2d data
     n_frames = 3
     n_labels = 3
     track_graph = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
-    time_to_seg_id_map = _construct_time_to_seg_id_map(track_graph)
-    for t in range(n_frames):
-        for i in range(1, n_labels):
-            assert time_to_seg_id_map[t][i] == f"{i}_{t}"
-
-    # Test 3d data
-    track_graph = get_movie_with_graph(ndims=4, n_frames=n_frames, n_labels=n_labels)
-    time_to_seg_id_map = _construct_time_to_seg_id_map(track_graph)
-    for t in range(n_frames):
-        for i in range(1, n_labels):
-            assert time_to_seg_id_map[t][i] == f"{i}_{t}"
-
-
-def test_match_iou():
-    # Bad input
-    with pytest.raises(ValueError):
-        match_iou("not tracking data", "not tracking data")
-
-    # shapes don't match
-    with pytest.raises(ValueError):
-        match_iou(
-            TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10))),
-            TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5))),
-        )
-
-    # Test 2d data
-    n_frames = 3
-    n_labels = 3
-    track_graph = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
-    mapper = match_iou(
+    mapper = match_point_in_seg(
         track_graph,
         track_graph,
     )
@@ -91,9 +61,13 @@ def test_match_iou():
     for pair in mapper:
         assert pair[0] == pair[1]
 
+
+def test_match_point_in_seg_3d():
     # Check 3d data
+    n_frames = 3
+    n_labels = 3
     track_graph = get_movie_with_graph(ndims=4, n_frames=n_frames, n_labels=n_labels)
-    mapper = match_iou(
+    mapper = match_point_in_seg(
         track_graph,
         track_graph,
     )
@@ -105,30 +79,45 @@ def test_match_iou():
         assert pair[0] == pair[1]
 
 
-class TestIOUMatched:
-    def test__init__(self):
-        # No segmentation
-        track_graph = get_movie_with_graph()
-        data = TrackingGraph(track_graph.graph)
+def test_gt_point_in_seg_matcher():
+    matcher = GTPointInSegMatcher()
 
-        matcher = IOUMatcher()
+    n_frames = 3
+    n_labels = 3
+    seg_track_graph = get_movie_with_graph(
+        ndims=4, n_frames=n_frames, n_labels=n_labels
+    )
+    points_track_graph = TrackingGraph(seg_track_graph.graph)
+    with pytest.raises(ValueError):
+        # pass in seg as GT and points as prediction
+        matcher.compute_mapping(seg_track_graph, points_track_graph)
 
-        with pytest.raises(ValueError):
-            matcher.compute_mapping(data, data)
+    matched = matcher.compute_mapping(points_track_graph, seg_track_graph)
 
-    def test_compute_mapping(self):
-        # Test 2d data
-        n_frames = 3
-        n_labels = 3
-        track_graph = get_movie_with_graph(
-            ndims=3, n_frames=n_frames, n_labels=n_labels
-        )
+    # Check for correct number of pairs
+    assert len(matched.mapping) == n_frames * n_labels
+    # gt and pred node should be the same
+    for pair in matched.mapping:
+        assert pair[0] == pair[1]
 
-        matcher = IOUMatcher()
-        matched = matcher.compute_mapping(gt_graph=track_graph, pred_graph=track_graph)
 
-        # Check for correct number of pairs
-        assert len(matched.mapping) == n_frames * n_labels
-        # gt and pred node should be the same
-        for pair in matched.mapping:
-            assert pair[0] == pair[1]
+def test_pred_point_in_seg_matcher():
+    matcher = PredPointInSegMatcher()
+
+    n_frames = 3
+    n_labels = 3
+    seg_track_graph = get_movie_with_graph(
+        ndims=4, n_frames=n_frames, n_labels=n_labels
+    )
+    points_track_graph = TrackingGraph(seg_track_graph.graph)
+    with pytest.raises(ValueError):
+        # pass in seg as pred and points as GT
+        matcher.compute_mapping(points_track_graph, seg_track_graph)
+
+    matched = matcher.compute_mapping(seg_track_graph, points_track_graph)
+
+    # Check for correct number of pairs
+    assert len(matched.mapping) == n_frames * n_labels
+    # gt and pred node should be the same
+    for pair in matched.mapping:
+        assert pair[0] == pair[1]

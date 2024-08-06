@@ -90,6 +90,9 @@ def get_movie_with_graph(ndims=3, n_frames=3, n_labels=3):
     # Extend to 3d if needed
     if ndims == 4:
         movie = np.stack([movie, movie, movie], axis=-1)
+        location_keys = ("z", "y", "x")
+    else:
+        location_keys = ("y", "x")
 
     # We can assume each object is present and connected across each frame
     G = nx.DiGraph()
@@ -106,7 +109,7 @@ def get_movie_with_graph(ndims=3, n_frames=3, n_labels=3):
             attrs[f"{i}_{t}"] = a
     nx.set_node_attributes(G, attrs)
 
-    return TrackingGraph(G, segmentation=movie)
+    return TrackingGraph(G, segmentation=movie, location_keys=location_keys)
 
 
 def get_division_graphs():
