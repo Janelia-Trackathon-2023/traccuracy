@@ -39,7 +39,6 @@ def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
         gt, res, overlap="iou"
     )
 
-    # for index in range(len(overlapping_gt_labels)):
     for gt_label, res_label, iou_val in zip(
         overlapping_gt_labels, overlapping_res_labels, ious
     ):
