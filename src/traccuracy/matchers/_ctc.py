@@ -84,7 +84,7 @@ class CTCMatcher(Matcher):
                 overlapping_gt_labels,
                 overlapping_pred_labels,
                 intersection,
-            ) = get_labels_with_overlap(gt_frame, pred_frame)
+            ) = get_labels_with_overlap(gt_frame, pred_frame, overlap="iogt")
 
             for i in range(len(overlapping_gt_labels)):
                 gt_label = overlapping_gt_labels[i]
