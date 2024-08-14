@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1722964457263,
+  "lastUpdate": 1723644120955,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -3345,6 +3345,86 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.03871818738033638",
             "extra": "mean: 268.6922562500058 msec\nrounds: 4"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "bgallusser@googlemail.com",
+            "name": "Benjamin Gallusser",
+            "username": "bentaculum"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4160403789bc4401e954cc28783da608efdf7df3",
+          "message": "Speed up IoU Matcher (#156)\n\nThis commit brings the speed ups already in place in the CTC matcher to\r\nthe IoU matcher. It calculates the IoU on local crops instead of full\r\nlabel images.",
+          "timestamp": "2024-08-14T16:00:27+02:00",
+          "tree_id": "b12dbf5c41b7b5dc30efc482c65a33e705a71676",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/4160403789bc4401e954cc28783da608efdf7df3"
+        },
+        "date": 1723644120108,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_data",
+            "value": 0.8158418213373478,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.2257277990000262 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_data",
+            "value": 0.8555035693127526,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.168902194999987 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks",
+            "value": 2.3352539247813224,
+            "unit": "iter/sec",
+            "range": "stddev: 0.003393657288788132",
+            "extra": "mean: 428.21895699999385 msec\nrounds: 3"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matched",
+            "value": 0.565760838510801,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.767531316999964 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics",
+            "value": 1.8380180768710448,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 544.0642899999943 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_div_metrics",
+            "value": 3.6921428489220736,
+            "unit": "iter/sec",
+            "range": "stddev: 0.03599064605093471",
+            "extra": "mean: 270.84542524998767 msec\nrounds: 4"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matched",
+            "value": 0.556811103034329,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.7959411990000262 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics",
+            "value": 3.4834677244844765,
+            "unit": "iter/sec",
+            "range": "stddev: 0.038155637820505746",
+            "extra": "mean: 287.07026420001966 msec\nrounds: 5"
           }
         ]
       }
