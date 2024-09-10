@@ -1,5 +1,9 @@
+from typing import Any
+
 import numpy as np
+import pytest
 from skimage.draw import disk
+from skimage.measure import regionprops
 
 
 def make_one_cell_2d(
@@ -125,8 +129,7 @@ def make_split_cell_3d(
 
 
 ### CANONICAL 2D SEGMENTATION EXAMPLES ###
-
-
+@pytest.fixture()
 def good_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     """A pretty good (but not perfect) pair of segmentations in 2d.
 
@@ -140,6 +143,7 @@ def good_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
+@pytest.fixture()
 def false_positive_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt is empty and the prediction has a
     single cell.
@@ -153,6 +157,7 @@ def false_positive_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
+@pytest.fixture()
 def false_negative_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has a single cell and the
     prediction is empty.
@@ -166,6 +171,7 @@ def false_negative_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
+@pytest.fixture()
 def oversegmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has a single cell and the prediction
     splits that into two cells.
@@ -180,6 +186,7 @@ def oversegmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
+@pytest.fixture()
 def undersegmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has two cells and the prediction
     merges them into one circular cell.
@@ -195,8 +202,7 @@ def undersegmentation_2d() -> tuple[np.ndarray, np.ndarray]:
 
 
 ### CANONICAL 3D SEGMENTATION EXAMPLES ###
-
-
+@pytest.fixture()
 def good_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pretty good (but not perfect) pair of segmentations in 3d.
 
@@ -210,6 +216,7 @@ def good_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
+@pytest.fixture
 def false_positive_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt is empty and the prediction has a
     single cell.
@@ -223,6 +230,7 @@ def false_positive_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
+@pytest.fixture()
 def false_negative_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has a single cell and the
     prediction is empty.
@@ -236,6 +244,7 @@ def false_negative_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
+@pytest.fixture()
 def oversegmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has a single cell and the prediction
     splits that into two cells.
@@ -250,6 +259,7 @@ def oversegmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
+@pytest.fixture()
 def undersegmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has two cells and the prediction
     merges them into one circular cell.
@@ -262,3 +272,47 @@ def undersegmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     gt = make_split_cell_3d(labels=(1, 2), center=(16, 16, 16), radius=9)
     pred = make_one_cell_3d(label=3, center=(16, 16, 16), radius=9)
     return gt, pred
+
+
+def nodes_from_segmentation(
+    seg: np.ndarray,
+    frame: int,
+    pos_keys=("y", "x"),
+    frame_key="t",
+    label_key="label_id",
+) -> dict[Any, dict]:
+    """Extract candidate nodes from a segmentation. Also computes specified attributes.
+    Returns a networkx graph with only nodes, and also a dictionary from frames to
+    node_ids for efficient edge adding.
+
+    Args:
+        segmentation (np.ndarray): A numpy array with integer labels, representing one time
+            frame.
+        frame (int): The time frame of this array. Used for making node ids and
+            for populating the attributes dict.
+        pos_keys (tuple[str]): The attribute keys to use to store the positions.
+        frame_key (str, optional): The frame key to use in the attributes dict.
+            Defaults to "t".
+        label_key (str, optional): The label key to use in the attributes dict.
+            Defaults to "label_id"
+
+    Returns:
+        dict[Any, dict]: A dictionary from node_ids to node attributes, which
+            can be used to create a networkx graph using add_nodes_from().
+            Node Ids are currently "<frame>_<label id>". Attributes include the
+            frame and the label.
+    """
+    nodes = {}
+    props = regionprops(seg)
+    for regionprop in props:
+        node_id = f"{frame}_{regionprop.label}"
+        attrs = {frame_key: frame, label_key: regionprop.label}
+        centroid = regionprop.centroid  # [z,] y, x
+        assert len(pos_keys) == len(centroid), (
+            f"Number of position keys {pos_keys} does not match number of "
+            f"elements in centroid {centroid}"
+        )
+        for key, val in zip(pos_keys, centroid):
+            attrs[key] = val
+        nodes[node_id] = attrs
+    return nodes
