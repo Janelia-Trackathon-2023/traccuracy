@@ -138,18 +138,18 @@ def test__get_pred_by_t(straight_graph):
 
 
 def test__get_succ_by_t():
-    _, g2, _ = get_division_graphs()
+    _, g2, _, _ = get_division_graphs()
     g2 = TrackingGraph(g2)
 
     # Find 2 frames forward correctly
-    start_node = "2_2"
+    start_node = "5_2"
     delta_t = 2
-    end_node = "2_4"
+    end_node = "5_4"
     node = _get_succ_by_t(g2, start_node, delta_t)
     assert node == end_node
 
     # 3 frames forward returns None
-    start_node = "2_2"
+    start_node = "5_2"
     delta_t = 3
     end_node = None
     node = _get_succ_by_t(g2, start_node, delta_t)
@@ -159,8 +159,9 @@ def test__get_succ_by_t():
 class Test_correct_shifted_divisions:
     def test_no_change(self):
         # Early division in gt
-        g_pred, g_gt, mapper = get_division_graphs()
-        g_gt.nodes["1_1"][NodeFlag.FN_DIV] = True
+        g_pred, g_gt, map_pred, map_gt = get_division_graphs()
+        mapper = list(zip(map_gt, map_pred))
+        g_gt.nodes["4_1"][NodeFlag.FN_DIV] = True
         g_pred.nodes["1_3"][NodeFlag.FP_DIV] = True
 
         matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
@@ -171,13 +172,14 @@ class Test_correct_shifted_divisions:
         ng_gt = new_matched.gt_graph
 
         assert ng_pred.nodes["1_3"][NodeFlag.FP_DIV] is True
-        assert ng_gt.nodes["1_1"][NodeFlag.FN_DIV] is True
+        assert ng_gt.nodes["4_1"][NodeFlag.FN_DIV] is True
         assert len(ng_gt.get_nodes_with_flag(NodeFlag.TP_DIV)) == 0
 
     def test_fn_early(self):
         # Early division in gt
-        g_pred, g_gt, mapper = get_division_graphs()
-        g_gt.nodes["1_1"][NodeFlag.FN_DIV] = True
+        g_pred, g_gt, map_pred, map_gt = get_division_graphs()
+        mapper = list(zip(map_gt, map_pred))
+        g_gt.nodes["4_1"][NodeFlag.FN_DIV] = True
         g_pred.nodes["1_3"][NodeFlag.FP_DIV] = True
 
         matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
@@ -188,14 +190,15 @@ class Test_correct_shifted_divisions:
         ng_gt = new_matched.gt_graph
 
         assert ng_pred.nodes["1_3"][NodeFlag.FP_DIV] is False
-        assert ng_gt.nodes["1_1"][NodeFlag.FN_DIV] is False
+        assert ng_gt.nodes["4_1"][NodeFlag.FN_DIV] is False
         assert ng_pred.nodes["1_3"][NodeFlag.TP_DIV] is True
-        assert ng_gt.nodes["1_1"][NodeFlag.TP_DIV] is True
+        assert ng_gt.nodes["4_1"][NodeFlag.TP_DIV] is True
 
     def test_fp_early(self):
         # Early division in pred
-        g_gt, g_pred, mapper = get_division_graphs()
-        g_pred.nodes["1_1"][NodeFlag.FP_DIV] = True
+        g_gt, g_pred, map_gt, map_pred = get_division_graphs()
+        mapper = list(zip(map_gt, map_pred))
+        g_pred.nodes["4_1"][NodeFlag.FP_DIV] = True
         g_gt.nodes["1_3"][NodeFlag.FN_DIV] = True
 
         matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
@@ -205,14 +208,15 @@ class Test_correct_shifted_divisions:
         ng_pred = new_matched.pred_graph
         ng_gt = new_matched.gt_graph
 
-        assert ng_pred.nodes["1_1"][NodeFlag.FP_DIV] is False
+        assert ng_pred.nodes["4_1"][NodeFlag.FP_DIV] is False
         assert ng_gt.nodes["1_3"][NodeFlag.FN_DIV] is False
-        assert ng_pred.nodes["1_1"][NodeFlag.TP_DIV] is True
+        assert ng_pred.nodes["4_1"][NodeFlag.TP_DIV] is True
         assert ng_gt.nodes["1_3"][NodeFlag.TP_DIV] is True
 
 
 def test_evaluate_division_events():
-    g_gt, g_pred, mapper = get_division_graphs()
+    g_gt, g_pred, map_gt, map_pred = get_division_graphs()
+    mapper = list(zip(map_gt, map_pred))
     frame_buffer = 2
 
     matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
