@@ -116,9 +116,9 @@ def get_division_graphs():
     1_0 -- 1_1 -- 1_2 -- 1_3 -<
                                 3_4
     G2
-                  2_2 -- 2_3 -- 2_4
-    1_0 -- 1_1 -<
-                  3_2 -- 3_3 -- 3_4
+                  5_2 -- 5_3 -- 5_4
+    4_0 -- 4_1 -<
+                  6_2 -- 6_3 -- 6_4
     """
 
     G1 = nx.DiGraph()
@@ -134,21 +134,22 @@ def get_division_graphs():
     nx.set_node_attributes(G1, attrs)
 
     G2 = nx.DiGraph()
-    G2.add_edge("1_0", "1_1")
-    # Divide to generate 2 lineage
-    G2.add_edge("1_1", "2_2")
-    G2.add_edge("2_2", "2_3")
-    G2.add_edge("2_3", "2_4")
-    # Divide to generate 3 lineage
-    G2.add_edge("1_1", "3_2")
-    G2.add_edge("3_2", "3_3")
-    G2.add_edge("3_3", "3_4")
+    G2.add_edge("4_0", "4_1")
+    # Divide to generate 5 lineage
+    G2.add_edge("4_1", "5_2")
+    G2.add_edge("5_2", "5_3")
+    G2.add_edge("5_3", "5_4")
+    # Divide to generate 6 lineage
+    G2.add_edge("4_1", "6_2")
+    G2.add_edge("6_2", "6_3")
+    G2.add_edge("6_3", "6_4")
 
     attrs = {}
     for node in G2.nodes:
         attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
     nx.set_node_attributes(G2, attrs)
 
-    mapper = [("1_0", "1_0"), ("1_1", "1_1"), ("2_4", "2_4"), ("3_4", "3_4")]
+    mapped_g1 = ["1_0", "1_1", "2_4", "3_4"]
+    mapped_g2 = ["4_0", "4_1", "5_4", "6_4"]
 
-    return G1, G2, mapper
+    return G1, G2, mapped_g1, mapped_g2

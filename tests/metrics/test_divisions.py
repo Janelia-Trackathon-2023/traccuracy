@@ -6,7 +6,8 @@ from tests.test_utils import get_division_graphs
 
 
 def test_DivisionMetrics():
-    g_gt, g_pred, mapper = get_division_graphs()
+    g_gt, g_pred, map_gt, map_pred = get_division_graphs()
+    mapper = list(zip(map_gt, map_pred))
     matched = Matched(
         TrackingGraph(g_gt),
         TrackingGraph(g_pred),
