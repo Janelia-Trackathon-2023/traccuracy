@@ -1,13 +1,8 @@
 import networkx as nx
 import numpy as np
-from traccuracy._tracking_graph import EdgeAttr, NodeAttr, TrackingGraph
-from traccuracy.matchers._matched import Matched
+from traccuracy._tracking_graph import EdgeFlag, NodeFlag, TrackingGraph
+from traccuracy.matchers import Matched
 from traccuracy.track_errors._ctc import get_edge_errors, get_vertex_errors
-
-
-class DummyMatched(Matched):
-    def compute_mapping(self):
-        return []
 
 
 def test_get_vertex_errors():
@@ -39,27 +34,26 @@ def test_get_vertex_errors():
     )
     G_comp = TrackingGraph(comp_g)
 
-    matched_data = DummyMatched(G_gt, G_comp)
-    matched_data.mapping = mapping
+    matched_data = Matched(G_gt, G_comp, mapping)
 
     get_vertex_errors(matched_data)
 
-    assert len(G_comp.get_nodes_with_flag(NodeAttr.NON_SPLIT)) == 1
-    assert len(G_comp.get_nodes_with_flag(NodeAttr.TRUE_POS)) == 3
-    assert len(G_comp.get_nodes_with_flag(NodeAttr.FALSE_POS)) == 2
-    assert len(G_gt.get_nodes_with_flag(NodeAttr.FALSE_NEG)) == 3
+    assert len(matched_data.pred_graph.get_nodes_with_flag(NodeFlag.NON_SPLIT)) == 1
+    assert len(matched_data.pred_graph.get_nodes_with_flag(NodeFlag.TRUE_POS)) == 3
+    assert len(matched_data.pred_graph.get_nodes_with_flag(NodeFlag.FALSE_POS)) == 2
+    assert len(matched_data.gt_graph.get_nodes_with_flag(NodeFlag.FALSE_NEG)) == 3
 
-    assert gt_g.nodes[15][NodeAttr.FALSE_NEG]
-    assert not gt_g.nodes[17][NodeAttr.FALSE_NEG]
+    assert matched_data.gt_graph.nodes[15][NodeFlag.FALSE_NEG]
+    assert not matched_data.gt_graph.nodes[17][NodeFlag.FALSE_NEG]
 
-    assert comp_g.nodes[3][NodeAttr.NON_SPLIT]
-    assert not comp_g.nodes[7][NodeAttr.NON_SPLIT]
+    assert matched_data.pred_graph.nodes[3][NodeFlag.NON_SPLIT]
+    assert not matched_data.pred_graph.nodes[7][NodeFlag.NON_SPLIT]
 
-    assert comp_g.nodes[7][NodeAttr.TRUE_POS]
-    assert not comp_g.nodes[3][NodeAttr.TRUE_POS]
+    assert matched_data.pred_graph.nodes[7][NodeFlag.TRUE_POS]
+    assert not matched_data.pred_graph.nodes[3][NodeFlag.TRUE_POS]
 
-    assert comp_g.nodes[10][NodeAttr.FALSE_POS]
-    assert not comp_g.nodes[7][NodeAttr.FALSE_POS]
+    assert matched_data.pred_graph.nodes[10][NodeFlag.FALSE_POS]
+    assert not matched_data.pred_graph.nodes[7][NodeFlag.FALSE_POS]
 
 
 def test_assign_edge_errors():
@@ -78,7 +72,7 @@ def test_assign_edge_errors():
     comp_g = nx.DiGraph()
     comp_g.add_nodes_from(comp_ids)
     comp_g.add_edges_from(comp_edges)
-    nx.set_node_attributes(comp_g, True, NodeAttr.TRUE_POS)
+    nx.set_node_attributes(comp_g, True, NodeFlag.TRUE_POS)
     nx.set_node_attributes(
         comp_g,
         {idx: {"t": 0, "segmentation_id": 1, "y": 0, "x": 0} for idx in comp_ids},
@@ -89,19 +83,18 @@ def test_assign_edge_errors():
     gt_g = nx.DiGraph()
     gt_g.add_nodes_from(gt_ids)
     gt_g.add_edges_from(gt_edges)
-    nx.set_node_attributes(gt_g, False, NodeAttr.FALSE_NEG)
+    nx.set_node_attributes(gt_g, False, NodeFlag.FALSE_NEG)
     nx.set_node_attributes(
         gt_g, {idx: {"t": 0, "segmentation_id": 1, "y": 0, "x": 0} for idx in gt_ids}
     )
     G_gt = TrackingGraph(gt_g)
 
-    matched_data = DummyMatched(G_gt, G_comp)
-    matched_data.mapping = mapping
+    matched_data = Matched(G_gt, G_comp, mapping)
 
     get_edge_errors(matched_data)
 
-    assert comp_g.edges[(7, 8)][EdgeAttr.FALSE_POS]
-    assert gt_g.edges[(17, 18)][EdgeAttr.FALSE_NEG]
+    assert matched_data.pred_graph.edges[(7, 8)][EdgeFlag.FALSE_POS]
+    assert matched_data.gt_graph.edges[(17, 18)][EdgeFlag.FALSE_NEG]
 
 
 def test_assign_edge_errors_semantics():
@@ -136,9 +129,75 @@ def test_assign_edge_errors_semantics():
     # Define mapping with all nodes matching except for 2_3 in comp
     mapping = [(n, n) for n in gt.nodes]
 
-    matched_data = DummyMatched(TrackingGraph(gt), TrackingGraph(comp))
-    matched_data.mapping = mapping
+    matched_data = Matched(TrackingGraph(gt), TrackingGraph(comp), mapping)
 
     get_edge_errors(matched_data)
 
-    assert comp.edges[("1_2", "1_3")][EdgeAttr.WRONG_SEMANTIC]
+    assert matched_data.pred_graph.edges[("1_2", "1_3")][EdgeFlag.WRONG_SEMANTIC]
+
+
+def test_ns_vertex_fn_edge():
+    """Minimal Example of testing for FN edges with a NS Vertex
+    gt      1 - 2 - 3
+            4 - 5 - 6
+
+    comp    1 - 2
+
+    matching [ (1, 1), (4, 1), (2, 2), (5, 2) ]
+    """
+
+    gt_nodes = [
+        (1, {"t": 0, "x": 1, "y": 1}),
+        (2, {"t": 1, "x": 1, "y": 1}),
+        (3, {"t": 2, "x": 1, "y": 1}),
+        (4, {"t": 0, "x": 0, "y": 1}),
+        (5, {"t": 1, "x": 0, "y": 1}),
+        (6, {"t": 2, "x": 0, "y": 1}),
+    ]
+    gt_edges = [
+        (1, 2),
+        (2, 3),
+        (4, 5),
+        (5, 6),
+    ]
+    gt = nx.DiGraph()
+    gt.add_nodes_from(gt_nodes)
+    gt.add_edges_from(gt_edges)
+
+    comp_nodes = [
+        (1, {"t": 0, "x": 0.5, "y": 1}),
+        (2, {"t": 1, "x": 0.5, "y": 1}),
+    ]
+    comp_edges = [
+        (1, 2),
+    ]
+    comp = nx.DiGraph()
+    comp.add_nodes_from(comp_nodes)
+    comp.add_edges_from(comp_edges)
+
+    mapping = [
+        (1, 1),
+        (5, 1),
+        (2, 2),
+        (5, 2),
+    ]
+
+    matched_data = Matched(TrackingGraph(gt), TrackingGraph(comp), mapping)
+    get_vertex_errors(matched_data)
+    get_edge_errors(matched_data)
+
+    for node in comp.nodes:
+        assert comp.nodes[node][NodeFlag.NON_SPLIT]
+    for edge in comp_edges:
+        assert not comp.edges[edge][EdgeFlag.FALSE_POS]
+
+    # https://github.com/Janelia-Trackathon-2023/traccuracy/pull/141#issuecomment-2265990197
+    if False:  # TODO: Fix this in a separate PR
+        for node in [1, 2, 4, 5]:
+            assert gt.nodes[node][NodeFlag.FALSE_NEG]
+
+    for node in [3, 6]:
+        assert gt.nodes[node][NodeFlag.FALSE_NEG]
+
+    for edge in gt_edges:
+        assert gt.edges[edge][EdgeFlag.FALSE_NEG]

@@ -5,6 +5,7 @@ Written by Sergey Karayev
 Licensed under The MIT License [see LICENSE for details]
 Copyright (c) 2015 Microsoft
 """
+
 from typing import Tuple
 
 import numpy as np
@@ -18,18 +19,24 @@ def _union_slice(a: Tuple[slice], b: Tuple[slice]):
     return tuple(slice(start, stop) for start, stop in zip(starts, stops))
 
 
-def get_labels_with_overlap(gt_frame, res_frame):
+def get_labels_with_overlap(
+    gt_frame,
+    res_frame,
+    overlap="iou",
+):
     """Get all labels IDs in gt_frame and res_frame whose bounding boxes
     overlap.
 
     Args:
         gt_frame (np.ndarray): ground truth segmentation for a single frame
         res_frame (np.ndarray): result segmentation for a given frame
+        overlap (str, optional): Choose between intersection-over-ground-truth (``iogt``)
+            or intersection-over-union (``iou``).
 
     Returns:
         overlapping_gt_labels: List[int], labels of gt boxes that overlap with res boxes
         overlapping_res_labels: List[int], labels of res boxes that overlap with gt boxes
-        intersections_over_gt: List[float], list of (intersection gt vs res) / (gt area)
+        overlaps: List[float], list of IoGT/IoU values for each overlapping pair
     """
     gt_frame = gt_frame.astype(np.uint16, copy=False)
     res_frame = res_frame.astype(np.uint16, copy=False)
@@ -46,6 +53,8 @@ def get_labels_with_overlap(gt_frame, res_frame):
     res_box_labels = np.asarray(
         [int(res_prop.label) for res_prop in res_props], dtype=np.uint16
     )
+    if len(gt_props) == 0 or len(res_props) == 0:
+        return [], [], []
 
     if gt_frame.ndim == 3:
         overlaps = compute_overlap_3D(gt_boxes, res_boxes)
@@ -61,16 +70,23 @@ def get_labels_with_overlap(gt_frame, res_frame):
     overlapping_gt_labels = gt_box_labels[ind_gt]
     overlapping_res_labels = res_box_labels[ind_res]
 
-    intersections_over_gt = []
+    overlaps = []
     for i, j in zip(ind_gt, ind_res):
         sslice = _union_slice(gt_props[i].slice, res_props[j].slice)
         gt_mask = gt_frame[sslice] == gt_box_labels[i]
         res_mask = res_frame[sslice] == res_box_labels[j]
         area_inter = np.count_nonzero(np.logical_and(gt_mask, res_mask))
-        area_gt = np.count_nonzero(gt_mask)
-        intersections_over_gt.append(area_inter / area_gt)
 
-    return overlapping_gt_labels, overlapping_res_labels, intersections_over_gt
+        if overlap == "iou":
+            area_union = np.count_nonzero(np.logical_or(gt_mask, res_mask))
+            overlaps.append(area_inter / area_union)
+        elif overlap == "iogt":
+            area_gt = np.count_nonzero(gt_mask)
+            overlaps.append(area_inter / area_gt)
+        else:
+            raise ValueError(f"Unknown overlap type: {overlap}")
+
+    return overlapping_gt_labels, overlapping_res_labels, overlaps
 
 
 def compute_overlap(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
