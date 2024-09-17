@@ -1,6 +1,9 @@
 Edge Error Types
 ================
 
+.. note::
+    Coming soon!
+
 False Positive
 --------------
 

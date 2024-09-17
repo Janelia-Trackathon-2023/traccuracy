@@ -1,13 +1,13 @@
 Division Errors
 ===============
-Note: These are annotated on the parent nodes.
+Note: These flags are annotated on the parent nodes.
 
 True Positive
 -------------
 
 A true positive division is a division event in which the parent and both daughters match between the ground truth and predicted graphs. True positive divisions are annotated on the parent node on both the ground truth and predicted graphs.
 
-The ``frame_buffer`` parameter allows for divisions to be classified as true positives if they occur within the specified number of frames of tolerance. This feature is useful in cases where the exact frame that a division event occurs is somewhat arbitrary due to a high frame rate or variable segmentation or detection.wo detections before or after the split is annotated in the ground truth dataset.
+The ``frame_buffer`` parameter allows for divisions to be classified as true positives if they occur within the specified number of frames of tolerance. This feature is useful in cases where the exact frame that a division event occurs is somewhat arbitrary due to a high frame rate or variable segmentation or detection.
 
 For the given ground truth graph, the subsequent predicted graphs show examples of true positive divisions events with different ``frame_buffer`` specifications.
 
