@@ -29,10 +29,17 @@ def gt_data_2d():
 @pytest.fixture(scope="module")
 def gt_data_3d():
     path = "downloads/Fluo-N3DH-CE/01_GT/TRA"
-    return load_ctc_data(
+    trackgraph = load_ctc_data(
         os.path.join(ROOT_DIR, path),
         os.path.join(ROOT_DIR, path, "man_track.txt"),
     )
+    nodes = set()
+
+    # Limit 3d dataset to a subset of frames to manage memory/cpu footprint
+    for t in range(10):
+        nodes = nodes.union(trackgraph.nodes_by_frame[t])
+
+    return trackgraph.get_subgraph(nodes)
 
 
 @pytest.fixture(scope="module")
