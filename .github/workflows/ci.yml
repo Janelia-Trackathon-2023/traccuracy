@@ -61,13 +61,13 @@ jobs:
           fetch-depth: 50 # this is to make sure we obtain the target base commit
 
       - uses: actions/cache@v3
-        id: cache
+        id: cache_data
         with:
           path: downloads
           key: ${{ hashFiles('scripts/download_samples.py') }}
 
       - name: Download Samples
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache_data.outputs.cache-hit != 'true'
         run: |
           pip install requests
           python scripts/download_test_data.py
@@ -87,20 +87,20 @@ jobs:
 
       - name: Retrieve cached baseline if available
         uses: actions/cache/restore@v4
-        id: cache
+        id: cache_baseline
         with:
           path: baseline.json
           key: ${{ github.event.pull_request.base.sha }}
 
       - name: Run baseline benchmark if not in cache
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache_baseline.outputs.cache-hit != 'true'
         run: |
           git checkout ${{ github.event.pull_request.base.sha }}
           pytest tests/bench.py --benchmark-json baseline.json
 
       - name: Cache baseline results
         uses: actions/cache/save@v4
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.cache_baseline.outputs.cache-hit != 'true'
         with:
           path: baseline.json
           key: ${{ github.event.pull_request.base.sha }}
