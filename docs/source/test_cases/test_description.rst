@@ -17,3 +17,17 @@ Segmentation Canonical Examples
 .. image:: segmentation/2d/False\ Positive.svg
 .. image:: segmentation/2d/Oversegmentation.svg
 .. image:: segmentation/2d/Undersegmentation.svg
+
+
+Matched Graph Canonical Examples
+--------------------------------
+
+.. image:: matched_graph/Good\ Matching.svg
+.. image:: matched_graph/False\ Negative\ Node.svg
+.. image:: matched_graph/False\ Negative\ Edge.svg
+.. image:: matched_graph/False\ Positive\ Node.svg
+.. image:: matched_graph/False\ Positive\ Edge.svg
+.. image:: matched_graph/Two\ Ground\ Truth\ to\ One\ Prediction.svg
+.. image:: matched_graph/One\ Ground\ Truth\ to\ Two\ Predictions.svg
+.. image:: matched_graph/Empty\ Ground\ Truth.svg
+.. image:: matched_graph/Empty\ Prediction.svg
