@@ -137,6 +137,7 @@ def test_ctc_checks(benchmark):
     benchmark(_check_ctc, tracks, detections, masks)
 
 
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.parametrize(
     "gt_data,pred_data",
     [
