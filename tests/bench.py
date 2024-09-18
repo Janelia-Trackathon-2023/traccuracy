@@ -13,24 +13,26 @@ from traccuracy.loaders import (
 from traccuracy.matchers import CTCMatcher, IOUMatcher
 from traccuracy.metrics import CTCMetrics, DivisionMetrics
 
-from tests.test_utils import download_gt_data, gt_data
-
 ROOT_DIR = Path(__file__).resolve().parents[1]
 TIMEOUT = 20
 
 
 @pytest.fixture(scope="module")
 def gt_data_2d():
-    url = "http://data.celltrackingchallenge.net/training-datasets/PhC-C2DL-PSC.zip"
     path = "downloads/Fluo-N2DL-HeLa/01_GT/TRA"
-    return gt_data(url, ROOT_DIR, path)
+    return load_ctc_data(
+        os.path.join(ROOT_DIR, path),
+        os.path.join(ROOT_DIR, path, "man_track.txt"),
+    )
 
 
 @pytest.fixture(scope="module")
 def gt_data_3d():
-    url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N3DH-CE.zip"
     path = "downloads/Fluo-N3DH-CE/01_GT/TRA"
-    return gt_data(url, ROOT_DIR, path)
+    return load_ctc_data(
+        os.path.join(ROOT_DIR, path),
+        os.path.join(ROOT_DIR, path, "man_track.txt"),
+    )
 
 
 @pytest.fixture(scope="module")
@@ -74,9 +76,7 @@ def test_load_gt_ctc_data(
     benchmark,
     dataset,
 ):
-    url = f"http://data.celltrackingchallenge.net/training-datasets/{dataset}.zip"
     path = f"downloads/{dataset}/01_GT/TRA"
-    download_gt_data(url, ROOT_DIR)
 
     benchmark.pedantic(
         load_ctc_data,
