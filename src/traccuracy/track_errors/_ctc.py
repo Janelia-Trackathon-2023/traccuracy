@@ -87,9 +87,8 @@ def get_edge_errors(matched_data: Matched):
         logger.warning("Node errors have not been annotated. Running node annotation.")
         get_vertex_errors(matched_data)
 
-    induced_graph = comp_graph.get_subgraph(
-        comp_graph.get_nodes_with_flag(NodeFlag.TRUE_POS)
-    ).graph
+    comp_tp_nodes = comp_graph.get_nodes_with_flag(NodeFlag.TRUE_POS)
+    induced_graph = comp_graph.get_subgraph(comp_tp_nodes).graph
 
     comp_graph.set_flag_on_all_edges(EdgeFlag.FALSE_POS, False)
     comp_graph.set_flag_on_all_edges(EdgeFlag.WRONG_SEMANTIC, False)
@@ -141,12 +140,15 @@ def get_edge_errors(matched_data: Matched):
             gt_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_NEG, True)
             continue
 
-        source_comp_id = gt_comp_mapping[source]
-        target_comp_id = gt_comp_mapping[target]
+        source_comp_id = gt_comp_mapping.get(source, None)
+        target_comp_id = gt_comp_mapping.get(target, None)
 
-        expected_comp_edge = (source_comp_id, target_comp_id)
-        if expected_comp_edge not in induced_graph.edges:
+        if source_comp_id is None or target_comp_id is None:
             gt_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_NEG, True)
+        else:
+            expected_comp_edge = (source_comp_id, target_comp_id)
+            if expected_comp_edge not in induced_graph.edges:
+                gt_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_NEG, True)
 
     gt_graph.edge_errors = True
     comp_graph.edge_errors = True

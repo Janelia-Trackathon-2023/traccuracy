@@ -47,7 +47,8 @@ def test_iou_div_metrics(gt_hela, pred_hela):
 
 
 def test_DivisionMetrics():
-    g_gt, g_pred, mapper = get_division_graphs()
+    g_gt, g_pred, map_gt, map_pred = get_division_graphs()
+    mapper = list(zip(map_gt, map_pred))
     matched = Matched(
         TrackingGraph(g_gt),
         TrackingGraph(g_pred),
