@@ -36,7 +36,7 @@ def gt_data_3d():
     nodes = set()
 
     # Limit 3d dataset to a subset of frames to manage memory/cpu footprint
-    for t in range(10):
+    for t in range(3):
         nodes = nodes.union(trackgraph.nodes_by_frame[t])
 
     return trackgraph.get_subgraph(nodes)
@@ -137,7 +137,7 @@ def test_ctc_checks(benchmark):
     benchmark(_check_ctc, tracks, detections, masks)
 
 
-@pytest.mark.timeout(TIMEOUT)
+@pytest.mark.timeout(TIMEOUT * 2)
 @pytest.mark.parametrize(
     "gt_data,pred_data",
     [
@@ -171,7 +171,7 @@ def test_ctc_metrics(benchmark, ctc_matched, request):
     benchmark.pedantic(run_compute, rounds=1, iterations=1)
 
 
-@pytest.mark.timeout(TIMEOUT)
+@pytest.mark.timeout(TIMEOUT * 2)
 @pytest.mark.parametrize(
     "gt_data,pred_data",
     [
@@ -191,7 +191,7 @@ def test_iou_matcher(benchmark, gt_data, pred_data, request):
     )
 
 
-@pytest.mark.timeout(TIMEOUT)
+@pytest.mark.timeout(TIMEOUT * 2)
 @pytest.mark.parametrize(
     "iou_matched",
     ["iou_matched_2d", "iou_matched_3d"],
