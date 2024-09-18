@@ -163,7 +163,6 @@ def test_ctc_metrics(benchmark, ctc_matched, request):
     benchmark.pedantic(run_compute, rounds=1, iterations=1)
 
 
-@pytest.mark.xfail
 @pytest.mark.timeout(TIMEOUT)
 @pytest.mark.parametrize(
     "gt_data,pred_data",
@@ -173,7 +172,9 @@ def test_ctc_metrics(benchmark, ctc_matched, request):
     ],
     ids=["2d", "3d"],
 )
-def test_iou_matcher(benchmark, gt_data, pred_data):
+def test_iou_matcher(benchmark, gt_data, pred_data, request):
+    gt_data = request.getfixturevalue(gt_data)
+    pred_data = request.getfixturevalue(pred_data)
     benchmark.pedantic(
         IOUMatcher(iou_threshold=0.1).compute_mapping,
         args=(gt_data, pred_data),
@@ -182,14 +183,15 @@ def test_iou_matcher(benchmark, gt_data, pred_data):
     )
 
 
-@pytest.mark.xfail
 @pytest.mark.timeout(TIMEOUT)
 @pytest.mark.parametrize(
     "iou_matched",
     ["iou_matched_2d", "iou_matched_3d"],
     ids=["2d", "3d"],
 )
-def test_iou_div_metrics(benchmark, iou_matched):
+def test_iou_div_metrics(benchmark, iou_matched, request):
+    iou_matched = request.getfixturevalue(iou_matched)
+
     def run_compute():
         return DivisionMetrics().compute(copy.deepcopy(iou_matched))
 
