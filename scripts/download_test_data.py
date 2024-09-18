@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 DATASETS = [
     "http://data.celltrackingchallenge.net/training-datasets/Fluo-N2DL-HeLa.zip",
-    "http://data.celltrackingchallenge.net/training-datasets/PhC-C2DL-PSC.zip"
+    "http://data.celltrackingchallenge.net/training-datasets/PhC-C2DL-PSC.zip",
     "http://data.celltrackingchallenge.net/training-datasets/Fluo-N3DH-CE.zip",
 ]
 
