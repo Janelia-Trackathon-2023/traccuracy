@@ -65,7 +65,7 @@ jobs:
         id: cache_data
         with:
           path: downloads
-          key: ${{ hashFiles('scripts/download_samples.py') }}
+          key: ${{ hashFiles('scripts/download_test_data.py') }}
 
       - name: Download Samples
         if: steps.cache_data.outputs.cache-hit != 'true'
@@ -78,7 +78,7 @@ jobs:
         if: steps.cache_data.outputs.cache-hit != 'true'
         with:
           path: downloads
-          key: ${{ hashFiles('scripts/download_samples.py') }}
+          key: ${{ hashFiles('scripts/download_test_data.py') }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
