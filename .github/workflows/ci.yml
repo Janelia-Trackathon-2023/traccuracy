@@ -60,7 +60,8 @@ jobs:
         with:
           fetch-depth: 50 # this is to make sure we obtain the target base commit
 
-      - uses: actions/cache@v3
+      - name: Retrieve cached data
+        uses: actions/cache/restore@v4
         id: cache_data
         with:
           path: downloads
@@ -71,6 +72,13 @@ jobs:
         run: |
           pip install requests
           python scripts/download_test_data.py
+
+      - name: Cache sample data
+        uses: actions/cache/save@v4
+        if: steps.cache_data.outputs.cache-hit != 'true'
+        with:
+          path: downloads
+          key: ${{ hashFiles('scripts/download_samples.py') }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
