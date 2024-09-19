@@ -66,7 +66,10 @@ def _get_node_attributes(masks):
             segmentation_id, x, y, z, t
     """
     data_df = pd.concat(
-        [_detections_from_image(masks, idx) for idx in range(masks.shape[0])]
+        [
+            _detections_from_image(masks, idx)
+            for idx in tqdm(range(masks.shape[0]), desc="Computing node attributes")
+        ],
     ).reset_index(drop=True)
     data_df = data_df.rename(
         columns={
@@ -193,9 +196,9 @@ def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame, masks: np.ndarray
             parent_end = tracks[tracks["Cell_ID"] == row["Parent_ID"]]["End"].iloc[0]
             if parent_end >= row["Start"]:
                 raise ValueError(
-                    f"Invalid tracklet connection: Daughter tracklet with ID {row['Cell_ID']} "
-                    f"starts at t={row['Start']}, "
-                    f"but parent tracklet with ID {row['Parent_ID']} only ends at t={parent_end}."
+                    "Invalid tracklet connection: Daughter tracklet with ID"
+                    f" {row['Cell_ID']} starts at t={row['Start']}, but parent tracklet"
+                    f" with ID {row['Parent_ID']} only ends at t={parent_end}."
                 )
 
     for t in range(tracks["Start"].min(), tracks["End"].max()):
@@ -241,12 +244,13 @@ def load_ctc_data(data_dir, track_path=None, name=None, run_checks=True):
         track_paths = list(glob.glob(os.path.join(data_dir, "*_track.txt")))
         if not track_paths:
             raise ValueError(
-                f"No track_path passed and a *_track.txt file could not be found in {data_dir}"
+                "No track_path passed and a *_track.txt file could not be found in"
+                f" {data_dir}"
             )
         if len(track_paths) > 1:
             raise ValueError(
-                f"No track_path passed and multiple *_track.txt files found: {track_paths}."
-                + " Please pick one and pass it explicitly."
+                "No track_path passed and multiple *_track.txt files found:"
+                f" {track_paths}." + " Please pick one and pass it explicitly."
             )
         track_path = track_paths[0]
 
