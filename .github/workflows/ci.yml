@@ -116,7 +116,7 @@ jobs:
       - name: Run benchmark on PR head commit
         run: |
           git checkout ${{ github.event.pull_request.head.sha }}
-          pytest tests/bench.py -v --benchmark-json pr.json
+          pytest tests/bench.py -v -s --benchmark-json pr.json
 
       - name: Generate report
         run: python .github/workflows/benchmark-pr.py baseline.json pr.json report.md
