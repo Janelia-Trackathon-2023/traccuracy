@@ -14,7 +14,7 @@ from traccuracy.matchers import CTCMatcher, IOUMatcher
 from traccuracy.metrics import CTCMetrics, DivisionMetrics
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-TIMEOUT = 20
+TIMEOUT = 30
 
 
 @pytest.fixture(scope="module")
@@ -23,23 +23,18 @@ def gt_data_2d():
     return load_ctc_data(
         os.path.join(ROOT_DIR, path),
         os.path.join(ROOT_DIR, path, "man_track.txt"),
+        run_checks=False,
     )
 
 
 @pytest.fixture(scope="module")
 def gt_data_3d():
     path = "downloads/Fluo-N3DH-CE/01_GT/TRA"
-    trackgraph = load_ctc_data(
+    return load_ctc_data(
         os.path.join(ROOT_DIR, path),
         os.path.join(ROOT_DIR, path, "man_track.txt"),
+        run_checks=False,
     )
-    nodes = set()
-
-    # Limit 3d dataset to a subset of frames to manage memory/cpu footprint
-    for t in range(3):
-        nodes = nodes.union(trackgraph.nodes_by_frame[t])
-
-    return trackgraph.get_subgraph(nodes)
 
 
 @pytest.fixture(scope="module")
@@ -118,26 +113,26 @@ def test_load_pred_ctc_data(benchmark, path):
     )
 
 
-def test_ctc_checks(benchmark):
+@pytest.mark.parametrize(
+    "dataset",
+    ["PhC-C2DL-PSC", "Fluo-N3DH-CE"],
+    ids=["2d", "3d"],
+)
+def test_ctc_checks(benchmark, dataset):
+    path = f"downloads/{dataset}/01_GT/TRA"
     names = ["Cell_ID", "Start", "End", "Parent_ID"]
-
     tracks = pd.read_csv(
-        os.path.join(
-            ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES/res_track.txt"
-        ),
+        os.path.join(ROOT_DIR, path, "man_track.txt"),
         header=None,
         sep=" ",
         names=names,
     )
-
-    masks = _load_tiffs(
-        os.path.join(ROOT_DIR, "examples/sample-data/Fluo-N2DL-HeLa/01_RES")
-    )
+    masks = _load_tiffs(os.path.join(ROOT_DIR, path))
     detections = _get_node_attributes(masks)
     benchmark(_check_ctc, tracks, detections, masks)
 
 
-@pytest.mark.timeout(TIMEOUT * 2)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.parametrize(
     "gt_data,pred_data",
     [
@@ -171,7 +166,7 @@ def test_ctc_metrics(benchmark, ctc_matched, request):
     benchmark.pedantic(run_compute, rounds=1, iterations=1)
 
 
-@pytest.mark.timeout(TIMEOUT * 2)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.parametrize(
     "gt_data,pred_data",
     [
@@ -191,7 +186,7 @@ def test_iou_matcher(benchmark, gt_data, pred_data, request):
     )
 
 
-@pytest.mark.timeout(TIMEOUT * 2)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.parametrize(
     "iou_matched",
     ["iou_matched_2d", "iou_matched_3d"],
