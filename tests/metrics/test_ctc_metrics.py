@@ -1,7 +1,6 @@
+from tests.test_utils import get_movie_with_graph
 from traccuracy.matchers._ctc import CTCMatcher
 from traccuracy.metrics._ctc import CTCMetrics
-
-from tests.test_utils import get_movie_with_graph
 
 
 def test_compute_mapping():

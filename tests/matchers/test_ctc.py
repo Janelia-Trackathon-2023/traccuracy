@@ -1,10 +1,10 @@
 import networkx as nx
 import numpy as np
 import pytest
-from traccuracy._tracking_graph import TrackingGraph
-from traccuracy.matchers._ctc import CTCMatcher
 
 from tests.test_utils import get_annotated_movie
+from traccuracy._tracking_graph import TrackingGraph
+from traccuracy.matchers._ctc import CTCMatcher
 
 
 def test_match_ctc():
