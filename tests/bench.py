@@ -5,6 +5,7 @@ import zipfile
 
 import pandas as pd
 import pytest
+
 from traccuracy.loaders import (
     _check_ctc,
     _get_node_attributes,

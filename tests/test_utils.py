@@ -1,6 +1,7 @@
 import networkx as nx
 import numpy as np
 import skimage as sk
+
 from traccuracy._tracking_graph import TrackingGraph
 
 

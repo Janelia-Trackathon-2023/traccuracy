@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+
 from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.loaders import _ctc
 
