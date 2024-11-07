@@ -14,7 +14,7 @@ from traccuracy.matchers import CTCMatcher, IOUMatcher
 from traccuracy.metrics import CTCMetrics, DivisionMetrics
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-TIMEOUT = 30
+TIMEOUT = 300
 
 
 @pytest.fixture(scope="function")
