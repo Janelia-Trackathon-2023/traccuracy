@@ -17,7 +17,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 TIMEOUT = 30
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def gt_data_2d():
     path = "downloads/Fluo-N2DL-HeLa/01_GT/TRA"
     return load_ctc_data(
@@ -27,7 +27,7 @@ def gt_data_2d():
     )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def gt_data_3d():
     path = "downloads/Fluo-N3DH-CE/01_GT/TRA"
     return load_ctc_data(
@@ -37,34 +37,34 @@ def gt_data_3d():
     )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def pred_data_2d(gt_data_2d):
     # For now this is also GT data.
     return copy.deepcopy(gt_data_2d)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def pred_data_3d(gt_data_3d):
     # For now this is also GT data.
     return copy.deepcopy(gt_data_3d)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def ctc_matched_2d(gt_data_2d, pred_data_2d):
     return CTCMatcher().compute_mapping(gt_data_2d, pred_data_2d)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def ctc_matched_3d(gt_data_3d, pred_data_3d):
     return CTCMatcher().compute_mapping(gt_data_3d, pred_data_3d)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def iou_matched_2d(gt_data_2d, pred_data_2d):
     return IOUMatcher(iou_threshold=0.1).compute_mapping(gt_data_2d, pred_data_2d)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def iou_matched_3d(gt_data_3d, pred_data_3d):
     return IOUMatcher(iou_threshold=0.1).compute_mapping(gt_data_3d, pred_data_3d)
 
@@ -161,7 +161,7 @@ def test_ctc_metrics(benchmark, ctc_matched, request):
     ctc_matched = request.getfixturevalue(ctc_matched)
 
     def run_compute():
-        return CTCMetrics().compute(copy.deepcopy(ctc_matched))
+        return CTCMetrics().compute(ctc_matched)
 
     benchmark.pedantic(run_compute, rounds=1, iterations=1)
 
@@ -196,6 +196,6 @@ def test_iou_div_metrics(benchmark, iou_matched, request):
     iou_matched = request.getfixturevalue(iou_matched)
 
     def run_compute():
-        return DivisionMetrics().compute(copy.deepcopy(iou_matched))
+        return DivisionMetrics().compute(iou_matched)
 
     benchmark.pedantic(run_compute, rounds=1, iterations=1)
