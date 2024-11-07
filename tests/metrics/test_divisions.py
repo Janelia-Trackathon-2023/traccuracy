@@ -7,19 +7,27 @@ from traccuracy.loaders import load_ctc_data
 from traccuracy.matchers import CTCMatcher, IOUMatcher, Matched
 from traccuracy.metrics._divisions import DivisionMetrics
 
-from tests.test_utils import get_division_graphs, gt_data
+from tests.test_utils import download_gt_data, get_division_graphs
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
 @pytest.fixture(scope="module")
-def gt_hela():
+def download_gt_hela():
     url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N2DL-HeLa.zip"
+    download_gt_data(url, ROOT_DIR)
+
+
+@pytest.fixture(scope="function")
+def gt_hela():
     path = "downloads/Fluo-N2DL-HeLa/01_GT/TRA"
-    return gt_data(url, ROOT_DIR, path)
+    return load_ctc_data(
+        os.path.join(ROOT_DIR, path),
+        os.path.join(ROOT_DIR, path, "man_track.txt"),
+    )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def pred_hela():
     path = "examples/sample-data/Fluo-N2DL-HeLa/01_RES"
     return load_ctc_data(
