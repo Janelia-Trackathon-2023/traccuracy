@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import logging
 from abc import ABC, abstractmethod
 from typing import Any
@@ -41,10 +40,7 @@ class Matcher(ABC):
                 "Input data must be a TrackingData object with a graph and segmentations"
             )
 
-        # Copy graphs to avoid possible changes to graphs while computing mapping
-        matched = self._compute_mapping(
-            copy.deepcopy(gt_graph), copy.deepcopy(pred_graph)
-        )
+        matched = self._compute_mapping(gt_graph, pred_graph)
 
         # Record matcher info on Matched object
         matched.matcher_info = self.info
