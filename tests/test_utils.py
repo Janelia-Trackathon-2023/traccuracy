@@ -1,7 +1,38 @@
+import os
+import urllib.request
+import zipfile
+
 import networkx as nx
 import numpy as np
 import skimage as sk
 from traccuracy._tracking_graph import TrackingGraph
+from traccuracy.loaders import load_ctc_data
+
+
+def download_gt_data(url, root_dir):
+    # Download GT data -- look into caching this in github actions
+    data_dir = os.path.join(root_dir, "downloads")
+
+    if not os.path.exists(data_dir):
+        os.mkdir(data_dir)
+
+    filename = url.split("/")[-1]
+    file_path = os.path.join(data_dir, filename)
+
+    if not os.path.exists(file_path):
+        urllib.request.urlretrieve(url, file_path)
+
+        # Unzip the data
+        with zipfile.ZipFile(file_path, "r") as zip_ref:
+            zip_ref.extractall(data_dir)
+
+
+def gt_data(url, root_dir, path):
+    download_gt_data(url, root_dir)
+    return load_ctc_data(
+        os.path.join(root_dir, path),
+        os.path.join(root_dir, path, "man_track.txt"),
+    )
 
 
 def get_annotated_image(img_size=256, num_labels=3, sequential=True, seed=1):
