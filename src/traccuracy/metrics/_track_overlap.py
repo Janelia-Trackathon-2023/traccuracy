@@ -16,6 +16,8 @@ from __future__ import annotations
 from itertools import groupby, product
 from typing import TYPE_CHECKING, Any
 
+from traccuracy.matchers._base import Matched
+
 from ._base import Metric
 
 if TYPE_CHECKING:
@@ -57,10 +59,20 @@ class TrackOverlapMetrics(Metric):
 
     """
 
-    supports_many_to_one = True
-
     def __init__(self, include_division_edges: bool = True):
         self.include_division_edges = include_division_edges
+
+    def _validate_matcher(self, matched: Matched) -> bool:
+        valid_matchers = {
+            "IOUMatcher",
+            "CTCMatcher"
+        }
+        name = matched.matcher_info["name"]
+
+        if name in valid_matchers:
+            return True
+        else:
+            return False
 
     def _compute(self, matched: Matched) -> dict:
         gt_tracklets = matched.gt_graph.get_tracklets(

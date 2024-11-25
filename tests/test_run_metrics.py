@@ -9,6 +9,9 @@ from tests.test_utils import get_movie_with_graph
 class DummyMetric(Metric):
     def _compute(self, matched):
         return {}
+    
+    def _validate_matcher(self, matched):
+        return True
 
 
 class DummyMetricParam(Metric):
@@ -17,6 +20,9 @@ class DummyMetricParam(Metric):
 
     def _compute(self, matched):
         return {}
+    
+    def _validate_matcher(self, matched):
+        return True
 
 
 class DummyMatcher(Matcher):

@@ -38,6 +38,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from traccuracy._tracking_graph import NodeFlag
+from traccuracy.matchers._base import Matched
 from traccuracy.track_errors.divisions import _evaluate_division_events
 
 from ._base import Metric
@@ -63,10 +64,19 @@ class DivisionMetrics(Metric):
             buffer between 0 and max_frame_buffer
     """
 
-    needs_one_to_one = True
-
     def __init__(self, max_frame_buffer=0):
         self.frame_buffer = max_frame_buffer
+
+    def _validate_matcher(self, matched: Matched) -> bool:
+        "Matcher must be one to one"
+        name = matched.matcher_info["name"]
+        
+        if name == "IOUMatcher":
+            flag = matched.matcher_info["one_to_one"]
+            if flag:
+                return True
+        
+        return False
 
     def _compute(self, data: Matched):
         """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer

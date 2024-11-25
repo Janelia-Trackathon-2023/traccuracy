@@ -36,17 +36,13 @@ def pred_hela():
     )
 
 
-def test_ctc_div_metrics(gt_hela, pred_hela):
-    ctc_matched = CTCMatcher().compute_mapping(gt_hela, pred_hela)
-    div_results = DivisionMetrics().compute(ctc_matched)
-
-    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 18
-    assert div_results.results["Frame Buffer 0"]["False Positive Divisions"] == 30
-    assert div_results.results["Frame Buffer 0"]["True Positive Divisions"] == 76
-
-
 def test_iou_div_metrics(gt_hela, pred_hela):
+    # Fail validation if one-to-one not enabled
     iou_matched = IOUMatcher(iou_threshold=0.1).compute_mapping(gt_hela, pred_hela)
+    with pytest.raises(TypeError):
+        div_results = DivisionMetrics().compute(iou_matched)
+
+    iou_matched = IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(gt_hela, pred_hela)
     div_results = DivisionMetrics().compute(iou_matched)
 
     assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 25
