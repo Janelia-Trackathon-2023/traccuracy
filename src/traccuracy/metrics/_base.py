@@ -51,7 +51,8 @@ class Metric(ABC):
         if override_matcher:
             warnings.warn(
                 "Overriding matcher/metric validation may result in "
-                "unpredictable/incorrect metric results"
+                "unpredictable/incorrect metric results",
+                stacklevel=2,
             )
 
         valid_matcher = self._validate_matcher(matched)
