@@ -35,10 +35,7 @@ class AOGMMetrics(Metric):
         }
 
     def _validate_matcher(self, matched: Matched) -> bool:
-        valid_matchers = {
-            "IOUMatcher",
-            "CTCMatcher"
-        }
+        valid_matchers = {"IOUMatcher", "CTCMatcher"}
         name = matched.matcher_info["name"]
 
         if name in valid_matchers:

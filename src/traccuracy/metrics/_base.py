@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import warnings
 from abc import ABC, abstractmethod
 from importlib.metadata import version
 from typing import TYPE_CHECKING
-import warnings
 
 if TYPE_CHECKING:
     from traccuracy.matchers._base import Matched
@@ -49,14 +49,17 @@ class Metric(ABC):
             Results: Object containing metric results and associated pipeline metadata
         """
         if override_matcher:
-            warnings.warn("Overriding matcher/metric validation may result in "
-                         "unpredictable/incorrect metric results")
-        
+            warnings.warn(
+                "Overriding matcher/metric validation may result in "
+                "unpredictable/incorrect metric results"
+            )
+
         valid_matcher = self._validate_matcher(matched)
         if not valid_matcher:
             raise TypeError(
                 "The matched data uses a matcher that does not meet the requirements "
-                "of the metric. Check the documentation for the metric for more information.")
+                "of the metric. Check the documentation for the metric for more information."
+            )
 
         res_dict = self._compute(matched)
 

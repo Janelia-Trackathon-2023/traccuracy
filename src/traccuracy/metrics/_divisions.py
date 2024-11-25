@@ -70,12 +70,12 @@ class DivisionMetrics(Metric):
     def _validate_matcher(self, matched: Matched) -> bool:
         "Matcher must be one to one"
         name = matched.matcher_info["name"]
-        
+
         if name == "IOUMatcher":
             flag = matched.matcher_info["one_to_one"]
             if flag:
                 return True
-        
+
         return False
 
     def _compute(self, data: Matched):

@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from traccuracy import TrackingGraph
 from traccuracy.loaders import load_ctc_data
-from traccuracy.matchers import CTCMatcher, IOUMatcher, Matched
+from traccuracy.matchers import IOUMatcher, Matched
 from traccuracy.metrics._divisions import DivisionMetrics
 
 from tests.test_utils import download_gt_data, get_division_graphs
@@ -42,7 +42,9 @@ def test_iou_div_metrics(gt_hela, pred_hela):
     with pytest.raises(TypeError):
         div_results = DivisionMetrics().compute(iou_matched)
 
-    iou_matched = IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(gt_hela, pred_hela)
+    iou_matched = IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(
+        gt_hela, pred_hela
+    )
     div_results = DivisionMetrics().compute(iou_matched)
 
     assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 25
