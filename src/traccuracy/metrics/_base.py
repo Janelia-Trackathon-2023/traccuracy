@@ -54,13 +54,13 @@ class Metric(ABC):
                 "unpredictable/incorrect metric results",
                 stacklevel=2,
             )
-
-        valid_matcher = self._validate_matcher(matched)
-        if not valid_matcher:
-            raise TypeError(
-                "The matched data uses a matcher that does not meet the requirements "
-                "of the metric. Check the documentation for the metric for more information."
-            )
+        else:
+            valid_matcher = self._validate_matcher(matched)
+            if not valid_matcher:
+                raise TypeError(
+                    "The matched data uses a matcher that does not meet the requirements "
+                    "of the metric. Check the documentation for the metric for more information."
+                )
 
         res_dict = self._compute(matched)
 

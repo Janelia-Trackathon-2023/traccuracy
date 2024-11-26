@@ -38,10 +38,7 @@ class AOGMMetrics(Metric):
         valid_matchers = {"IOUMatcher", "CTCMatcher"}
         name = matched.matcher_info["name"]
 
-        if name in valid_matchers:
-            return True
-        else:
-            return False
+        return name in valid_matchers
 
     def _compute(self, data: Matched):
         evaluate_ctc_events(data)

@@ -70,13 +70,16 @@ class DivisionMetrics(Metric):
     def _validate_matcher(self, matched: Matched) -> bool:
         "Matcher must be one to one"
         name = matched.matcher_info["name"]
+        valid = False
 
         if name == "IOUMatcher":
-            flag = matched.matcher_info["one_to_one"]
-            if flag:
-                return True
+            if matched.matcher_info["one_to_one"]:
+                valid = True
+            # Threshold of greater than 0.5 ensures one to one
+            if matched.matcher_info["iou_threshold"] >= 0.5:
+                valid = True
 
-        return False
+        return valid
 
     def _compute(self, data: Matched):
         """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer
