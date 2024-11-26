@@ -76,7 +76,7 @@ class DivisionMetrics(Metric):
             if matched.matcher_info["one_to_one"]:
                 valid = True
             # Threshold of greater than 0.5 ensures one to one
-            if matched.matcher_info["iou_threshold"] >= 0.5:
+            if matched.matcher_info["iou_threshold"] > 0.5:
                 valid = True
 
         return valid
