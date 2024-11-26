@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from abc import ABC, abstractmethod
 from importlib.metadata import version
 from typing import TYPE_CHECKING
@@ -15,11 +16,12 @@ class Metric(ABC):
     Kwargs should be specified in the constructor
     """
 
-    # Mapping criteria
-    needs_one_to_one = False
-    supports_one_to_many = False
-    supports_many_to_one = False
-    supports_many_to_many = False
+    @abstractmethod
+    def _validate_matcher(self, matched: Matched) -> bool:
+        """Verifies that the matched meets the assumptions of the metric
+        Returns True if matcher is valid and False if matcher is not valid"""
+
+        raise NotImplementedError
 
     @abstractmethod
     def _compute(self, matched: Matched) -> dict:
@@ -36,7 +38,7 @@ class Metric(ABC):
         """
         raise NotImplementedError
 
-    def compute(self, matched: Matched) -> Results:
+    def compute(self, matched: Matched, override_matcher: bool = False) -> Results:
         """The compute methods of Metric objects returns a Results object populated with results
         and associated metadata
 
@@ -46,6 +48,19 @@ class Metric(ABC):
         Returns:
             Results: Object containing metric results and associated pipeline metadata
         """
+        if override_matcher:
+            warnings.warn(
+                "Overriding matcher/metric validation may result in "
+                "unpredictable/incorrect metric results",
+                stacklevel=2,
+            )
+        else:
+            valid_matcher = self._validate_matcher(matched)
+            if not valid_matcher:
+                raise TypeError(
+                    "The matched data uses a matcher that does not meet the requirements "
+                    "of the metric. Check the documentation for the metric for more information."
+                )
 
         res_dict = self._compute(matched)
 

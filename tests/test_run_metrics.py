@@ -1,6 +1,6 @@
 import pytest
 from traccuracy import run_metrics
-from traccuracy.matchers._base import Matched, Matcher
+from traccuracy.matchers._base import Matcher
 from traccuracy.metrics._base import Metric
 
 from tests.test_utils import get_movie_with_graph
@@ -10,6 +10,9 @@ class DummyMetric(Metric):
     def _compute(self, matched):
         return {}
 
+    def _validate_matcher(self, matched):
+        return True
+
 
 class DummyMetricParam(Metric):
     def __init__(self, param="value"):
@@ -17,6 +20,9 @@ class DummyMetricParam(Metric):
 
     def _compute(self, matched):
         return {}
+
+    def _validate_matcher(self, matched):
+        return True
 
 
 class DummyMatcher(Matcher):
@@ -27,7 +33,7 @@ class DummyMatcher(Matcher):
             self.mapping = []
 
     def _compute_mapping(self, gt_graph, pred_graph):
-        return Matched(gt_graph, pred_graph, self.mapping)
+        return self.mapping
 
 
 def test_run_metrics():

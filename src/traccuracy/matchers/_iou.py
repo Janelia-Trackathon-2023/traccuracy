@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from traccuracy._tracking_graph import TrackingGraph
 
-from ._base import Matched, Matcher
+from ._base import Matcher
 from ._compute_overlap import get_labels_with_overlap
 
 
@@ -234,4 +234,4 @@ class IOUMatcher(Matcher):
             one_to_one=self.one_to_one,
         )
 
-        return Matched(gt_graph, pred_graph, mapping)
+        return mapping
