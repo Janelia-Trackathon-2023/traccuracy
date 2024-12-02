@@ -1,9 +1,9 @@
 import pytest
+
+from tests.test_utils import get_annotated_image
 from traccuracy.matchers._compute_overlap import (
     get_labels_with_overlap,
 )
-
-from tests.test_utils import get_annotated_image
 
 
 @pytest.mark.parametrize("overlap", ["iou", "iogt"])

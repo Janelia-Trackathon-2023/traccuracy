@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+
 from traccuracy.loaders import (
     _check_ctc,
     _get_node_attributes,

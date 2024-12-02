@@ -2,12 +2,12 @@ import os
 from pathlib import Path
 
 import pytest
+
+from tests.test_utils import download_gt_data, get_division_graphs
 from traccuracy import TrackingGraph
 from traccuracy.loaders import load_ctc_data
 from traccuracy.matchers import IOUMatcher, Matched
 from traccuracy.metrics._divisions import DivisionMetrics
-
-from tests.test_utils import download_gt_data, get_division_graphs
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 

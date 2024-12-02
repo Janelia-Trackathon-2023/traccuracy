@@ -2,11 +2,11 @@ import os
 from pathlib import Path
 
 import pytest
+
+from tests.test_utils import get_movie_with_graph, gt_data
 from traccuracy.loaders import load_ctc_data
 from traccuracy.matchers import CTCMatcher
 from traccuracy.metrics import CTCMetrics
-
-from tests.test_utils import get_movie_with_graph, gt_data
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
