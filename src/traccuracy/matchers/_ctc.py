@@ -8,7 +8,7 @@ from tqdm import tqdm
 if TYPE_CHECKING:
     from traccuracy._tracking_graph import TrackingGraph
 
-from ._base import Matched, Matcher
+from ._base import Matcher
 from ._compute_overlap import get_labels_with_overlap
 
 
@@ -54,7 +54,7 @@ class CTCMatcher(Matcher):
         mapping: list[tuple] = []
         # Get overlaps for each frame
         if gt.start_frame is None or gt.end_frame is None:
-            return Matched(gt_graph, pred_graph, mapping)
+            return mapping
 
         for i, t in enumerate(
             tqdm(
@@ -95,7 +95,7 @@ class CTCMatcher(Matcher):
                         (gt_label_to_id[gt_label], pred_label_to_id[pred_label])
                     )
 
-        return Matched(gt_graph, pred_graph, mapping)
+        return mapping
 
 
 def detection_test(gt_blob: np.ndarray, comp_blob: np.ndarray) -> int:

@@ -10,4 +10,4 @@ except PackageNotFoundError:  # pragma: no cover
 from ._run_metrics import run_metrics
 from ._tracking_graph import EdgeFlag, NodeFlag, TrackingGraph
 
-__all__ = ["TrackingGraph", "run_metrics", "NodeFlag", "EdgeFlag"]
+__all__ = ["EdgeFlag", "NodeFlag", "TrackingGraph", "run_metrics"]

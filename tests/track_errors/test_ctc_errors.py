@@ -1,5 +1,6 @@
 import networkx as nx
 import numpy as np
+
 from traccuracy._tracking_graph import EdgeFlag, NodeFlag, TrackingGraph
 from traccuracy.matchers import Matched
 from traccuracy.track_errors._ctc import get_edge_errors, get_vertex_errors
@@ -34,7 +35,7 @@ def test_get_vertex_errors():
     )
     G_comp = TrackingGraph(comp_g)
 
-    matched_data = Matched(G_gt, G_comp, mapping)
+    matched_data = Matched(G_gt, G_comp, mapping, {"name": "DummyMatcher"})
 
     get_vertex_errors(matched_data)
 
@@ -89,7 +90,7 @@ def test_assign_edge_errors():
     )
     G_gt = TrackingGraph(gt_g)
 
-    matched_data = Matched(G_gt, G_comp, mapping)
+    matched_data = Matched(G_gt, G_comp, mapping, {"name": "DummyMatcher"})
 
     get_edge_errors(matched_data)
 
@@ -129,7 +130,9 @@ def test_assign_edge_errors_semantics():
     # Define mapping with all nodes matching except for 2_3 in comp
     mapping = [(n, n) for n in gt.nodes]
 
-    matched_data = Matched(TrackingGraph(gt), TrackingGraph(comp), mapping)
+    matched_data = Matched(
+        TrackingGraph(gt), TrackingGraph(comp), mapping, {"name": "DummyMatcher"}
+    )
 
     get_edge_errors(matched_data)
 
@@ -182,7 +185,9 @@ def test_ns_vertex_fn_edge():
         (5, 2),
     ]
 
-    matched_data = Matched(TrackingGraph(gt), TrackingGraph(comp), mapping)
+    matched_data = Matched(
+        TrackingGraph(gt), TrackingGraph(comp), mapping, {"name": "DummyMatcher"}
+    )
     get_vertex_errors(matched_data)
     get_edge_errors(matched_data)
 

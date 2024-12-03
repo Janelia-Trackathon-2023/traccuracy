@@ -40,10 +40,8 @@ class Matcher(ABC):
                 "Input data must be a TrackingData object with a graph and segmentations"
             )
 
-        matched = self._compute_mapping(gt_graph, pred_graph)
-
-        # Record matcher info on Matched object
-        matched.matcher_info = self.info
+        mapping = self._compute_mapping(gt_graph, pred_graph)
+        matched = Matched(gt_graph, pred_graph, mapping, self.info)
 
         # Report matching performance
         total_gt = len(matched.gt_graph.nodes)
@@ -58,8 +56,11 @@ class Matcher(ABC):
     @abstractmethod
     def _compute_mapping(
         self, gt_graph: TrackingGraph, pred_graph: TrackingGraph
-    ) -> Matched:
-        """Computes a mapping of nodes in gt to nodes in pred and returns a Matched object
+    ) -> list[tuple[Any, Any]]:
+        """Computes a mapping of nodes in gt to nodes in pred and returns a mapping
+
+        Returns:
+            mapping: list of tuples
 
         Raises:
             NotImplementedError
@@ -83,7 +84,7 @@ class Matched:
         pred_graph (traccuracy.TrackingGraph): Tracking graph object for the pred
         mapping (list[tuple[Any, Any]]): List of tuples where each tuple maps
             a gt node to a pred node
-        matcher_info (optional, dict): Dictionary containing name and parameters from
+        matcher_info (dict): Dictionary containing name and parameters from
             the matcher that generated the mapping
     """
 
@@ -92,7 +93,7 @@ class Matched:
         gt_graph: TrackingGraph,
         pred_graph: TrackingGraph,
         mapping: list[tuple[Any, Any]],
-        matcher_info: dict | None = None,
+        matcher_info: dict,
     ):
         self.gt_graph = gt_graph
         self.pred_graph = pred_graph

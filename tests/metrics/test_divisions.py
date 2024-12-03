@@ -2,12 +2,12 @@ import os
 from pathlib import Path
 
 import pytest
-from traccuracy import TrackingGraph
-from traccuracy.loaders import load_ctc_data
-from traccuracy.matchers import CTCMatcher, IOUMatcher, Matched
-from traccuracy.metrics._divisions import DivisionMetrics
 
 from tests.test_utils import download_gt_data, get_division_graphs
+from traccuracy import TrackingGraph
+from traccuracy.loaders import load_ctc_data
+from traccuracy.matchers import IOUMatcher, Matched
+from traccuracy.metrics._divisions import DivisionMetrics
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
@@ -36,17 +36,15 @@ def pred_hela():
     )
 
 
-def test_ctc_div_metrics(gt_hela, pred_hela):
-    ctc_matched = CTCMatcher().compute_mapping(gt_hela, pred_hela)
-    div_results = DivisionMetrics().compute(ctc_matched)
-
-    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 18
-    assert div_results.results["Frame Buffer 0"]["False Positive Divisions"] == 30
-    assert div_results.results["Frame Buffer 0"]["True Positive Divisions"] == 76
-
-
 def test_iou_div_metrics(gt_hela, pred_hela):
+    # Fail validation if one-to-one not enabled
     iou_matched = IOUMatcher(iou_threshold=0.1).compute_mapping(gt_hela, pred_hela)
+    with pytest.raises(TypeError):
+        div_results = DivisionMetrics().compute(iou_matched)
+
+    iou_matched = IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(
+        gt_hela, pred_hela
+    )
     div_results = DivisionMetrics().compute(iou_matched)
 
     assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 25
@@ -58,9 +56,7 @@ def test_DivisionMetrics():
     g_gt, g_pred, map_gt, map_pred = get_division_graphs()
     mapper = list(zip(map_gt, map_pred))
     matched = Matched(
-        TrackingGraph(g_gt),
-        TrackingGraph(g_pred),
-        mapper,
+        TrackingGraph(g_gt), TrackingGraph(g_pred), mapper, {"name": "DummyMatcher"}
     )
     frame_buffer = 2
 
