@@ -1,6 +1,8 @@
 import networkx as nx
 import numpy as np
 import pytest
+
+from tests.test_utils import get_division_graphs
 from traccuracy import NodeFlag, TrackingGraph
 from traccuracy.matchers import Matched
 from traccuracy.track_errors.divisions import (
@@ -10,8 +12,6 @@ from traccuracy.track_errors.divisions import (
     _get_pred_by_t,
     _get_succ_by_t,
 )
-
-from tests.test_utils import get_division_graphs
 
 
 @pytest.fixture

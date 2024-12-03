@@ -1,9 +1,9 @@
 import pytest
+
+from tests.test_utils import get_movie_with_graph
 from traccuracy import run_metrics
 from traccuracy.matchers._base import Matcher
 from traccuracy.metrics._base import Metric
-
-from tests.test_utils import get_movie_with_graph
 
 
 class DummyMetric(Metric):
