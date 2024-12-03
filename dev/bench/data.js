@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1733244429718,
+  "lastUpdate": 1733248537735,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -4090,6 +4090,121 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0",
             "extra": "mean: 749.4556030000012 msec\nrounds: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "369b29469f104d8c976d1adbff40a7cbed97d832",
+          "message": "ci(dependabot): bump codecov/codecov-action from 4 to 5 (#168)\n\nBumps [codecov/codecov-action](https://github.com/codecov/codecov-action) from 4 to 5.\r\n- [Release notes](https://github.com/codecov/codecov-action/releases)\r\n- [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)\r\n- [Commits](https://github.com/codecov/codecov-action/compare/v4...v5)\r\n\r\n---\r\nupdated-dependencies:\r\n- dependency-name: codecov/codecov-action\r\n  dependency-type: direct:production\r\n  update-type: version-update:semver-major\r\n...\r\n\r\nSigned-off-by: dependabot[bot] <support@github.com>\r\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>\r\nCo-authored-by: Morgan Schwartz <msschwartz21@gmail.com>",
+          "timestamp": "2024-12-03T12:50:06-05:00",
+          "tree_id": "901c3aa755b06c22c9261d8f28e611c5af15f806",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/369b29469f104d8c976d1adbff40a7cbed97d832"
+        },
+        "date": 1733248537381,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[2d]",
+            "value": 0.1705511427340492,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 5.863343885999996 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[3d]",
+            "value": 0.05916939008271161,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 16.900630522 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_ctc_data[2d]",
+            "value": 0.8510610680035171,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.1750038130000178 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[2d]",
+            "value": 1.340952746631447,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0019320660419939787",
+            "extra": "mean: 745.7384330000139 msec\nrounds: 2"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[3d]",
+            "value": 0.10012582102035598,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 9.987433708999959 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[2d]",
+            "value": 0.6834957000721532,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.4630669950000197 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[3d]",
+            "value": 0.05888201972058093,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 16.983113091999996 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[2d]",
+            "value": 3.7511730621515995,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 266.5832749999595 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[3d]",
+            "value": 0.24310177851411,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 4.1135034310000265 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[2d]",
+            "value": 0.6342451783027695,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.576677339000014 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[3d]",
+            "value": 0.056055814828189554,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 17.839362483000002 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[2d]",
+            "value": 13.593120521712212,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 73.56662499995537 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[3d]",
+            "value": 1.3727542843259652,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 728.4624870000016 msec\nrounds: 1"
           }
         ]
       }
