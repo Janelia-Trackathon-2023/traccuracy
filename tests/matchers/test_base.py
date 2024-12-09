@@ -1,14 +1,13 @@
+from tests.test_utils import get_movie_with_graph
 from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.matchers._base import Matched, Matcher
-
-from tests.test_utils import get_movie_with_graph
 
 
 class DummyMatcher(Matcher):
     def _compute_mapping(
         self, gt_graph: TrackingGraph, pred_graph: TrackingGraph
     ) -> Matched:
-        return Matched(gt_graph, pred_graph, [])
+        return []
 
 
 class DummyMatcherParam(DummyMatcher):

@@ -1,16 +1,62 @@
+import os
+from pathlib import Path
+
+import pytest
+
+from tests.test_utils import download_gt_data, get_division_graphs
 from traccuracy import TrackingGraph
-from traccuracy.matchers import Matched
+from traccuracy.loaders import load_ctc_data
+from traccuracy.matchers import IOUMatcher, Matched
 from traccuracy.metrics._divisions import DivisionMetrics
 
-from tests.test_utils import get_division_graphs
+ROOT_DIR = Path(__file__).resolve().parents[2]
+
+
+@pytest.fixture(scope="module")
+def download_gt_hela():
+    url = "http://data.celltrackingchallenge.net/training-datasets/Fluo-N2DL-HeLa.zip"
+    download_gt_data(url, ROOT_DIR)
+
+
+@pytest.fixture(scope="function")
+def gt_hela():
+    path = "downloads/Fluo-N2DL-HeLa/01_GT/TRA"
+    return load_ctc_data(
+        os.path.join(ROOT_DIR, path),
+        os.path.join(ROOT_DIR, path, "man_track.txt"),
+    )
+
+
+@pytest.fixture(scope="function")
+def pred_hela():
+    path = "examples/sample-data/Fluo-N2DL-HeLa/01_RES"
+    return load_ctc_data(
+        os.path.join(ROOT_DIR, path),
+        os.path.join(ROOT_DIR, path, "res_track.txt"),
+    )
+
+
+def test_iou_div_metrics(gt_hela, pred_hela):
+    # Fail validation if one-to-one not enabled
+    iou_matched = IOUMatcher(iou_threshold=0.1).compute_mapping(gt_hela, pred_hela)
+    with pytest.raises(TypeError):
+        div_results = DivisionMetrics().compute(iou_matched)
+
+    iou_matched = IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(
+        gt_hela, pred_hela
+    )
+    div_results = DivisionMetrics().compute(iou_matched)
+
+    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 25
+    assert div_results.results["Frame Buffer 0"]["False Positive Divisions"] == 31
+    assert div_results.results["Frame Buffer 0"]["True Positive Divisions"] == 69
 
 
 def test_DivisionMetrics():
-    g_gt, g_pred, mapper = get_division_graphs()
+    g_gt, g_pred, map_gt, map_pred = get_division_graphs()
+    mapper = list(zip(map_gt, map_pred))
     matched = Matched(
-        TrackingGraph(g_gt),
-        TrackingGraph(g_pred),
-        mapper,
+        TrackingGraph(g_gt), TrackingGraph(g_pred), mapper, {"name": "DummyMatcher"}
     )
     frame_buffer = 2
 

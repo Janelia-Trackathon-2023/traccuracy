@@ -3,6 +3,8 @@ from collections import Counter
 import networkx as nx
 import numpy as np
 import pytest
+
+from tests.test_utils import get_annotated_image, get_movie_with_graph
 from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.matchers._iou import (
     IOUMatcher,
@@ -10,8 +12,6 @@ from traccuracy.matchers._iou import (
     _match_nodes,
     match_iou,
 )
-
-from tests.test_utils import get_annotated_image, get_movie_with_graph
 
 
 # tests with new fixtures (incomplete)

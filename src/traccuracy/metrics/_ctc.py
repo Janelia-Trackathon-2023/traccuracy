@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from traccuracy._tracking_graph import EdgeFlag, NodeFlag
+from traccuracy.matchers._base import Matched
 from traccuracy.track_errors._ctc import evaluate_ctc_events
 
 from ._base import Metric
@@ -12,7 +13,6 @@ if TYPE_CHECKING:
 
 
 class AOGMMetrics(Metric):
-    supports_many_to_one = True
 
     def __init__(
         self,
@@ -33,6 +33,12 @@ class AOGMMetrics(Metric):
             "fn": edge_fn_weight,
             "ws": edge_ws_weight,
         }
+
+    def _validate_matcher(self, matched: Matched) -> bool:
+        valid_matchers = {"IOUMatcher", "CTCMatcher"}
+        name = matched.matcher_info["name"]
+
+        return name in valid_matchers
 
     def _compute(self, data: Matched):
         evaluate_ctc_events(data)
