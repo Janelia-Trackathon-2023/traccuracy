@@ -1,4 +1,5 @@
 import networkx as nx
+
 from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.matchers._base import Matched
 
