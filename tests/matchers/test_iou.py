@@ -1,3 +1,5 @@
+from collections import Counter
+
 import networkx as nx
 import numpy as np
 import pytest
@@ -12,6 +14,39 @@ from traccuracy.matchers._iou import (
 )
 
 
+# tests with new fixtures (incomplete)
+def test_good_seg(good_segmentation_2d, good_segmentation_3d):
+    # 2d
+    gt_2d, pred_2d = good_segmentation_2d
+    expected_matches = [(1, 2)]
+    # Test for merge and force one to one
+    gtcells, rescells = _match_nodes(gt_2d, pred_2d, threshold=0.4, one_to_one=True)
+    computed_matches = list(zip(gtcells, rescells))
+    assert Counter(expected_matches) == Counter(computed_matches)
+
+    gtcells, rescells = _match_nodes(gt_2d, pred_2d, threshold=0.5)
+    computed_matches = list(zip(gtcells, rescells))
+    assert Counter(expected_matches) == Counter(computed_matches)
+
+    gtcells, rescells = _match_nodes(gt_2d, pred_2d, threshold=0.8)
+    computed_matches = list(zip(gtcells, rescells))
+    expected_matches = []
+    assert Counter(expected_matches) == Counter(computed_matches)
+
+    # 3d
+    gt_3d, pred_3d = good_segmentation_3d
+    expected_matches = [(1, 2)]
+    # Test for merge and force one to one
+    gtcells, rescells = _match_nodes(gt_3d, pred_3d, threshold=0.4, one_to_one=True)
+    computed_matches = list(zip(gtcells, rescells))
+    assert Counter(expected_matches) == Counter(computed_matches)
+
+    gtcells, rescells = _match_nodes(gt_3d, pred_3d, threshold=0.5)
+    computed_matches = list(zip(gtcells, rescells))
+    assert Counter(expected_matches) == Counter(computed_matches)
+
+
+# test with old data
 def get_two_to_one(w, h, imw, imh):
     """Basic two cell merge/split
 
