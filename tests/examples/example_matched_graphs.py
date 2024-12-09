@@ -6,6 +6,13 @@ from traccuracy.matchers._base import Matched
 """A set of fixtures covering basic graph matching cases over 3 time frames
 Covers edge cases, good matchings, fn nodes, fp nodes, two to one matchings in each
 direction (pred -> gt, gt -> pred), and divisions
+The type of mapping e.g. one to one or one to many is annotated in the docstring
+
+example of how to use
+@pytest.mark.parametrize("i", [0, 1, 2], ids=["0", "1", "2"])
+def test_fn_node(i):
+    matched = fn_node_matched(i)
+    assert ...
 """
 
 
@@ -59,6 +66,7 @@ def empty_gt():
 
 # good
 def good_matched():
+    """one to one"""
     gt = basic_graph()
     pred = basic_graph(node_ids=(4, 5, 6), y_offset=1)
     mapping = [(1, 4), (2, 5), (3, 6)]
@@ -67,6 +75,7 @@ def good_matched():
 
 # fn_node
 def fn_node_matched(time_to_drop):  # 0, 1, or 2
+    """one to one"""
     gt = basic_graph()
     pred_node_ids = (4, 5, 6)
     pred = basic_graph(node_ids=pred_node_ids, y_offset=1)
@@ -76,15 +85,9 @@ def fn_node_matched(time_to_drop):  # 0, 1, or 2
     return Matched(gt, pred, mapping)
 
 
-# example of how to use
-# @pytest.mark.parametrize("i", [0, 1, 2], ids=["0", "1", "2"])
-# def test_fn_node(i):
-#     matched = fn_node_matched(i)
-#     assert ...
-
-
 # fn_edge
 def fn_edge_matched(edge_to_drop):  # 0 or 1
+    """one to one"""
     gt = basic_graph()
     pred_node_ids = (4, 5, 6)
     pred = basic_graph(node_ids=pred_node_ids, y_offset=1)
@@ -96,6 +99,7 @@ def fn_edge_matched(edge_to_drop):  # 0 or 1
 
 # fp_node
 def fp_node_matched(time_to_add):  # 0, 1, or 2
+    """one to one"""
     gt = basic_graph()
     pred_node_ids = (4, 5, 6)
     pred = basic_graph(node_ids=pred_node_ids, y_offset=1)
@@ -106,6 +110,7 @@ def fp_node_matched(time_to_add):  # 0, 1, or 2
 
 # fp_edge
 def fp_edge_matched(edge_to_add):  # 0 or 1
+    """one to one"""
     gt = basic_graph()
     pred_node_ids = (4, 5, 6)
     pred = basic_graph(node_ids=pred_node_ids, y_offset=1)
@@ -118,6 +123,7 @@ def fp_edge_matched(edge_to_add):  # 0 or 1
 
 # two pred to one gt (identity switch)
 def one_to_two(time):  # 0, 1, or 2
+    """one to many"""
     gt_node_ids = (1, 2, 3)
     gt = basic_graph(node_ids=gt_node_ids, y_offset=1)
     pred_node_ids = (4, 5, 6)
@@ -134,6 +140,7 @@ def one_to_two(time):  # 0, 1, or 2
 
 # two gt to one pred (non split vertex)
 def two_to_one(time):  # 0, 1, or 2
+    """many to one"""
     gt_node_ids = (1, 2, 3)
     gt = basic_graph(node_ids=gt_node_ids, y_offset=0)
     pred_node_ids = (4, 5, 6)
