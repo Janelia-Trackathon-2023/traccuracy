@@ -7,6 +7,8 @@ from traccuracy.matchers._base import Matched
 Covers edge cases, good matchings, fn nodes, fp nodes, two to one matchings in each
 direction (pred -> gt, gt -> pred), and divisions
 The type of mapping e.g. one to one or one to many is annotated in the docstring
+Please note that the names of the fixtures are just meant to be descriptive and may
+or may not match to a particular error type as described by a set of metrics
 
 example of how to use
 @pytest.mark.parametrize("i", [0, 1, 2], ids=["0", "1", "2"])
