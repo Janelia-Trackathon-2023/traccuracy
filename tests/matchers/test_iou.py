@@ -4,8 +4,8 @@ import networkx as nx
 import numpy as np
 import pytest
 
-from tests.examples.segs import good_segmentation_2d, good_segmentation_3d
-from tests.test_utils import get_annotated_image, get_movie_with_graph
+import tests.examples.segs as ex_segs
+from tests.test_utils import get_movie_with_graph
 from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.matchers._iou import (
     IOUMatcher,
@@ -15,146 +15,146 @@ from traccuracy.matchers._iou import (
 )
 
 
-# tests with new fixtures (incomplete)
-def test_good_seg():
-    # 2d
-    gt_2d, pred_2d = good_segmentation_2d()
-    expected_matches = [(1, 2)]
-    # Test for merge and force one to one
-    gtcells, rescells = _match_nodes(gt_2d, pred_2d, threshold=0.4, one_to_one=True)
-    computed_matches = list(zip(gtcells, rescells))
-    assert Counter(expected_matches) == Counter(computed_matches)
+class Test__match_nodes:
+    @pytest.mark.parametrize(
+        "data_fxn",
+        [ex_segs.good_segmentation_2d, ex_segs.good_segmentation_3d],
+        ids=["2D", "3D"],
+    )
+    def test_good_seg(self, data_fxn):
+        gt, pred = data_fxn()
+        expected_matches = [(1, 2)]
 
-    gtcells, rescells = _match_nodes(gt_2d, pred_2d, threshold=0.5)
-    computed_matches = list(zip(gtcells, rescells))
-    assert Counter(expected_matches) == Counter(computed_matches)
+        # Low threshold
+        gtcells, rescells = _match_nodes(gt, pred, threshold=0.4)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    gtcells, rescells = _match_nodes(gt_2d, pred_2d, threshold=0.8)
-    computed_matches = list(zip(gtcells, rescells))
-    expected_matches = []
-    assert Counter(expected_matches) == Counter(computed_matches)
+        # Low threshold one_to_one
+        gtcells, rescells = _match_nodes(gt, pred, threshold=0.4, one_to_one=True)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    # 3d
-    gt_3d, pred_3d = good_segmentation_3d()
-    expected_matches = [(1, 2)]
-    # Test for merge and force one to one
-    gtcells, rescells = _match_nodes(gt_3d, pred_3d, threshold=0.4, one_to_one=True)
-    computed_matches = list(zip(gtcells, rescells))
-    assert Counter(expected_matches) == Counter(computed_matches)
+        # High threshold -- no matches
+        gtcells, rescells = _match_nodes(gt, pred, threshold=0.9)
+        expected_matches = []
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    gtcells, rescells = _match_nodes(gt_3d, pred_3d, threshold=0.5)
-    computed_matches = list(zip(gtcells, rescells))
-    assert Counter(expected_matches) == Counter(computed_matches)
+    @pytest.mark.parametrize(
+        "data_fxn",
+        [
+            ex_segs.false_positive_segmentation_2d,
+            ex_segs.false_positive_segmentation_3d,
+        ],
+        ids=["2D", "3D"],
+    )
+    def test_false_pos(self, data_fxn):
+        gt, pred = data_fxn()
+        expected_matches = []
 
+        gtcells, rescells = _match_nodes(gt, pred)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-# test with old data
-def get_two_to_one(w, h, imw, imh):
-    """Basic two cell merge/split
+    @pytest.mark.parametrize(
+        "data_fxn",
+        [
+            ex_segs.false_negative_segmentation_2d,
+            ex_segs.false_negative_segmentation_3d,
+        ],
+        ids=["2D", "3D"],
+    )
+    def test_false_neg(self, data_fxn):
+        gt, pred = data_fxn()
+        expected_matches = []
 
-    Mapping [(1,3), (2,4), (2,5)]
+        gtcells, rescells = _match_nodes(gt, pred)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    """
-    x = np.random.randint(2, imw - w * 2)
-    y = np.random.randint(2, imh - h * 2)
+    @pytest.mark.parametrize(
+        "data_fxn",
+        [ex_segs.oversegmentation_2d, ex_segs.oversegmentation_3d],
+        ids=["2D", "3D"],
+    )
+    def test_split(self, data_fxn):
+        gt, pred = data_fxn()
 
-    merge = np.zeros((imw, imh))
-    merge[0:2, 0:2] = 1
-    merge[x : x + w, y : y + h] = 2
-    merge[x + w : x + 2 * w, y : y + h] = 2
+        # Low threshold, both match
+        expected_matches = [(1, 2), (1, 3)]
+        gtcells, rescells = _match_nodes(gt, pred, threshold=0.3)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    split = np.zeros((imw, imh))
-    split[0:2, 0:2] = 3
-    split[x : x + w, y : y + h] = 4
-    split[x + w : x + 2 * w, y : y + h] = 5
+        # High threshold, no match
+        expected_matches = []
+        gtcells, rescells = _match_nodes(gt, pred, threshold=0.7)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    return merge.astype("int"), split.astype("int")
+        # Low threshold, one to one, only one matches
+        gtcells, rescells = _match_nodes(gt, pred, threshold=0.3, one_to_one=True)
+        computed_matches = list(zip(gtcells, rescells))
+        assert ((1, 2) in computed_matches) != ((1, 3) in computed_matches)
 
+    @pytest.mark.parametrize(
+        "data_fxn",
+        [ex_segs.undersegmentation_2d, ex_segs.undersegmentation_3d],
+        ids=["2D", "3D"],
+    )
+    def test_merge(self, data_fxn):
+        gt, pred = data_fxn()
 
-def get_no_overlap(imw, imh):
-    """two non-overlapping segmentations that start at high number labels
+        # Low threshold, both match
+        expected_matches = [(1, 3), (2, 3)]
+        gtcells, rescells = _match_nodes(gt, pred, threshold=0.3)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    Mapping []
+        # High threshold, no match
+        expected_matches = []
+        gtcells, rescells = _match_nodes(gt, pred, threshold=0.7)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    """
+        # Low threshold, one to one, only one matches
+        gtcells, rescells = _match_nodes(gt, pred, threshold=0.3, one_to_one=True)
+        computed_matches = list(zip(gtcells, rescells))
+        assert ((1, 3) in computed_matches) != ((2, 3) in computed_matches)
 
-    im1 = np.zeros((imw, imh))
-    im1[0:2, 0:2] = 100
+    @pytest.mark.parametrize(
+        "data_fxn", [ex_segs.multicell_2d, ex_segs.multicell_3d], ids=["2D", "3D"]
+    )
+    def test_multiple_objects(self, data_fxn):
+        gt, pred = data_fxn()
+        expected_matches = [(1, 3)]
+        gtcells, rescells = _match_nodes(gt, pred)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    im2 = np.zeros((imw, imh))
-    im2[4:6, 4:6] = 222
+    @pytest.mark.parametrize(
+        "data_fxn", [ex_segs.no_overlap_2d, ex_segs.no_overlap_3d], ids=["2D", "3D"]
+    )
+    def test_no_overlap(self, data_fxn):
+        gt, pred = data_fxn()
+        expected_matches = []
+        gtcells, rescells = _match_nodes(gt, pred)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    return im1.astype("int"), im2.astype("int")
+    def test_input_error(self):
+        im = np.zeros((10, 10))
+        with pytest.raises(ValueError):
+            # Test that threshold 0 is not valid when not one-to-one
+            gtcells, rescells = _match_nodes(im, im, threshold=0.0)
 
+    @pytest.mark.parametrize(
+        "data_fxn", [ex_segs.no_overlap_2d, ex_segs.no_overlap_3d], ids=["2D", "3D"]
+    )
+    def test_non_sequential(self, data_fxn):
+        # test when the segmentation ids are high numbers (the lower numbers should never appear)
+        gt, pred = data_fxn()
+        # Change id of segmentation to non sequntial high value
+        gt[gt == 1] = 100
+        pred[pred == 2] = 200
 
-def test__match_nodes():
-    # creat dummy image to test against
-    num_labels = 5
-    y1 = get_annotated_image(img_size=256, num_labels=num_labels, seed=1)
-    # test same movie
-    gtcells, rescells = _match_nodes(y1, y1)
-    for gt_cell, res_cell in zip(gtcells, rescells):
-        assert gt_cell == res_cell
+        expected_matches = []
+        gtcells, rescells = _match_nodes(gt, pred)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
-    # test different movies (no assertions about matching)
-    y2 = get_annotated_image(img_size=256, num_labels=num_labels, seed=10)
-    gtcells, rescells = _match_nodes(y1, y2)
-
-    # Test for merge without forcing one to one
-    im1, im2 = get_two_to_one(10, 10, 30, 30)
-    gtcells, rescells = _match_nodes(im1, im2, threshold=0.4)
-    for gt_cell, res_cell in zip(gtcells, rescells):
-        assert (int(gt_cell), int(res_cell)) in [(1, 3), (2, 4), (2, 5)]
-
-    # Test for merge and force one to one
-    gtcells, rescells = _match_nodes(im1, im2, threshold=0.4, one_to_one=True)
-    # Create match tuples
-    matches = list(zip(gtcells, rescells))
-    # Check for direct match
-    assert (1, 3) in matches
-    # Check that only one of the merge matches is present
-    assert ((2, 4) in matches) != ((2, 5) in matches)
-
-    with pytest.raises(ValueError):
-        # Test that threshold 0 is not valid when not one-to-one
-        gtcells, rescells = _match_nodes(im1, im2, threshold=0.0)
-
-
-def test__match_nodes_threshold():
-    im1, im2 = get_two_to_one(10, 10, 30, 30)
-    # Test high threshold
-    gtcells, rescells = _match_nodes(im1, im2, threshold=1)
-    # Create match tuples
-    matches = list(zip(gtcells, rescells))
-    # Check that nothing is matched
-    assert len(matches) == 1
-
-    # Test for high threshold and one to one
-    gtcells, rescells = _match_nodes(im1, im2, threshold=0.7, one_to_one=True)
-    # Create match tuples
-    matches = list(zip(gtcells, rescells))
-    # Check that nothing is matched
-    assert len(matches) == 1
-
-
-def test__match_nodes_non_sequential():
-    # test when the segmentation ids are high numbers (the lower numbers should never appear)
-
-    im1, im2 = get_no_overlap(30, 30)
-
-    # Test that phantom segmentations are not matched
-    gtcells, rescells = _match_nodes(im1, im2, threshold=0.1)
-    # Create match tuples
-    matches = list(zip(gtcells, rescells))
-    # Check that nothing is matched
-    assert len(matches) == 0
-
-    # Test that with one-to-one, phantom segmentations are not matched,
-    # even with threshold 0
-    gtcells, rescells = _match_nodes(im1, im2, threshold=0.0, one_to_one=True)
-    # Create match tuples
-    matches = list(zip(gtcells, rescells))
-    # Check that nothing is matched
-    assert len(matches) == 0
+        # Check case with one to one threshold 0
+        gtcells, rescells = _match_nodes(gt, pred)
+        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
 
 
 def test__construct_time_to_seg_id_map():
