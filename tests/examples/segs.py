@@ -1,7 +1,6 @@
 from typing import Any
 
 import numpy as np
-import pytest
 from skimage.draw import disk
 from skimage.measure import regionprops
 
@@ -129,7 +128,6 @@ def make_split_cell_3d(
 
 
 ### CANONICAL 2D SEGMENTATION EXAMPLES ###
-@pytest.fixture()
 def good_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     """A pretty good (but not perfect) pair of segmentations in 2d.
 
@@ -143,7 +141,6 @@ def good_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
-@pytest.fixture()
 def false_positive_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt is empty and the prediction has a
     single cell.
@@ -157,7 +154,6 @@ def false_positive_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
-@pytest.fixture()
 def false_negative_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has a single cell and the
     prediction is empty.
@@ -171,7 +167,6 @@ def false_negative_segmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
-@pytest.fixture()
 def oversegmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has a single cell and the prediction
     splits that into two cells.
@@ -186,7 +181,6 @@ def oversegmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
-@pytest.fixture()
 def undersegmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has two cells and the prediction
     merges them into one circular cell.
@@ -202,7 +196,6 @@ def undersegmentation_2d() -> tuple[np.ndarray, np.ndarray]:
 
 
 ### CANONICAL 3D SEGMENTATION EXAMPLES ###
-@pytest.fixture()
 def good_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pretty good (but not perfect) pair of segmentations in 3d.
 
@@ -216,7 +209,6 @@ def good_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
-@pytest.fixture
 def false_positive_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt is empty and the prediction has a
     single cell.
@@ -230,7 +222,6 @@ def false_positive_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
-@pytest.fixture()
 def false_negative_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has a single cell and the
     prediction is empty.
@@ -244,7 +235,6 @@ def false_negative_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
-@pytest.fixture()
 def oversegmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has a single cell and the prediction
     splits that into two cells.
@@ -259,7 +249,6 @@ def oversegmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
-@pytest.fixture()
 def undersegmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pair of segmentations where the gt has two cells and the prediction
     merges them into one circular cell.

@@ -56,14 +56,14 @@ def empty_pred():
     gt = basic_graph()
     pred = TrackingGraph(nx.DiGraph())
     mapping = []
-    return Matched(gt, pred, mapping)
+    return Matched(gt, pred, mapping, {})
 
 
 def empty_gt():
     pred = basic_graph()
     gt = TrackingGraph(nx.DiGraph())
     mapping = []
-    return Matched(gt, pred, mapping)
+    return Matched(gt, pred, mapping, {})
 
 
 # good
@@ -72,7 +72,7 @@ def good_matched():
     gt = basic_graph()
     pred = basic_graph(node_ids=(4, 5, 6), y_offset=1)
     mapping = [(1, 4), (2, 5), (3, 6)]
-    return Matched(gt, pred, mapping)
+    return Matched(gt, pred, mapping, {})
 
 
 # fn_node
@@ -84,7 +84,7 @@ def fn_node_matched(time_to_drop):  # 0, 1, or 2
     mapping = [(1, 4), (2, 5), (3, 6)]
     pred.graph.remove_node(pred_node_ids[time_to_drop])
     del mapping[time_to_drop]
-    return Matched(gt, pred, mapping)
+    return Matched(gt, pred, mapping, {})
 
 
 # fn_edge
@@ -96,7 +96,7 @@ def fn_edge_matched(edge_to_drop):  # 0 or 1
     edge = (pred_node_ids[edge_to_drop], pred_node_ids[edge_to_drop + 1])
     pred.graph.remove_edge(*edge)
     mapping = [(1, 4), (2, 5), (3, 6)]
-    return Matched(gt, pred, mapping)
+    return Matched(gt, pred, mapping, {})
 
 
 # fp_node
@@ -107,7 +107,7 @@ def fp_node_matched(time_to_add):  # 0, 1, or 2
     pred = basic_graph(node_ids=pred_node_ids, y_offset=1)
     pred.graph.add_node(7, **{"t": time_to_add, "x": time_to_add, "y": 2})
     mapping = [(1, 4), (2, 5), (3, 6)]
-    return Matched(gt, pred, mapping)
+    return Matched(gt, pred, mapping, {})
 
 
 # fp_edge
@@ -120,7 +120,7 @@ def fp_edge_matched(edge_to_add):  # 0 or 1
     pred.graph.add_node(8, **{"t": edge_to_add + 1, "y": 2})
     pred.graph.add_edge(7, 8)
     mapping = [(1, 4), (2, 5), (3, 6)]
-    return Matched(gt, pred, mapping)
+    return Matched(gt, pred, mapping, {})
 
 
 # two pred to one gt (identity switch)
@@ -137,7 +137,7 @@ def one_to_two(time):  # 0, 1, or 2
         pred.graph.add_edge(7, 6)
         pred.graph.nodes[6]["y"] = 2
     mapping.append((gt_node_ids[time], 7))
-    return Matched(gt, pred, mapping)
+    return Matched(gt, pred, mapping, {})
 
 
 # two gt to one pred (non split vertex)
@@ -154,7 +154,7 @@ def two_to_one(time):  # 0, 1, or 2
         gt.graph.add_edge(1, 7)
         gt.graph.nodes[1]["y"] = 2
     mapping.append((7, pred_node_ids[time]))
-    return Matched(gt, pred, mapping)
+    return Matched(gt, pred, mapping, {})
 
 
 def get_division_graphs():
