@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import numpy as np
 from tqdm import tqdm
 
 if TYPE_CHECKING:
@@ -96,30 +95,3 @@ class CTCMatcher(Matcher):
                     )
 
         return mapping
-
-
-def detection_test(gt_blob: np.ndarray, comp_blob: np.ndarray) -> int:
-    """Check if computed marker overlaps majority of the reference marker.
-
-    Given a reference marker and computer marker in original coordinates,
-    return True if the computed marker overlaps strictly more than half
-    of the reference marker's pixels, otherwise False.
-
-    Parameters
-    ----------
-    gt_blob : np.ndarray
-        2D or 3D boolean mask representing the pixels of the ground truth
-        marker
-    comp_blob : np.ndarray
-        2D or 3D boolean mask representing the pixels of the computed
-        marker
-
-    Returns
-    -------
-    bool
-        True if computed marker majority overlaps reference marker, else False.
-    """
-    n_gt_pixels = np.sum(gt_blob)
-    intersection = np.logical_and(gt_blob, comp_blob)
-    comp_blob_matches_gt_blob = int(np.sum(intersection) > 0.5 * n_gt_pixels)
-    return comp_blob_matches_gt_blob
