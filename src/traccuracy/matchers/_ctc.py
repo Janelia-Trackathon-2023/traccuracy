@@ -79,19 +79,27 @@ class CTCMatcher(Matcher):
                 if pred_label_key in G_pred.graph.nodes[node]
             }
 
-            (
-                overlapping_gt_labels,
-                overlapping_pred_labels,
-                intersection,
-            ) = get_labels_with_overlap(gt_frame, pred_frame, overlap="iogt")
-
-            for i in range(len(overlapping_gt_labels)):
-                gt_label = overlapping_gt_labels[i]
-                pred_label = overlapping_pred_labels[i]
-                # CTC metrics only match comp IDs to a single GT ID if there is majority overlap
-                if intersection[i] > 0.5:
-                    mapping.append(
-                        (gt_label_to_id[gt_label], pred_label_to_id[pred_label])
-                    )
+            frame_map = match_frame_majority(gt_frame, pred_frame)
+            # Switch from segmentation ids to node ids
+            for gt_label, pred_label in frame_map:
+                mapping.append((gt_label_to_id[gt_label], pred_label_to_id[pred_label]))
 
         return mapping
+
+
+def match_frame_majority(gt_frame, pred_frame):
+    mapping = []
+    (
+        overlapping_gt_labels,
+        overlapping_pred_labels,
+        intersection,
+    ) = get_labels_with_overlap(gt_frame, pred_frame, overlap="iogt")
+
+    for gt_label, pred_label, iogt in zip(
+        overlapping_gt_labels, overlapping_pred_labels, intersection
+    ):
+        # CTC metrics only match comp IDs to a single GT ID if there is majority overlap
+        if iogt > 0.5:
+            mapping.append((gt_label, pred_label))
+
+    return mapping
