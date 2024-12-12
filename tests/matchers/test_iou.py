@@ -17,144 +17,137 @@ from traccuracy.matchers._iou import (
 
 class Test__match_nodes:
     @pytest.mark.parametrize(
-        "data_fxn",
-        [ex_segs.good_segmentation_2d, ex_segs.good_segmentation_3d],
+        "data",
+        [ex_segs.good_segmentation_2d(), ex_segs.good_segmentation_3d()],
         ids=["2D", "3D"],
     )
-    def test_good_seg(self, data_fxn):
-        gt, pred = data_fxn()
-        expected_matches = [(1, 2)]
+    def test_good_seg(self, data):
+        ex_matches = [(1, 2)]
 
         # Low threshold
-        gtcells, rescells = _match_nodes(gt, pred, threshold=0.4)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        gtcells, rescells = _match_nodes(*data, threshold=0.4)
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
         # Low threshold one_to_one
-        gtcells, rescells = _match_nodes(gt, pred, threshold=0.4, one_to_one=True)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        gtcells, rescells = _match_nodes(*data, threshold=0.4, one_to_one=True)
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
         # High threshold -- no matches
-        gtcells, rescells = _match_nodes(gt, pred, threshold=0.9)
-        expected_matches = []
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        gtcells, rescells = _match_nodes(*data, threshold=0.9)
+        ex_matches = []
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
     @pytest.mark.parametrize(
-        "data_fxn",
+        "data",
         [
-            ex_segs.false_positive_segmentation_2d,
-            ex_segs.false_positive_segmentation_3d,
+            ex_segs.false_positive_segmentation_2d(),
+            ex_segs.false_positive_segmentation_3d(),
         ],
         ids=["2D", "3D"],
     )
-    def test_false_pos(self, data_fxn):
-        gt, pred = data_fxn()
-        expected_matches = []
+    def test_false_pos(self, data):
+        ex_matches = []
 
-        gtcells, rescells = _match_nodes(gt, pred)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        gtcells, rescells = _match_nodes(*data)
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
     @pytest.mark.parametrize(
-        "data_fxn",
+        "data",
         [
-            ex_segs.false_negative_segmentation_2d,
-            ex_segs.false_negative_segmentation_3d,
+            ex_segs.false_negative_segmentation_2d(),
+            ex_segs.false_negative_segmentation_3d(),
         ],
         ids=["2D", "3D"],
     )
-    def test_false_neg(self, data_fxn):
-        gt, pred = data_fxn()
-        expected_matches = []
+    def test_false_neg(self, data):
+        ex_matches = []
 
-        gtcells, rescells = _match_nodes(gt, pred)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        gtcells, rescells = _match_nodes(*data)
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
     @pytest.mark.parametrize(
-        "data_fxn",
-        [ex_segs.oversegmentation_2d, ex_segs.oversegmentation_3d],
+        "data",
+        [ex_segs.oversegmentation_2d(), ex_segs.oversegmentation_3d()],
         ids=["2D", "3D"],
     )
-    def test_split(self, data_fxn):
-        gt, pred = data_fxn()
-
+    def test_split(self, data):
         # Low threshold, both match
-        expected_matches = [(1, 2), (1, 3)]
-        gtcells, rescells = _match_nodes(gt, pred, threshold=0.3)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        ex_matches = [(1, 2), (1, 3)]
+        gtcells, rescells = _match_nodes(*data, threshold=0.3)
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
         # High threshold, no match
-        expected_matches = []
-        gtcells, rescells = _match_nodes(gt, pred, threshold=0.7)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        ex_matches = []
+        gtcells, rescells = _match_nodes(*data, threshold=0.7)
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
         # Low threshold, one to one, only one matches
-        gtcells, rescells = _match_nodes(gt, pred, threshold=0.3, one_to_one=True)
-        computed_matches = list(zip(gtcells, rescells))
-        assert ((1, 2) in computed_matches) != ((1, 3) in computed_matches)
+        gtcells, rescells = _match_nodes(*data, threshold=0.3, one_to_one=True)
+        comp_matches = list(zip(gtcells, rescells))
+        assert ((1, 2) in comp_matches) != ((1, 3) in comp_matches)
 
     @pytest.mark.parametrize(
-        "data_fxn",
-        [ex_segs.undersegmentation_2d, ex_segs.undersegmentation_3d],
+        "data",
+        [ex_segs.undersegmentation_2d(), ex_segs.undersegmentation_3d()],
         ids=["2D", "3D"],
     )
-    def test_merge(self, data_fxn):
-        gt, pred = data_fxn()
-
+    def test_merge(self, data):
         # Low threshold, both match
-        expected_matches = [(1, 3), (2, 3)]
-        gtcells, rescells = _match_nodes(gt, pred, threshold=0.3)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        ex_matches = [(1, 3), (2, 3)]
+        gtcells, rescells = _match_nodes(*data, threshold=0.3)
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
         # High threshold, no match
-        expected_matches = []
-        gtcells, rescells = _match_nodes(gt, pred, threshold=0.7)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        ex_matches = []
+        gtcells, rescells = _match_nodes(*data, threshold=0.7)
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
         # Low threshold, one to one, only one matches
-        gtcells, rescells = _match_nodes(gt, pred, threshold=0.3, one_to_one=True)
-        computed_matches = list(zip(gtcells, rescells))
-        assert ((1, 3) in computed_matches) != ((2, 3) in computed_matches)
+        gtcells, rescells = _match_nodes(*data, threshold=0.3, one_to_one=True)
+        comp_matches = list(zip(gtcells, rescells))
+        assert ((1, 3) in comp_matches) != ((2, 3) in comp_matches)
 
     @pytest.mark.parametrize(
-        "data_fxn", [ex_segs.multicell_2d, ex_segs.multicell_3d], ids=["2D", "3D"]
+        "data", [ex_segs.multicell_2d(), ex_segs.multicell_3d()], ids=["2D", "3D"]
     )
-    def test_multiple_objects(self, data_fxn):
-        gt, pred = data_fxn()
-        expected_matches = [(1, 3)]
-        gtcells, rescells = _match_nodes(gt, pred)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+    def test_multiple_objects(self, data):
+        ex_matches = [(1, 3)]
+        gtcells, rescells = _match_nodes(*data)
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
     @pytest.mark.parametrize(
-        "data_fxn", [ex_segs.no_overlap_2d, ex_segs.no_overlap_3d], ids=["2D", "3D"]
+        "data", [ex_segs.no_overlap_2d(), ex_segs.no_overlap_3d()], ids=["2D", "3D"]
     )
-    def test_no_overlap(self, data_fxn):
-        gt, pred = data_fxn()
-        expected_matches = []
-        gtcells, rescells = _match_nodes(gt, pred)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+    def test_no_overlap(self, data):
+        ex_matches = []
+        gtcells, rescells = _match_nodes(*data)
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
     def test_input_error(self):
         im = np.zeros((10, 10))
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError, match="Threshold of 0 is not valid unless one_to_one is True"
+        ):
             # Test that threshold 0 is not valid when not one-to-one
             gtcells, rescells = _match_nodes(im, im, threshold=0.0)
 
     @pytest.mark.parametrize(
-        "data_fxn", [ex_segs.no_overlap_2d, ex_segs.no_overlap_3d], ids=["2D", "3D"]
+        "data", [ex_segs.no_overlap_2d(), ex_segs.no_overlap_3d()], ids=["2D", "3D"]
     )
-    def test_non_sequential(self, data_fxn):
+    def test_non_sequential(self, data):
         # test when the segmentation ids are high numbers (the lower numbers should never appear)
-        gt, pred = data_fxn()
+        gt, pred = data[0], data[1]
         # Change id of segmentation to non sequntial high value
         gt[gt == 1] = 100
         pred[pred == 2] = 200
 
-        expected_matches = []
+        ex_matches = []
         gtcells, rescells = _match_nodes(gt, pred)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
         # Check case with one to one threshold 0
         gtcells, rescells = _match_nodes(gt, pred)
-        assert Counter(expected_matches) == Counter(list(zip(gtcells, rescells)))
+        assert Counter(ex_matches) == Counter(list(zip(gtcells, rescells)))
 
 
 def test__construct_time_to_seg_id_map():
