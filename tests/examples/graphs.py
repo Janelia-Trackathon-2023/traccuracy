@@ -124,7 +124,7 @@ def fp_edge_matched(edge_to_add):  # 0 or 1
 
 
 # two pred to one gt (identity switch)
-def one_to_two(time):  # 0, 1, or 2
+def node_one_to_two(time):  # 0, 1, or 2
     """one to many"""
     gt_node_ids = (1, 2, 3)
     gt = basic_graph(node_ids=gt_node_ids, y_offset=1)
@@ -141,7 +141,7 @@ def one_to_two(time):  # 0, 1, or 2
 
 
 # two gt to one pred (non split vertex)
-def two_to_one(time):  # 0, 1, or 2
+def node_two_to_one(time):  # 0, 1, or 2
     """many to one"""
     gt_node_ids = (1, 2, 3)
     gt = basic_graph(node_ids=gt_node_ids, y_offset=0)

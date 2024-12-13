@@ -1,61 +1,152 @@
 import networkx as nx
 import numpy as np
+import pytest
 
 from traccuracy._tracking_graph import EdgeFlag, NodeFlag, TrackingGraph
 from traccuracy.matchers import Matched
 from traccuracy.track_errors._ctc import get_edge_errors, get_vertex_errors
 
+import tests.examples.graphs as ex_graphs
 
-def test_get_vertex_errors():
-    comp_ids = [3, 7, 10]
-    comp_ids_2 = list(np.asarray(comp_ids) + 1)
-    gt_ids = [4, 12, 14, 17]
-    gt_ids_2 = list(np.asarray(gt_ids) + 1)
 
-    mapping = [(12, 3), (17, 3), (14, 7), (13, 8), (5, 11)]
+class Test_get_vertex_errors:
+    def test_no_gt(self):
+        matched = ex_graphs.empty_gt()
+        # all pred nodes are false positives
+        get_vertex_errors(matched)
+        for attrs in matched.pred_graph.nodes.values():
+            assert attrs.get(NodeFlag.TRUE_POS) == False
+            assert attrs.get(NodeFlag.FALSE_POS) == True
+            assert attrs.get(NodeFlag.NON_SPLIT) == False
 
-    gt_g = nx.DiGraph()
-    gt_g.add_nodes_from(gt_ids + gt_ids_2)
-    nx.set_node_attributes(
-        gt_g,
-        {
-            idx: {"t": 0, "segmentation_id": 1, "y": 0, "x": 0}
-            for idx in gt_ids + gt_ids_2
-        },
+    def test_no_pred(self):
+        matched = ex_graphs.empty_pred()
+        # All gt nodes are false negatives
+        get_vertex_errors(matched)
+        for attrs in matched.gt_graph.nodes.values():
+            assert attrs.get(NodeFlag.TRUE_POS) == False
+            assert attrs.get(NodeFlag.FALSE_NEG) == True
+
+    def test_good_matched(self):
+        matched = ex_graphs.good_matched()
+        # all notes gt/pred are true pos
+        get_vertex_errors(matched)
+        for attrs in matched.gt_graph.nodes.values():
+            assert attrs.get(NodeFlag.TRUE_POS) == True
+            assert attrs.get(NodeFlag.FALSE_NEG) == False
+        for attrs in matched.pred_graph.nodes.values():
+            assert attrs.get(NodeFlag.TRUE_POS) == True
+            assert attrs.get(NodeFlag.FALSE_POS) == False
+            assert attrs.get(NodeFlag.NON_SPLIT) == False
+
+    @pytest.mark.parametrize(
+            "t",
+            [0, 1, 2]
     )
-    G_gt = TrackingGraph(gt_g)
-    comp_g = nx.DiGraph()
-    comp_g.add_nodes_from(comp_ids + comp_ids_2)
-    nx.set_node_attributes(
-        comp_g,
-        {
-            idx: {"t": 0, "segmentation_id": 1, "y": 0, "x": 0}
-            for idx in comp_ids + comp_ids_2
-        },
+    def test_fn_node(self, t):
+        wrong_node = [1, 2, 3][t]
+        matched = ex_graphs.fn_node_matched(t)
+        # Missing pred node = false neg in gt
+        get_vertex_errors(matched)
+
+        # Check gt graph
+        for node, attrs in matched.gt_graph.nodes.items():
+            if node == wrong_node:
+                assert attrs[NodeFlag.TRUE_POS] == False
+                assert attrs[NodeFlag.FALSE_NEG] == True
+            else:
+                assert attrs[NodeFlag.TRUE_POS] == True
+                assert attrs[NodeFlag.FALSE_NEG] == False
+
+        # Check pred graph -- all correct
+        for attrs in matched.pred_graph.nodes.values():
+            assert attrs.get(NodeFlag.TRUE_POS) == True
+            assert attrs.get(NodeFlag.FALSE_POS) == False
+            assert attrs.get(NodeFlag.NON_SPLIT) == False
+
+    @pytest.mark.parametrize(
+            "t",
+            [0, 1, 2]
     )
-    G_comp = TrackingGraph(comp_g)
+    def test_fp_node(self, t):
+        matched = ex_graphs.fp_node_matched(t)
+        # Pred has a false pos node in t
+        get_vertex_errors(matched)
 
-    matched_data = Matched(G_gt, G_comp, mapping, {"name": "DummyMatcher"})
+        # GT all correct
+        for attrs in matched.gt_graph.nodes.values():
+            assert attrs[NodeFlag.TRUE_POS] == True
+            assert attrs[NodeFlag.FALSE_NEG] == False
+        
+        # Check pred
+        for node, attrs in matched.pred_graph.nodes.items():
+            if node == 7:
+                assert attrs.get(NodeFlag.TRUE_POS) == False
+                assert attrs.get(NodeFlag.FALSE_POS) == True
+                assert attrs.get(NodeFlag.NON_SPLIT) == False
+            else:
+                assert attrs.get(NodeFlag.TRUE_POS) == True
+                assert attrs.get(NodeFlag.FALSE_POS) == False
+                assert attrs.get(NodeFlag.NON_SPLIT) == False
 
-    get_vertex_errors(matched_data)
+    @pytest.mark.parametrize(
+            "edge_er",
+            [0, 1]
+    )
+    def test_fp_edge(self, edge_er):
+        matched = ex_graphs.fp_edge_matched(edge_er)
+        # Introduces two fp nodes 7 and 8
+        get_vertex_errors(matched)
 
-    assert len(matched_data.pred_graph.get_nodes_with_flag(NodeFlag.NON_SPLIT)) == 1
-    assert len(matched_data.pred_graph.get_nodes_with_flag(NodeFlag.TRUE_POS)) == 3
-    assert len(matched_data.pred_graph.get_nodes_with_flag(NodeFlag.FALSE_POS)) == 2
-    assert len(matched_data.gt_graph.get_nodes_with_flag(NodeFlag.FALSE_NEG)) == 3
+        #GT all correct
+        # GT all correct
+        for attrs in matched.gt_graph.nodes.values():
+            assert attrs[NodeFlag.TRUE_POS] == True
+            assert attrs[NodeFlag.FALSE_NEG] == False
+        
+        # Check pred
+        for node, attrs in matched.pred_graph.nodes.items():
+            if node in {7, 8}:
+                assert attrs.get(NodeFlag.TRUE_POS) == False
+                assert attrs.get(NodeFlag.FALSE_POS) == True
+                assert attrs.get(NodeFlag.NON_SPLIT) == False
+            else:
+                assert attrs.get(NodeFlag.TRUE_POS) == True
+                assert attrs.get(NodeFlag.FALSE_POS) == False
+                assert attrs.get(NodeFlag.NON_SPLIT) == False
 
-    assert matched_data.gt_graph.nodes[15][NodeFlag.FALSE_NEG]
-    assert not matched_data.gt_graph.nodes[17][NodeFlag.FALSE_NEG]
+    # Not testing ex_graphs.one_to two b/c not supported by ctc matcher
+    
+    @pytest.mark.parametrize(
+            "t",
+            [0, 1, 2]
+    )
+    def test_nonsplit(self, t):
+        matched = ex_graphs.node_two_to_one(t)
+        get_vertex_errors(matched)
+        
+        # false neg in gt
+        fn_nodes = {7, [1, 2, 3][t]}
+        for node, attrs in matched.gt_graph.nodes.items():
+            if node in fn_nodes:
+                assert attrs[NodeFlag.TRUE_POS] == False
+                assert attrs[NodeFlag.FALSE_NEG] == False
+            else:
+                assert attrs[NodeFlag.TRUE_POS] == True
+                assert attrs[NodeFlag.FALSE_NEG] == False
 
-    assert matched_data.pred_graph.nodes[3][NodeFlag.NON_SPLIT]
-    assert not matched_data.pred_graph.nodes[7][NodeFlag.NON_SPLIT]
-
-    assert matched_data.pred_graph.nodes[7][NodeFlag.TRUE_POS]
-    assert not matched_data.pred_graph.nodes[3][NodeFlag.TRUE_POS]
-
-    assert matched_data.pred_graph.nodes[10][NodeFlag.FALSE_POS]
-    assert not matched_data.pred_graph.nodes[7][NodeFlag.FALSE_POS]
-
+        # nonsplit node in prediction
+        ns_node = [4, 5, 6][t]
+        for node, attrs in matched.pred_graph.nodes.items():
+            if node == ns_node:
+                assert attrs.get(NodeFlag.TRUE_POS) == False
+                assert attrs.get(NodeFlag.FALSE_POS) == False
+                assert attrs.get(NodeFlag.NON_SPLIT) == True
+            else:
+                assert attrs.get(NodeFlag.TRUE_POS) == True
+                assert attrs.get(NodeFlag.FALSE_POS) == False
+                assert attrs.get(NodeFlag.NON_SPLIT) == False
+        
 
 def test_assign_edge_errors():
     comp_ids = [3, 7, 10]
