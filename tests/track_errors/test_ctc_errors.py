@@ -297,3 +297,168 @@ def test_ns_vertex_fn_edge():
 
     for edge in gt_edges:
         assert gt.edges[edge][EdgeFlag.FALSE_NEG]
+
+
+class Test_get_edge_errors:
+    # TODO: delete this flag before merging
+    test_edge_tp = False
+
+    def prep_matched(self, matched):
+        get_vertex_errors(matched)
+        get_edge_errors(matched)
+        return matched
+    
+    def test_no_gt(self):
+        # if pred nodes are never matched to gt nodes the corresponding edges are never reviewed
+        matched = self.prep_matched(ex_graphs.empty_gt())
+        for attrs in matched.pred_graph.edges.values():
+            assert attrs.get(EdgeFlag.FALSE_POS) == True  # currently False 
+            if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == False  # currently None 
+            assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+            assert attrs.get(EdgeFlag.WRONG_SEMANTIC) == False
+    
+    def test_no_pred(self):
+        matched = self.prep_matched(ex_graphs.empty_pred())
+        for attrs in matched.gt_graph.edges.values():
+            if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == False # currently None 
+            assert attrs.get(EdgeFlag.FALSE_NEG) == True
+            assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+
+    def test_good_matched(self):
+        matched = self.prep_matched(ex_graphs.good_matched())
+        for attrs in matched.gt_graph.edges.values():
+            if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True # currently None
+            assert attrs.get(EdgeFlag.FALSE_NEG) == False
+            assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+
+        for attrs in matched.pred_graph.edges.values():
+            assert attrs.get(EdgeFlag.FALSE_POS) == False
+            if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True  # currently None
+            assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+            assert attrs.get(EdgeFlag.WRONG_SEMANTIC) == False
+    
+    def test_fn_node_end(self):
+        matched = self.prep_matched(ex_graphs.fn_node_matched(0))
+
+        # All pred edges correct
+        for attrs in matched.pred_graph.edges.values():
+            if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True
+            assert attrs.get(EdgeFlag.FALSE_POS) == False
+            assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+            assert attrs.get(EdgeFlag.WRONG_SEMANTIC) == False
+
+        # First gt edge is false neg
+        attrs = matched.gt_graph.edges[(1, 2)]
+        assert attrs.get(EdgeFlag.FALSE_NEG) == True
+        if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == False
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+
+    def test_fn_node_middle(self):
+        matched = self.prep_matched(ex_graphs.fn_node_matched(1))
+
+        # No pred edges to test
+
+        # All gt edges false pos
+        for attrs in matched.gt_graph.edges.values():
+            if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == False # currently None 
+            assert attrs.get(EdgeFlag.FALSE_NEG) == True
+            assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+
+    def test_fn_edge(self):
+        matched = self.prep_matched(ex_graphs.fn_edge_matched(0))
+
+        # Only pred edge is correct
+        attrs = matched.pred_graph.edges[(5, 6)]
+        assert attrs.get(EdgeFlag.FALSE_NEG) == False # currently None
+        if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+
+        # First gt edge is false neg
+        attrs = matched.gt_graph.edges[(1, 2)]
+        if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == False # currently None 
+        assert attrs.get(EdgeFlag.FALSE_NEG) == True
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+
+        # Second gt edge is correct
+        attrs = matched.gt_graph.edges[(2, 3)]
+        if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True # currently None 
+        assert attrs.get(EdgeFlag.FALSE_NEG) == False
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+
+    @pytest.mark.parametrize(
+            "t",
+            [0, 1, 2]
+    )
+    def test_fp_node(self, t):
+        matched = self.prep_matched(ex_graphs.fp_node_matched(t))
+
+        # All pred edges correct
+        for attrs in matched.pred_graph.edges.values():
+            if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True
+            assert attrs.get(EdgeFlag.FALSE_POS) == False
+            assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+            assert attrs.get(EdgeFlag.WRONG_SEMANTIC) == False
+        
+        # All gt edges correct
+        for attrs in matched.gt_graph.edges.values():
+            if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True # currently None 
+            assert attrs.get(EdgeFlag.FALSE_NEG) == False
+            assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+
+    @pytest.mark.parametrize(
+            "t",
+            [0, 1]
+    )
+    def test_fp_edge(self, t):
+        matched = self.prep_matched(ex_graphs.fp_edge_matched(t))
+
+        # All but one pred edges correct
+        for edge, attrs in matched.pred_graph.edges.items():
+            # false positive edge
+            if edge == (7, 8):
+                if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == False
+                assert attrs.get(EdgeFlag.FALSE_POS) == True # Currently False b/c not matched to any gt nodes
+                assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+                assert attrs.get(EdgeFlag.WRONG_SEMANTIC) == False
+            else:
+                if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True
+                assert attrs.get(EdgeFlag.FALSE_POS) == False
+                assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+                assert attrs.get(EdgeFlag.WRONG_SEMANTIC) == False
+
+    def test_node_two_to_one_end(self):
+        matched = self.prep_matched(ex_graphs.node_two_to_one(0))
+
+        # All pred edges correct
+        for attrs in matched.pred_graph.edges.values():
+            if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True
+            assert attrs.get(EdgeFlag.FALSE_POS) == False
+            assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+            assert attrs.get(EdgeFlag.WRONG_SEMANTIC) == False
+        
+        # First edge correct - test currently fails
+        attrs = matched.gt_graph.edges[(1,2)]
+        if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True # currently None 
+        assert attrs.get(EdgeFlag.FALSE_NEG) == False # currently True
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+
+        # Second edge correct
+        attrs = matched.gt_graph.edges[(2, 3)]
+        if self.test_edge_tp: assert attrs.get(EdgeFlag.TRUE_POS) == True # currently None 
+        assert attrs.get(EdgeFlag.FALSE_NEG) == False
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) == False
+
+
+    def test_node_two_to_one_mid(self):
+        matched = self.prep_matched(ex_graphs.node_two_to_one(1))
+
+        # TODO weird non split case
+        assert False
+
+    def test_node_one_to_two(self):
+        # TODO
+        assert False
+
+    
+    
+    # TODO: add test case for two to one with edges
