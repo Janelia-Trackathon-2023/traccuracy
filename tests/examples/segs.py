@@ -122,7 +122,7 @@ def make_split_cell_3d(
     mask = sphere(center, radius, shape=arr_shape)
     im[mask] = labels[0]
     # get indices where y value greater than center
-    mask[:, 0 : center[1]] = 0
+    mask[:, 0 : center[1] + 1] = 0
     im[mask] = labels[1]
     return im
 
