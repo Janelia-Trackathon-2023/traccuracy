@@ -264,6 +264,7 @@ def basic_division_t2(start_id=1, y_offset=0, frame_key="t", location_keys=("y")
 
 
 def basic_division(t_div, start_id=1, y_offset=0, frame_key="t", location_keys=("y")):
+    """one to one"""
     if t_div == 0:
         return basic_division_t0(start_id, y_offset, frame_key, location_keys)
     elif t_div == 1:
@@ -273,6 +274,7 @@ def basic_division(t_div, start_id=1, y_offset=0, frame_key="t", location_keys=(
 
 
 def longer_division(t_div, start_id=1, y_offset=0, frame_key="t", location_keys=("y")):
+    """one to one"""
     nodes = []
     nid = start_id
     for t in range(5):
@@ -321,6 +323,7 @@ def empty_gt_div(t_div):
 
 
 def good_div(t_div):
+    """one to one"""
     gt = basic_division(t_div)
     start_id = max(gt.graph.nodes) + 1
     pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
@@ -329,6 +332,7 @@ def good_div(t_div):
 
 
 def fp_div(t_div):
+    """one to one"""
     # t_div either 0 or 1
     gt = basic_division(t_div)
     start_id = max(gt.graph.nodes) + 1
@@ -342,6 +346,7 @@ def fp_div(t_div):
 
 
 def one_child(t_div):
+    """one to one"""
     # t_div either 0 or 1
     gt = basic_division(t_div)
     start_id = max(gt.graph.nodes) + 1
@@ -352,6 +357,7 @@ def one_child(t_div):
 
 
 def no_children(t_div):
+    """one to one"""
     # t_div either 0 or 1
     gt = basic_division(t_div)
     start_id = max(gt.graph.nodes) + 1
@@ -363,6 +369,7 @@ def no_children(t_div):
 
 
 def wrong_child(t_div):
+    """one to one"""
     # t_div either 0 or 1
     gt_graph = basic_division(t_div).graph
     child_start_id = max(gt_graph.nodes)
@@ -394,6 +401,7 @@ def wrong_child(t_div):
 
 
 def div_1early_end():
+    """one to one"""
     gt = longer_division(1)
     start_id = max(gt.nodes) + 1
     pred = longer_division(0, start_id=start_id, y_offset=0.75)
@@ -402,6 +410,7 @@ def div_1early_end():
 
 
 def div_1early_mid():
+    """one to one"""
     gt = longer_division(2)
     start_id = max(gt.nodes) + 1
     pred = longer_division(1, start_id=start_id, y_offset=0.75)
@@ -410,6 +419,7 @@ def div_1early_mid():
 
 
 def div_2early_end():
+    """one to one"""
     gt = longer_division(2)
     start_id = max(gt.nodes) + 1
     pred = longer_division(0, start_id=start_id, y_offset=0.75)
@@ -418,6 +428,7 @@ def div_2early_end():
 
 
 def div_2early_mid():
+    """one to one"""
     gt = longer_division(3)
     start_id = max(gt.nodes) + 1
     pred = longer_division(1, start_id=start_id, y_offset=0.75)
@@ -426,6 +437,7 @@ def div_2early_mid():
 
 
 def div_1late_end():
+    """one to one"""
     gt = longer_division(0)
     start_id = max(gt.nodes) + 1
     pred = longer_division(1, start_id=start_id, y_offset=0.75)
@@ -434,6 +446,7 @@ def div_1late_end():
 
 
 def div_1late_mid():
+    """one to one"""
     gt = longer_division(1)
     start_id = max(gt.nodes) + 1
     pred = longer_division(2, start_id=start_id, y_offset=0.75)
@@ -442,6 +455,7 @@ def div_1late_mid():
 
 
 def div_2late_end():
+    """one to one"""
     gt = longer_division(0)
     start_id = max(gt.nodes) + 1
     pred = longer_division(2, start_id=start_id, y_offset=0.75)
@@ -450,6 +464,7 @@ def div_2late_end():
 
 
 def div_2late_mid():
+    """one to one"""
     gt = longer_division(1)
     start_id = max(gt.nodes) + 1
     pred = longer_division(3, start_id=start_id, y_offset=0.75)
