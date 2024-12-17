@@ -122,7 +122,7 @@ def make_split_cell_3d(
     mask = sphere(center, radius, shape=arr_shape)
     im[mask] = labels[0]
     # get indices where y value greater than center
-    mask[:, 0 : center[1]] = 0
+    mask[:, 0 : center[1] + 1] = 0
     im[mask] = labels[1]
     return im
 
@@ -195,6 +195,37 @@ def undersegmentation_2d() -> tuple[np.ndarray, np.ndarray]:
     return gt, pred
 
 
+def no_overlap_2d() -> tuple[np.ndarray, np.ndarray]:
+    """Two cells with no overlap in 2d."""
+    gt = make_one_cell_2d(label=1, center=(5, 5), radius=7)
+    pred = make_one_cell_2d(label=2, center=(17, 17), radius=7)
+    return gt, pred
+
+
+def multicell_2d() -> tuple[np.ndarray, np.ndarray]:
+    """Two cells in each image, one that overlaps and one that doesn't"""
+    arr_shape = (32, 32)
+    radius = 5
+
+    gt = np.zeros(arr_shape, dtype="int32")
+    pred = np.zeros(arr_shape, dtype="int32")
+
+    # Overlap cell
+    rr, cc = disk((5, 5), radius, shape=arr_shape)
+    gt[rr, cc] = 1
+    pred[rr, cc] = 3
+
+    # Unique gt
+    rr, cc = disk((17, 17), radius, shape=arr_shape)
+    gt[rr, cc] = 2
+
+    # Unique pred
+    rr, cc = disk((25, 7), radius, shape=arr_shape)
+    pred[rr, cc] = 4
+
+    return gt, pred
+
+
 ### CANONICAL 3D SEGMENTATION EXAMPLES ###
 def good_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """A pretty good (but not perfect) pair of segmentations in 3d.
@@ -260,6 +291,37 @@ def undersegmentation_3d() -> tuple[np.ndarray, np.ndarray]:
     """
     gt = make_split_cell_3d(labels=(1, 2), center=(16, 16, 16), radius=9)
     pred = make_one_cell_3d(label=3, center=(16, 16, 16), radius=9)
+    return gt, pred
+
+
+def no_overlap_3d() -> tuple[np.ndarray, np.ndarray]:
+    """3D segmentations with no overlap"""
+    gt = make_one_cell_3d(label=1, center=(5, 5, 5), radius=5)
+    pred = make_one_cell_3d(label=2, center=(17, 17, 17), radius=6)
+    return gt, pred
+
+
+def multicell_3d() -> tuple[np.ndarray, np.ndarray]:
+    """Two cells in each image, one that overlaps and one that doesn't"""
+    arr_shape = (32, 32, 32)
+    radius = 5
+
+    gt = np.zeros(arr_shape, dtype="int32")
+    pred = np.zeros(arr_shape, dtype="int32")
+
+    # Overlap cell
+    mask = sphere((5, 5, 5), radius, shape=arr_shape)
+    gt[mask] = 1
+    pred[mask] = 3
+
+    # Unique gt
+    mask = sphere((17, 17, 17), radius, shape=arr_shape)
+    gt[mask] = 2
+
+    # Unique pred
+    mask = sphere((25, 7, 7), radius, shape=arr_shape)
+    pred[mask] = 4
+
     return gt, pred
 
 

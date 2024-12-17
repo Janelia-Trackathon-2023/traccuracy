@@ -49,6 +49,9 @@ jobs:
 
       - name: Coverage
         uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
 
   benchmark:
     name: Benchmark
