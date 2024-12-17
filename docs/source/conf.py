@@ -84,7 +84,7 @@ autoapi_ignore = ["*/cli.py"]
 # -- Nbsphinx extension ------------------------------------------------------
 
 # Disable nbsphinx extension from running notebooks
-nbsphinx_execute = "never"
+nbsphinx_execute = "auto"
 exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
 # -- Options for HTML output -------------------------------------------------
