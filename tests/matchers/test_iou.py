@@ -4,6 +4,7 @@ import networkx as nx
 import numpy as np
 import pytest
 
+from tests.examples.segs import good_segmentation_2d, good_segmentation_3d
 from tests.test_utils import get_annotated_image, get_movie_with_graph
 from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.matchers._iou import (
@@ -15,9 +16,9 @@ from traccuracy.matchers._iou import (
 
 
 # tests with new fixtures (incomplete)
-def test_good_seg(good_segmentation_2d, good_segmentation_3d):
+def test_good_seg():
     # 2d
-    gt_2d, pred_2d = good_segmentation_2d
+    gt_2d, pred_2d = good_segmentation_2d()
     expected_matches = [(1, 2)]
     # Test for merge and force one to one
     gtcells, rescells = _match_nodes(gt_2d, pred_2d, threshold=0.4, one_to_one=True)
@@ -34,7 +35,7 @@ def test_good_seg(good_segmentation_2d, good_segmentation_3d):
     assert Counter(expected_matches) == Counter(computed_matches)
 
     # 3d
-    gt_3d, pred_3d = good_segmentation_3d
+    gt_3d, pred_3d = good_segmentation_3d()
     expected_matches = [(1, 2)]
     # Test for merge and force one to one
     gtcells, rescells = _match_nodes(gt_3d, pred_3d, threshold=0.4, one_to_one=True)
