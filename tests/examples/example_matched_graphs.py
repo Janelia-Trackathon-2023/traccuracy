@@ -200,3 +200,258 @@ def get_division_graphs():
     mapper = [("1_0", "1_0"), ("1_1", "1_1"), ("2_4", "2_4"), ("3_4", "3_4")]
 
     return G1, G2, mapper
+
+
+def basic_division_t0(start_id=1, y_offset=0, frame_key="t", location_keys=("y")):
+    nodes = [
+        (start_id, {frame_key: 0, location_keys[0]: y_offset}),
+        (start_id + 1, {frame_key: 1, location_keys[0]: y_offset + 0.5}),
+        (start_id + 2, {frame_key: 1, location_keys[0]: y_offset - 0.5}),
+        (start_id + 3, {frame_key: 2, location_keys[0]: y_offset + 0.5}),
+        (start_id + 4, {frame_key: 2, location_keys[0]: y_offset - 0.5}),
+    ]
+    edges = [
+        (start_id, start_id + 1),
+        (start_id, start_id + 2),
+        (start_id + 1, start_id + 3),
+        (start_id + 2, start_id + 4),
+    ]
+    graph = nx.DiGraph()
+    graph.add_nodes_from(nodes)
+    graph.add_edges_from(edges)
+
+    return TrackingGraph(graph, frame_key=frame_key, location_keys=location_keys)
+
+
+def basic_division_t1(start_id=1, y_offset=0, frame_key="t", location_keys=("y")):
+    nodes = [
+        (start_id, {frame_key: 0, location_keys[0]: y_offset}),
+        (start_id + 1, {frame_key: 1, location_keys[0]: y_offset}),
+        (start_id + 2, {frame_key: 2, location_keys[0]: y_offset + 0.5}),
+        (start_id + 3, {frame_key: 2, location_keys[0]: y_offset - 0.5}),
+    ]
+    edges = [
+        (start_id, start_id + 1),
+        (start_id + 1, start_id + 2),
+        (start_id + 1, start_id + 3),
+    ]
+    graph = nx.DiGraph()
+    graph.add_nodes_from(nodes)
+    graph.add_edges_from(edges)
+
+    return TrackingGraph(graph, frame_key=frame_key, location_keys=location_keys)
+
+
+def basic_division_t2(start_id=1, y_offset=0, frame_key="t", location_keys=("y")):
+    nodes = [
+        (start_id, {frame_key: 0, location_keys[0]: y_offset}),
+        (start_id + 1, {frame_key: 1, location_keys[0]: y_offset}),
+        (start_id + 2, {frame_key: 2, location_keys[0]: y_offset}),
+        (start_id + 3, {frame_key: 3, location_keys[0]: y_offset + 0.5}),
+        (start_id + 4, {frame_key: 3, location_keys[0]: y_offset - 0.5}),
+    ]
+    edges = [
+        (start_id, start_id + 1),
+        (start_id + 1, start_id + 2),
+        (start_id + 2, start_id + 3),
+        (start_id + 2, start_id + 4),
+    ]
+    graph = nx.DiGraph()
+    graph.add_nodes_from(nodes)
+    graph.add_edges_from(edges)
+
+    return TrackingGraph(graph, frame_key=frame_key, location_keys=location_keys)
+
+
+def basic_division(t_div, start_id=1, y_offset=0, frame_key="t", location_keys=("y")):
+    if t_div == 0:
+        return basic_division_t0(start_id, y_offset, frame_key, location_keys)
+    elif t_div == 1:
+        return basic_division_t1(start_id, y_offset, frame_key, location_keys)
+    elif t_div == 2:
+        return basic_division_t2(start_id, y_offset, frame_key, location_keys)
+
+
+def longer_division(t_div, start_id=1, y_offset=0, frame_key="t", location_keys=("y")):
+    nodes = []
+    nid = start_id
+    for t in range(5):
+        if t <= t_div:
+            nodes.append((nid, {frame_key: t, location_keys[0]: y_offset}))
+            nid += 1
+        else:
+            nodes.extend(
+                [
+                    (nid, {frame_key: t, location_keys[0]: y_offset + 0.5}),
+                    (nid + 1, {frame_key: t, location_keys[0]: y_offset - 0.5}),
+                ]
+            )
+            nid += 2
+    edges = []
+    for t in range(4):
+        if t < t_div:
+            edges.append((start_id + t, start_id + t + 1))
+        elif t == t_div:
+            edges.extend(
+                [(start_id + t, start_id + t + 1), (start_id + t, start_id + t + 2)]
+            )
+        else:
+            delta = start_id + t_div + 2 * (t - t_div) - 1
+            edges.extend([(delta, delta + 2), (delta + 1, delta + 3)])
+
+    graph = nx.DiGraph()
+    graph.add_nodes_from(nodes)
+    graph.add_edges_from(edges)
+
+    return TrackingGraph(graph, frame_key=frame_key, location_keys=location_keys)
+
+
+def empty_pred_div(t_div):
+    gt = basic_division(t_div)
+    pred = TrackingGraph(nx.DiGraph())
+    mapping = []
+    return Matched(gt, pred, mapping, {})
+
+
+def empty_gt_div(t_div):
+    gt = TrackingGraph(nx.DiGraph())
+    pred = basic_division(t_div)
+    mapping = []
+    return Matched(gt, pred, mapping, {})
+
+
+def good_div(t_div):
+    gt = basic_division(t_div)
+    start_id = max(gt.graph.nodes) + 1
+    pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
+    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
+    return Matched(gt, pred, mapping, {})
+
+
+def fp_div(t_div):
+    # t_div either 0 or 1
+    gt = basic_division(t_div)
+    start_id = max(gt.graph.nodes) + 1
+    pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
+    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
+    if t_div == 0:
+        gt.graph.remove_edge(1, 2)
+    elif t_div == 1:
+        gt.graph.remove_edge(2, 3)
+    return Matched(gt, pred, mapping, {})
+
+
+def one_child(t_div):
+    # t_div either 0 or 1
+    gt = basic_division(t_div)
+    start_id = max(gt.graph.nodes) + 1
+    pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
+    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
+    pred.graph.remove_edge(6, 7)
+    return Matched(gt, pred, mapping, {})
+
+
+def no_children(t_div):
+    # t_div either 0 or 1
+    gt = basic_division(t_div)
+    start_id = max(gt.graph.nodes) + 1
+    pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
+    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
+    pred.graph.remove_edge(6, 7)
+    pred.graph.remove_edge(6, 8)
+    return Matched(gt, pred, mapping, {})
+
+
+def wrong_child(t_div):
+    # t_div either 0 or 1
+    gt_graph = basic_division(t_div).graph
+    child_start_id = max(gt_graph.nodes)
+    # Add additional gt node and/or edge for wrong child
+    nodes = [
+        (child_start_id + 1, {"t": t_div + 1, "y": -0.25}),
+        (child_start_id + 2, {"t": t_div + 2, "y": -0.25}),
+    ]
+    if t_div == 0:
+        gt_graph.add_nodes_from(nodes)
+        gt_graph.add_edge(child_start_id + 1, child_start_id + 2)
+    elif t_div == 1:
+        gt_graph.add_nodes_from(nodes[0:1])
+    gt = TrackingGraph(gt_graph, frame_key="t", location_keys=("y"))
+    start_id = max(gt.graph.nodes) + 1
+    pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
+
+    # mapping of the two basic div graphs
+    mapping = list(zip(range(1, child_start_id + 1), range(start_id, start_id * 2)))
+    # remove mapping to one of the correct daughters and add to wrong daughter
+    if t_div == 0:
+        mapping.remove((3, 10))
+        mapping.remove((5, 12))
+        mapping.extend([(6, 10), (7, 12)])
+    elif t_div == 1:
+        mapping.remove((4, 9))
+        mapping.append((5, 9))
+    return Matched(gt, pred, mapping, {})
+
+
+def div_1early_end():
+    gt = longer_division(1)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(0, start_id=start_id, y_offset=0.75)
+    mapping = [(1, 9), (2, 11), (4, 13), (6, 15), (8, 17), (3, 12), (5, 14), (7, 16)]
+    return Matched(gt, pred, mapping, {})
+
+
+def div_1early_mid():
+    gt = longer_division(2)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(1, start_id=start_id, y_offset=0.75)
+    mapping = [(1, 8), (2, 9), (3, 11), (5, 13), (7, 15), (4, 12), (6, 14)]
+    return Matched(gt, pred, mapping, {})
+
+
+def div_2early_end():
+    gt = longer_division(2)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(0, start_id=start_id, y_offset=0.75)
+    mapping = [(1, 8), (2, 10), (3, 12), (5, 14), (7, 16), (4, 13), (6, 15)]
+    return Matched(gt, pred, mapping, {})
+
+
+def div_2early_mid():
+    gt = longer_division(3)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(1, start_id=start_id, y_offset=0.75)
+    mapping = [(1, 7), (2, 8), (3, 10), (4, 12), (6, 14), (5, 13)]
+    return Matched(gt, pred, mapping, {})
+
+
+def div_1late_end():
+    gt = longer_division(0)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(1, start_id=start_id, y_offset=0.75)
+    mapping = [(1, 10), (2, 11), (4, 12), (6, 14), (8, 16), (5, 13), (7, 15), (9, 17)]
+    return Matched(gt, pred, mapping, {})
+
+
+def div_1late_mid():
+    gt = longer_division(1)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(2, start_id=start_id, y_offset=0.75)
+    mapping = [(1, 9), (2, 10), (3, 11), (6, 13), (8, 15), (5, 12), (7, 14)]
+    return Matched(gt, pred, mapping, {})
+
+
+def div_2late_end():
+    gt = longer_division(0)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(2, start_id=start_id, y_offset=0.75)
+    mapping = [(1, 10), (2, 11), (4, 12), (6, 13), (8, 15), (7, 14), (9, 16)]
+    return Matched(gt, pred, mapping, {})
+
+
+def div_2late_mid():
+    gt = longer_division(1)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(3, start_id=start_id, y_offset=0.75)
+    mapping = [(1, 9), (2, 10), (3, 11), (5, 12), (7, 13), (8, 14)]
+    return Matched(gt, pred, mapping, {})
