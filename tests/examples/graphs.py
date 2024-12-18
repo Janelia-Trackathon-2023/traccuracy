@@ -519,3 +519,40 @@ def div_2late_mid():
     pred = longer_division(3, start_id=start_id, y_offset=0.75)
     mapping = [(1, 9), (2, 10), (3, 11), (5, 12), (7, 13), (8, 14)]
     return Matched(gt, pred, mapping, {})
+
+
+def div_shift_min_match():
+    """one to one
+    Minimal requirements for matching in a shifted division
+    - Early division node is matched to a predecessor of the late division
+    - Daughters must be matched in the frame following the late division
+    """
+    gt = longer_division(1)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(2, start_id=start_id, y_offset=0.75)
+    mapping = [(2, 10), (6, 13), (5, 12)]
+    return Matched(gt, pred, mapping, {})
+
+
+def div_shift_bad_match_pred():
+    """one to one
+    Division isn't corrected because the early division node isn't matched
+    to a predecessor of the late division node
+    """
+    gt = longer_division(1)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(2, start_id=start_id, y_offset=0.75)
+    mapping = [(1, 9), (6, 13), (5, 12)]
+    return Matched(gt, pred, mapping, {})
+
+
+def div_shift_bad_match_daughter():
+    """one to one
+    Division isn't corrected because daughter nodes aren't matched in frame
+    following late division
+    """
+    gt = longer_division(1)
+    start_id = max(gt.nodes) + 1
+    pred = longer_division(2, start_id=start_id, y_offset=0.75)
+    mapping = [(2, 10), (7, 14), (8, 15)]
+    return Matched(gt, pred, mapping, {})
