@@ -10,48 +10,52 @@ from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.matchers._ctc import CTCMatcher, match_frame_majority
 
 
-def test_CTCMatcher():
+class TestCTCMatcher:
     matcher = CTCMatcher()
 
-    # shapes don't match
-    with pytest.raises(ValueError):
-        matcher.compute_mapping(
-            TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10))),
-            TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5))),
+    def test_bad_shape_input(self):
+        # shapes don't match
+        with pytest.raises(ValueError):
+            self.matcher.compute_mapping(
+                TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10))),
+                TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5))),
+            )
+
+    def test_end_to_end(self):
+        n_labels = 3
+        n_frames = 3
+        movie = get_annotated_movie(
+            labels_per_frame=n_labels, frames=n_frames, mov_type="repeated"
         )
 
-    n_labels = 3
-    n_frames = 3
-    movie = get_annotated_movie(
-        labels_per_frame=n_labels, frames=n_frames, mov_type="repeated"
-    )
+        # We can assume each object is present and connected across each frame
+        g = nx.DiGraph()
+        for t in range(n_frames - 1):
+            for i in range(1, n_labels + 1):
+                g.add_edge(f"{i}_{t}", f"{i}_{t+1}")
 
-    # We can assume each object is present and connected across each frame
-    g = nx.DiGraph()
-    for t in range(n_frames - 1):
-        for i in range(1, n_labels + 1):
-            g.add_edge(f"{i}_{t}", f"{i}_{t+1}")
+        attrs = {}
+        for t in range(n_frames):
+            for i in range(1, n_labels + 1):
+                attrs[f"{i}_{t}"] = {"t": t, "y": 0, "x": 0, "segmentation_id": i}
+        nx.set_node_attributes(g, attrs)
 
-    attrs = {}
-    for t in range(n_frames):
-        for i in range(1, n_labels + 1):
-            attrs[f"{i}_{t}"] = {"t": t, "y": 0, "x": 0, "segmentation_id": i}
-    nx.set_node_attributes(g, attrs)
+        matched = self.matcher.compute_mapping(
+            TrackingGraph(g, segmentation=movie),
+            TrackingGraph(g, segmentation=movie),
+        )
 
-    matched = matcher.compute_mapping(
-        TrackingGraph(g, segmentation=movie),
-        TrackingGraph(g, segmentation=movie),
-    )
+        # Check for correct number of pairs
+        assert len(matched.mapping) == n_frames * n_labels
 
-    # Check for correct number of pairs
-    assert len(matched.mapping) == n_frames * n_labels
-
-    # gt and pred node should be the same
-    for pair in matched.mapping:
-        assert pair[0] == pair[1]
+        # gt and pred node should be the same
+        for pair in matched.mapping:
+            assert pair[0] == pair[1]
 
 
-class Test_match_frame_majority:
+class TestStandards:
+    """Test match_frame_majority against standard test cases"""
+
     @pytest.mark.parametrize(
         "data",
         [ex_segs.good_segmentation_2d(), ex_segs.good_segmentation_3d()],
