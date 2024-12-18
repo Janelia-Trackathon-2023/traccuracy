@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import numpy as np
 from tqdm import tqdm
 
 if TYPE_CHECKING:
@@ -80,46 +79,27 @@ class CTCMatcher(Matcher):
                 if pred_label_key in G_pred.graph.nodes[node]
             }
 
-            (
-                overlapping_gt_labels,
-                overlapping_pred_labels,
-                intersection,
-            ) = get_labels_with_overlap(gt_frame, pred_frame, overlap="iogt")
-
-            for i in range(len(overlapping_gt_labels)):
-                gt_label = overlapping_gt_labels[i]
-                pred_label = overlapping_pred_labels[i]
-                # CTC metrics only match comp IDs to a single GT ID if there is majority overlap
-                if intersection[i] > 0.5:
-                    mapping.append(
-                        (gt_label_to_id[gt_label], pred_label_to_id[pred_label])
-                    )
+            frame_map = match_frame_majority(gt_frame, pred_frame)
+            # Switch from segmentation ids to node ids
+            for gt_label, pred_label in frame_map:
+                mapping.append((gt_label_to_id[gt_label], pred_label_to_id[pred_label]))
 
         return mapping
 
 
-def detection_test(gt_blob: np.ndarray, comp_blob: np.ndarray) -> int:
-    """Check if computed marker overlaps majority of the reference marker.
+def match_frame_majority(gt_frame, pred_frame):
+    mapping = []
+    (
+        overlapping_gt_labels,
+        overlapping_pred_labels,
+        intersection,
+    ) = get_labels_with_overlap(gt_frame, pred_frame, overlap="iogt")
 
-    Given a reference marker and computer marker in original coordinates,
-    return True if the computed marker overlaps strictly more than half
-    of the reference marker's pixels, otherwise False.
+    for gt_label, pred_label, iogt in zip(
+        overlapping_gt_labels, overlapping_pred_labels, intersection
+    ):
+        # CTC metrics only match comp IDs to a single GT ID if there is majority overlap
+        if iogt > 0.5:
+            mapping.append((gt_label, pred_label))
 
-    Parameters
-    ----------
-    gt_blob : np.ndarray
-        2D or 3D boolean mask representing the pixels of the ground truth
-        marker
-    comp_blob : np.ndarray
-        2D or 3D boolean mask representing the pixels of the computed
-        marker
-
-    Returns
-    -------
-    bool
-        True if computed marker majority overlaps reference marker, else False.
-    """
-    n_gt_pixels = np.sum(gt_blob)
-    intersection = np.logical_and(gt_blob, comp_blob)
-    comp_blob_matches_gt_blob = int(np.sum(intersection) > 0.5 * n_gt_pixels)
-    return comp_blob_matches_gt_blob
+    return mapping
