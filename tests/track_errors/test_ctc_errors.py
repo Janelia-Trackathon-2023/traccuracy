@@ -424,6 +424,38 @@ class Test_get_edge_errors:
                 assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
                 assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
+    def test_crossover_edge(self):
+        matched = self.prep_matched(ex_graphs.crossover_edge())
+
+        # All but one gt edge are FN
+        for edge, attrs in matched.gt_graph.edges.items():
+            if edge == (2, 3):
+                if self.test_edge_tp:
+                    assert attrs.get(EdgeFlag.TRUE_POS) is True
+                assert attrs.get(EdgeFlag.FALSE_NEG) is False
+                assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
+            else:
+                if self.test_edge_tp:
+                    assert attrs.get(EdgeFlag.TRUE_POS) is False
+                assert attrs.get(EdgeFlag.FALSE_NEG) is True
+                assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
+
+        # First pred edge is crossover so FP
+        attrs = matched.pred_graph.edges[(7, 8)]
+        if self.test_edge_tp:
+            assert attrs.get(EdgeFlag.TRUE_POS) is False
+        assert attrs.get(EdgeFlag.FALSE_POS) is True
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
+        assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
+
+        # Second pred edge is correct
+        attrs = matched.pred_graph.edges[(8, 9)]
+        if self.test_edge_tp:
+            assert attrs.get(EdgeFlag.TRUE_POS) is True
+        assert attrs.get(EdgeFlag.FALSE_POS) is False
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
+        assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
+
     def test_node_two_to_one_end(self):
         matched = self.prep_matched(ex_graphs.node_two_to_one(0))
 
