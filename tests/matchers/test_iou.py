@@ -15,7 +15,9 @@ from traccuracy.matchers._iou import (
 )
 
 
-class Test__match_nodes:
+class TestStandards:
+    """Test _match_nodes against standard test cases"""
+
     @pytest.mark.parametrize(
         "data",
         [ex_segs.good_segmentation_2d(), ex_segs.good_segmentation_3d()],
@@ -172,71 +174,103 @@ def test__construct_time_to_seg_id_map():
             assert time_to_seg_id_map[t][i] == f"{i}_{t}"
 
 
-def test_match_iou():
-    # Bad input
-    with pytest.raises(ValueError):
-        match_iou("not tracking data", "not tracking data")
+class Test_match_iou:
 
-    # shapes don't match
-    with pytest.raises(ValueError):
-        match_iou(
-            TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10))),
-            TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5))),
-        )
-
-    # Test 2d data
-    n_frames = 3
-    n_labels = 3
-    track_graph = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
-    mapper = match_iou(
-        track_graph,
-        track_graph,
-    )
-
-    # Check for correct number of pairs
-    assert len(mapper) == n_frames * n_labels
-    # gt and pred node should be the same
-    for pair in mapper:
-        assert pair[0] == pair[1]
-
-    # Check 3d data
-    track_graph = get_movie_with_graph(ndims=4, n_frames=n_frames, n_labels=n_labels)
-    mapper = match_iou(
-        track_graph,
-        track_graph,
-    )
-
-    # Check for correct number of pairs
-    assert len(mapper) == n_frames * n_labels
-    # gt and pred node should be the same
-    for pair in mapper:
-        assert pair[0] == pair[1]
-
-
-class TestIOUMatched:
-    def test__init__(self):
-        # No segmentation
-        track_graph = get_movie_with_graph()
-        data = TrackingGraph(track_graph.graph)
-
-        matcher = IOUMatcher()
-
+    def test_bad_input(self):
+        # Bad input
         with pytest.raises(ValueError):
-            matcher.compute_mapping(data, data)
+            match_iou("not tracking data", "not tracking data")
 
-    def test_compute_mapping(self):
+    def test_bad_shapes(self):
+        # shapes don't match
+        with pytest.raises(ValueError):
+            match_iou(
+                TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10))),
+                TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5))),
+            )
+
+    def test_end_to_end_2d(self):
         # Test 2d data
         n_frames = 3
         n_labels = 3
         track_graph = get_movie_with_graph(
             ndims=3, n_frames=n_frames, n_labels=n_labels
         )
-
-        matcher = IOUMatcher()
-        matched = matcher.compute_mapping(gt_graph=track_graph, pred_graph=track_graph)
+        mapper = match_iou(
+            track_graph,
+            track_graph,
+        )
 
         # Check for correct number of pairs
-        assert len(matched.mapping) == n_frames * n_labels
+        assert len(mapper) == n_frames * n_labels
+        # gt and pred node should be the same
+        for pair in mapper:
+            assert pair[0] == pair[1]
+
+    def test_end_to_end_3d(self):
+        # Check 3d data
+        n_frames = 3
+        n_labels = 3
+        track_graph = get_movie_with_graph(
+            ndims=4, n_frames=n_frames, n_labels=n_labels
+        )
+        mapper = match_iou(
+            track_graph,
+            track_graph,
+        )
+
+        # Check for correct number of pairs
+        assert len(mapper) == n_frames * n_labels
+        # gt and pred node should be the same
+        for pair in mapper:
+            assert pair[0] == pair[1]
+
+
+class TestIOUMatched:
+    matcher = IOUMatcher()
+    n_frames = 3
+    n_labels = 3
+    track_graph = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
+
+    def test_no_segmentation(self):
+        # No segmentation
+        track_graph = get_movie_with_graph()
+        data = TrackingGraph(track_graph.graph)
+
+        with pytest.raises(ValueError):
+            self.matcher.compute_mapping(data, data)
+
+    def test_e2e(self):
+        matched = self.matcher.compute_mapping(
+            gt_graph=self.track_graph, pred_graph=self.track_graph
+        )
+
+        # Check for correct number of pairs
+        assert len(matched.mapping) == self.n_frames * self.n_labels
+        # gt and pred node should be the same
+        for pair in matched.mapping:
+            assert pair[0] == pair[1]
+
+    def test_e2e_threshold(self):
+        matcher = IOUMatcher(iou_threshold=1.0)
+        matched = matcher.compute_mapping(
+            gt_graph=self.track_graph, pred_graph=self.track_graph
+        )
+
+        # Check for correct number of pairs
+        assert len(matched.mapping) == self.n_frames * self.n_labels
+        # gt and pred node should be the same
+        for pair in matched.mapping:
+            assert pair[0] == pair[1]
+
+    def test_e2e_one_to_one(self):
+        matcher = IOUMatcher(one_to_one=True)
+        matched = matcher.compute_mapping(
+            gt_graph=self.track_graph, pred_graph=self.track_graph
+        )
+
+        # Check for correct number of pairs
+        assert len(matched.mapping) == self.n_frames * self.n_labels
         # gt and pred node should be the same
         for pair in matched.mapping:
             assert pair[0] == pair[1]
