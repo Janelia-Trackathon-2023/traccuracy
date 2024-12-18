@@ -123,6 +123,19 @@ def fp_edge_matched(edge_to_add):  # 0 or 1
     return Matched(gt, pred, mapping, {})
 
 
+# identity switch
+def crossover_edge():
+    """one to one"""
+    gta = basic_graph().graph
+    gtb = basic_graph(node_ids=(4, 5, 6), y_offset=1).graph
+    gta.add_nodes_from(gtb.nodes(data=True))
+    gta.add_edges_from(gtb.edges(data=True))
+    gt = TrackingGraph(gta, location_keys=("y"))
+    pred = basic_graph(node_ids=(7, 8, 9), y_offset=0.5)
+    mapping = [(4, 7), (2, 8), (3, 9)]
+    return Matched(gt, pred, mapping, {})
+
+
 # two pred to one gt (identity switch)
 def node_one_to_two(time):  # 0, 1, or 2
     """one to many"""
@@ -140,6 +153,24 @@ def node_one_to_two(time):  # 0, 1, or 2
     return Matched(gt, pred, mapping, {})
 
 
+# two pred edges to one gt edge
+def edge_one_to_two(time):  # 0 or 1
+    gt = basic_graph()
+
+    a = basic_graph(node_ids=(4, 5, 6), y_offset=1).graph
+    b = basic_graph(node_ids=(7, 8, 9), y_offset=-1).graph
+    a.add_nodes_from(b.nodes(data=True))
+    a.add_edges_from(b.edges(data=True))
+    pred = TrackingGraph(a, location_keys=("y"))
+
+    mapping = [(1, 4), (2, 5), (3, 6)]
+    if time == 0:
+        mapping.extend([(1, 7), (2, 8)])
+    elif time == 1:
+        mapping.extend([(2, 8), (3, 9)])
+    return Matched(gt, pred, mapping, {})
+
+
 # two gt to one pred (non split vertex)
 def node_two_to_one(time):  # 0, 1, or 2
     """many to one"""
@@ -154,6 +185,24 @@ def node_two_to_one(time):  # 0, 1, or 2
         gt.graph.add_edge(1, 7)
         gt.graph.nodes[1]["y"] = 2
     mapping.append((7, pred_node_ids[time]))
+    return Matched(gt, pred, mapping, {})
+
+
+def edge_two_to_one(time):  # 0 or 1
+    """many to one"""
+    a = basic_graph(y_offset=1).graph
+    b = basic_graph(node_ids=(4, 5, 6), y_offset=-1).graph
+    a.add_nodes_from(b.nodes(data=True))
+    a.add_edges_from(b.edges(data=True))
+    gt = TrackingGraph(a, location_keys=("y"))
+
+    pred = basic_graph(node_ids=(7, 8, 9))
+
+    mapping = [(1, 7), (2, 8), (3, 9)]
+    if time == 0:
+        mapping.extend([(4, 7), (5, 8)])
+    elif time == 1:
+        mapping.extend([(5, 8), (6, 9)])
     return Matched(gt, pred, mapping, {})
 
 
