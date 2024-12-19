@@ -96,10 +96,6 @@ def get_edge_errors(matched_data: Matched):
     comp_graph.set_flag_on_all_edges(EdgeFlag.FALSE_POS, False)
     comp_graph.set_flag_on_all_edges(EdgeFlag.WRONG_SEMANTIC, False)
     gt_graph.set_flag_on_all_edges(EdgeFlag.FALSE_NEG, False)
-    # TP set to incorrect and flip if we verify that edge is not an error
-    # comp_graph.set_flag_on_all_edges(EdgeFlag.TRUE_POS, False)
-    # For gt assume all TP unless we find an error to flip
-    # gt_graph.set_flag_on_all_edges(EdgeFlag.TRUE_POS, True)
 
     gt_comp_mapping = {gt: comp for gt, comp in node_mapping if comp in induced_graph}
     comp_gt_mapping = {comp: gt for gt, comp in node_mapping if comp in induced_graph}
@@ -130,19 +126,11 @@ def get_edge_errors(matched_data: Matched):
         if expected_gt_edge not in gt_graph.edges:
             comp_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_POS, True)
         else:
-            # Set tp flag if not a false pos
-            # comp_graph.set_flag_on_edge(edge, EdgeFlag.TRUE_POS, True)
             # check if semantics are correct
             is_parent_gt = gt_graph.edges[expected_gt_edge][EdgeFlag.INTERTRACK_EDGE]
             is_parent_comp = comp_graph.edges[edge][EdgeFlag.INTERTRACK_EDGE]
             if is_parent_gt != is_parent_comp:
                 comp_graph.set_flag_on_edge(edge, EdgeFlag.WRONG_SEMANTIC, True)
-
-    # fp edges - edges in comp graph that aren't in induced graph
-    # leftover_comp_edges = set(comp_graph.edges) - set(induced_graph.edges)
-    # for edge in tqdm(leftover_comp_edges, "Evaluating remaining FP edges"):
-    #     comp_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_POS, True)
-    #     comp_graph.set_flag_on_edge(edge, EdgeFlag.TRUE_POS, False)
 
     # fn edges - edges in gt_graph that aren't in induced graph
     for edge in tqdm(gt_graph.edges, "Evaluating FN edges"):
@@ -153,7 +141,6 @@ def get_edge_errors(matched_data: Matched):
             or gt_graph.nodes[target][NodeFlag.FALSE_NEG]
         ):
             gt_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_NEG, True)
-            # gt_graph.set_flag_on_edge(edge, EdgeFlag.TRUE_POS, False)
             continue
 
         source_comp_id = gt_comp_mapping.get(source, None)
@@ -161,12 +148,10 @@ def get_edge_errors(matched_data: Matched):
 
         if source_comp_id is None or target_comp_id is None:
             gt_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_NEG, True)
-            # gt_graph.set_flag_on_edge(edge, EdgeFlag.TRUE_POS, False)
         else:
             expected_comp_edge = (source_comp_id, target_comp_id)
             if expected_comp_edge not in induced_graph.edges:
                 gt_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_NEG, True)
-                # gt_graph.set_flag_on_edge(edge, EdgeFlag.TRUE_POS, False)
 
     gt_graph.edge_errors = True
     comp_graph.edge_errors = True
