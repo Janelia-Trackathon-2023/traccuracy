@@ -18,8 +18,8 @@ These node and edge error annotations are used to calculate the CTC metrics TRA 
     from traccuracy._tracking_graph import TrackingGraph
     from traccuracy.matchers import Matched
 
-    import tests.examples.graphs as ex_graphs
-    import tests.examples.segs as ex_segs
+    import examples.graphs as ex_graphs
+    import examples.segs as ex_segs
 
     def get_loc(graph, node):
         return graph.graph.nodes[node]["t"], graph.graph.nodes[node]["y"]
