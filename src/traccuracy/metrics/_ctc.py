@@ -45,13 +45,13 @@ class AOGMMetrics(Metric):
 
         vertex_error_counts = {
             "ns": len(data.pred_graph.get_nodes_with_flag(NodeFlag.NON_SPLIT)),
-            "fp": len(data.pred_graph.get_nodes_with_flag(NodeFlag.FALSE_POS)),
-            "fn": len(data.gt_graph.get_nodes_with_flag(NodeFlag.FALSE_NEG)),
+            "fp": len(data.pred_graph.get_nodes_with_flag(NodeFlag.CTC_FALSE_POS)),
+            "fn": len(data.gt_graph.get_nodes_with_flag(NodeFlag.CTC_FALSE_NEG)),
         }
         edge_error_counts = {
             "ws": len(data.pred_graph.get_edges_with_flag(EdgeFlag.WRONG_SEMANTIC)),
-            "fp": len(data.pred_graph.get_edges_with_flag(EdgeFlag.FALSE_POS)),
-            "fn": len(data.gt_graph.get_edges_with_flag(EdgeFlag.FALSE_NEG)),
+            "fp": len(data.pred_graph.get_edges_with_flag(EdgeFlag.CTC_FALSE_POS)),
+            "fn": len(data.gt_graph.get_edges_with_flag(EdgeFlag.CTC_FALSE_NEG)),
         }
         error_sum = get_weighted_error_sum(
             vertex_error_counts,

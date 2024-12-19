@@ -128,11 +128,11 @@ def test_constructor(nx_comp1):
     with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, frame_key="f")
     with pytest.raises(ValueError):
-        TrackingGraph(nx_comp1, frame_key=NodeFlag.FALSE_NEG)
+        TrackingGraph(nx_comp1, frame_key=NodeFlag.CTC_FALSE_NEG)
     with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, location_keys=["x", "y", "z"])
     with pytest.raises(ValueError):
-        TrackingGraph(nx_comp1, location_keys=["x", NodeFlag.FALSE_NEG])
+        TrackingGraph(nx_comp1, location_keys=["x", NodeFlag.CTC_FALSE_NEG])
 
 
 def test_get_cells_by_frame(simple_graph):
@@ -155,7 +155,9 @@ def test_get_edges_with_flag(simple_graph):
     assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.TRUE_POS)) == Counter(
         [("1_0", "1_1")]
     )
-    assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.FALSE_NEG)) == Counter([])
+    assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.CTC_FALSE_NEG)) == Counter(
+        []
+    )
     with pytest.raises(ValueError):
         assert simple_graph.get_nodes_with_flag("is_tp")
 
@@ -212,37 +214,37 @@ def test_set_flag_on_node(simple_graph):
         "is_tp_division": True,
     }
 
-    simple_graph.set_flag_on_node("1_0", NodeFlag.FALSE_POS, value=True)
+    simple_graph.set_flag_on_node("1_0", NodeFlag.CTC_FALSE_POS, value=True)
     assert simple_graph.nodes()["1_0"] == {
         "id": "1_0",
         "t": 0,
         "y": 1,
         "x": 1,
-        NodeFlag.FALSE_POS: True,
+        NodeFlag.CTC_FALSE_POS: True,
     }
-    assert "1_0" in simple_graph.nodes_by_flag[NodeFlag.FALSE_POS]
+    assert "1_0" in simple_graph.nodes_by_flag[NodeFlag.CTC_FALSE_POS]
 
-    simple_graph.set_flag_on_node("1_0", NodeFlag.FALSE_POS, value=False)
+    simple_graph.set_flag_on_node("1_0", NodeFlag.CTC_FALSE_POS, value=False)
     assert simple_graph.nodes()["1_0"] == {
         "id": "1_0",
         "t": 0,
         "y": 1,
         "x": 1,
-        NodeFlag.FALSE_POS: False,
+        NodeFlag.CTC_FALSE_POS: False,
     }
-    assert "1_0" not in simple_graph.nodes_by_flag[NodeFlag.FALSE_POS]
+    assert "1_0" not in simple_graph.nodes_by_flag[NodeFlag.CTC_FALSE_POS]
 
-    simple_graph.set_flag_on_all_nodes(NodeFlag.FALSE_POS, value=True)
+    simple_graph.set_flag_on_all_nodes(NodeFlag.CTC_FALSE_POS, value=True)
     for node in simple_graph.nodes:
-        assert simple_graph.nodes[node][NodeFlag.FALSE_POS] is True
-    assert Counter(simple_graph.nodes_by_flag[NodeFlag.FALSE_POS]) == Counter(
+        assert simple_graph.nodes[node][NodeFlag.CTC_FALSE_POS] is True
+    assert Counter(simple_graph.nodes_by_flag[NodeFlag.CTC_FALSE_POS]) == Counter(
         list(simple_graph.nodes())
     )
 
-    simple_graph.set_flag_on_all_nodes(NodeFlag.FALSE_POS, value=False)
+    simple_graph.set_flag_on_all_nodes(NodeFlag.CTC_FALSE_POS, value=False)
     for node in simple_graph.nodes:
-        assert simple_graph.nodes[node][NodeFlag.FALSE_POS] is False
-    assert not simple_graph.nodes_by_flag[NodeFlag.FALSE_POS]
+        assert simple_graph.nodes[node][NodeFlag.CTC_FALSE_POS] is False
+    assert not simple_graph.nodes_by_flag[NodeFlag.CTC_FALSE_POS]
 
     with pytest.raises(ValueError):
         simple_graph.set_flag_on_node("1_0", "x", 2)
@@ -260,17 +262,17 @@ def test_set_flag_on_edge(simple_graph):
     assert simple_graph.edges()[edge_id][EdgeFlag.TRUE_POS] is False
     assert edge_id not in simple_graph.edges_by_flag[EdgeFlag.TRUE_POS]
 
-    simple_graph.set_flag_on_all_edges(EdgeFlag.FALSE_POS, value=True)
+    simple_graph.set_flag_on_all_edges(EdgeFlag.CTC_FALSE_POS, value=True)
     for edge in simple_graph.edges:
-        assert simple_graph.edges[edge][EdgeFlag.FALSE_POS] is True
-    assert Counter(simple_graph.edges_by_flag[EdgeFlag.FALSE_POS]) == Counter(
+        assert simple_graph.edges[edge][EdgeFlag.CTC_FALSE_POS] is True
+    assert Counter(simple_graph.edges_by_flag[EdgeFlag.CTC_FALSE_POS]) == Counter(
         list(simple_graph.edges)
     )
 
-    simple_graph.set_flag_on_all_edges(EdgeFlag.FALSE_POS, value=False)
+    simple_graph.set_flag_on_all_edges(EdgeFlag.CTC_FALSE_POS, value=False)
     for edge in simple_graph.edges:
-        assert simple_graph.edges[edge][EdgeFlag.FALSE_POS] is False
-    assert not simple_graph.edges_by_flag[EdgeFlag.FALSE_POS]
+        assert simple_graph.edges[edge][EdgeFlag.CTC_FALSE_POS] is False
+    assert not simple_graph.edges_by_flag[EdgeFlag.CTC_FALSE_POS]
 
     with pytest.raises(ValueError):
         simple_graph.set_flag_on_edge(("1_1", "1_3"), "x", 2)
