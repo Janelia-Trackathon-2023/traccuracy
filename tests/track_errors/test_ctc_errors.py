@@ -8,7 +8,7 @@ from traccuracy.matchers import Matched
 from traccuracy.track_errors._ctc import get_edge_errors, get_vertex_errors
 
 
-class Test_get_vertex_errors:
+class TestStandardNode:
     def test_no_gt(self):
         matched = ex_graphs.empty_gt()
         # all pred nodes are false positives
@@ -286,7 +286,7 @@ def test_ns_vertex_fn_edge():
         assert gt.edges[edge][EdgeFlag.FALSE_NEG]
 
 
-class Test_get_edge_errors:
+class TestStandardEdge:
     # TODO: delete this flag before merging
     test_edge_tp = False
 
@@ -502,3 +502,74 @@ class Test_get_edge_errors:
             )  # currently None, should be FP? @Draga
 
     # CTCMatcher does not allow one gt to match multiple comp nodes. Skipping the one_to_two example
+
+    def test_correct_division(self):
+        # Check that intertrack edges have been identified
+        # No wrong semantics
+        matched = self.prep_matched(ex_graphs.good_div(1))
+        gt_edges = [(2, 4), (2, 3)]
+        pred_edges = [(6, 7), (6, 8)]
+
+        for edge, attrs in matched.gt_graph.edges.items():
+            if edge in gt_edges:
+                assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+            else:
+                assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
+
+        for edge, attrs in matched.pred_graph.edges.items():
+            if edge in pred_edges:
+                assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+            else:
+                assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
+            assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
+
+    def test_fp_division(self):
+        # Check intertrack and for wrong semantic on fp division
+        matched = self.prep_matched(ex_graphs.fp_div(1))
+
+        # GT edge is not intertrack
+        attrs = matched.gt_graph.edges[(2, 4)]
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
+
+        # Pred edges are intertrack and wrong semantic
+        attrs = matched.pred_graph.edges[(6, 8)]
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+        assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is True
+
+        attrs = matched.pred_graph.edges[(6, 7)]
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+        assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
+
+    def test_fn_division(self):
+        # Intertrack and wrong semantic check
+        matched = self.prep_matched(ex_graphs.one_child(1))
+
+        # Pred edge
+        attrs = matched.pred_graph.edges[(6, 8)]
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
+        assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is True
+
+        # Gt edges are just intertrack
+        attrs = matched.gt_graph.edges[(2, 4)]
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+        attrs = matched.gt_graph.edges[(2, 3)]
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+
+    def test_wrong_child(self):
+        # Intertrack and wrong semantic check
+        matched = self.prep_matched(ex_graphs.wrong_child(1))
+
+        # One pred edge correct
+        attrs = matched.pred_graph.edges[(7, 8)]
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+        assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
+        # Not wrong semantic b/c edge doesn't directly match to gt edge
+        attrs = matched.pred_graph.edges[(7, 9)]
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+        assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
+
+        # Gt edges are just intertrack
+        attrs = matched.gt_graph.edges[(2, 4)]
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+        attrs = matched.gt_graph.edges[(2, 3)]
+        assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
