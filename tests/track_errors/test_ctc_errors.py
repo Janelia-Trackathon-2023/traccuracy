@@ -287,8 +287,9 @@ def test_ns_vertex_fn_edge():
 
 
 class TestStandardEdge:
-    # TODO: delete this flag before merging
-    test_edge_tp = False
+    """Notes
+    CTC does not annotate true positive edges
+    """
 
     def prep_matched(self, matched):
         get_vertex_errors(matched)
@@ -296,36 +297,28 @@ class TestStandardEdge:
         return matched
 
     def test_no_gt(self):
-        # if pred nodes are never matched to gt nodes the corresponding edges are never reviewed
-        # @Draga, this seems wrong...
         matched = self.prep_matched(ex_graphs.empty_gt())
         for attrs in matched.pred_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_POS) is True  # currently False
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is False  # currently None
+            # Edges on FP nodes are not additionally penalized as FP edge
+            # https://github.com/Janelia-Trackathon-2023/traccuracy/pull/176#issuecomment-2552537116
+            assert attrs.get(EdgeFlag.FALSE_POS) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
     def test_no_pred(self):
         matched = self.prep_matched(ex_graphs.empty_pred())
         for attrs in matched.gt_graph.edges.values():
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is False  # currently None
             assert attrs.get(EdgeFlag.FALSE_NEG) is True
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
     def test_good_matched(self):
         matched = self.prep_matched(ex_graphs.good_matched())
         for attrs in matched.gt_graph.edges.values():
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is True  # currently None
             assert attrs.get(EdgeFlag.FALSE_NEG) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
         for attrs in matched.pred_graph.edges.values():
             assert attrs.get(EdgeFlag.FALSE_POS) is False
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is True  # currently None
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
@@ -334,8 +327,6 @@ class TestStandardEdge:
 
         # All pred edges correct
         for attrs in matched.pred_graph.edges.values():
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is True
             assert attrs.get(EdgeFlag.FALSE_POS) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
@@ -343,8 +334,6 @@ class TestStandardEdge:
         # First gt edge is false neg
         attrs = matched.gt_graph.edges[(1, 2)]
         assert attrs.get(EdgeFlag.FALSE_NEG) is True
-        if self.test_edge_tp:
-            assert attrs.get(EdgeFlag.TRUE_POS) is False
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
     def test_fn_node_middle(self):
@@ -354,8 +343,6 @@ class TestStandardEdge:
 
         # All gt edges false pos
         for attrs in matched.gt_graph.edges.values():
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is False  # currently None
             assert attrs.get(EdgeFlag.FALSE_NEG) is True
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
@@ -365,21 +352,15 @@ class TestStandardEdge:
         # Only pred edge is correct
         attrs = matched.pred_graph.edges[(5, 6)]
         assert attrs.get(EdgeFlag.FALSE_POS) is False
-        if self.test_edge_tp:
-            assert attrs.get(EdgeFlag.TRUE_POS) is True
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
         # First gt edge is false neg
         attrs = matched.gt_graph.edges[(1, 2)]
-        if self.test_edge_tp:
-            assert attrs.get(EdgeFlag.TRUE_POS) is False  # currently None
         assert attrs.get(EdgeFlag.FALSE_NEG) is True
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
         # Second gt edge is correct
         attrs = matched.gt_graph.edges[(2, 3)]
-        if self.test_edge_tp:
-            assert attrs.get(EdgeFlag.TRUE_POS) is True  # currently None
         assert attrs.get(EdgeFlag.FALSE_NEG) is False
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
@@ -389,16 +370,12 @@ class TestStandardEdge:
 
         # All pred edges correct
         for attrs in matched.pred_graph.edges.values():
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is True
             assert attrs.get(EdgeFlag.FALSE_POS) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
         # All gt edges correct
         for attrs in matched.gt_graph.edges.values():
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is True  # currently None
             assert attrs.get(EdgeFlag.FALSE_NEG) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
@@ -410,16 +387,11 @@ class TestStandardEdge:
         for edge, attrs in matched.pred_graph.edges.items():
             # false positive edge
             if edge == (7, 8):
-                if self.test_edge_tp:
-                    assert attrs.get(EdgeFlag.TRUE_POS) is False
-                assert (
-                    attrs.get(EdgeFlag.FALSE_POS) is True
-                )  # Currently False b/c not matched to any gt nodes
+                # Not FP b/c not matched to any gt nodes
+                assert attrs.get(EdgeFlag.FALSE_POS) is False
                 assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
                 assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
             else:
-                if self.test_edge_tp:
-                    assert attrs.get(EdgeFlag.TRUE_POS) is True
                 assert attrs.get(EdgeFlag.FALSE_POS) is False
                 assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
                 assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
@@ -430,57 +402,43 @@ class TestStandardEdge:
         # All but one gt edge are FN
         for edge, attrs in matched.gt_graph.edges.items():
             if edge == (2, 3):
-                if self.test_edge_tp:
-                    assert attrs.get(EdgeFlag.TRUE_POS) is True
                 assert attrs.get(EdgeFlag.FALSE_NEG) is False
                 assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             else:
-                if self.test_edge_tp:
-                    assert attrs.get(EdgeFlag.TRUE_POS) is False
                 assert attrs.get(EdgeFlag.FALSE_NEG) is True
                 assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
         # First pred edge is crossover so FP
         attrs = matched.pred_graph.edges[(7, 8)]
-        if self.test_edge_tp:
-            assert attrs.get(EdgeFlag.TRUE_POS) is False
         assert attrs.get(EdgeFlag.FALSE_POS) is True
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
         assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
         # Second pred edge is correct
         attrs = matched.pred_graph.edges[(8, 9)]
-        if self.test_edge_tp:
-            assert attrs.get(EdgeFlag.TRUE_POS) is True
         assert attrs.get(EdgeFlag.FALSE_POS) is False
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
         assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
     def test_node_two_to_one_end(self):
+        """See comment thread for discussion of edge errors with NS nodes
+        https://github.com/Janelia-Trackathon-2023/traccuracy/pull/176#issuecomment-2552537116
+        """
         matched = self.prep_matched(ex_graphs.node_two_to_one(0))
 
         # All pred edges correct
         for attrs in matched.pred_graph.edges.values():
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is True
             assert attrs.get(EdgeFlag.FALSE_POS) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
         # First edge correct
         attrs = matched.gt_graph.edges[(1, 2)]
-        if self.test_edge_tp:
-            assert attrs.get(EdgeFlag.TRUE_POS) is True  # currently None
-        assert (
-            attrs.get(EdgeFlag.FALSE_NEG) is True
-        )  # If the node is non-split, then the edge after should be false neg
-        # even if both ends are matched? @Draga
+        assert attrs.get(EdgeFlag.FALSE_NEG) is True
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
         # Second edge correct
         attrs = matched.gt_graph.edges[(2, 3)]
-        if self.test_edge_tp:
-            assert attrs.get(EdgeFlag.TRUE_POS) is True  # currently None
         assert attrs.get(EdgeFlag.FALSE_NEG) is False
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
@@ -489,19 +447,14 @@ class TestStandardEdge:
 
         # gt edges are fn
         for attrs in matched.gt_graph.edges.values():
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is False  # currently None
             assert attrs.get(EdgeFlag.FALSE_NEG) is True
 
-        # Pred edges are fp
+        # Pred edges with NS nodes are not penalized (see comment thread above)
         for attrs in matched.pred_graph.edges.values():
-            if self.test_edge_tp:
-                assert attrs.get(EdgeFlag.TRUE_POS) is False  # currently None
-            assert (
-                attrs.get(EdgeFlag.FALSE_POS) is True
-            )  # currently None, should be FP? @Draga
+            assert attrs.get(EdgeFlag.FALSE_POS) is False
 
-    # CTCMatcher does not allow one gt to match multiple comp nodes. Skipping the one_to_two example
+    # CTCMatcher does not allow one gt to match multiple comp nodes.
+    # Skipping the one_to_two example
 
     def test_correct_division(self):
         # Check that intertrack edges have been identified
