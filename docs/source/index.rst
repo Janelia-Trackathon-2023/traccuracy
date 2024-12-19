@@ -25,6 +25,7 @@
    track_errors/nodes
    track_errors/edges
    track_errors/divisions
+   track_errors/ctc
 
 .. toctree::
    :maxdepth: 2

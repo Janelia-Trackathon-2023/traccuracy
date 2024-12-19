@@ -53,6 +53,7 @@ extensions = [
     "nbsphinx",  # add notebooks to docs
     "nbsphinx_link",  # add notebooks to docs
     "sphinx_click",  # auto document cli
+    "jupyter_sphinx",  # executable code blocks in rst
 ]
 
 napoleon_google_docstring = True
