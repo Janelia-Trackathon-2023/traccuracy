@@ -34,3 +34,12 @@
    metrics/ctc
    metrics/track_overlap
    metrics/divisions
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Test Cases
+
+   Segmentation <test_cases/segmentation>
+   Graphs <test_cases/graphs>
+   Divisions <test_cases/divisions>
