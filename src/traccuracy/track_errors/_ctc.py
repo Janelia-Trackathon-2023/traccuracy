@@ -41,6 +41,7 @@ def get_vertex_errors(matched_data: Matched):
 
     comp_graph.set_flag_on_all_nodes(NodeFlag.TRUE_POS, False)
     comp_graph.set_flag_on_all_nodes(NodeFlag.NON_SPLIT, False)
+    gt_graph.set_flag_on_all_nodes(NodeFlag.TRUE_POS, False)
 
     # will flip this when we come across the vertex in the mapping
     comp_graph.set_flag_on_all_nodes(NodeFlag.FALSE_POS, True)
@@ -60,6 +61,7 @@ def get_vertex_errors(matched_data: Matched):
             comp_graph.set_flag_on_node(pred_id, NodeFlag.TRUE_POS, True)
             comp_graph.set_flag_on_node(pred_id, NodeFlag.FALSE_POS, False)
             gt_graph.set_flag_on_node(gid, NodeFlag.FALSE_NEG, False)
+            gt_graph.set_flag_on_node(gid, NodeFlag.TRUE_POS, True)
         elif len(gt_ids) > 1:
             comp_graph.set_flag_on_node(pred_id, NodeFlag.NON_SPLIT, True)
             comp_graph.set_flag_on_node(pred_id, NodeFlag.FALSE_POS, False)
@@ -90,6 +92,7 @@ def get_edge_errors(matched_data: Matched):
     comp_tp_nodes = comp_graph.get_nodes_with_flag(NodeFlag.TRUE_POS)
     induced_graph = comp_graph.get_subgraph(comp_tp_nodes).graph
 
+    # Set error flags to default/correct value and flip as we find errors
     comp_graph.set_flag_on_all_edges(EdgeFlag.FALSE_POS, False)
     comp_graph.set_flag_on_all_edges(EdgeFlag.WRONG_SEMANTIC, False)
     gt_graph.set_flag_on_all_edges(EdgeFlag.FALSE_NEG, False)
