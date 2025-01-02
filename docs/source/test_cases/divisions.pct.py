@@ -20,16 +20,9 @@
 # functions in the `tests/examples/` directory.
 
 # %% nbsphinx="hidden"
-import os
 import sys
 
-on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-
-# Running locally assume relative path from this file to examples
-if not on_rtd:
-    sys.path.append("../../../tests")
-else:
-    sys.path.append("../../tests")
+sys.path.append("../../../tests")
 
 # %%
 import matplotlib.pyplot as plt
