@@ -7,7 +7,6 @@
    :caption: Examples:
 
    examples/ctc
-   examples/test-cases
 
 .. toctree::
    :maxdepth: 2
