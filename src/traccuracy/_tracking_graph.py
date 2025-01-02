@@ -25,12 +25,12 @@ class NodeFlag(str, enum.Enum):
     this will likely ruin metrics computation!
     """
 
-    # True positive nodes. Valid on gt and computed graphs.
-    TRUE_POS = "is_tp"
-    # False positive nodes. Valid on computed graph.
-    FALSE_POS = "is_fp"
-    # False negative nodes. Valid on gt graph.
-    FALSE_NEG = "is_fn"
+    # True positive nodes as defined by CTC. Valid on gt and computed graphs.
+    CTC_TRUE_POS = "is_ctc_tp"
+    # False positive nodes as defined by CTC. Valid on computed graph.
+    CTC_FALSE_POS = "is_ctc_fp"
+    # False negative nodes as defined by CTC. Valid on gt graph.
+    CTC_FALSE_NEG = "is_ctc_fn"
     # Non-split vertices as defined by CTC. Valid on computed graph
     # when many computed nodes can be matched to one gt node.
     NON_SPLIT = "is_ns"
@@ -67,10 +67,10 @@ class EdgeFlag(str, enum.Enum):
 
     # True positive edges. Valid on gt and computed graphs.
     TRUE_POS = "is_tp"
-    # False positive edges.Valid on computed graph.
-    FALSE_POS = "is_fp"
-    # False negative nodes. Valid on gt graph.
-    FALSE_NEG = "is_fn"
+    # False positive edges as defined by CTC. Valid on computed graph.
+    CTC_FALSE_POS = "is_ctc_fp"
+    # False negative nodes as defined by CTC. Valid on gt graph.
+    CTC_FALSE_NEG = "is_ctc_fn"
     # Edges between tracks as defined by CTC. Valid on gt and computed graphs.
     INTERTRACK_EDGE = "is_intertrack_edge"
     # Edges with wrong semantic as defined by CTC. Valid on computed graph.

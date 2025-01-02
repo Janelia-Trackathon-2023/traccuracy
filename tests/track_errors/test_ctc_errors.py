@@ -14,8 +14,8 @@ class TestStandardNode:
         # all pred nodes are false positives
         get_vertex_errors(matched)
         for attrs in matched.pred_graph.nodes.values():
-            assert attrs.get(NodeFlag.TRUE_POS) is False
-            assert attrs.get(NodeFlag.FALSE_POS) is True
+            assert attrs.get(NodeFlag.CTC_TRUE_POS) is False
+            assert attrs.get(NodeFlag.CTC_FALSE_POS) is True
             assert attrs.get(NodeFlag.NON_SPLIT) is False
 
     def test_no_pred(self):
@@ -23,19 +23,19 @@ class TestStandardNode:
         # All gt nodes are false negatives
         get_vertex_errors(matched)
         for attrs in matched.gt_graph.nodes.values():
-            assert attrs.get(NodeFlag.TRUE_POS) is False
-            assert attrs.get(NodeFlag.FALSE_NEG) is True
+            assert attrs.get(NodeFlag.CTC_TRUE_POS) is False
+            assert attrs.get(NodeFlag.CTC_FALSE_NEG) is True
 
     def test_good_matched(self):
         matched = ex_graphs.good_matched()
         # all notes gt/pred are true pos
         get_vertex_errors(matched)
         for attrs in matched.gt_graph.nodes.values():
-            assert attrs.get(NodeFlag.TRUE_POS) is True
-            assert attrs.get(NodeFlag.FALSE_NEG) is False
+            assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
+            assert attrs.get(NodeFlag.CTC_FALSE_NEG) is False
         for attrs in matched.pred_graph.nodes.values():
-            assert attrs.get(NodeFlag.TRUE_POS) is True
-            assert attrs.get(NodeFlag.FALSE_POS) is False
+            assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
+            assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
             assert attrs.get(NodeFlag.NON_SPLIT) is False
 
     @pytest.mark.parametrize("t", [0, 1, 2])
@@ -48,16 +48,16 @@ class TestStandardNode:
         # Check gt graph
         for node, attrs in matched.gt_graph.nodes.items():
             if node == wrong_node:
-                assert attrs[NodeFlag.TRUE_POS] is False
-                assert attrs[NodeFlag.FALSE_NEG] is True
+                assert attrs[NodeFlag.CTC_TRUE_POS] is False
+                assert attrs[NodeFlag.CTC_FALSE_NEG] is True
             else:
-                assert attrs[NodeFlag.TRUE_POS] is True
-                assert attrs[NodeFlag.FALSE_NEG] is False
+                assert attrs[NodeFlag.CTC_TRUE_POS] is True
+                assert attrs[NodeFlag.CTC_FALSE_NEG] is False
 
         # Check pred graph -- all correct
         for attrs in matched.pred_graph.nodes.values():
-            assert attrs.get(NodeFlag.TRUE_POS) is True
-            assert attrs.get(NodeFlag.FALSE_POS) is False
+            assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
+            assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
             assert attrs.get(NodeFlag.NON_SPLIT) is False
 
     @pytest.mark.parametrize("t", [0, 1, 2])
@@ -68,18 +68,18 @@ class TestStandardNode:
 
         # GT all correct
         for attrs in matched.gt_graph.nodes.values():
-            assert attrs[NodeFlag.TRUE_POS] is True
-            assert attrs[NodeFlag.FALSE_NEG] is False
+            assert attrs[NodeFlag.CTC_TRUE_POS] is True
+            assert attrs[NodeFlag.CTC_FALSE_NEG] is False
 
         # Check pred
         for node, attrs in matched.pred_graph.nodes.items():
             if node == 7:
-                assert attrs.get(NodeFlag.TRUE_POS) is False
-                assert attrs.get(NodeFlag.FALSE_POS) is True
+                assert attrs.get(NodeFlag.CTC_TRUE_POS) is False
+                assert attrs.get(NodeFlag.CTC_FALSE_POS) is True
                 assert attrs.get(NodeFlag.NON_SPLIT) is False
             else:
-                assert attrs.get(NodeFlag.TRUE_POS) is True
-                assert attrs.get(NodeFlag.FALSE_POS) is False
+                assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
+                assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
                 assert attrs.get(NodeFlag.NON_SPLIT) is False
 
     @pytest.mark.parametrize("edge_er", [0, 1])
@@ -91,18 +91,18 @@ class TestStandardNode:
         # GT all correct
         # GT all correct
         for attrs in matched.gt_graph.nodes.values():
-            assert attrs[NodeFlag.TRUE_POS] is True
-            assert attrs[NodeFlag.FALSE_NEG] is False
+            assert attrs[NodeFlag.CTC_TRUE_POS] is True
+            assert attrs[NodeFlag.CTC_FALSE_NEG] is False
 
         # Check pred
         for node, attrs in matched.pred_graph.nodes.items():
             if node in {7, 8}:
-                assert attrs.get(NodeFlag.TRUE_POS) is False
-                assert attrs.get(NodeFlag.FALSE_POS) is True
+                assert attrs.get(NodeFlag.CTC_TRUE_POS) is False
+                assert attrs.get(NodeFlag.CTC_FALSE_POS) is True
                 assert attrs.get(NodeFlag.NON_SPLIT) is False
             else:
-                assert attrs.get(NodeFlag.TRUE_POS) is True
-                assert attrs.get(NodeFlag.FALSE_POS) is False
+                assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
+                assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
                 assert attrs.get(NodeFlag.NON_SPLIT) is False
 
     # Not testing ex_graphs.one_to two b/c not supported by ctc matcher
@@ -116,22 +116,22 @@ class TestStandardNode:
         fn_nodes = {7, [1, 2, 3][t]}
         for node, attrs in matched.gt_graph.nodes.items():
             if node in fn_nodes:
-                assert attrs[NodeFlag.TRUE_POS] is False
-                assert attrs[NodeFlag.FALSE_NEG] is False
+                assert attrs[NodeFlag.CTC_TRUE_POS] is False
+                assert attrs[NodeFlag.CTC_FALSE_NEG] is False
             else:
-                assert attrs[NodeFlag.TRUE_POS] is True
-                assert attrs[NodeFlag.FALSE_NEG] is False
+                assert attrs[NodeFlag.CTC_TRUE_POS] is True
+                assert attrs[NodeFlag.CTC_FALSE_NEG] is False
 
         # nonsplit node in prediction
         ns_node = [4, 5, 6][t]
         for node, attrs in matched.pred_graph.nodes.items():
             if node == ns_node:
-                assert attrs.get(NodeFlag.TRUE_POS) is False
-                assert attrs.get(NodeFlag.FALSE_POS) is False
+                assert attrs.get(NodeFlag.CTC_TRUE_POS) is False
+                assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
                 assert attrs.get(NodeFlag.NON_SPLIT) is True
             else:
-                assert attrs.get(NodeFlag.TRUE_POS) is True
-                assert attrs.get(NodeFlag.FALSE_POS) is False
+                assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
+                assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
                 assert attrs.get(NodeFlag.NON_SPLIT) is False
 
 
@@ -151,7 +151,7 @@ def test_assign_edge_errors():
     comp_g = nx.DiGraph()
     comp_g.add_nodes_from(comp_ids)
     comp_g.add_edges_from(comp_edges)
-    nx.set_node_attributes(comp_g, True, NodeFlag.TRUE_POS)
+    nx.set_node_attributes(comp_g, True, NodeFlag.CTC_TRUE_POS)
     nx.set_node_attributes(
         comp_g,
         {idx: {"t": 0, "segmentation_id": 1, "y": 0, "x": 0} for idx in comp_ids},
@@ -162,7 +162,7 @@ def test_assign_edge_errors():
     gt_g = nx.DiGraph()
     gt_g.add_nodes_from(gt_ids)
     gt_g.add_edges_from(gt_edges)
-    nx.set_node_attributes(gt_g, False, NodeFlag.FALSE_NEG)
+    nx.set_node_attributes(gt_g, False, NodeFlag.CTC_FALSE_NEG)
     nx.set_node_attributes(
         gt_g, {idx: {"t": 0, "segmentation_id": 1, "y": 0, "x": 0} for idx in gt_ids}
     )
@@ -172,8 +172,8 @@ def test_assign_edge_errors():
 
     get_edge_errors(matched_data)
 
-    assert matched_data.pred_graph.edges[(7, 8)][EdgeFlag.FALSE_POS]
-    assert matched_data.gt_graph.edges[(17, 18)][EdgeFlag.FALSE_NEG]
+    assert matched_data.pred_graph.edges[(7, 8)][EdgeFlag.CTC_FALSE_POS]
+    assert matched_data.gt_graph.edges[(17, 18)][EdgeFlag.CTC_FALSE_NEG]
 
 
 def test_assign_edge_errors_semantics():
@@ -272,18 +272,18 @@ def test_ns_vertex_fn_edge():
     for node in comp.nodes:
         assert comp.nodes[node][NodeFlag.NON_SPLIT]
     for edge in comp_edges:
-        assert not comp.edges[edge][EdgeFlag.FALSE_POS]
+        assert not comp.edges[edge][EdgeFlag.CTC_FALSE_POS]
 
     # https://github.com/Janelia-Trackathon-2023/traccuracy/pull/141#issuecomment-2265990197
     if False:  # TODO: Fix this in a separate PR
         for node in [1, 2, 4, 5]:
-            assert gt.nodes[node][NodeFlag.FALSE_NEG]
+            assert gt.nodes[node][NodeFlag.CTC_FALSE_NEG]
 
     for node in [3, 6]:
-        assert gt.nodes[node][NodeFlag.FALSE_NEG]
+        assert gt.nodes[node][NodeFlag.CTC_FALSE_NEG]
 
     for edge in gt_edges:
-        assert gt.edges[edge][EdgeFlag.FALSE_NEG]
+        assert gt.edges[edge][EdgeFlag.CTC_FALSE_NEG]
 
 
 class TestStandardEdge:
@@ -301,24 +301,24 @@ class TestStandardEdge:
         for attrs in matched.pred_graph.edges.values():
             # Edges on FP nodes are not additionally penalized as FP edge
             # https://github.com/Janelia-Trackathon-2023/traccuracy/pull/176#issuecomment-2552537116
-            assert attrs.get(EdgeFlag.FALSE_POS) is False
+            assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
     def test_no_pred(self):
         matched = self.prep_matched(ex_graphs.empty_pred())
         for attrs in matched.gt_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_NEG) is True
+            assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is True
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
     def test_good_matched(self):
         matched = self.prep_matched(ex_graphs.good_matched())
         for attrs in matched.gt_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_NEG) is False
+            assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
         for attrs in matched.pred_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_POS) is False
+            assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
@@ -327,13 +327,13 @@ class TestStandardEdge:
 
         # All pred edges correct
         for attrs in matched.pred_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_POS) is False
+            assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
         # First gt edge is false neg
         attrs = matched.gt_graph.edges[(1, 2)]
-        assert attrs.get(EdgeFlag.FALSE_NEG) is True
+        assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is True
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
     def test_fn_node_middle(self):
@@ -343,7 +343,7 @@ class TestStandardEdge:
 
         # All gt edges false pos
         for attrs in matched.gt_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_NEG) is True
+            assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is True
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
     def test_fn_edge(self):
@@ -351,17 +351,17 @@ class TestStandardEdge:
 
         # Only pred edge is correct
         attrs = matched.pred_graph.edges[(5, 6)]
-        assert attrs.get(EdgeFlag.FALSE_POS) is False
+        assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
         # First gt edge is false neg
         attrs = matched.gt_graph.edges[(1, 2)]
-        assert attrs.get(EdgeFlag.FALSE_NEG) is True
+        assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is True
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
         # Second gt edge is correct
         attrs = matched.gt_graph.edges[(2, 3)]
-        assert attrs.get(EdgeFlag.FALSE_NEG) is False
+        assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is False
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
     @pytest.mark.parametrize("t", [0, 1, 2])
@@ -370,13 +370,13 @@ class TestStandardEdge:
 
         # All pred edges correct
         for attrs in matched.pred_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_POS) is False
+            assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
         # All gt edges correct
         for attrs in matched.gt_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_NEG) is False
+            assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
     @pytest.mark.parametrize("t", [0, 1])
@@ -388,11 +388,11 @@ class TestStandardEdge:
             # false positive edge
             if edge == (7, 8):
                 # Not FP b/c not matched to any gt nodes
-                assert attrs.get(EdgeFlag.FALSE_POS) is False
+                assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
                 assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
                 assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
             else:
-                assert attrs.get(EdgeFlag.FALSE_POS) is False
+                assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
                 assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
                 assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
@@ -402,21 +402,21 @@ class TestStandardEdge:
         # All but one gt edge are FN
         for edge, attrs in matched.gt_graph.edges.items():
             if edge == (2, 3):
-                assert attrs.get(EdgeFlag.FALSE_NEG) is False
+                assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is False
                 assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             else:
-                assert attrs.get(EdgeFlag.FALSE_NEG) is True
+                assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is True
                 assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
         # First pred edge is crossover so FP
         attrs = matched.pred_graph.edges[(7, 8)]
-        assert attrs.get(EdgeFlag.FALSE_POS) is True
+        assert attrs.get(EdgeFlag.CTC_FALSE_POS) is True
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
         assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
         # Second pred edge is correct
         attrs = matched.pred_graph.edges[(8, 9)]
-        assert attrs.get(EdgeFlag.FALSE_POS) is False
+        assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
         assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
@@ -428,18 +428,18 @@ class TestStandardEdge:
 
         # All pred edges correct
         for attrs in matched.pred_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_POS) is False
+            assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
             assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
             assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
 
         # First edge correct
         attrs = matched.gt_graph.edges[(1, 2)]
-        assert attrs.get(EdgeFlag.FALSE_NEG) is True
+        assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is True
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
         # Second edge correct
         attrs = matched.gt_graph.edges[(2, 3)]
-        assert attrs.get(EdgeFlag.FALSE_NEG) is False
+        assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is False
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
 
     def test_node_two_to_one_mid(self):
@@ -447,11 +447,11 @@ class TestStandardEdge:
 
         # gt edges are fn
         for attrs in matched.gt_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_NEG) is True
+            assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is True
 
         # Pred edges with NS nodes are not penalized (see comment thread above)
         for attrs in matched.pred_graph.edges.values():
-            assert attrs.get(EdgeFlag.FALSE_POS) is False
+            assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
 
     # CTCMatcher does not allow one gt to match multiple comp nodes.
     # Skipping the one_to_two example
