@@ -117,7 +117,7 @@ False negative nodes are annotated on the ground truth graph and correspond to a
 Non-Split
 ^^^^^^^^^
 
-Non-split nodes are annotated on the predicted graph and correspond to a node in the prediction that has been matched to two nodes in the ground truth graph.
+Non-split nodes are annotated on the predicted graph and correspond to a node in the prediction that has been matched to more than one node in the ground truth graph.
 
 .. jupyter-execute::
     :hide-code:
@@ -143,7 +143,7 @@ False Negatives
 
 False negative edges are annotated on the ground truth graph. An edge is considered a false negative if:
 
-1. Either node is annotated as false negative nodes
+1. Either node is annotated as a false negative node
 
 .. jupyter-execute::
     :hide-code:
@@ -167,7 +167,7 @@ False negative edges are annotated on the ground truth graph. An edge is conside
 Intertrack
 ^^^^^^^^^^
 
-Intertrack edges connect parent cells to daughter cells.
+Intertrack edges connect two nodes with different track IDs, most commonly parent cells to daughter cells, or two cells in non-consecutive frames. Note that intertrack edges are not errors, but support the annotation of Wrong Semantic edges, as detailed below.
 
 .. jupyter-execute::
     :hide-code:
