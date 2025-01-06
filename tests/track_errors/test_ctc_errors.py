@@ -387,7 +387,8 @@ class TestStandardEdge:
         for edge, attrs in matched.pred_graph.edges.items():
             # false positive edge
             if edge == (7, 8):
-                # Not FP b/c not matched to any gt nodes
+                # This edge consists of FP nodes which are excluded from the induced graph
+                # Therefore the edge is not classified as a CTC false positive
                 assert attrs.get(EdgeFlag.CTC_FALSE_POS) is False
                 assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is False
                 assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
@@ -492,6 +493,7 @@ class TestStandardEdge:
         attrs = matched.pred_graph.edges[(6, 7)]
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
         assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
+        assert attrs.get(EdgeFlag.CTC_FALSE_POS) is True
 
     def test_fn_division(self):
         # Intertrack and wrong semantic check
@@ -507,6 +509,7 @@ class TestStandardEdge:
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
         attrs = matched.gt_graph.edges[(2, 3)]
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+        assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is True
 
     def test_wrong_child(self):
         # Intertrack and wrong semantic check
@@ -520,9 +523,11 @@ class TestStandardEdge:
         attrs = matched.pred_graph.edges[(7, 9)]
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
         assert attrs.get(EdgeFlag.WRONG_SEMANTIC) is False
+        assert attrs.get(EdgeFlag.CTC_FALSE_POS) is True
 
         # Gt edges are just intertrack
         attrs = matched.gt_graph.edges[(2, 4)]
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
+        assert attrs.get(EdgeFlag.CTC_FALSE_NEG) is True
         attrs = matched.gt_graph.edges[(2, 3)]
         assert attrs.get(EdgeFlag.INTERTRACK_EDGE) is True
