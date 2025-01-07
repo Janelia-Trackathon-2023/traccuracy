@@ -136,7 +136,7 @@ False positive edges are annotated on the predicted graph. An edge is considered
 .. jupyter-execute::
     :hide-code:
 
-    # plot_matched([ex_graphs.crossover_edge()], [{}], "")
+    plot_matched([ex_graphs.crossover_edge()], [{}], "")
 
 False Negatives
 ^^^^^^^^^^^^^^^
@@ -162,7 +162,7 @@ False negative edges are annotated on the ground truth graph. An edge is conside
 .. jupyter-execute::
     :hide-code:
 
-    plot_matched([ex_graphs.two_to_one(t) for t in [0, 1]], [{4: "NS", (1, 2): "FN"}, {5: "NS", (1, 7): "FN", (2, 3): "FN"}], "")
+    plot_matched([ex_graphs.node_two_to_one(t) for t in [0, 1]], [{4: "NS", (1, 2): "FN"}, {5: "NS", (1, 7): "FN", (2, 3): "FN"}], "")
 
 Intertrack
 ^^^^^^^^^^
