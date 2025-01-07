@@ -7,7 +7,7 @@ These node and edge error annotations are used to calculate the CTC metrics TRA 
     :hide-code:
 
     import sys
-    sys.path.append('../../tests')
+    sys.path.append('../tests')
 
     import matplotlib.pyplot as plt
     import networkx as nx
@@ -122,7 +122,7 @@ Non-split nodes are annotated on the predicted graph and correspond to a node in
 .. jupyter-execute::
     :hide-code:
 
-    plot_matched([ex_graphs.two_to_one(t) for t in [0, 1]], [{4: "NS"}, {5: "NS"}], "Non-Split Nodes")
+    plot_matched([ex_graphs.node_two_to_one(t) for t in [0, 1]], [{4: "NS"}, {5: "NS"}], "Non-Split Nodes")
 
 
 Edges
