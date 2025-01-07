@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1734641829724,
+  "lastUpdate": 1736274330344,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -4780,6 +4780,121 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0",
             "extra": "mean: 715.6743229999734 msec\nrounds: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "69ffb71a093b968aef4a316354007e421b8df28a",
+          "message": "Add written documentation for the ctc error types with example graphs (#178)\n\n* Add written documentation for the ctc error types with example graphs\n\n* Add matplotlib as dependency for new plots in the docs\n\n* Fix path to import of example graphs\n\n* Try different path configuration for rtd build\n\n* Try path with two ../\n\n* Correct imports with two ../\n\n* Draga's edits from code review\n\nCo-authored-by: Draga Doncila Pop <17995243+DragaDoncila@users.noreply.github.com>\n\n---------\n\nCo-authored-by: Draga Doncila Pop <17995243+DragaDoncila@users.noreply.github.com>",
+          "timestamp": "2025-01-07T13:14:29-05:00",
+          "tree_id": "471247f5959d94d0664391f25bf6d28fda386ba2",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/69ffb71a093b968aef4a316354007e421b8df28a"
+        },
+        "date": 1736274329989,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[2d]",
+            "value": 0.16705401785267726,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 5.986087690999966 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[3d]",
+            "value": 0.05890746967651795,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 16.97577583100002 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_ctc_data[2d]",
+            "value": 0.8424472946312228,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.187017878000006 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[2d]",
+            "value": 1.259848464582615,
+            "unit": "iter/sec",
+            "range": "stddev: 0.006704898929159567",
+            "extra": "mean: 793.7462544999789 msec\nrounds: 2"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[3d]",
+            "value": 0.0948270591499265,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 10.545513158000063 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[2d]",
+            "value": 0.6388448262705881,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.5653253479999876 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[3d]",
+            "value": 0.058703985434229125,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 17.03461856299998 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[2d]",
+            "value": 3.1878725371760672,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 313.6888279999539 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[3d]",
+            "value": 0.26342011656916514,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 3.796217286000001 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[2d]",
+            "value": 0.6295153336831939,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.588523656999996 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[3d]",
+            "value": 0.05497647607029903,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 18.189598014999888 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[2d]",
+            "value": 13.24057971812586,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 75.52539400001024 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[3d]",
+            "value": 1.370252512667845,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 729.7924950000834 msec\nrounds: 1"
           }
         ]
       }
