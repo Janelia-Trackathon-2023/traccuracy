@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1736274330344,
+  "lastUpdate": 1736275229168,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -4895,6 +4895,121 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0",
             "extra": "mean: 729.7924950000834 msec\nrounds: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b367f32072a7c0eb9c4dab9ba6ee50aeebaa7819",
+          "message": "Add tests for CTC node and edge track errors (#176)\n\n* Test ctc node errors with graph test cases\n\n* Start drafting ctc edge error tests -- currently failing and incomplete\n\n* Fix obvious issues with CTC error tests\n\n* Add tests cases for non split edges and crossover/identity switch edges\n\n* Add test for two to one with edges\n\n* Add test for crossover edge\n\n* Add division test cases\n\n* Add test description back to notebook\n\n* Annotate div cases with one to one matching\n\n* Add division cases to collection of plots of test cases\n\n* Add additional context to testing non sequential ids\n\n* Correct notebook header levels\n\n* Add test cases for limits of matching in shifted division cases\n\n* Differentiate between standard test case testing and end to end tests\n\n* Add tests for intertrack edges\n\n* Update tests to reflect correct ctc behavior\n\n* Remove leftover comments and test code from ctc edge errors\n\n* Rename node/edge flags to prefix with CTC\n\n* Improve AssertionError test with explicit match\n\n* Draga's improvements/clarifications to test comments\n\nCo-authored-by: Draga Doncila Pop <17995243+DragaDoncila@users.noreply.github.com>\n\n* Improvements based on Draga's questions\n\n* Update ctc errors docs to match changes introduced in last merge\n\n* Correction to notebook for test examples\n\n---------\n\nCo-authored-by: Caroline Malin-Mayor <malinmayorc@janelia.hhmi.org>\nCo-authored-by: Draga Doncila Pop <17995243+DragaDoncila@users.noreply.github.com>",
+          "timestamp": "2025-01-07T13:34:45-05:00",
+          "tree_id": "e25113db496b9928d6d259c9a824ac01e7600aa5",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/b367f32072a7c0eb9c4dab9ba6ee50aeebaa7819"
+        },
+        "date": 1736275228670,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[2d]",
+            "value": 0.18145758679429064,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 5.510929675999989 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[3d]",
+            "value": 0.05119508112287133,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 19.533126583000012 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_ctc_data[2d]",
+            "value": 0.8706866178422035,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.1485188579999885 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[2d]",
+            "value": 1.3547966642622078,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0011074628624909242",
+            "extra": "mean: 738.1181444999925 msec\nrounds: 2"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[3d]",
+            "value": 0.10201018698719759,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 9.802942524999992 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[2d]",
+            "value": 0.6644210126762566,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.5050697989999549 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[3d]",
+            "value": 0.05909931903307254,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 16.920668738000018 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[2d]",
+            "value": 3.656214354195123,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 273.5069400000043 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[3d]",
+            "value": 0.21854567581524123,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 4.575702522000029 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[2d]",
+            "value": 0.6385533491119338,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.566039864000004 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[3d]",
+            "value": 0.055614091865160455,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 17.98105419799998 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[2d]",
+            "value": 13.671333914234385,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 73.14575200001627 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[3d]",
+            "value": 1.3873058091814048,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 720.821605000026 msec\nrounds: 1"
           }
         ]
       }
