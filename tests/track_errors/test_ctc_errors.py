@@ -14,16 +14,16 @@ class TestStandardNode:
         # all pred nodes are false positives
         get_vertex_errors(matched)
         for attrs in matched.pred_graph.nodes.values():
-            assert attrs.get(NodeFlag.CTC_TRUE_POS) is False
+            assert NodeFlag.CTC_TRUE_POS not in attrs
             assert attrs.get(NodeFlag.CTC_FALSE_POS) is True
-            assert attrs.get(NodeFlag.NON_SPLIT) is False
+            assert NodeFlag.NON_SPLIT not in attrs
 
     def test_no_pred(self):
         matched = ex_graphs.empty_pred()
         # All gt nodes are false negatives
         get_vertex_errors(matched)
         for attrs in matched.gt_graph.nodes.values():
-            assert attrs.get(NodeFlag.CTC_TRUE_POS) is False
+            assert NodeFlag.CTC_TRUE_POS not in attrs
             assert attrs.get(NodeFlag.CTC_FALSE_NEG) is True
 
     def test_good_matched(self):
@@ -32,11 +32,11 @@ class TestStandardNode:
         get_vertex_errors(matched)
         for attrs in matched.gt_graph.nodes.values():
             assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
-            assert attrs.get(NodeFlag.CTC_FALSE_NEG) is False
+            assert NodeFlag.CTC_FALSE_NEG not in attrs
         for attrs in matched.pred_graph.nodes.values():
             assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
-            assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
-            assert attrs.get(NodeFlag.NON_SPLIT) is False
+            assert NodeFlag.CTC_FALSE_NEG not in attrs
+            assert NodeFlag.NON_SPLIT not in attrs
 
     @pytest.mark.parametrize("t", [0, 1, 2])
     def test_fn_node(self, t):
@@ -48,17 +48,17 @@ class TestStandardNode:
         # Check gt graph
         for node, attrs in matched.gt_graph.nodes.items():
             if node == wrong_node:
-                assert attrs[NodeFlag.CTC_TRUE_POS] is False
+                assert NodeFlag.CTC_TRUE_POS not in attrs
                 assert attrs[NodeFlag.CTC_FALSE_NEG] is True
             else:
                 assert attrs[NodeFlag.CTC_TRUE_POS] is True
-                assert attrs[NodeFlag.CTC_FALSE_NEG] is False
+                assert NodeFlag.CTC_FALSE_NEG not in attrs
 
         # Check pred graph -- all correct
         for attrs in matched.pred_graph.nodes.values():
             assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
-            assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
-            assert attrs.get(NodeFlag.NON_SPLIT) is False
+            assert NodeFlag.CTC_FALSE_NEG not in attrs
+            assert NodeFlag.NON_SPLIT not in attrs
 
     @pytest.mark.parametrize("t", [0, 1, 2])
     def test_fp_node(self, t):
@@ -69,18 +69,18 @@ class TestStandardNode:
         # GT all correct
         for attrs in matched.gt_graph.nodes.values():
             assert attrs[NodeFlag.CTC_TRUE_POS] is True
-            assert attrs[NodeFlag.CTC_FALSE_NEG] is False
+            assert NodeFlag.CTC_FALSE_NEG not in attrs
 
         # Check pred
         for node, attrs in matched.pred_graph.nodes.items():
             if node == 7:
-                assert attrs.get(NodeFlag.CTC_TRUE_POS) is False
+                assert NodeFlag.CTC_TRUE_POS not in attrs
                 assert attrs.get(NodeFlag.CTC_FALSE_POS) is True
-                assert attrs.get(NodeFlag.NON_SPLIT) is False
+                assert NodeFlag.NON_SPLIT not in attrs
             else:
                 assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
-                assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
-                assert attrs.get(NodeFlag.NON_SPLIT) is False
+                assert NodeFlag.CTC_FALSE_NEG not in attrs
+                assert NodeFlag.NON_SPLIT not in attrs
 
     @pytest.mark.parametrize("edge_er", [0, 1])
     def test_fp_edge(self, edge_er):
@@ -89,21 +89,20 @@ class TestStandardNode:
         get_vertex_errors(matched)
 
         # GT all correct
-        # GT all correct
         for attrs in matched.gt_graph.nodes.values():
             assert attrs[NodeFlag.CTC_TRUE_POS] is True
-            assert attrs[NodeFlag.CTC_FALSE_NEG] is False
+            assert NodeFlag.CTC_FALSE_NEG not in attrs
 
         # Check pred
         for node, attrs in matched.pred_graph.nodes.items():
             if node in {7, 8}:
-                assert attrs.get(NodeFlag.CTC_TRUE_POS) is False
+                assert NodeFlag.CTC_TRUE_POS not in attrs
                 assert attrs.get(NodeFlag.CTC_FALSE_POS) is True
-                assert attrs.get(NodeFlag.NON_SPLIT) is False
+                assert NodeFlag.NON_SPLIT not in attrs
             else:
                 assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
-                assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
-                assert attrs.get(NodeFlag.NON_SPLIT) is False
+                assert NodeFlag.CTC_FALSE_NEG not in attrs
+                assert NodeFlag.NON_SPLIT not in attrs
 
     # Not testing ex_graphs.one_to two b/c not supported by ctc matcher
 
@@ -116,23 +115,23 @@ class TestStandardNode:
         fn_nodes = {7, [1, 2, 3][t]}
         for node, attrs in matched.gt_graph.nodes.items():
             if node in fn_nodes:
-                assert attrs[NodeFlag.CTC_TRUE_POS] is False
-                assert attrs[NodeFlag.CTC_FALSE_NEG] is False
+                assert NodeFlag.CTC_TRUE_POS not in attrs
+                assert NodeFlag.CTC_FALSE_NEG not in attrs
             else:
                 assert attrs[NodeFlag.CTC_TRUE_POS] is True
-                assert attrs[NodeFlag.CTC_FALSE_NEG] is False
+                assert NodeFlag.CTC_FALSE_NEG not in attrs
 
         # nonsplit node in prediction
         ns_node = [4, 5, 6][t]
         for node, attrs in matched.pred_graph.nodes.items():
             if node == ns_node:
-                assert attrs.get(NodeFlag.CTC_TRUE_POS) is False
-                assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
+                assert NodeFlag.CTC_TRUE_POS not in attrs
+                assert NodeFlag.CTC_FALSE_NEG not in attrs
                 assert attrs.get(NodeFlag.NON_SPLIT) is True
             else:
                 assert attrs.get(NodeFlag.CTC_TRUE_POS) is True
-                assert attrs.get(NodeFlag.CTC_FALSE_POS) is False
-                assert attrs.get(NodeFlag.NON_SPLIT) is False
+                assert NodeFlag.CTC_FALSE_NEG not in attrs
+                assert NodeFlag.NON_SPLIT not in attrs
 
 
 def test_assign_edge_errors():

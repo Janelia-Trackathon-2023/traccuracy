@@ -39,10 +39,6 @@ def get_vertex_errors(matched_data: Matched):
         logger.info("Node errors already calculated. Skipping graph annotation")
         return
 
-    comp_graph.set_flag_on_all_nodes(NodeFlag.CTC_TRUE_POS, False)
-    comp_graph.set_flag_on_all_nodes(NodeFlag.NON_SPLIT, False)
-    gt_graph.set_flag_on_all_nodes(NodeFlag.CTC_TRUE_POS, False)
-
     # will flip this when we come across the vertex in the mapping
     comp_graph.set_flag_on_all_nodes(NodeFlag.CTC_FALSE_POS, True)
     gt_graph.set_flag_on_all_nodes(NodeFlag.CTC_FALSE_NEG, True)
@@ -59,16 +55,16 @@ def get_vertex_errors(matched_data: Matched):
         if len(gt_ids) == 1:
             gid = gt_ids[0]
             comp_graph.set_flag_on_node(pred_id, NodeFlag.CTC_TRUE_POS, True)
-            comp_graph.set_flag_on_node(pred_id, NodeFlag.CTC_FALSE_POS, False)
-            gt_graph.set_flag_on_node(gid, NodeFlag.CTC_FALSE_NEG, False)
+            comp_graph.remove_flag_from_node(pred_id, NodeFlag.CTC_FALSE_POS)
+            gt_graph.remove_flag_from_node(gid, NodeFlag.CTC_FALSE_NEG)
             gt_graph.set_flag_on_node(gid, NodeFlag.CTC_TRUE_POS, True)
         elif len(gt_ids) > 1:
             comp_graph.set_flag_on_node(pred_id, NodeFlag.NON_SPLIT, True)
-            comp_graph.set_flag_on_node(pred_id, NodeFlag.CTC_FALSE_POS, False)
+            comp_graph.remove_flag_from_node(pred_id, NodeFlag.CTC_FALSE_POS)
             # number of split operations that would be required to correct the vertices
             ns_count += len(gt_ids) - 1
             for gt_id in gt_ids:
-                gt_graph.set_flag_on_node(gt_id, NodeFlag.CTC_FALSE_NEG, False)
+                gt_graph.remove_flag_from_node(gt_id, NodeFlag.CTC_FALSE_NEG)
 
     # Record presence of annotations on the TrackingGraph
     comp_graph.node_errors = True
