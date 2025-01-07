@@ -125,7 +125,7 @@ def test_constructor(nx_comp1):
 
     # raise AssertionError if frame key not present or ValueError if overlaps
     # with reserved values
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match=r"Frame key .* not present for node .*."):
         TrackingGraph(nx_comp1, frame_key="f")
     with pytest.raises(ValueError):
         TrackingGraph(nx_comp1, frame_key=NodeFlag.CTC_FALSE_NEG)

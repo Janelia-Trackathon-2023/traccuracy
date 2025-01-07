@@ -73,6 +73,7 @@ docs = [
     "Sphinx==7.2.6",
     "jupytext",
     "ipykernel",
+    "jupyter-sphinx",
     "matplotlib"
 ]
 
