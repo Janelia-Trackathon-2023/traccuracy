@@ -88,19 +88,11 @@ def get_edge_errors(matched_data: Matched):
     comp_tp_nodes = comp_graph.get_nodes_with_flag(NodeFlag.CTC_TRUE_POS)
     induced_graph = comp_graph.get_subgraph(comp_tp_nodes).graph
 
-    # Set error flags to default/correct value and flip as we find errors
-    comp_graph.set_flag_on_all_edges(EdgeFlag.CTC_FALSE_POS, False)
-    comp_graph.set_flag_on_all_edges(EdgeFlag.WRONG_SEMANTIC, False)
-    gt_graph.set_flag_on_all_edges(EdgeFlag.CTC_FALSE_NEG, False)
-
     gt_comp_mapping = {gt: comp for gt, comp in node_mapping if comp in induced_graph}
     comp_gt_mapping = {comp: gt for gt, comp in node_mapping if comp in induced_graph}
 
     # intertrack edges = connection between parent and daughter
     for graph in [comp_graph, gt_graph]:
-        # Set to False by default
-        graph.set_flag_on_all_edges(EdgeFlag.INTERTRACK_EDGE, False)
-
         for parent in graph.get_divisions():
             for daughter in graph.graph.successors(parent):
                 graph.set_flag_on_edge(
@@ -123,8 +115,10 @@ def get_edge_errors(matched_data: Matched):
             comp_graph.set_flag_on_edge(edge, EdgeFlag.CTC_FALSE_POS, True)
         else:
             # check if semantics are correct
-            is_parent_gt = gt_graph.edges[expected_gt_edge][EdgeFlag.INTERTRACK_EDGE]
-            is_parent_comp = comp_graph.edges[edge][EdgeFlag.INTERTRACK_EDGE]
+            is_parent_gt = gt_graph.edges[expected_gt_edge].get(
+                EdgeFlag.INTERTRACK_EDGE, False
+            )
+            is_parent_comp = comp_graph.edges[edge].get(EdgeFlag.INTERTRACK_EDGE, False)
             if is_parent_gt != is_parent_comp:
                 comp_graph.set_flag_on_edge(edge, EdgeFlag.WRONG_SEMANTIC, True)
 
