@@ -132,10 +132,9 @@ def get_edge_errors(matched_data: Matched):
     for edge in tqdm(gt_graph.edges, "Evaluating FN edges"):
         source, target = edge[0], edge[1]
         # this edge is adjacent to an edge we didn't detect, so it definitely is an fn
-        if (
-            gt_graph.nodes[source][NodeFlag.CTC_FALSE_NEG]
-            or gt_graph.nodes[target][NodeFlag.CTC_FALSE_NEG]
-        ):
+        if gt_graph.nodes[source].get(NodeFlag.CTC_FALSE_NEG, False) or gt_graph.nodes[
+            target
+        ].get(NodeFlag.CTC_FALSE_NEG, False):
             gt_graph.set_flag_on_edge(edge, EdgeFlag.CTC_FALSE_NEG, True)
             continue
 

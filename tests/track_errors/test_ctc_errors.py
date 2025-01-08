@@ -257,7 +257,7 @@ def test_ns_vertex_fn_edge():
 
     mapping = [
         (1, 1),
-        (5, 1),
+        (4, 1),
         (2, 2),
         (5, 2),
     ]
