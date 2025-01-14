@@ -271,7 +271,7 @@ def test_ns_vertex_fn_edge():
     for node in comp.nodes:
         assert comp.nodes[node][NodeFlag.NON_SPLIT]
     for edge in comp_edges:
-        assert not comp.edges[edge][EdgeFlag.CTC_FALSE_POS]
+        assert EdgeFlag.CTC_FALSE_POS not in comp.edges[edge]
 
     # https://github.com/Janelia-Trackathon-2023/traccuracy/pull/141#issuecomment-2265990197
     if False:  # TODO: Fix this in a separate PR
