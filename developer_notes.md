@@ -37,10 +37,15 @@ Documentation is built with Sphinx using `sphinx-autoapi` to automatically gener
 ```
 # Install docs requirements
 pip install -e ".[docs]"
-# Run the build
-sphinx-build docs/source docs/_build
+# Change into docs directory
+cd docs
+# Run the build 
+sphinx-build source _build
 ```
 
 Note that running documentation locally requires Pandoc to be installed as well - https://pandoc.org/installing.html.
 
 You can view the documentation by opening `docs/_build/index.html` in your browser.
+
+#### Running code cells in docs
+Executable code blocks can be added to rst files using `.. jupyter-execute::`. In order to get these code cells to run, assume that sphinx-build is being called from the docs/source directory and append to `sys.path` if necessary. 
