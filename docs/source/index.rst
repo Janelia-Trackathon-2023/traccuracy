@@ -38,8 +38,6 @@
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Test Cases
+   :caption: Development
 
-   Segmentation <test_cases/segmentation>
-   Graphs <test_cases/graphs>
-   Divisions <test_cases/divisions>
+   test_cases/index
