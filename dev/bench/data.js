@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1736275229168,
+  "lastUpdate": 1736881645540,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -5010,6 +5010,121 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0",
             "extra": "mean: 720.821605000026 msec\nrounds: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "fd11de3d30cb6ed88750ed76db15b381ee82a0c0",
+          "message": "Update the test case notebook with py:percent files (#180)\n\n* Test ctc node errors with graph test cases\n\n* Start drafting ctc edge error tests -- currently failing and incomplete\n\n* Fix obvious issues with CTC error tests\n\n* Add tests cases for non split edges and crossover/identity switch edges\n\n* Add test for two to one with edges\n\n* Add test for crossover edge\n\n* Add division test cases\n\n* Add test description back to notebook\n\n* Annotate div cases with one to one matching\n\n* Add division cases to collection of plots of test cases\n\n* Add additional context to testing non sequential ids\n\n* Correct notebook header levels\n\n* Add test cases for limits of matching in shifted division cases\n\n* Differentiate between standard test case testing and end to end tests\n\n* Add tests for intertrack edges\n\n* Update tests to reflect correct ctc behavior\n\n* Remove leftover comments and test code from ctc edge errors\n\n* Rename node/edge flags to prefix with CTC\n\n* Replace the test case notebook with three py:percent files\n\n* Remove old test case example notebook\n\n* Add jupytext as docs dependency\n\n* Add ipykernel as a docs dependency for running notebooks during docs build\n\n* Add matplotlib as dependency for docs\n\n* Try a different path for sys appending path to examples tests\n\n* Correct path to get jupyter-execute blocks to run\n\n* Try conditional path depending on local vs rtd\n\n* Try path based on calling from docs/source\n\n* Correct intro text on test case files\n\n* Make plot names more consistent\n\n* Add landing page for test cases\n\n---------\n\nCo-authored-by: Caroline Malin-Mayor <malinmayorc@janelia.hhmi.org>",
+          "timestamp": "2025-01-14T14:01:54-05:00",
+          "tree_id": "e0ce9938efd81276c309d40da55b3d4473038eb4",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/fd11de3d30cb6ed88750ed76db15b381ee82a0c0"
+        },
+        "date": 1736881645211,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[2d]",
+            "value": 0.1789486420833035,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 5.588195519999999 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[3d]",
+            "value": 0.050101675257571546,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 19.959412431999993 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_ctc_data[2d]",
+            "value": 0.866975590703654,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.1534350109999991 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[2d]",
+            "value": 1.3485568927155607,
+            "unit": "iter/sec",
+            "range": "stddev: 0.003938009893390217",
+            "extra": "mean: 741.5334165000047 msec\nrounds: 2"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[3d]",
+            "value": 0.10174342843507084,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 9.82864461500003 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[2d]",
+            "value": 0.6555014260977811,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.5255496939999489 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[3d]",
+            "value": 0.05827654236396069,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 17.159562998000013 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[2d]",
+            "value": 3.284873143733923,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 304.42575900002566 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[3d]",
+            "value": 0.22894521641072763,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 4.367857147999985 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[2d]",
+            "value": 0.59559815417557,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.678984383999989 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[3d]",
+            "value": 0.05478875215695472,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 18.251921436999964 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[2d]",
+            "value": 13.36125907740553,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 74.84324600000036 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[3d]",
+            "value": 1.432234384377949,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 698.2097419999604 msec\nrounds: 1"
           }
         ]
       }
