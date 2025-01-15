@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1736881645540,
+  "lastUpdate": 1736958697491,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -5125,6 +5125,121 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0",
             "extra": "mean: 698.2097419999604 msec\nrounds: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6b0bfabdc8bee409ff0ef5859f8e9b9d17f70fb2",
+          "message": "Add example graph plots for division error documentation (#189)",
+          "timestamp": "2025-01-15T11:25:53-05:00",
+          "tree_id": "c23594141b46bd7dc6dcd7a0cf503d52a21f0321",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/6b0bfabdc8bee409ff0ef5859f8e9b9d17f70fb2"
+        },
+        "date": 1736958697209,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[2d]",
+            "value": 0.180949838286614,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 5.526393443999979 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[3d]",
+            "value": 0.05260054713554241,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 19.01120909300002 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_ctc_data[2d]",
+            "value": 0.8894779636575585,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.1242549459999793 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[2d]",
+            "value": 1.3240892632843757,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0021381600915577896",
+            "extra": "mean: 755.2360914999952 msec\nrounds: 2"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[3d]",
+            "value": 0.09780283398405382,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 10.224652591999984 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[2d]",
+            "value": 0.6598339776156755,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.5155327460000194 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[3d]",
+            "value": 0.058804849957779716,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 17.00540007699999 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[2d]",
+            "value": 3.493177783617623,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 286.27228899995316 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[3d]",
+            "value": 0.23219006083492116,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 4.306816563999973 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[2d]",
+            "value": 0.6460339329530037,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.5479063079999946 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[3d]",
+            "value": 0.05616483068085899,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 17.80473630700004 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[2d]",
+            "value": 14.201416301576446,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 70.4155119999541 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[3d]",
+            "value": 1.4135873301728725,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 707.4200359999736 msec\nrounds: 1"
           }
         ]
       }
