@@ -373,8 +373,8 @@ class TrackingGraph:
         """Removes a flag from a node
 
         Args:
-            _id (Hashable): The node id on which to set the flag.
-            flag (NodeFlag): The node flag to set. Must be
+            _id (Hashable): The node id for which to discard the flag.
+            flag (NodeFlag): The node flag to discard. Must be
                 of type NodeFlag - you may not not pass strings, even if they
                 are included in the NodeFlag enum values.
 
@@ -445,12 +445,12 @@ class TrackingGraph:
     def remove_flag_from_edge(
         self, _id: tuple[Hashable, Hashable], flag: EdgeFlag
     ) -> None:
-        """Removes flag from a given node
+        """Removes flag from a given edge
 
         Args:
             ids (tuple[Hashable]): The edge id or list of edge ids
-                to set the attribute for. Edge ids are a 2-tuple of node ids.
-            flag (traccuracy.EdgeFlag): The edge flag to set. Must be
+                to discard the attribute for. Edge ids are a 2-tuple of node ids.
+            flag (traccuracy.EdgeFlag): The edge flag to discard. Must be
                 of type EdgeFlag - you may not pass strings, even if they are
                 included in the EdgeFlag enum values.
 
