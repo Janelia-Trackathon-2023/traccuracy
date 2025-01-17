@@ -89,7 +89,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
-          python -m pip install -e . nbclient
+          python -m pip install -e . nbclient ipykernel
 
       - name: Run notebooks
         # This will exit after the first error and will not report errors in subsequent nbs 
