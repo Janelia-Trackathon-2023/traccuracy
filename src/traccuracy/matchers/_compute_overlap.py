@@ -63,8 +63,6 @@ def get_labels_with_overlap(
 
     # Find the bboxes that have overlap at all (ind_ corresponds to box number - starting at 0)
     ind_gt, ind_res = np.nonzero(overlaps)
-    ind_gt = np.asarray(ind_gt, dtype=np.uint16)
-    ind_res = np.asarray(ind_res, dtype=np.uint16)
 
     overlaps = []
     for i, j in zip(ind_gt, ind_res):
