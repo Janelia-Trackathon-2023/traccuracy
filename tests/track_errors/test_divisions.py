@@ -131,11 +131,11 @@ class TestStandardShifted:
 
         attrs = shifted.gt_graph.nodes[gt_node]
         assert attrs.get(NodeFlag.TP_DIV) is True
-        assert attrs.get(NodeFlag.FN_DIV) is False
+        assert NodeFlag.FN_DIV not in attrs
 
         attrs = shifted.pred_graph.nodes[pred_node]
         assert attrs.get(NodeFlag.TP_DIV) is True
-        assert attrs.get(NodeFlag.FP_DIV) is False
+        assert NodeFlag.FP_DIV not in attrs
 
     @pytest.mark.parametrize("n_frames", [1, 3])
     @pytest.mark.parametrize(
@@ -156,11 +156,11 @@ class TestStandardShifted:
         elif n_frames == 3:  # corrected
             attrs = shifted.gt_graph.nodes[gt_node]
             assert attrs.get(NodeFlag.TP_DIV) is True
-            assert attrs.get(NodeFlag.FN_DIV) is False
+            assert NodeFlag.FN_DIV not in attrs
 
             attrs = shifted.pred_graph.nodes[pred_node]
             assert attrs.get(NodeFlag.TP_DIV) is True
-            assert attrs.get(NodeFlag.FP_DIV) is False
+            assert NodeFlag.FP_DIV not in attrs
 
     @pytest.mark.parametrize("n_frames", [1, 2])
     @pytest.mark.parametrize(
@@ -174,11 +174,11 @@ class TestStandardShifted:
 
         attrs = shifted.gt_graph.nodes[gt_node]
         assert attrs.get(NodeFlag.TP_DIV) is True
-        assert attrs.get(NodeFlag.FN_DIV) is False
+        assert NodeFlag.FN_DIV not in attrs
 
         attrs = shifted.pred_graph.nodes[pred_node]
         assert attrs.get(NodeFlag.TP_DIV) is True
-        assert attrs.get(NodeFlag.FP_DIV) is False
+        assert NodeFlag.FP_DIV not in attrs
 
     @pytest.mark.parametrize("n_frames", [1, 3])
     @pytest.mark.parametrize(
@@ -199,11 +199,11 @@ class TestStandardShifted:
         elif n_frames == 3:  # corrected
             attrs = shifted.gt_graph.nodes[gt_node]
             assert attrs.get(NodeFlag.TP_DIV) is True
-            assert attrs.get(NodeFlag.FN_DIV) is False
+            assert NodeFlag.FN_DIV not in attrs
 
             attrs = shifted.pred_graph.nodes[pred_node]
             assert attrs.get(NodeFlag.TP_DIV) is True
-            assert attrs.get(NodeFlag.FP_DIV) is False
+            assert NodeFlag.FP_DIV not in attrs
 
     def test_minimal_matching(self):
         matched = ex_graphs.div_shift_min_match()
@@ -212,11 +212,11 @@ class TestStandardShifted:
 
         attrs = shifted.gt_graph.nodes[2]
         assert attrs.get(NodeFlag.TP_DIV) is True
-        assert attrs.get(NodeFlag.FN_DIV) is False
+        assert NodeFlag.FN_DIV not in attrs
 
         attrs = shifted.pred_graph.nodes[11]
         assert attrs.get(NodeFlag.TP_DIV) is True
-        assert attrs.get(NodeFlag.FP_DIV) is False
+        assert NodeFlag.FP_DIV not in attrs
 
     @pytest.mark.parametrize(
         "matched",
