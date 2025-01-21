@@ -32,3 +32,12 @@ def test_get_labels_with_overlap(overlap):
     # Test empty labels array
     ious = get_labels_with_overlap(image1, empty_image, overlap)
     assert ious == []
+
+
+def test_get_labels_with_overlap_invalid():
+    n_labels = 3
+    image1 = get_annotated_image(
+        img_size=256, num_labels=n_labels, sequential=True, seed=1
+    )
+    with pytest.raises(ValueError):
+        get_labels_with_overlap(image1, image1, "test")
