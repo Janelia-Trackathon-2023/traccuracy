@@ -134,7 +134,7 @@ After classifying basic division errors, we consider all false positive and fals
 False Negative
 --------------
 
-A false negative division applies to any case where the parent node is not linked to both correct daughters. False negative divisions are annotated on the ground truth graph.
+A false negative division is any division event in the ground truth that is not matched to a division in the predicted graph. False negative divisions are annotated on the ground truth graph.
 
 Given the ground truth graph below, each of the subsequent prediction graphs would be classified as a false negative division.
 
@@ -142,10 +142,10 @@ Given the ground truth graph below, each of the subsequent prediction graphs wou
     :hide-code:
 
     plot_matched(
-        [ex_graphs.one_child(1), ex_graphs.no_children(1), ex_graphs.wrong_child(1)],
-        [{2: "FN"}, {2: "FN"}, {2: "FN", 7: "FP"}],
+        [ex_graphs.one_child(1), ex_graphs.no_children(1)],
+        [{2: "FN"}, {2: "FN"}],
         "",
-        ["Missing daughter", "Missing daughters", "Wrong daughter"]
+        ["Missing daughter", "Missing daughters"]
     )
 
 
@@ -156,10 +156,25 @@ A false positive division is any division event in the predicted graph that does
 
 .. jupyter-execute::
     :hide-code:
-    
+
     plot_matched(
-        [ex_graphs.fp_div(1), ex_graphs.wrong_child(1)],
-        [{6: "FP"}, {2: "FN", 7: "FP"}],
+        [ex_graphs.fp_div(1)],
+        [{6: "FP"}],
         "",
-        ["No division", "Wrong daughter"]
+        ["No division"]
+    )
+
+Wrong Child
+-----------
+
+A wrong child division is one where the parent node is correctly matched and identified as a division, but either one or both daughters do not match. This error is annotated on both the ground truth and the predicted graph.
+
+.. jupyter-execute::
+    :hide-code:
+
+    plot_matched(
+        [ex_graphs.wrong_child(1), ex_graphs.wrong_children(1)],
+        [{2: "WC", 6: "WC"}, {2: "WC", 6: "WC"}],
+        "",
+        ["One wrong daughter", "Two wrong daughters"]
     )

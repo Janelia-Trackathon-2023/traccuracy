@@ -461,11 +461,11 @@ def wrong_children(t_div):
     mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
     # remove mapping between daughters
     if t_div == 0:
-        mapping.remove((3, 10))
-        mapping.remove((2, 9))
-    elif t_div == 1:
-        mapping.remove((4, 9))
         mapping.remove((3, 8))
+        mapping.remove((2, 7))
+    elif t_div == 1:
+        mapping.remove((4, 8))
+        mapping.remove((3, 7))
     return Matched(gt, pred, mapping, {})
 
 

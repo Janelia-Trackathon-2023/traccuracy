@@ -58,10 +58,21 @@ class TestStandardsDivisions:
         _classify_divisions(matched)
 
         gt_node_attr = matched.gt_graph.nodes[gt_div_node]
-        assert gt_node_attr.get(NodeFlag.FN_DIV) is True
+        assert gt_node_attr.get(NodeFlag.WC_DIV) is True
 
         pred_node_attr = matched.pred_graph.nodes[pred_div_node]
-        assert pred_node_attr.get(NodeFlag.FP_DIV) is True
+        assert pred_node_attr.get(NodeFlag.WC_DIV) is True
+
+    @pytest.mark.parametrize("t_div,gt_div_node,pred_div_node", [(0, 1, 6), (1, 2, 6)])
+    def test_wrong_children(self, t_div, gt_div_node, pred_div_node):
+        matched = ex_graphs.wrong_children(t_div)
+        _classify_divisions(matched)
+
+        gt_node_attr = matched.gt_graph.nodes[gt_div_node]
+        assert gt_node_attr.get(NodeFlag.WC_DIV) is True
+
+        pred_node_attr = matched.pred_graph.nodes[pred_div_node]
+        assert pred_node_attr.get(NodeFlag.WC_DIV) is True
 
 
 class Test_get_pred_by_t:

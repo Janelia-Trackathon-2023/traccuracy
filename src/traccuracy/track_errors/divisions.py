@@ -77,13 +77,10 @@ def _classify_divisions(matched_data: Matched):
             if cnt_gt == cnt_pred:
                 g_gt.set_flag_on_node(gt_node, NodeFlag.TP_DIV, True)
                 g_pred.set_flag_on_node(pred_node, NodeFlag.TP_DIV, True)
-            # Only one daughter matched
-            elif len(cnt_gt - cnt_pred) == 1:
-                g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV)
-                g_pred.set_flag_on_node(pred_node, NodeFlag.FP_DIV)
-            # If daughters are at all mismatched, division is false negative
+            # If daughters are at all mismatched, division is a wrong child division
             else:
-                g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV, True)
+                g_gt.set_flag_on_node(gt_node, NodeFlag.WC_DIV, True)
+                g_pred.set_flag_on_node(pred_node, NodeFlag.WC_DIV)
 
         # Remove res division to record that we have classified it
         if pred_node in div_pred:
