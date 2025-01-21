@@ -131,7 +131,10 @@ class DivisionMetrics(Metric):
 
         try:
             mbc = tp_division_count / (
-                tp_division_count + fn_division_count + fp_division_count
+                tp_division_count
+                + fn_division_count
+                + fp_division_count
+                + wc_division_count
             )
         except ZeroDivisionError:
             mbc = 0
