@@ -20,23 +20,21 @@ def _union_slice(a: Tuple[slice], b: Tuple[slice]):
 
 
 def get_labels_with_overlap(
-    gt_frame,
-    res_frame,
-    overlap="iou",
-):
-    """Get all labels IDs in gt_frame and res_frame whose bounding boxes
-    overlap.
+    gt_frame: np.ndarray,
+    res_frame: np.ndarray,
+    overlap: str = "iou",
+) -> list[tuple[int, int, float]]:
+    """Get all labels IDs in gt_frame and res_frame whose bounding boxes overlap,
+    and a metric of pixel overlap (either ``iou`` or ``iogt``).
 
     Args:
         gt_frame (np.ndarray): ground truth segmentation for a single frame
         res_frame (np.ndarray): result segmentation for a given frame
         overlap (str, optional): Choose between intersection-over-ground-truth (``iogt``)
-            or intersection-over-union (``iou``).
+            or intersection-over-union (``iou``). Defaults to ``iou``.
 
-    Returns:
-        overlapping_gt_labels: List[int], labels of gt boxes that overlap with res boxes
-        overlapping_res_labels: List[int], labels of res boxes that overlap with gt boxes
-        overlaps: List[float], list of IoGT/IoU values for each overlapping pair
+    Returns: list[tuple[int, int, float]] A list of tuples of overlapping labels and their
+        overlap values. Each tuple contains (gt_label, res_label, overlap_value).
     """
     gt_props = regionprops(gt_frame)
     gt_boxes = [np.array(gt_prop.bbox) for gt_prop in gt_props]
