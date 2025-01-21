@@ -35,7 +35,10 @@ as the late division daughters.
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
+
+import numpy as np
 
 from traccuracy._tracking_graph import NodeFlag
 from traccuracy.matchers._base import Matched
@@ -45,6 +48,8 @@ from ._base import Metric
 
 if TYPE_CHECKING:
     from traccuracy.matchers import Matched
+
+logger = logging.getLogger(__name__)
 
 
 class DivisionMetrics(Metric):
@@ -105,39 +110,47 @@ class DivisionMetrics(Metric):
         }
 
     def _calculate_metrics(self, g_gt, g_pred):
+        gt_div_count = len(g_gt.get_divisions())
         tp_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.TP_DIV))
         fn_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.FN_DIV))
         fp_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.FP_DIV))
         wc_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.WC_DIV))
 
-        try:
-            recall = tp_division_count / (
-                tp_division_count + fn_division_count + wc_division_count
+        if gt_div_count == 0:
+            logger.warning(
+                "No ground truth divisions present. Metrics may return np.nan"
             )
-        except ZeroDivisionError:
-            recall = 0
+            recall = np.nan
+            if fp_division_count == 0:
+                precision = np.nan
+                mbc = np.nan
+            else:
+                precision = 0
+                mbc = 0
+            f1 = np.nan
+        else:
+            # Any other ZeroDivisionErrors indicate metric is not meaningful and returns nan
+            try:
+                recall = tp_division_count / (tp_division_count + fn_division_count + wc_division_count)
+            except ZeroDivisionError:
+                recall = np.nan
 
-        try:
-            precision = tp_division_count / (
-                tp_division_count + fp_division_count + wc_division_count
-            )
-        except ZeroDivisionError:
-            precision = 0
+            try:
+                precision = tp_division_count / (tp_division_count + fp_division_count + wc_division_count)
+            except ZeroDivisionError:
+                precision = np.nan
 
-        try:
-            f1 = 2 * (recall * precision) / (recall + precision)
-        except ZeroDivisionError:
-            f1 = 0
+            try:
+                f1 = 2 * (recall * precision) / (recall + precision)
+            except ZeroDivisionError:
+                f1 = np.nan
 
-        try:
-            mbc = tp_division_count / (
-                tp_division_count
-                + fn_division_count
-                + fp_division_count
-                + wc_division_count
-            )
-        except ZeroDivisionError:
-            mbc = 0
+            try:
+                mbc = tp_division_count / (
+                    tp_division_count + fn_division_count + fp_division_count + wc_division_count
+                )
+            except ZeroDivisionError:
+                mbc = np.nan
 
         return {
             "Division Recall": recall,
