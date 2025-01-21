@@ -63,6 +63,9 @@ def _classify_divisions(matched_data: Matched):
         # No matching node so division missed
         if pred_node is None:
             g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV, True)
+        # Pred node not labeled as division then fn div
+        elif pred_node not in div_pred:
+            g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV)
         # Check if the division has the correct daughters
         else:
             succ_gt = g_gt.graph.successors(gt_node)
