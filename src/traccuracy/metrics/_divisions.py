@@ -108,14 +108,19 @@ class DivisionMetrics(Metric):
         tp_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.TP_DIV))
         fn_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.FN_DIV))
         fp_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.FP_DIV))
+        wc_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.WC_DIV))
 
         try:
-            recall = tp_division_count / (tp_division_count + fn_division_count)
+            recall = tp_division_count / (
+                tp_division_count + fn_division_count + wc_division_count
+            )
         except ZeroDivisionError:
             recall = 0
 
         try:
-            precision = tp_division_count / (tp_division_count + fp_division_count)
+            precision = tp_division_count / (
+                tp_division_count + fp_division_count + wc_division_count
+            )
         except ZeroDivisionError:
             precision = 0
 
@@ -139,4 +144,5 @@ class DivisionMetrics(Metric):
             "True Positive Divisions": tp_division_count,
             "False Positive Divisions": fp_division_count,
             "False Negative Divisions": fn_division_count,
+            "Wrong Children Divisions": wc_division_count,
         }
