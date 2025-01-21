@@ -1,6 +1,7 @@
 from collections import Counter
 
 import networkx as nx
+import numpy as np
 import pytest
 
 from traccuracy import EdgeFlag, NodeFlag, TrackingGraph
@@ -133,6 +134,25 @@ def test_constructor(nx_comp1):
         TrackingGraph(nx_comp1, location_keys=["x", "y", "z"])
     with pytest.raises(ValueError):
         TrackingGraph(nx_comp1, location_keys=["x", NodeFlag.CTC_FALSE_NEG])
+
+
+def test_constructor_seg(nx_comp1):
+    # empty segmentation for now, until we get paired seg and graph examples
+    segmentation = np.zeros(shape=(5, 5, 5))
+    tracking_graph = TrackingGraph(nx_comp1, segmentation=segmentation)
+    assert tracking_graph.start_frame == 0
+    assert tracking_graph.end_frame == 4
+    assert tracking_graph.nodes_by_frame == {
+        0: {"1_0"},
+        1: {"1_1"},
+        2: {"1_2", "1_3"},
+        3: {"1_4"},
+    }
+
+    # check that it casts to uint64
+    segmentation = segmentation.astype(np.float32)
+    tracking_graph = TrackingGraph(nx_comp1, segmentation=segmentation)
+    assert tracking_graph.segmentation.dtype == np.uint64
 
 
 def test_get_cells_by_frame(simple_graph):

@@ -7,9 +7,9 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Hashable, Iterable
 
 import networkx as nx
+import numpy as np
 
 if TYPE_CHECKING:
-    import numpy as np
     from networkx.classes.reportviews import NodeView, OutEdgeView
 
 logger = logging.getLogger(__name__)
@@ -145,7 +145,17 @@ class TrackingGraph:
             name (str, optional): User specified name that will be included in result
                 outputs associated with this object
         """
-        self.segmentation = segmentation
+
+        # if the segmentation is not integer dtype, cast to uint64. Otherwise, leave it
+        # the original dtype
+        if segmentation is not None and segmentation.dtype.kind not in ["i", "u"]:
+            logger.warning(
+                f"Input segmentation had dtype {segmentation.dtype}: casting to uint64"
+            )
+            self.segmentation = segmentation.astype(np.uint64, copy=False)
+        else:
+            self.segmentation = segmentation
+
         if NodeFlag.has_value(frame_key):
             raise ValueError(
                 f"Specified frame key {frame_key} is reserved for graph "

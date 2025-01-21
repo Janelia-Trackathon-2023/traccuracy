@@ -19,13 +19,6 @@ def get_labels_with_overlap(
         list[tuple[int, int, float]]: List of tuples of label in gt_frame, label in
             res_frame, and iou values. Labels that have no overlap are not included.
     """
-    # if the input frames were not integers, cast to uint64. Otherwise, leave them the
-    # original dtype
-    if gt_frame.dtype.kind not in ["i", "u"]:
-        gt_frame = gt_frame.astype(np.uint64, copy=False)
-    if res_frame.dtype.kind not in ["i", "u"]:
-        res_frame = res_frame.astype(np.uint64, copy=False)
-
     gt_frame = gt_frame.flatten()
     res_frame = res_frame.flatten()
     # get indices where both are not zero (ignore background)
