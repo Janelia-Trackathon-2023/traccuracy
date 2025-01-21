@@ -30,9 +30,9 @@ def get_labels_with_overlap(
 
     values, counts = np.unique(flattened_stacked, axis=1, return_counts=True)
     gt_values, gt_counts = np.unique(gt_frame, return_counts=True)
-    gt_label_sizes = dict(zip(gt_values, gt_counts, strict=True))
+    gt_label_sizes = dict(zip(gt_values, gt_counts))
     res_values, res_counts = np.unique(res_frame, return_counts=True)
-    res_label_sizes = dict(zip(res_values, res_counts, strict=True))
+    res_label_sizes = dict(zip(res_values, res_counts))
     overlaps: list[tuple[int, int, float]] = []
     for index in range(values.shape[1]):
         pair = values[:, index]
