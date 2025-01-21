@@ -174,7 +174,7 @@ A wrong child division is one where the parent node is correctly matched and ide
 
     plot_matched(
         [ex_graphs.wrong_child(1), ex_graphs.wrong_children(1)],
-        [{2: "WC", 6: "WC"}, {2: "WC", 6: "WC"}],
+        [{2: "WC", 7: "WC"}, {2: "WC", 6: "WC"}],
         "",
         ["One wrong daughter", "Two wrong daughters"]
     )
