@@ -262,7 +262,7 @@ def false_negative_segmentation_3d() -> tuple[np.ndarray, np.ndarray]:
             a single cell. The pred is empty and the gt has a single cell.
     """
     gt = make_one_cell_3d(label=1, center=(15, 15, 15), radius=9)
-    pred = np.zeros((32, 32, 32), dtype="int32")
+    pred = np.zeros((32, 32), dtype="int32")
     return gt, pred
 
 

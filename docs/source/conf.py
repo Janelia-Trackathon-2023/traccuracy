@@ -12,6 +12,7 @@
 #
 import os
 import sys
+from unittest import mock
 
 sys.path.insert(0, os.path.abspath("../../src"))
 
@@ -111,7 +112,10 @@ autodoc_mock_imports = [
     "scipy",
     "numpy",
     "skimage",
+    "numba",
     "networkx",
     "pandas",
     "tifffile",
 ]
+
+sys.modules["traccuracy.matchers.compute_overlap"] = mock.Mock()

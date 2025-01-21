@@ -20,12 +20,9 @@ def test_get_labels_with_overlap(overlap):
     )
 
     ious = get_labels_with_overlap(image1, image1, overlap)
-    perfect_gt = [gt for gt, _, _ in ious]
-    assert list(perfect_gt) == list(range(1, n_labels + 1))
-    perfect_res = [res for _, res, _ in ious]
-    assert list(perfect_res) == list(range(1, n_labels + 1))
-    perfect_ious = [iou for _, _, iou in ious]
-    assert list(perfect_ious) == [1.0] * n_labels
+    assert [gt for gt, _, _ in ious] == list(range(1, n_labels + 1))
+    assert [res for _, res, _ in ious] == list(range(1, n_labels + 1))
+    assert [iou for _, _, iou in ious] == [1.0] * n_labels
 
     get_labels_with_overlap(image1, image2, overlap)
 
