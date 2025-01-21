@@ -36,8 +36,6 @@ dependencies = [
     "scikit-image",
     "tqdm",
     "typer",
-    # numba technically optional, will still work without it
-    "numba; python_version != '3.11'",
     "pyarrow",
 ]
 
@@ -152,10 +150,6 @@ convention = "google"
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["tests"]
-filterwarnings = [
-    "error",
-    "ignore:Numba not installed, falling back to slower:UserWarning",
-]
 addopts = ["--benchmark-min-rounds=1"]
 pythonpath = [
   "tests"

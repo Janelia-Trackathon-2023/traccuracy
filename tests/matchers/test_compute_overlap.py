@@ -19,19 +19,16 @@ def test_get_labels_with_overlap(overlap):
         img_size=256, num_labels=0, sequential=True, seed=1
     )
 
-    perfect_gt, perfect_res, perfect_ious = get_labels_with_overlap(
-        image1, image1, overlap
-    )
+    ious = get_labels_with_overlap(image1, image1, overlap)
+    perfect_gt = [gt for gt, _, _ in ious]
     assert list(perfect_gt) == list(range(1, n_labels + 1))
+    perfect_res = [res for _, res, _ in ious]
     assert list(perfect_res) == list(range(1, n_labels + 1))
+    perfect_ious = [iou for _, _, iou in ious]
     assert list(perfect_ious) == [1.0] * n_labels
 
     get_labels_with_overlap(image1, image2, overlap)
 
     # Test empty labels array
-    empty_gt, empty_res, empty_ious = get_labels_with_overlap(
-        image1, empty_image, overlap
-    )
-    assert empty_gt == []
-    assert empty_res == []
-    assert empty_ious == []
+    ious = get_labels_with_overlap(image1, empty_image, overlap)
+    assert ious == []
