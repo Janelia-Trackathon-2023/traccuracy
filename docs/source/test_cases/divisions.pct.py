@@ -112,6 +112,9 @@ plot_matched([ex_graphs.no_children(t) for t in [0, 1]], "No Children")
 # %%
 plot_matched([ex_graphs.wrong_child(t) for t in [0, 1]], "Incorrect Child")
 
+# %%
+plot_matched([ex_graphs.wrong_children(t) for t in [0, 1]], "Incorrect Children")
+
 # %% [markdown]
 # ## Shifted Division Cases
 
