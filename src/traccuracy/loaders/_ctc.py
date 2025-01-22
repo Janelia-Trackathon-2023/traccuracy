@@ -30,12 +30,16 @@ def _load_tiffs(data_dir):
     if len(files) == 0:
         raise FileNotFoundError(f"No tif files were found in {data_dir}")
 
-    ims = []
-    for f in tqdm(files, "Loading TIFFs"):
-        ims.append(imread(f))
+    first_im = imread(files[0])
+    shape = (len(files), *first_im.shape)
+    dtype = first_im.dtype
+    stack = np.zeros(shape=shape, dtype=dtype)
+    stack[0] = first_im
 
-    mov = np.stack(ims)
-    return mov
+    for i, f in enumerate(tqdm(files[1:], "Loading TIFFs")):
+        imread(f, out=stack[i + 1])
+
+    return stack
 
 
 def _detections_from_image(stack, idx):
