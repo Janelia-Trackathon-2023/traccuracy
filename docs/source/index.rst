@@ -7,7 +7,6 @@
    :caption: Examples:
 
    examples/ctc
-   examples/test-cases
 
 .. toctree::
    :maxdepth: 2
@@ -25,6 +24,7 @@
    track_errors/nodes
    track_errors/edges
    track_errors/divisions
+   track_errors/ctc
 
 .. toctree::
    :maxdepth: 2
@@ -34,3 +34,10 @@
    metrics/ctc
    metrics/track_overlap
    metrics/divisions
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Development
+
+   test_cases/index
