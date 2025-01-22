@@ -7,7 +7,6 @@ from collections import Counter
 from typing import TYPE_CHECKING
 
 from traccuracy._tracking_graph import NodeFlag
-from traccuracy._utils import find_gt_node_matches, find_pred_node_matches
 
 if TYPE_CHECKING:
     from traccuracy.matchers import Matched
@@ -31,26 +30,19 @@ def _classify_divisions(matched_data: Matched):
     """
     g_gt = matched_data.gt_graph
     g_pred = matched_data.pred_graph
-    mapper = matched_data.mapping
 
     if g_gt.division_annotations and g_pred.division_annotations:
         logger.info("Division annotations already present. Skipping graph annotation.")
         return
 
-    # Check that mapper is one to one
-    if len(mapper) != len({pair[0] for pair in mapper}) or len(mapper) != len(
-        {pair[1] for pair in mapper}
-    ):
-        raise ValueError("Mapping must be one-to-one")
-
     def _find_gt_node_matches(gt_node):
-        match = find_gt_node_matches(mapper, gt_node)
-        if len(match) > 0:
+        match = matched_data.gt_pred_map.get(gt_node)
+        if match:
             return match[0]
 
     def _find_pred_node_matches(pred_node):
-        match = find_pred_node_matches(mapper, pred_node)
-        if len(match) > 0:
+        match = matched_data.pred_gt_map.get(pred_node)
+        if match:
             return match[0]
 
     # Collect list of divisions
@@ -165,17 +157,8 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
     g_pred = new_matched.pred_graph
     mapper = new_matched.mapping
 
-    # Check that mapper is one to one
-    if len(mapper) != len({pair[0] for pair in mapper}) or len(mapper) != len(
-        {pair[1] for pair in mapper}
-    ):
-        raise ValueError("Mapping must be one-to-one")
-
     fp_divs = g_pred.get_nodes_with_flag(NodeFlag.FP_DIV)
     fn_divs = g_gt.get_nodes_with_flag(NodeFlag.FN_DIV)
-
-    gt_to_pred_dict = dict(mapper)
-    pred_to_gt_dict = {pred: gt for (gt, pred) in mapper}
 
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
@@ -203,7 +186,9 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
             ]
             fn_succ = g_gt.graph.successors(fn_node)
             fn_succ_mapped = [
-                gt_to_pred_dict[fn] for fn in fn_succ if fn in gt_to_pred_dict
+                new_matched.gt_pred_map[fn][0]
+                for fn in fn_succ
+                if fn in new_matched.gt_pred_map
             ]
             if Counter(fp_succ) != Counter(fn_succ_mapped):
                 # Daughters don't match so division cannot match
@@ -228,7 +213,9 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
             fp_succ = g_pred.graph.successors(fp_node)
 
             fp_succ_mapped = [
-                pred_to_gt_dict[fp] for fp in fp_succ if fp in pred_to_gt_dict
+                new_matched.pred_gt_map[fp][0]
+                for fp in fp_succ
+                if fp in new_matched.pred_gt_map
             ]
             if Counter(fp_succ_mapped) != Counter(fn_succ):
                 # Daughters don't match so division cannot match
