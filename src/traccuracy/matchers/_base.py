@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from typing import Any
 
 from traccuracy._tracking_graph import TrackingGraph
@@ -45,9 +46,9 @@ class Matcher(ABC):
 
         # Report matching performance
         total_gt = len(matched.gt_graph.nodes)
-        matched_gt = len({m[0] for m in matched.mapping})
+        matched_gt = len(matched.gt_pred_map.keys())
         total_pred = len(matched.pred_graph.nodes)
-        matched_pred = len({m[1] for m in matched.mapping})
+        matched_pred = len(matched.pred_gt_map.keys())
         logger.info(f"Matched {matched_gt} out of {total_gt} ground truth nodes.")
         logger.info(f"Matched {matched_pred} out of {total_pred} predicted nodes.")
 
@@ -99,3 +100,13 @@ class Matched:
         self.pred_graph = pred_graph
         self.mapping = mapping
         self.matcher_info = matcher_info
+
+        gt_pred_map = defaultdict(list)
+        pred_gt_map = defaultdict(list)
+        for gt_id, pred_id in mapping:
+            pred_gt_map[pred_id].append(gt_id)
+            gt_pred_map[gt_id].append(pred_id)
+
+        # Set back to normal dict to remove default dict behavior
+        self.gt_pred_map = dict(gt_pred_map)
+        self.pred_gt_map = dict(pred_gt_map)
