@@ -35,23 +35,13 @@ def _classify_divisions(matched_data: Matched):
         logger.info("Division annotations already present. Skipping graph annotation.")
         return
 
-    def _find_gt_node_matches(gt_node):
-        match = matched_data.gt_pred_map.get(gt_node)
-        if match:
-            return match[0]
-
-    def _find_pred_node_matches(pred_node):
-        match = matched_data.pred_gt_map.get(pred_node)
-        if match:
-            return match[0]
-
     # Collect list of divisions
     div_gt = g_gt.get_divisions()
     div_pred = g_pred.get_divisions()
 
     for gt_node in div_gt:
         # Find possible matching nodes
-        pred_node = _find_gt_node_matches(gt_node)
+        pred_node = matched_data.get_gt_pred_match(gt_node)
         # No matching node so division missed
         if pred_node is None:
             g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV, True)
@@ -60,7 +50,8 @@ def _classify_divisions(matched_data: Matched):
             succ_gt = g_gt.graph.successors(gt_node)
             # Map pred succ nodes onto gt, unmapped nodes will return as None
             succ_pred = [
-                _find_pred_node_matches(n) for n in g_pred.graph.successors(pred_node)
+                matched_data.get_pred_gt_match(n)
+                for n in g_pred.graph.successors(pred_node)
             ]
 
             # If daughters are same, division is correct
@@ -185,11 +176,7 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
                 for node in g_pred.graph.successors(fp_node)
             ]
             fn_succ = g_gt.graph.successors(fn_node)
-            fn_succ_mapped = [
-                new_matched.gt_pred_map[fn][0]
-                for fn in fn_succ
-                if fn in new_matched.gt_pred_map
-            ]
+            fn_succ_mapped = [new_matched.get_gt_pred_match(fn) for fn in fn_succ]
             if Counter(fp_succ) != Counter(fn_succ_mapped):
                 # Daughters don't match so division cannot match
                 continue
@@ -212,11 +199,7 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
             ]
             fp_succ = g_pred.graph.successors(fp_node)
 
-            fp_succ_mapped = [
-                new_matched.pred_gt_map[fp][0]
-                for fp in fp_succ
-                if fp in new_matched.pred_gt_map
-            ]
+            fp_succ_mapped = [new_matched.get_pred_gt_match(fp) for fp in fp_succ]
             if Counter(fp_succ_mapped) != Counter(fn_succ):
                 # Daughters don't match so division cannot match
                 continue

@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import Any
+from typing import Any, Hashable
 
 from traccuracy._tracking_graph import TrackingGraph
 
@@ -110,3 +110,65 @@ class Matched:
         # Set back to normal dict to remove default dict behavior
         self.gt_pred_map = dict(gt_pred_map)
         self.pred_gt_map = dict(pred_gt_map)
+
+    def _get_match(self, node: Hashable, map: dict[Hashable, list]):
+        if node in map:
+            match = map[node]
+            if len(match) > 1:
+                raise TypeError(
+                    "Single match requested but multiple available."
+                    "Use `Matched.get_gt_pred_matches`"
+                    "or `Matched.get_pred_gt_matches`"
+                )
+            return match[0]
+
+    def get_gt_pred_match(self, gt_node: Hashable) -> Hashable | None:
+        """Looks for a single pred node matched to a gt node
+
+        Assumes the matching is one-to-one
+
+        Args:
+            gt_node (Hashable): ground truth node
+
+        Returns:
+            Hashable | None: Predicted node id if there is a match or none
+                if there is no match
+        """
+        return self._get_match(gt_node, self.gt_pred_map)
+
+    def get_pred_gt_match(self, pred_node: Hashable) -> Hashable | None:
+        """Looks for a single gt node that matches a pred node
+
+        Args:
+            pred_node (Hashable): predicted node id
+
+        Returns:
+            Hashable | None: Ground truth node id if there is a match or none
+                if there is no match
+        """
+        return self._get_match(pred_node, self.pred_gt_map)
+
+    def _get_matches(self, node: Hashable, map: dict[Hashable, list]):
+        return map.get(node, [])
+
+    def get_gt_pred_matches(self, gt_node: Hashable) -> list[Hashable]:
+        """Look for predicted node matches to a gt node
+
+        Args:
+            gt_node (Hashable): Ground truth node id
+
+        Returns:
+            list(Hashable): List of matching predicted nodes
+        """
+        return self._get_matches(gt_node, self.gt_pred_map)
+
+    def get_pred_gt_matches(self, pred_node: Hashable) -> list[Hashable]:
+        """Look for gt node matches to a predicted node
+
+        Args:
+            pred_node (Hashable): Predicted node ID
+
+        Returns:
+            list(hashable): List of matching ground truth nodes
+        """
+        return self._get_matches(pred_node, self.pred_gt_map)
