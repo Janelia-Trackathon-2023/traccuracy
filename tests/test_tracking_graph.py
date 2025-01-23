@@ -138,7 +138,7 @@ def test_constructor(nx_comp1):
 
 def test_constructor_seg(nx_comp1):
     # empty segmentation for now, until we get paired seg and graph examples
-    segmentation = np.zeros(shape=(5, 5, 5))
+    segmentation = np.zeros(shape=(5, 5, 5), dtype=np.uint16)
     tracking_graph = TrackingGraph(nx_comp1, segmentation=segmentation)
     assert tracking_graph.start_frame == 0
     assert tracking_graph.end_frame == 4
@@ -149,10 +149,12 @@ def test_constructor_seg(nx_comp1):
         3: {"1_4"},
     }
 
-    # check that it casts to uint64
+    # check that it fails on non-int values
     segmentation = segmentation.astype(np.float32)
-    tracking_graph = TrackingGraph(nx_comp1, segmentation=segmentation)
-    assert tracking_graph.segmentation.dtype == np.uint64
+    with pytest.raises(
+        TypeError, match="Segmentation must have integer dtype, found float32"
+    ):
+        TrackingGraph(nx_comp1, segmentation=segmentation)
 
 
 def test_get_cells_by_frame(simple_graph):
