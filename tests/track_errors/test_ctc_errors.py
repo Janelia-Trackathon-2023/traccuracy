@@ -273,10 +273,8 @@ def test_ns_vertex_fn_edge():
     for edge in comp_edges:
         assert EdgeFlag.CTC_FALSE_POS not in comp.edges[edge]
 
-    # https://github.com/Janelia-Trackathon-2023/traccuracy/pull/141#issuecomment-2265990197
-    if False:  # TODO: Fix this in a separate PR
-        for node in [1, 2, 4, 5]:
-            assert gt.nodes[node][NodeFlag.CTC_FALSE_NEG]
+    for node in [1, 2, 4, 5]:
+        assert NodeFlag.CTC_FALSE_NEG not in gt.nodes[node]
 
     for node in [3, 6]:
         assert gt.nodes[node][NodeFlag.CTC_FALSE_NEG]
