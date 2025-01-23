@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from tqdm import tqdm
@@ -33,7 +32,7 @@ def get_vertex_errors(matched_data: Matched):
     """
     comp_graph = matched_data.pred_graph
     gt_graph = matched_data.gt_graph
-    mapping = matched_data.mapping
+    dict_mapping = matched_data.pred_gt_map
 
     if comp_graph.node_errors and gt_graph.node_errors:
         logger.info("Node errors already calculated. Skipping graph annotation")
@@ -42,12 +41,6 @@ def get_vertex_errors(matched_data: Matched):
     # will flip this when we come across the vertex in the mapping
     comp_graph.set_flag_on_all_nodes(NodeFlag.CTC_FALSE_POS, True)
     gt_graph.set_flag_on_all_nodes(NodeFlag.CTC_FALSE_NEG, True)
-
-    # we need to know how many computed vertices are "non-split", so we make
-    # a mapping of gt vertices to their matched comp vertices
-    dict_mapping = defaultdict(list)
-    for gt_id, pred_id in mapping:
-        dict_mapping[pred_id].append(gt_id)
 
     ns_count = 0
     for pred_id in tqdm(dict_mapping, desc="Evaluating nodes"):
