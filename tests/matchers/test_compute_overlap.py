@@ -20,9 +20,10 @@ def test_get_labels_with_overlap(overlap):
     )
 
     ious = get_labels_with_overlap(image1, image1, overlap)
-    assert [gt for gt, _, _ in ious] == list(range(1, n_labels + 1))
-    assert [res for _, res, _ in ious] == list(range(1, n_labels + 1))
-    assert [iou for _, _, iou in ious] == [1.0] * n_labels
+    gt, res, iou = tuple(zip(*ious))
+    assert gt == tuple(range(1, n_labels + 1))
+    assert res == tuple(range(1, n_labels + 1))
+    assert iou == (1.0,) * n_labels
 
     get_labels_with_overlap(image1, image2, overlap)
 
@@ -36,5 +37,5 @@ def test_get_labels_with_overlap_invalid():
     image1 = get_annotated_image(
         img_size=256, num_labels=n_labels, sequential=True, seed=1
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Unknown overlap type: test"):
         get_labels_with_overlap(image1, image1, "test")
