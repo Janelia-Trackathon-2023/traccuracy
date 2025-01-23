@@ -44,7 +44,10 @@ def _classify_divisions(matched_data: Matched):
         pred_node = matched_data.get_gt_pred_match(gt_node)
         # No matching node so division missed
         if pred_node is None:
-            g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV, True)
+            g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV)
+        # Pred node not labeled as division then fn div
+        elif pred_node not in div_pred:
+            g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV)
         # Check if the division has the correct daughters
         else:
             succ_gt = g_gt.graph.successors(gt_node)
@@ -55,12 +58,15 @@ def _classify_divisions(matched_data: Matched):
             ]
 
             # If daughters are same, division is correct
-            if Counter(succ_gt) == Counter(succ_pred):
-                g_gt.set_flag_on_node(gt_node, NodeFlag.TP_DIV, True)
-                g_pred.set_flag_on_node(pred_node, NodeFlag.TP_DIV, True)
-            # If daughters are at all mismatched, division is false negative
+            cnt_gt = Counter(succ_gt)
+            cnt_pred = Counter(succ_pred)
+            if cnt_gt == cnt_pred:
+                g_gt.set_flag_on_node(gt_node, NodeFlag.TP_DIV)
+                g_pred.set_flag_on_node(pred_node, NodeFlag.TP_DIV)
+            # If daughters are at all mismatched, division is a wrong child division
             else:
-                g_gt.set_flag_on_node(gt_node, NodeFlag.FN_DIV, True)
+                g_gt.set_flag_on_node(gt_node, NodeFlag.WC_DIV)
+                g_pred.set_flag_on_node(pred_node, NodeFlag.WC_DIV)
 
         # Remove res division to record that we have classified it
         if pred_node in div_pred:
@@ -68,7 +74,7 @@ def _classify_divisions(matched_data: Matched):
 
     # Any remaining pred divisions are false positives
     for fp_div in div_pred:
-        g_pred.set_flag_on_node(fp_div, NodeFlag.FP_DIV, True)
+        g_pred.set_flag_on_node(fp_div, NodeFlag.FP_DIV)
 
     # Set division annotation flag
     g_gt.division_annotations = True
@@ -213,8 +219,8 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
             g_gt.remove_flag_from_node(fn_node, NodeFlag.FN_DIV)
 
             # Add the tp divisions annotations
-            g_gt.set_flag_on_node(fn_node, NodeFlag.TP_DIV, True)
-            g_pred.set_flag_on_node(fp_node, NodeFlag.TP_DIV, True)
+            g_gt.set_flag_on_node(fn_node, NodeFlag.TP_DIV)
+            g_pred.set_flag_on_node(fp_node, NodeFlag.TP_DIV)
 
     return new_matched
 

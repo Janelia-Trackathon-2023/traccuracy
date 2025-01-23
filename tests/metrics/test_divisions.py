@@ -47,9 +47,10 @@ def test_iou_div_metrics(gt_hela, pred_hela):
     )
     div_results = DivisionMetrics().compute(iou_matched)
 
-    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 25
+    assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 19
     assert div_results.results["Frame Buffer 0"]["False Positive Divisions"] == 31
     assert div_results.results["Frame Buffer 0"]["True Positive Divisions"] == 69
+    assert div_results.results["Frame Buffer 0"]["Wrong Children Divisions"] == 6
 
 
 def test_DivisionMetrics():
