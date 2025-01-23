@@ -5,7 +5,7 @@ import pytest
 
 from traccuracy import TrackingGraph
 from traccuracy.matchers import Matched
-from traccuracy.metrics._track_overlap import TrackOverlapMetrics, _mapping_to_dict
+from traccuracy.metrics._track_overlap import TrackOverlapMetrics
 
 
 def add_frame(tree):
@@ -180,9 +180,3 @@ def test_track_overlap_metrics(data, inverse) -> None:
             "target_effectiveness": expected["track_purity"],
         }
     assert results == expected, f"{data['name']} failed without division edges"
-
-
-def test_mapping_to_dict():
-    mapping = [("1", "2"), ("2", "3"), ("1", "3"), ("2", "3")]
-    mapping_dict = _mapping_to_dict(mapping)
-    assert mapping_dict == {"1": ["2", "3"], "2": ["3", "3"]}
