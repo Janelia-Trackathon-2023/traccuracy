@@ -449,6 +449,26 @@ def wrong_child(t_div):
     return Matched(gt, pred, mapping, {})
 
 
+def wrong_children(t_div):
+    """one to one"""
+    # t_div either 0 or 1
+    gt_graph = basic_division(t_div).graph
+    gt = TrackingGraph(gt_graph, frame_key="t", location_keys=("y"))
+    start_id = max(gt.graph.nodes) + 1
+    pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
+
+    # mapping of the two basic div graphs
+    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
+    # remove mapping between daughters
+    if t_div == 0:
+        mapping.remove((3, 8))
+        mapping.remove((2, 7))
+    elif t_div == 1:
+        mapping.remove((4, 8))
+        mapping.remove((3, 7))
+    return Matched(gt, pred, mapping, {})
+
+
 def div_1early_end():
     """one to one"""
     gt = longer_division(1)

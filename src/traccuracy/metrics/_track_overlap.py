@@ -13,7 +13,7 @@ Definitions (Bise et al., 2011; Chen, 2021; Fukai et al., 2022):
 
 from __future__ import annotations
 
-from itertools import groupby, product
+from itertools import product
 from typing import TYPE_CHECKING, Any
 
 from traccuracy.matchers._base import Matched
@@ -23,26 +23,6 @@ from ._base import Metric
 if TYPE_CHECKING:
     from traccuracy._tracking_graph import TrackingGraph
     from traccuracy.matchers import Matched
-
-
-def _mapping_to_dict(mapping: list[tuple[Any, Any]]) -> dict[Any, list[Any]]:
-    """Convert mapping list of tuples to dictionary.
-
-    Args:
-        mapping (List[Tuple[Any, Any]]): Mapping list of tuples
-
-    Returns:
-        Dict[Any, List[Any]]: Mapping dictionary
-
-    """
-
-    def get_from_val(x):
-        return x[0]
-
-    return {
-        k: [v[1] for v in vs]
-        for k, vs in groupby(sorted(mapping, key=get_from_val), key=get_from_val)
-    }
 
 
 class TrackOverlapMetrics(Metric):
@@ -77,17 +57,12 @@ class TrackOverlapMetrics(Metric):
             include_division_edges=self.include_division_edges
         )
 
-        gt_pred_mapping = _mapping_to_dict(matched.mapping)
-        pred_gt_mapping = _mapping_to_dict(
-            [(pred_node, gt_node) for gt_node, pred_node in matched.mapping]
-        )
-
         # calculate track purity and target effectiveness
         track_purity = _calc_overlap_score(
-            pred_tracklets, gt_tracklets, gt_pred_mapping
+            pred_tracklets, gt_tracklets, matched.gt_pred_map
         )
         target_effectiveness = _calc_overlap_score(
-            gt_tracklets, pred_tracklets, pred_gt_mapping
+            gt_tracklets, pred_tracklets, matched.pred_gt_map
         )
         return {
             "track_purity": track_purity,

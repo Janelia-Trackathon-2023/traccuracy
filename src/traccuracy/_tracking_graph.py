@@ -40,6 +40,8 @@ class NodeFlag(str, enum.Enum):
     FP_DIV = "is_fp_division"
     # False negative divisions. Valid on gt graph.
     FN_DIV = "is_fn_division"
+    # Wrong child division. Valid on gt and computed graph.
+    WC_DIV = "is_wrong_child_division"
 
     @classmethod
     def has_value(cls, value):
