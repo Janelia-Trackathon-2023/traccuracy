@@ -82,7 +82,7 @@ def test_DivisionMetrics():
 
 
 class TestDivisionMetrics:
-    def test_no_divisions(self):
+    def test_no_divisions(self, caplog):
         matched = ex_graphs.good_matched()
         results = DivisionMetrics()._compute(matched)
         assert (
@@ -114,19 +114,6 @@ class TestDivisionMetrics:
         assert results["Division Precision"] == 0
         assert np.isnan(results["Division F1"])
         assert results["Mitotic Branching Correctness"] == 0
-
-    def test_no_divisions(self):
-        matched = ex_graphs.good_matched()
-        results = DivisionMetrics()._compute(matched)
-
-        metrics = [
-            "Division Recall",
-            "Division Precision",
-            "Division F1",
-            "Mitotic Branching Correctness",
-        ]
-        for m in metrics:
-            assert np.isnan(results["Frame Buffer 0"][m])
 
     def test_frame_buffer(self):
         matched = ex_graphs.div_1late_end()
