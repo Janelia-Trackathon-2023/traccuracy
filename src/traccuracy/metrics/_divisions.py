@@ -156,6 +156,8 @@ class DivisionMetrics(Metric):
                     + fp_division_count
                     + wc_division_count
                 )
+            # This zero div should always be caught by checking for no gt
+            # Leaving because paranoid
             except ZeroDivisionError:
                 mbc = np.nan
 

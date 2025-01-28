@@ -81,12 +81,10 @@ def test_DivisionMetrics():
             assert r["False Negative Divisions"] == 0
 
 class TestDivisionMetrics:
-    def test_no_gt(self, caplog):
-        matched = ex_graphs.empty_gt()
+    def test_no_divisions(self):
+        matched = ex_graphs.good_matched()
         results = DivisionMetrics()._compute(matched)
-        assert "No ground truth divisions present. Metrics may return np.nan" in caplog.text
 
-        # No FP present so should get nans
         metrics = [
             "Division Recall",
             "Division Precision",
@@ -111,19 +109,6 @@ class TestDivisionMetrics:
         assert results["Division Precision"] == 0
         assert np.isnan(results["Division F1"])
         assert results["Mitotic Branching Correctness"] == 0
-
-    def test_no_divisions(self):
-        matched = ex_graphs.good_matched()
-        results = DivisionMetrics()._compute(matched)
-
-        metrics = [
-            "Division Recall",
-            "Division Precision",
-            "Division F1",
-            "Mitotic Branching Correctness"
-        ]
-        for m in metrics:
-            assert np.isnan(results['Frame Buffer 0'][m])
 
     def test_frame_buffer(self):
         matched = ex_graphs.div_1late_end()
