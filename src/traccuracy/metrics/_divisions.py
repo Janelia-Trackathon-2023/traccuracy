@@ -131,12 +131,16 @@ class DivisionMetrics(Metric):
         else:
             # Any other ZeroDivisionErrors indicate metric is not meaningful and returns nan
             try:
-                recall = tp_division_count / (tp_division_count + fn_division_count + wc_division_count)
+                recall = tp_division_count / (
+                    tp_division_count + fn_division_count + wc_division_count
+                )
             except ZeroDivisionError:
                 recall = np.nan
 
             try:
-                precision = tp_division_count / (tp_division_count + fp_division_count + wc_division_count)
+                precision = tp_division_count / (
+                    tp_division_count + fp_division_count + wc_division_count
+                )
             except ZeroDivisionError:
                 precision = np.nan
 
@@ -147,7 +151,10 @@ class DivisionMetrics(Metric):
 
             try:
                 mbc = tp_division_count / (
-                    tp_division_count + fn_division_count + fp_division_count + wc_division_count
+                    tp_division_count
+                    + fn_division_count
+                    + fp_division_count
+                    + wc_division_count
                 )
             except ZeroDivisionError:
                 mbc = np.nan
