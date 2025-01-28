@@ -1,12 +1,12 @@
 import os
 from pathlib import Path
 
-import pytest
-import numpy as np
 import networkx as nx
+import numpy as np
+import pytest
 
-from tests.test_utils import download_gt_data, get_division_graphs
 import tests.examples.graphs as ex_graphs
+from tests.test_utils import download_gt_data, get_division_graphs
 from traccuracy import TrackingGraph
 from traccuracy.loaders import load_ctc_data
 from traccuracy.matchers import IOUMatcher, Matched
@@ -80,31 +80,35 @@ def test_DivisionMetrics():
             assert r["False Positive Divisions"] == 0
             assert r["False Negative Divisions"] == 0
 
+
 class TestDivisionMetrics:
     def test_no_gt(self, caplog):
         matched = ex_graphs.empty_gt()
         results = DivisionMetrics()._compute(matched)
-        assert "No ground truth divisions present. Metrics may return np.nan" in caplog.text
+        assert (
+            "No ground truth divisions present. Metrics may return np.nan"
+            in caplog.text
+        )
 
         # No FP present so should get nans
         metrics = [
             "Division Recall",
             "Division Precision",
             "Division F1",
-            "Mitotic Branching Correctness"
+            "Mitotic Branching Correctness",
         ]
         for m in metrics:
-            assert np.isnan(results['Frame Buffer 0'][m])
+            assert np.isnan(results["Frame Buffer 0"][m])
 
     def test_fp_no_gt(self, caplog):
         matched = Matched(
-            TrackingGraph(nx.DiGraph()),
-            ex_graphs.basic_division(0),
-            [],
-            {}
+            TrackingGraph(nx.DiGraph()), ex_graphs.basic_division(0), [], {}
         )
-        results = DivisionMetrics()._compute(matched)['Frame Buffer 0']
-        assert "No ground truth divisions present. Metrics may return np.nan" in caplog.text
+        results = DivisionMetrics()._compute(matched)["Frame Buffer 0"]
+        assert (
+            "No ground truth divisions present. Metrics may return np.nan"
+            in caplog.text
+        )
 
         # FP so some nan some 0
         assert np.isnan(results["Division Recall"])
@@ -120,15 +124,15 @@ class TestDivisionMetrics:
             "Division Recall",
             "Division Precision",
             "Division F1",
-            "Mitotic Branching Correctness"
+            "Mitotic Branching Correctness",
         ]
         for m in metrics:
-            assert np.isnan(results['Frame Buffer 0'][m])
+            assert np.isnan(results["Frame Buffer 0"][m])
 
     def test_frame_buffer(self):
         matched = ex_graphs.div_1late_end()
         results = DivisionMetrics(max_frame_buffer=1)._compute(matched)
 
         # Check TP changed with frame buffer
-        assert results['Frame Buffer 0']['True Positive Divisions'] == 0
-        assert results['Frame Buffer 1']['True Positive Divisions'] == 1
+        assert results["Frame Buffer 0"]["True Positive Divisions"] == 0
+        assert results["Frame Buffer 1"]["True Positive Divisions"] == 1
