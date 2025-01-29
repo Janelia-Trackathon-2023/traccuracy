@@ -139,6 +139,7 @@ class Matched:
             pred_type = "one"
 
         self._matching_type = f"{gt_type}-to-{pred_type}"
+        self.matcher_info["matching type"] = self._matching_type
         return self._matching_type
 
     def _get_match(self, node: Hashable, map: dict[Hashable, list]):

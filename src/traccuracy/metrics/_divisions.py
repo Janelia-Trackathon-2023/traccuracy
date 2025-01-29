@@ -65,6 +65,9 @@ class DivisionMetrics(Metric):
     """
 
     def __init__(self, max_frame_buffer=0):
+        valid_matching_types = ["one-to-one"]
+        super().__init__(valid_matching_types)
+
         self.frame_buffer = max_frame_buffer
 
     def _validate_matcher(self, matched: Matched) -> bool:
