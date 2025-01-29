@@ -1,3 +1,4 @@
+import networkx as nx
 import pytest
 
 import tests.examples.graphs as ex_graphs
@@ -67,3 +68,31 @@ class TestMatched:
         assert matched.get_pred_gt_matches(pred) == gt
         assert matched.get_gt_pred_matches(gt[0]) == [pred]
         assert matched.get_gt_pred_matches(gt[1]) == [pred]
+
+    def test_matching_type(self):
+        graph = TrackingGraph(nx.DiGraph())
+
+        # Test caching and one to one
+        matched = ex_graphs.good_matched()
+        assert matched._matching_type is None
+        assert matched.matching_type == "one-to-one"
+        assert matched._matching_type == "one-to-one"
+
+        # Test empty mapping
+        matched = Matched(graph, graph, [], {})
+        with pytest.raises(
+            UserWarning, match="Mapping is empty. Defaulting to type of one-to-one"
+        ):
+            assert matched.matching_type == "one-to-one"
+
+        # One to many (with more than 2)
+        matched = Matched(graph, graph, [(1, 2), (1, 3), (1, 4), (5, 6)], {})
+        assert matched.matching_type == "many-to-one"
+
+        # Many to one
+        matched = Matched(graph, graph, [(2, 1), (3, 1), (4, 5)], {})
+        assert matched.matching_type == "one-to-many"
+
+        # Many to many
+        matched = Matched(graph, graph, [(1, 2), (1, 3), (4, 5), (6, 5)], {})
+        assert matched.matching_type == "many-to-many"
