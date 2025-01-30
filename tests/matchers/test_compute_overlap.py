@@ -19,19 +19,23 @@ def test_get_labels_with_overlap(overlap):
         img_size=256, num_labels=0, sequential=True, seed=1
     )
 
-    perfect_gt, perfect_res, perfect_ious = get_labels_with_overlap(
-        image1, image1, overlap
-    )
-    assert list(perfect_gt) == list(range(1, n_labels + 1))
-    assert list(perfect_res) == list(range(1, n_labels + 1))
-    assert list(perfect_ious) == [1.0] * n_labels
+    ious = get_labels_with_overlap(image1, image1, overlap)
+    gt, res, iou = tuple(zip(*ious))
+    assert gt == tuple(range(1, n_labels + 1))
+    assert res == tuple(range(1, n_labels + 1))
+    assert iou == (1.0,) * n_labels
 
     get_labels_with_overlap(image1, image2, overlap)
 
     # Test empty labels array
-    empty_gt, empty_res, empty_ious = get_labels_with_overlap(
-        image1, empty_image, overlap
+    ious = get_labels_with_overlap(image1, empty_image, overlap)
+    assert ious == []
+
+
+def test_get_labels_with_overlap_invalid():
+    n_labels = 3
+    image1 = get_annotated_image(
+        img_size=256, num_labels=n_labels, sequential=True, seed=1
     )
-    assert empty_gt == []
-    assert empty_res == []
-    assert empty_ious == []
+    with pytest.raises(ValueError, match="Unknown overlap type: test"):
+        get_labels_with_overlap(image1, image1, "test")

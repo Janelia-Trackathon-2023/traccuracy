@@ -185,8 +185,12 @@ class Test_match_iou:
         # shapes don't match
         with pytest.raises(ValueError):
             match_iou(
-                TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10))),
-                TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5))),
+                TrackingGraph(
+                    nx.DiGraph(), segmentation=np.zeros((5, 10, 10), dtype=np.uint16)
+                ),
+                TrackingGraph(
+                    nx.DiGraph(), segmentation=np.zeros((5, 10, 5), dtype=np.uint16)
+                ),
             )
 
     def test_end_to_end_2d(self):

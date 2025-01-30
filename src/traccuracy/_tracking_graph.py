@@ -147,7 +147,12 @@ class TrackingGraph:
             name (str, optional): User specified name that will be included in result
                 outputs associated with this object
         """
+        if segmentation is not None and segmentation.dtype.kind not in ["i", "u"]:
+            raise TypeError(
+                f"Segmentation must have integer dtype, found {segmentation.dtype}"
+            )
         self.segmentation = segmentation
+
         if NodeFlag.has_value(frame_key):
             raise ValueError(
                 f"Specified frame key {frame_key} is reserved for graph "
