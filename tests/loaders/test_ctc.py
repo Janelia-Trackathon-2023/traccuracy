@@ -104,7 +104,7 @@ def test_load_tiffs_float_data(tmp_path):
     for file in files:
         arr = tifffile.imread(file).astype(np.float64)
         tifffile.imwrite(tmp_path / Path(file).name, arr)
-    with pytest.warns(UserWarning):
+    with pytest.warns(UserWarning, match="Segmentation has float64: casting to uint64"):
         casted_seg = _load_tiffs(tmp_path)
     orig_seg = _load_tiffs(data_dir)
     assert casted_seg.dtype == np.uint64

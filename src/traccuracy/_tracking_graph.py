@@ -147,9 +147,6 @@ class TrackingGraph:
             name (str, optional): User specified name that will be included in result
                 outputs associated with this object
         """
-
-        # if the segmentation is not integer dtype, cast to uint64. Otherwise, leave it
-        # the original dtype
         if segmentation is not None and segmentation.dtype.kind not in ["i", "u"]:
             raise TypeError(
                 f"Segmentation must have integer dtype, found {segmentation.dtype}"
