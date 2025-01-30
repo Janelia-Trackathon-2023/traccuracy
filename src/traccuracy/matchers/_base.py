@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import warnings
 from abc import ABC, abstractmethod
-from collections import Counter, defaultdict
+from collections import defaultdict
 from typing import Any, Hashable
 
 from traccuracy._tracking_graph import TrackingGraph
@@ -116,7 +116,8 @@ class Matched:
 
     @property
     def matching_type(self):
-        """Determines the matching type: one-to-one, one-to-many, many-to-one, many-to-many"""
+        """Determines the matching type from gt to pred:
+        one-to-one, one-to-many, many-to-one, many-to-many"""
         if len(self.mapping) == 0:
             warnings.warn(
                 "Mapping is empty. Defaulting to type of one-to-one", stacklevel=2
@@ -125,18 +126,17 @@ class Matched:
         if self._matching_type is not None:
             return self._matching_type
 
-        gt_count = Counter(m[0] for m in self.mapping)
-        pred_count = Counter(m[1] for m in self.mapping)
+        gt_type = "one"
+        for matches in self.gt_pred_map.values():
+            if len(matches) > 1:
+                gt_type = "many"
+                break
 
-        if len(set(gt_count.values())) > 1:
-            gt_type = "many"
-        else:
-            gt_type = "one"
-
-        if len(set(pred_count.values())) > 1:
-            pred_type = "many"
-        else:
-            pred_type = "one"
+        pred_type = "one"
+        for matches in self.pred_gt_map.values():
+            if len(matches) > 1:
+                pred_type = "many"
+                break
 
         self._matching_type = f"{gt_type}-to-{pred_type}"
         self.matcher_info["matching type"] = self._matching_type

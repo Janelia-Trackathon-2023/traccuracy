@@ -1,3 +1,5 @@
+import pytest
+
 from tests.test_utils import get_movie_with_graph
 from traccuracy import run_metrics
 from traccuracy.matchers._base import Matcher
@@ -37,20 +39,20 @@ def test_run_metrics():
     mapping = [(n, n) for n in graph.nodes()]
 
     # Check matcher input -- not instantiated
-    # with pytest.raises(TypeError):
-    #     run_metrics(graph, graph, DummyMatcher, [DummyMetric()])
+    with pytest.raises(TypeError):
+        run_metrics(graph, graph, DummyMatcher, [DummyMetric()])
 
-    # # Check matcher input -- wrong type
-    # with pytest.raises(TypeError):
-    #     run_metrics(graph, graph, "rando", DummyMetric())
+    # Check matcher input -- wrong type
+    with pytest.raises(TypeError):
+        run_metrics(graph, graph, "rando", DummyMetric())
 
-    # # Check metric input -- not instantiated
-    # with pytest.raises(TypeError):
-    #     run_metrics(graph, graph, DummyMatcher(), [DummyMetric])
+    # Check metric input -- not instantiated
+    with pytest.raises(TypeError):
+        run_metrics(graph, graph, DummyMatcher(), [DummyMetric])
 
-    # # Check metric input -- wrong type
-    # with pytest.raises(TypeError):
-    # run_metrics(graph, graph, DummyMatcher(), [DummyMetric(), "rando"])
+    # Check metric input -- wrong type
+    with pytest.raises(TypeError):
+        run_metrics(graph, graph, DummyMatcher(), [DummyMetric(), "rando"])
 
     # One metric
     matcher = DummyMatcher(mapping)
