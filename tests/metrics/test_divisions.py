@@ -122,3 +122,33 @@ class TestDivisionMetrics:
         # Check TP changed with frame buffer
         assert results["Frame Buffer 0"]["True Positive Divisions"] == 0
         assert results["Frame Buffer 1"]["True Positive Divisions"] == 1
+
+    def test_precision(self):
+        m = DivisionMetrics()
+        assert np.isnan(m._get_precision(tp_division_count=0, pred_div_count=0))
+        assert m._get_precision(tp_division_count=10, pred_div_count=10) == 1
+        assert m._get_precision(tp_division_count=0, pred_div_count=10) == 0
+
+    def test_recall(self):
+        m = DivisionMetrics()
+        assert np.isnan(m._get_recall(tp_division_count=0, gt_div_count=0))
+        assert m._get_recall(tp_division_count=0, gt_div_count=10) == 0
+        assert m._get_recall(tp_division_count=10, gt_div_count=10) == 1
+
+    def test_f1(self):
+        m = DivisionMetrics()
+        assert np.isnan(m._get_f1(precision=0, recall=0))
+        assert m._get_f1(precision=0, recall=1) == 0
+        assert m._get_f1(precision=1, recall=1) == 1
+
+    def test_mbc(self):
+        m = DivisionMetrics()
+        assert np.isnan(
+            m._get_mbc(gt_div_count=0, tp_division_count=0, fp_division_count=0)
+        )
+        assert (
+            m._get_mbc(gt_div_count=10, tp_division_count=0, fp_division_count=10) == 0
+        )
+        assert (
+            m._get_mbc(gt_div_count=10, tp_division_count=10, fp_division_count=0) == 1
+        )

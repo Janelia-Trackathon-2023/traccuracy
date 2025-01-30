@@ -109,8 +109,67 @@ class DivisionMetrics(Metric):
             for fb, matched_data in div_annotations.items()
         }
 
+    def _get_precision(self, tp_division_count, pred_div_count) -> float:
+        """Compute precision and return np.nan if there are no pred divisions
+
+        Args:
+            tp_division_count (int): Number of true positive divisions
+            pred_div_count (int): Total number of divisions in prediction
+
+        Returns:
+            float: Precision
+        """
+        if pred_div_count == 0:
+            return np.nan
+        return tp_division_count / pred_div_count
+
+    def _get_recall(self, tp_division_count, gt_div_count) -> float:
+        """Compute recall and return np.nan if there are no gt divisions
+
+        Args:
+            tp_division_count (int): Number of true positive divisions
+            gt_div_count (int): Total number of gt divisions
+
+        Returns:
+            float: Recall
+        """
+        if gt_div_count == 0:
+            return np.nan
+        return tp_division_count / gt_div_count
+
+    def _get_f1(self, precision, recall) -> float:
+        """Compute F1 and return np.nan if precision and recall both equal 0
+
+        Args:
+            precision (float): Precision score
+            recall (float): Recall score
+
+        Returns:
+            float: F1
+        """
+        if precision + recall == 0:
+            return np.nan
+        return 2 * (recall * precision) / (recall + precision)
+
+    def _get_mbc(self, gt_div_count, tp_division_count, fp_division_count) -> float:
+        """Computes Mitotic Branching Correctness and returns nan if there are no gt
+        divisions and no false positives
+
+        Args:
+            gt_div_count (int): Total number of gt divisions
+            tp_division_count (int): Total number of tp divisions
+            fp_division_count (int): Total number of fp divisions
+
+        Returns:
+            float: Mitotic branching correctness
+        """
+        if gt_div_count + fp_division_count == 0:
+            return np.nan
+        return tp_division_count / (fp_division_count + gt_div_count)
+
     def _calculate_metrics(self, g_gt, g_pred):
         gt_div_count = len(g_gt.get_divisions())
+        pred_div_count = len(g_pred.get_divisions())
         tp_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.TP_DIV))
         fn_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.FN_DIV))
         fp_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.FP_DIV))
@@ -120,50 +179,19 @@ class DivisionMetrics(Metric):
             logger.warning(
                 "No ground truth divisions present. Metrics may return np.nan"
             )
-            recall = np.nan
-            if fp_division_count == 0:
-                precision = np.nan
-                mbc = np.nan
-            else:
-                precision = 0
-                mbc = 0
-            f1 = np.nan
-        else:
-            # Any other ZeroDivisionErrors indicate metric is not meaningful and returns nan
-            try:
-                recall = tp_division_count / (
-                    tp_division_count + fn_division_count + wc_division_count
-                )
-            except ZeroDivisionError:  # pragma: no cover
-                recall = np.nan  # pragma: no cover
 
-            try:
-                precision = tp_division_count / (
-                    tp_division_count + fp_division_count + wc_division_count
-                )
-            except ZeroDivisionError:  # pragma: no cover
-                precision = np.nan  # pragma: no cover
-
-            try:
-                f1 = 2 * (recall * precision) / (recall + precision)
-            except ZeroDivisionError:  # pragma: no cover
-                f1 = np.nan  # pragma: no cover
-
-            try:
-                mbc = tp_division_count / (
-                    tp_division_count
-                    + fn_division_count
-                    + fp_division_count
-                    + wc_division_count
-                )
-            except ZeroDivisionError:  # pragma: no cover
-                mbc = np.nan  # pragma: no cover
+        recall = self._get_recall(tp_division_count, gt_div_count)
+        precision = self._get_precision(tp_division_count, pred_div_count)
+        f1 = self._get_f1(recall, precision)
+        mbc = self._get_mbc(gt_div_count, tp_division_count, fp_division_count)
 
         return {
             "Division Recall": recall,
             "Division Precision": precision,
             "Division F1": f1,
             "Mitotic Branching Correctness": mbc,
+            "Total GT Divisions": gt_div_count,
+            "Total Predicted Divisions": pred_div_count,
             "True Positive Divisions": tp_division_count,
             "False Positive Divisions": fp_division_count,
             "False Negative Divisions": fn_division_count,
