@@ -35,13 +35,9 @@ def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
     # casting to int to avoid issue #152 (result is float with numpy<2, dtype=uint64)
     iou = np.zeros((int(np.max(gt) + 1), int(np.max(res) + 1)))
 
-    overlapping_gt_labels, overlapping_res_labels, ious = get_labels_with_overlap(
-        gt, res, overlap="iou"
-    )
+    ious = get_labels_with_overlap(gt, res, overlap="iou")
 
-    for gt_label, res_label, iou_val in zip(
-        overlapping_gt_labels, overlapping_res_labels, ious
-    ):
+    for gt_label, res_label, iou_val in ious:
         if iou_val >= threshold:
             iou[gt_label, res_label] = iou_val
 
