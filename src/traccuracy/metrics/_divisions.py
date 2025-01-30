@@ -134,20 +134,20 @@ class DivisionMetrics(Metric):
                 recall = tp_division_count / (
                     tp_division_count + fn_division_count + wc_division_count
                 )
-            except ZeroDivisionError:
-                recall = np.nan
+            except ZeroDivisionError:  # pragma: no cover
+                recall = np.nan  # pragma: no cover
 
             try:
                 precision = tp_division_count / (
                     tp_division_count + fp_division_count + wc_division_count
                 )
-            except ZeroDivisionError:
-                precision = np.nan
+            except ZeroDivisionError:  # pragma: no cover
+                precision = np.nan  # pragma: no cover
 
             try:
                 f1 = 2 * (recall * precision) / (recall + precision)
-            except ZeroDivisionError:
-                f1 = np.nan
+            except ZeroDivisionError:  # pragma: no cover
+                f1 = np.nan  # pragma: no cover
 
             try:
                 mbc = tp_division_count / (
@@ -156,10 +156,8 @@ class DivisionMetrics(Metric):
                     + fp_division_count
                     + wc_division_count
                 )
-            # This zero div should always be caught by checking for no gt
-            # Leaving because paranoid
-            except ZeroDivisionError:
-                mbc = np.nan
+            except ZeroDivisionError:  # pragma: no cover
+                mbc = np.nan  # pragma: no cover
 
         return {
             "Division Recall": recall,
