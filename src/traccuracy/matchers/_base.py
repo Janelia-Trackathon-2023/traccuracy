@@ -126,16 +126,16 @@ class Matched:
         if self._matching_type is not None:
             return self._matching_type
 
-        gt_type = "one"
+        pred_type = "one"
         for matches in self.gt_pred_map.values():
             if len(matches) > 1:
-                gt_type = "many"
+                pred_type = "many"
                 break
 
-        pred_type = "one"
+        gt_type = "one"
         for matches in self.pred_gt_map.values():
             if len(matches) > 1:
-                pred_type = "many"
+                gt_type = "many"
                 break
 
         self._matching_type = f"{gt_type}-to-{pred_type}"

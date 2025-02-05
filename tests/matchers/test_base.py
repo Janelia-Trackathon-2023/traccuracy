@@ -87,11 +87,11 @@ class TestMatched:
 
         # One to many (with more than 2)
         matched = Matched(graph, graph, [(1, 2), (1, 3), (1, 4), (5, 6)], {})
-        assert matched.matching_type == "many-to-one"
+        assert matched.matching_type == "one-to-many"
 
         # Many to one
         matched = Matched(graph, graph, [(2, 1), (3, 1), (4, 5)], {})
-        assert matched.matching_type == "one-to-many"
+        assert matched.matching_type == "many-to-one"
 
         # Many to many
         matched = Matched(graph, graph, [(1, 2), (1, 3), (4, 5), (6, 5)], {})
