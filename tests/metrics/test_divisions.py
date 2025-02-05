@@ -1,8 +1,11 @@
 import os
 from pathlib import Path
 
+import networkx as nx
+import numpy as np
 import pytest
 
+import tests.examples.graphs as ex_graphs
 from tests.test_utils import download_gt_data, get_division_graphs
 from traccuracy import TrackingGraph
 from traccuracy.loaders import load_ctc_data
@@ -71,3 +74,76 @@ def test_DivisionMetrics():
             assert r["True Positive Divisions"] == 1
             assert r["False Positive Divisions"] == 0
             assert r["False Negative Divisions"] == 0
+
+
+class TestDivisionMetrics:
+    def test_no_divisions(self, caplog):
+        matched = ex_graphs.good_matched()
+        results = DivisionMetrics()._compute(matched)
+        assert (
+            "No ground truth divisions present. Metrics may return np.nan"
+            in caplog.text
+        )
+
+        metrics = [
+            "Division Recall",
+            "Division Precision",
+            "Division F1",
+            "Mitotic Branching Correctness",
+        ]
+        for m in metrics:
+            assert np.isnan(results["Frame Buffer 0"][m])
+
+    def test_fp_no_gt(self, caplog):
+        matched = Matched(
+            TrackingGraph(nx.DiGraph()), ex_graphs.basic_division(0), [], {}
+        )
+        results = DivisionMetrics()._compute(matched)["Frame Buffer 0"]
+        assert (
+            "No ground truth divisions present. Metrics may return np.nan"
+            in caplog.text
+        )
+
+        # FP so some nan some 0
+        assert np.isnan(results["Division Recall"])
+        assert results["Division Precision"] == 0
+        assert np.isnan(results["Division F1"])
+        assert results["Mitotic Branching Correctness"] == 0
+
+    def test_frame_buffer(self):
+        matched = ex_graphs.div_1late_end()
+        results = DivisionMetrics(max_frame_buffer=1)._compute(matched)
+
+        # Check TP changed with frame buffer
+        assert results["Frame Buffer 0"]["True Positive Divisions"] == 0
+        assert results["Frame Buffer 1"]["True Positive Divisions"] == 1
+
+    def test_precision(self):
+        m = DivisionMetrics()
+        assert np.isnan(m._get_precision(tp_division_count=0, pred_div_count=0))
+        assert m._get_precision(tp_division_count=10, pred_div_count=10) == 1
+        assert m._get_precision(tp_division_count=0, pred_div_count=10) == 0
+
+    def test_recall(self):
+        m = DivisionMetrics()
+        assert np.isnan(m._get_recall(tp_division_count=0, gt_div_count=0))
+        assert m._get_recall(tp_division_count=0, gt_div_count=10) == 0
+        assert m._get_recall(tp_division_count=10, gt_div_count=10) == 1
+
+    def test_f1(self):
+        m = DivisionMetrics()
+        assert np.isnan(m._get_f1(precision=0, recall=0))
+        assert m._get_f1(precision=0, recall=1) == 0
+        assert m._get_f1(precision=1, recall=1) == 1
+
+    def test_mbc(self):
+        m = DivisionMetrics()
+        assert np.isnan(
+            m._get_mbc(gt_div_count=0, tp_division_count=0, fp_division_count=0)
+        )
+        assert (
+            m._get_mbc(gt_div_count=10, tp_division_count=0, fp_division_count=10) == 0
+        )
+        assert (
+            m._get_mbc(gt_div_count=10, tp_division_count=10, fp_division_count=0) == 1
+        )

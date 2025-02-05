@@ -92,15 +92,9 @@ class CTCMatcher(Matcher):
 
 def match_frame_majority(gt_frame, pred_frame):
     mapping = []
-    (
-        overlapping_gt_labels,
-        overlapping_pred_labels,
-        intersection,
-    ) = get_labels_with_overlap(gt_frame, pred_frame, overlap="iogt")
+    overlaps = get_labels_with_overlap(gt_frame, pred_frame, overlap="iogt")
 
-    for gt_label, pred_label, iogt in zip(
-        overlapping_gt_labels, overlapping_pred_labels, intersection
-    ):
+    for gt_label, pred_label, iogt in overlaps:
         # CTC metrics only match comp IDs to a single GT ID if there is majority overlap
         if iogt > 0.5:
             mapping.append((gt_label, pred_label))

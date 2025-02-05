@@ -1,6 +1,7 @@
 import glob
 import logging
 import os
+from warnings import warn
 
 import networkx as nx
 import numpy as np
@@ -33,11 +34,15 @@ def _load_tiffs(data_dir):
     first_im = imread(files[0])
     shape = (len(files), *first_im.shape)
     dtype = first_im.dtype
+
+    if dtype.kind not in ["i", "u"]:
+        warn(f"Segmentation has {dtype}: casting to uint64", stacklevel=2)
+        dtype = np.uint64
     stack = np.zeros(shape=shape, dtype=dtype)
-    stack[0] = first_im
+    stack[0] = first_im.astype(dtype, copy=False)
 
     for i, f in enumerate(tqdm(files[1:], "Loading TIFFs")):
-        imread(f, out=stack[i + 1])
+        stack[i + 1] = imread(f).astype(dtype, copy=False)
 
     return stack
 
