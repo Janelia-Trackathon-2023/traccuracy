@@ -19,6 +19,10 @@ class DummyMatcherParam(DummyMatcher):
         self.param = param
 
 
+class DummyMatcherWithType(DummyMatcher):
+    _matching_type = "one-to-one"
+
+
 def test_matched_info():
     matcher = DummyMatcher()
     # Check that matcher info is correctly generated
@@ -69,14 +73,23 @@ class TestMatched:
         assert matched.get_gt_pred_matches(gt[0]) == [pred]
         assert matched.get_gt_pred_matches(gt[1]) == [pred]
 
-    def test_matching_type(self):
-        graph = TrackingGraph(nx.DiGraph())
-
-        # Test caching and one to one
+    def test_matching_type_cache(self):
+        # Test caching
         matched = ex_graphs.good_matched()
         assert matched._matching_type is None
         assert matched.matching_type == "one-to-one"
         assert matched._matching_type == "one-to-one"
+
+    def test_matching_type_from_info(self):
+        graph = TrackingGraph(nx.DiGraph())
+
+        # Matching type can be set from the matcher info
+        matcher = DummyMatcherWithType()
+        matched = matcher.compute_mapping(graph, graph)
+        assert matched._matching_type == "one-to-one"
+
+    def test_matching_type(self):
+        graph = TrackingGraph(nx.DiGraph())
 
         # Test empty mapping
         matched = Matched(graph, graph, [], {})
@@ -84,6 +97,10 @@ class TestMatched:
             UserWarning, match="Mapping is empty. Defaulting to type of one-to-one"
         ):
             assert matched.matching_type == "one-to-one"
+
+        # One to one
+        matched = ex_graphs.good_matched()
+        assert matched.matching_type == "one-to-one"
 
         # One to many (with more than 2)
         matched = Matched(graph, graph, [(1, 2), (1, 3), (1, 4), (5, 6)], {})

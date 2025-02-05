@@ -24,6 +24,9 @@ class CTCMatcher(Matcher):
     for complete details.
     """
 
+    # CTC can return many-to-one or one-to-one
+    _matching_type = None
+
     def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Run ctc matching
 

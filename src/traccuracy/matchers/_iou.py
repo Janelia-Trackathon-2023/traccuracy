@@ -208,6 +208,10 @@ class IOUMatcher(Matcher):
         self.iou_threshold = iou_threshold
         self.one_to_one = one_to_one
 
+        # If either condition is met, matching must be one to one
+        if one_to_one or iou_threshold > 0.5:
+            self._matching_type = "one-to-one"
+
     def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Computes IOU mapping for a set of grpahs
 

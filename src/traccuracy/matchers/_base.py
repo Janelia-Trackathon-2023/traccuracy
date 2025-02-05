@@ -19,6 +19,9 @@ class Matcher(ABC):
     on a particular dataset
     """
 
+    # Set explicitly only if the matching type is guaranteed by the matcher
+    _matching_type = None
+
     def compute_mapping(
         self, gt_graph: TrackingGraph, pred_graph: TrackingGraph
     ) -> Matched:
@@ -72,7 +75,10 @@ class Matcher(ABC):
     @property
     def info(self):
         """Dictionary of Matcher name and any parameters"""
-        return {"name": self.__class__.__name__, **self.__dict__}
+        info = {"name": self.__class__.__name__, **self.__dict__}
+        if self._matching_type:
+            info["matching type"] = self._matching_type
+        return info
 
 
 class Matched:
@@ -112,7 +118,7 @@ class Matched:
         self.gt_pred_map = dict(gt_pred_map)
         self.pred_gt_map = dict(pred_gt_map)
 
-        self._matching_type = None
+        self._matching_type = self.matcher_info.get("matching type")
 
     @property
     def matching_type(self):
