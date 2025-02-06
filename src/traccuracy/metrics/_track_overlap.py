@@ -40,14 +40,9 @@ class TrackOverlapMetrics(Metric):
     """
 
     def __init__(self, include_division_edges: bool = True):
+        valid_match_types = ["many-to-one", "one-to-one"]
+        super().__init__(valid_match_types)
         self.include_division_edges = include_division_edges
-
-    def _validate_matcher(self, matched: Matched) -> bool:
-        """Supports many to one matching"""
-        valid_matchers = {"IOUMatcher", "CTCMatcher"}
-        name = matched.matcher_info["name"]
-
-        return name in valid_matchers
 
     def _compute(self, matched: Matched) -> dict:
         gt_tracklets = matched.gt_graph.get_tracklets(
