@@ -9,6 +9,9 @@ if TYPE_CHECKING:
     from traccuracy.matchers._base import Matched
 
 
+MATCHING_TYPES = ["one-to-one", "one-to-many", "many-to-one", "many-to-many"]
+
+
 class Metric(ABC):
     """The base class for Metrics
 
@@ -16,12 +19,26 @@ class Metric(ABC):
     Kwargs should be specified in the constructor
     """
 
-    @abstractmethod
+    def __init__(self, valid_matches: list):
+        # Check that we have gotten a list of valid match types
+        if len(valid_matches) == 0:
+            raise TypeError("New metrics must provide a list of valid matching types")
+
+        for mtype in valid_matches:
+            if mtype not in MATCHING_TYPES:
+                raise ValueError(
+                    f"Matching type {mtype} is not supported. "
+                    "Choose from {MATCHING_TYPES}."
+                )
+
+        self.valid_match_types = valid_matches
+
     def _validate_matcher(self, matched: Matched) -> bool:
         """Verifies that the matched meets the assumptions of the metric
         Returns True if matcher is valid and False if matcher is not valid"""
-
-        raise NotImplementedError
+        if not hasattr(self, "valid_match_types"):
+            raise AttributeError("Metric subclass does not define valid_match_types")
+        return matched.matching_type in self.valid_match_types
 
     @abstractmethod
     def _compute(self, matched: Matched) -> dict:
@@ -75,7 +92,7 @@ class Metric(ABC):
 
     @property
     def info(self):
-        """Dictionary with Matcher name and any parameters"""
+        """Dictionary with Metric name and any parameters"""
         return {"name": self.__class__.__name__, **self.__dict__}
 
 

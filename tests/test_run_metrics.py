@@ -7,22 +7,20 @@ from traccuracy.metrics._base import Metric
 
 
 class DummyMetric(Metric):
+    def __init__(self):
+        super().__init__(["one-to-one"])
+
     def _compute(self, matched):
         return {}
-
-    def _validate_matcher(self, matched):
-        return True
 
 
 class DummyMetricParam(Metric):
     def __init__(self, param="value"):
+        super().__init__(["one-to-one"])
         self.param = param
 
     def _compute(self, matched):
         return {}
-
-    def _validate_matcher(self, matched):
-        return True
 
 
 class DummyMatcher(Matcher):
@@ -57,8 +55,9 @@ def test_run_metrics():
         run_metrics(graph, graph, DummyMatcher(), [DummyMetric(), "rando"])
 
     # One metric
-    results = run_metrics(graph, graph, DummyMatcher(mapping), [DummyMetric()])
-    assert isinstance(results, list)
+    matcher = DummyMatcher(mapping)
+    metric = DummyMetric()
+    results = run_metrics(graph, graph, matcher, [metric])
     assert len(results) == 1
     assert results[0]["metric"]["name"] == "DummyMetric"
 
