@@ -18,7 +18,7 @@ def classify_basic_errors(matched: Matched):
 
 def _classify_nodes(matched: Matched):
     """Classify a pair of GT/pred nodes as true positives if the match to only
-    one other node. Supports many-to-many matching.
+    one other node. Supports one-to-one
 
     False positive nodes are all those remaining in the pred graph that are not true positives.
     False negative nodes are all those remaining in the gt graph that are not true positives.
@@ -67,7 +67,7 @@ def _classify_nodes(matched: Matched):
 
 def _classify_edges(matched: Matched):
     """Assign edges as true positives if both the source and target nodes are true positives
-    in the gt graph and the corresponding edge exists in the predicted graph. Supports many-to-many
+    in the gt graph and the corresponding edge exists in the predicted graph. Supports one-to-one
     matching.
 
     All remaining edges in the gt are false negatives and all remaining edges in the prediction

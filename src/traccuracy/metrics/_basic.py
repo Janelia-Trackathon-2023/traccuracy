@@ -16,12 +16,7 @@ if TYPE_CHECKING:
 class BasicMetrics(Metric):
 
     def __init__(self):
-        valid_matching_types = [
-            "one-to-one",
-            "many-to-many",
-            "many-to-one",
-            "one-to-many",
-        ]
+        valid_matching_types = ["one-to-one"]
         super().__init__(valid_matching_types)
 
     def _compute(self, matched: Matched) -> dict:
