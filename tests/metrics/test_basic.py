@@ -2,7 +2,7 @@ import pytest
 
 import examples.graphs as ex_graphs
 from traccuracy.metrics._basic import BasicMetrics
-from traccuracy.track_errors.basic import classify_edges
+from traccuracy.track_errors.basic import classify_basic_errors
 
 
 class TestBasicMetrics:
@@ -11,7 +11,7 @@ class TestBasicMetrics:
     @pytest.mark.parametrize("feature_type", ["node", "edge"])
     def test_no_gt(self, feature_type):
         matched = ex_graphs.empty_gt()
-        classify_edges(matched)
+        classify_basic_errors(matched)
 
         with pytest.raises(
             UserWarning,
@@ -22,7 +22,7 @@ class TestBasicMetrics:
     @pytest.mark.parametrize("feature_type", ["node", "edge"])
     def test_no_pred(self, feature_type):
         matched = ex_graphs.empty_pred()
-        classify_edges(matched)
+        classify_basic_errors(matched)
 
         with pytest.raises(
             UserWarning,

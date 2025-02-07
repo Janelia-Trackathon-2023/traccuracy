@@ -11,9 +11,17 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def classify_nodes(matched: Matched):
-    """Written for one to one mapping
+def classify_basic_errors(matched: Matched):
+    _classify_nodes(matched)
+    _classify_edges(matched)
 
+
+def _classify_nodes(matched: Matched):
+    """Classify a pair of GT/pred nodes as true positives if the match to only
+    one other node. Supports many-to-many matching.
+
+    False positive nodes are all those remaining in the pred graph that are not true positives.
+    False negative nodes are all those remaining in the gt graph that are not true positives.
     Args:
         matched (traccuracy.matches.Matched): Matched data object containing gt
             and pred graphs with their associated mapping
@@ -25,8 +33,17 @@ def classify_nodes(matched: Matched):
         logger.info("Node errors already calculated. Skipping graph annotation")
         return
 
-    # Label as TP if the node is matched
-    for gt_id, pred_id in matched.mapping:
+    # Label as TP if the node is matched to only one other node
+    for gt_id, pred_ids in matched.gt_pred_map:
+        # If gt is matched to more than one prediction, not a TP
+        if len(pred_ids) > 1:
+            continue
+        pred_id = pred_ids[0]
+
+        # If the prediction is matched to more than one gt, not a TP
+        if len(matched.pred_gt_map[pred_id]) > 1:
+            continue
+
         gt_graph.set_flag_on_node(gt_id, NodeFlag.TRUE_POS)
         pred_graph.set_flag_on_node(pred_id, NodeFlag.TRUE_POS)
 
@@ -48,8 +65,13 @@ def classify_nodes(matched: Matched):
     pred_graph.node_errors = True
 
 
-def classify_edges(matched: Matched):
-    """Written for one to one mapping
+def _classify_edges(matched: Matched):
+    """Assign edges as true positives if both the source and target nodes are true positives
+    in the gt graph and the corresponding edge exists in the predicted graph. Supports many-to-many
+    matching.
+
+    All remaining edges in the gt are false negatives and all remaining edges in the prediction
+    are false negatives.
 
     Args:
         matched (traccuracy.matches.Matched): Matched data object containing gt
@@ -65,7 +87,7 @@ def classify_edges(matched: Matched):
     # Node errors are needed for edge annotation
     if not pred_graph.node_errors and not gt_graph.node_errors:
         logger.warning("Node errors have not been annotated. Running node annotation.")
-        classify_nodes(matched)
+        _classify_nodes(matched)
 
     # Set all gt edges to false neg and flip to true if match is found
     gt_graph.set_flag_on_all_edges(EdgeFlag.FALSE_NEG)

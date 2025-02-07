@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from traccuracy._tracking_graph import EdgeFlag, NodeFlag
 from traccuracy.matchers._base import Matched
-from traccuracy.track_errors.basic import classify_edges
+from traccuracy.track_errors.basic import classify_basic_errors
 
 from ._base import Metric
 
@@ -16,12 +16,17 @@ if TYPE_CHECKING:
 class BasicMetrics(Metric):
 
     def __init__(self):
-        valid_matching_types = ["one-to-one"]
+        valid_matching_types = [
+            "one-to-one",
+            "many-to-many",
+            "many-to-one",
+            "one-to-many",
+        ]
         super().__init__(valid_matching_types)
 
     def _compute(self, matched: Matched) -> dict:
         # Run error analysis on nodes and edges
-        classify_edges(matched)
+        classify_basic_errors(matched)
 
         node_stats = self._compute_stats("node", matched)
         edge_stats = self._compute_stats("edge", matched)
@@ -29,7 +34,7 @@ class BasicMetrics(Metric):
         return {**node_stats, **edge_stats}
 
     def _compute_stats(self, feature_type: str, matched: Matched):
-        # Get coungs
+        # Get counts
         if feature_type == "node":
             tp = len(matched.gt_graph.get_nodes_with_flag(NodeFlag.TRUE_POS))
             fp = len(matched.pred_graph.get_nodes_with_flag(NodeFlag.FALSE_POS))

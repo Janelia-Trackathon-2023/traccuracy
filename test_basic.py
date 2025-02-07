@@ -2,14 +2,14 @@ import pytest
 
 import tests.examples.graphs as ex_graphs
 from traccuracy._tracking_graph import EdgeFlag, NodeFlag
-from traccuracy.track_errors.basic import classify_edges, classify_nodes
+from traccuracy.track_errors.basic import _classify_edges, _classify_nodes
 
 
 class TestStandardNode:
 
     def test_empty_gt(self):
         matched = ex_graphs.empty_gt()
-        classify_nodes(matched)
+        _classify_nodes(matched)
 
         # no gt = all false pos
         for attrs in matched.pred_graph.nodes.values():
@@ -17,7 +17,7 @@ class TestStandardNode:
 
     def test_empty_pred(self):
         matched = ex_graphs.empty_pred()
-        classify_nodes(matched)
+        _classify_nodes(matched)
 
         # no pred = all false neg
         for attrs in matched.gt_graph.nodes.values():
@@ -25,7 +25,7 @@ class TestStandardNode:
 
     def test_good_match(self):
         matched = ex_graphs.good_matched()
-        classify_nodes(matched)
+        _classify_nodes(matched)
 
         # All TP
         for graph in [matched.gt_graph, matched.pred_graph]:
@@ -36,7 +36,7 @@ class TestStandardNode:
     def test_fn_node(self, t):
         wrong_node = [1, 2, 3][t]
         matched = ex_graphs.fn_node_matched(t)
-        classify_nodes(matched)
+        _classify_nodes(matched)
 
         # Missing pred node = false neg in gt
         for node, attrs in matched.gt_graph.nodes.items():
@@ -52,7 +52,7 @@ class TestStandardNode:
     @pytest.mark.parametrize("edge_er", [0, 1])
     def test_fn_edge(self, edge_er):
         matched = ex_graphs.fn_edge_matched(edge_er)
-        classify_nodes(matched)
+        _classify_nodes(matched)
 
         # All nodes correct in both
         for graph in [matched.gt_graph, matched.pred_graph]:
@@ -62,7 +62,7 @@ class TestStandardNode:
     @pytest.mark.parametrize("t", [0, 1, 2])
     def test_fp_node(self, t):
         matched = ex_graphs.fp_node_matched(t)
-        classify_nodes(matched)
+        _classify_nodes(matched)
 
         # FP in pred, all others correct
         for node, attrs in matched.pred_graph.nodes.items():
@@ -78,7 +78,7 @@ class TestStandardNode:
     @pytest.mark.parametrize("edge_er", [0, 1])
     def test_fp_edge(self, edge_er):
         matched = ex_graphs.fp_edge_matched(edge_er)
-        classify_nodes(matched)
+        _classify_nodes(matched)
 
         # Two fp nodes in pred = 7 and 8
         for node, attrs in matched.pred_graph.nodes.items():
@@ -93,7 +93,7 @@ class TestStandardNode:
 
     def test_crossover(self):
         matched = ex_graphs.crossover_edge()
-        classify_nodes(matched)
+        _classify_nodes(matched)
 
         # All pred correct
         for attrs in matched.pred_graph.nodes.values():
@@ -116,7 +116,7 @@ class TestStandardEdge:
 
     def test_empty_gt(self):
         matched = ex_graphs.empty_gt()
-        classify_edges(matched)
+        _classify_edges(matched)
 
         # All fp edges
         for attrs in matched.pred_graph.edges.values():
@@ -124,7 +124,7 @@ class TestStandardEdge:
 
     def test_empty_pred(self):
         matched = ex_graphs.empty_pred()
-        classify_edges(matched)
+        _classify_edges(matched)
 
         # all false neg
         for attrs in matched.gt_graph.edges.values():
@@ -132,7 +132,7 @@ class TestStandardEdge:
 
     def test_good_match(self):
         matched = ex_graphs.good_matched()
-        classify_edges(matched)
+        _classify_edges(matched)
 
         for graph in [matched.gt_graph, matched.pred_graph]:
             for attrs in graph.edges.values():
@@ -140,7 +140,7 @@ class TestStandardEdge:
 
     def test_fn_node_end(self):
         matched = ex_graphs.fn_node_matched(0)
-        classify_edges(matched)
+        _classify_edges(matched)
 
         # All pred edges correct
         for attrs in matched.pred_graph.edges.values():
@@ -155,7 +155,7 @@ class TestStandardEdge:
 
     def test_fn_node_middle(self):
         matched = ex_graphs.fn_node_matched(1)
-        classify_edges(matched)
+        _classify_edges(matched)
 
         # all gt edges false neg
         for attrs in matched.gt_graph.edges.values():
@@ -163,7 +163,7 @@ class TestStandardEdge:
 
     def test_fn_edge(self):
         matched = ex_graphs.fn_edge_matched(0)
-        classify_edges(matched)
+        _classify_edges(matched)
 
         # Only pred edge is correct
         attrs = matched.pred_graph.edges[(5, 6)]
@@ -180,7 +180,7 @@ class TestStandardEdge:
     @pytest.mark.parametrize("t", [0, 1, 2])
     def test_fp_node(self, t):
         matched = ex_graphs.fp_node_matched(t)
-        classify_edges(matched)
+        _classify_edges(matched)
 
         # All pred and gt edges correct
         for graph in [matched.gt_graph, matched.pred_graph]:
@@ -190,7 +190,7 @@ class TestStandardEdge:
     @pytest.mark.parametrize("t", [0, 1])
     def test_fp_edge(self, t):
         matched = ex_graphs.fp_edge_matched(t)
-        classify_edges(matched)
+        _classify_edges(matched)
 
         # All gt and pred edges correct except for fp edge
         for graph in [matched.gt_graph, matched.pred_graph]:
@@ -202,7 +202,7 @@ class TestStandardEdge:
 
     def test_crossover_edge(self):
         matched = ex_graphs.crossover_edge()
-        classify_edges(matched)
+        _classify_edges(matched)
 
         # One pred edge correct other fp
         attrs = matched.pred_graph.edges[(7, 8)]
