@@ -30,7 +30,7 @@ def _classify_nodes(matched: Matched):
     gt_graph = matched.gt_graph
 
     if pred_graph.node_errors and gt_graph.node_errors:
-        logger.info("Node errors already calculated. Skipping graph annotation")
+        logger.warning("Node errors already calculated. Skipping graph annotation")
         return
 
     # Label as TP if the node is matched
@@ -72,7 +72,7 @@ def _classify_edges(matched: Matched):
     gt_graph = matched.gt_graph
 
     if pred_graph.edge_errors and gt_graph.edge_errors:
-        logger.info("Edge errors already calculated. Skipping graph annotation")
+        logger.warning("Edge errors already calculated. Skipping graph annotation")
         return
 
     # Node errors are needed for edge annotation
