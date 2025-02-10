@@ -1,8 +1,8 @@
-# %% [raw]
-# Edge Error Types
-# ================
-# Edge errors are calculated using the node error annotations defined in
-# :doc:`nodes` and are supported only on one-to-one matchings.
+# %% [markdown]
+# # Edge Errors
+#
+# Edge errors are calculated using the node error annotations and are supported
+# only on one-to-one matchings.
 
 # %% nbsphinx="hidden"
 import sys

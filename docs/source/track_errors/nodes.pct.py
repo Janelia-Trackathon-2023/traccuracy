@@ -1,5 +1,5 @@
 # %% [markdown]
-# # Node Error Types
+# # Node Errors
 #
 # This set of node errors applies only to graphs with a one-to-one matching.
 
