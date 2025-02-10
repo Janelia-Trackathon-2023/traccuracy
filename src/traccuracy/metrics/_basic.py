@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 
 class BasicMetrics(Metric):
+    """Generates basic statistics describing node and edge errors"""
 
     def __init__(self):
         valid_matching_types = ["one-to-one"]
