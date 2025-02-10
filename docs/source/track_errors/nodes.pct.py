@@ -103,14 +103,14 @@ def plot_matched(examples, annotations, suptitle, titles):
 
 
 # %% [markdown]
-# # True Positive
+# ## True Positive
 # A true positive node is defined as a predicted node that matches to only one
 # ground truth node. Additionally, the corresponding ground truth node cannot be
 # matched to more than one predicted node. True positives are annotated on both
 # the ground truth and the division graph.
 
 # %% [markdown]
-# # False Positive
+# ## False Positive
 # A false positive node is a node on the predicted graph does not match to a
 # node on the ground truth graph. False positives are annotated on the predicted
 # graph.
@@ -118,8 +118,8 @@ def plot_matched(examples, annotations, suptitle, titles):
 # %%
 plot_matched([ex_graphs.fp_edge_matched(1)], [{7: "FP", 8: "FP"}], "", [""])
 
-# %%
-# # False Negative
+# %% [markdown]
+# ## False Negative
 # A false negative node is a node on the ground truth graph that is not matched
 # to a predicted node. False negatives are annotated on the ground truth graph.
 

@@ -1,5 +1,6 @@
-# %% [markdown]
-# # Edge Error Types
+# %% [raw]
+# Edge Error Types
+# ================
 # Edge errors are calculated using the node error annotations defined in
 # :doc:`nodes` and are supported only on one-to-one matchings.
 
@@ -100,17 +101,18 @@ def plot_matched(examples, annotations, suptitle, titles):
 
 
 # %% [markdown]
-# # True Positive
+# ## True Positive
 # An edge in the ground truth is a true positive edge if both source and target
 # node are true positives and the corresponding edge is present in the
 # prediction. True positive edges are annotated on both the ground truth and the
 # predicted graph.
 
 # %% [markdown]
-# # False Positive
+# ## False Positive
 # False positive edges occur in and are annotated on the predicted graph. A
 # false positive edge can occur in several different scenarios when the edge
 # fails to meet the criteria for a true positive.
+#
 # - Ex 1: Nodes 7 and 8 are not matched to any node in the GT.
 # - Ex 2: Nodes 7 and 8 match to GT nodes that belong to two different edges.
 # - Ex 3: While Nodes 5 and 6 are matched to nodes in the GT, an edge does not
@@ -146,8 +148,9 @@ plot_matched(
 )
 
 # %% [markdown]
-# # False Negative
+# ## False Negative
 # A false negative edge can occur in the ground truth graph when:
+#
 # - One or both of the nodes is not a true positive and matched to a node in the
 #   prediction
 # - The matched nodes in the prediction do not also have an edge between them
