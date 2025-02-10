@@ -33,17 +33,8 @@ def _classify_nodes(matched: Matched):
         logger.info("Node errors already calculated. Skipping graph annotation")
         return
 
-    # Label as TP if the node is matched to only one other node
-    for gt_id, pred_ids in matched.gt_pred_map:
-        # If gt is matched to more than one prediction, not a TP
-        if len(pred_ids) > 1:
-            continue
-        pred_id = pred_ids[0]
-
-        # If the prediction is matched to more than one gt, not a TP
-        if len(matched.pred_gt_map[pred_id]) > 1:
-            continue
-
+    # Label as TP if the node is matched
+    for gt_id, pred_id in matched.mapping:
         gt_graph.set_flag_on_node(gt_id, NodeFlag.TRUE_POS)
         pred_graph.set_flag_on_node(pred_id, NodeFlag.TRUE_POS)
 
