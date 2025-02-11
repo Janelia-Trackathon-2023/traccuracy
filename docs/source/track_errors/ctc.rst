@@ -131,12 +131,12 @@ Edges
 False Positives
 ^^^^^^^^^^^^^^^
 
-False positive edges are annotated on the predicted graph. An edge is considered a false positive if both nodes are true positive nodes, but the edge does not match to any edge in the ground truth graph. In the example below, edge (4, 8) is a false positive.
+False positive edges are annotated on the predicted graph. An edge is considered a false positive if both nodes are true positive nodes, but the edge does not match to any edge in the ground truth graph. In the example below, edge (7, 8) is a false positive.
 
 .. jupyter-execute::
     :hide-code:
 
-    plot_matched([ex_graphs.crossover_edge()], [{}], "")
+    plot_matched([ex_graphs.crossover_edge()], [{(7,8): "FP"}], "")
 
 False Negatives
 ^^^^^^^^^^^^^^^

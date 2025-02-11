@@ -1,9 +1,18 @@
 import networkx as nx
+import numpy as np
 import pytest
 
 from traccuracy import TrackingGraph
 from traccuracy.matchers import Matched
 from traccuracy.metrics._base import Metric
+
+
+class ValidMetric(Metric):
+    def __init__(self):
+        super().__init__(valid_matches=["one-to-one"])
+
+    def _compute(self):
+        return {}
 
 
 class TestMetric:
@@ -82,3 +91,21 @@ class TestMetric:
         with pytest.raises(UserWarning, match=message):
             results = metric.compute(matched, override_matcher=True)
             assert "success" in results.results
+
+    def test_precision(self):
+        m = ValidMetric()
+        assert np.isnan(m._get_precision(numerator=0, denominator=0))
+        assert m._get_precision(numerator=10, denominator=10) == 1
+        assert m._get_precision(numerator=0, denominator=10) == 0
+
+    def test_recall(self):
+        m = ValidMetric()
+        assert np.isnan(m._get_recall(numerator=0, denominator=0))
+        assert m._get_recall(numerator=0, denominator=10) == 0
+        assert m._get_recall(numerator=10, denominator=10) == 1
+
+    def test_f1(self):
+        m = ValidMetric()
+        assert np.isnan(m._get_f1(precision=0, recall=0))
+        assert m._get_f1(precision=0, recall=1) == 0
+        assert m._get_f1(precision=1, recall=1) == 1
