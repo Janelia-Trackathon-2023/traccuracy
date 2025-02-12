@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import Any, Hashable
@@ -17,6 +18,9 @@ class Matcher(ABC):
     In use, the Matcher object will be initialized with kwargs prior to running compute_mapping
     on a particular dataset
     """
+
+    # Set explicitly only if the matching type is guaranteed by the matcher
+    _matching_type = None
 
     def compute_mapping(
         self, gt_graph: TrackingGraph, pred_graph: TrackingGraph
@@ -71,7 +75,10 @@ class Matcher(ABC):
     @property
     def info(self):
         """Dictionary of Matcher name and any parameters"""
-        return {"name": self.__class__.__name__, **self.__dict__}
+        info = {"name": self.__class__.__name__, **self.__dict__}
+        if self._matching_type:
+            info["matching type"] = self._matching_type
+        return info
 
 
 class Matched:
@@ -110,6 +117,36 @@ class Matched:
         # Set back to normal dict to remove default dict behavior
         self.gt_pred_map = dict(gt_pred_map)
         self.pred_gt_map = dict(pred_gt_map)
+
+        self._matching_type = self.matcher_info.get("matching type")
+
+    @property
+    def matching_type(self):
+        """Determines the matching type from gt to pred:
+        one-to-one, one-to-many, many-to-one, many-to-many"""
+        if len(self.mapping) == 0:
+            warnings.warn(
+                "Mapping is empty. Defaulting to type of one-to-one", stacklevel=2
+            )
+
+        if self._matching_type is not None:
+            return self._matching_type
+
+        pred_type = "one"
+        for matches in self.gt_pred_map.values():
+            if len(matches) > 1:
+                pred_type = "many"
+                break
+
+        gt_type = "one"
+        for matches in self.pred_gt_map.values():
+            if len(matches) > 1:
+                gt_type = "many"
+                break
+
+        self._matching_type = f"{gt_type}-to-{pred_type}"
+        self.matcher_info["matching type"] = self._matching_type
+        return self._matching_type
 
     def _get_match(self, node: Hashable, map: dict[Hashable, list]):
         if node in map:
