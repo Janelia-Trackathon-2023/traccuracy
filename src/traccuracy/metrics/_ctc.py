@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
+
+import numpy as np
 
 from traccuracy._tracking_graph import EdgeFlag, NodeFlag
 from traccuracy.matchers._base import Matched
@@ -93,10 +96,23 @@ class CTCMetrics(AOGMMetrics):
         )
 
     def _compute(self, data: Matched):
-        # AOGM-0 is the cost of creating the gt graph from scratch
+        errors = super()._compute(data)
         gt_graph = data.gt_graph.graph
         n_nodes = gt_graph.number_of_nodes()
         n_edges = gt_graph.number_of_edges()
+
+        tra = self._get_tra(errors, n_nodes, n_edges)
+        errors["TRA"] = tra
+
+        det = self._get_det(errors, n_nodes)
+        errors["DET"] = det
+
+        lnk = self._get_lnk(errors, n_edges)
+        errors["LNK"] = lnk
+
+        return errors
+
+    def _get_tra(self, errors, n_nodes, n_edges):
         aogm_0 = n_nodes * self.v_weights["fn"] + n_edges * self.e_weights["fn"]
         if aogm_0 == 0:
             raise RuntimeError(
@@ -104,11 +120,11 @@ class CTCMetrics(AOGMMetrics):
                 + f" {n_edges} edges with {self.v_weights['fn']} vertex FN weight and"
                 + f" {self.e_weights['fn']} edge FN weight"
             )
-        errors = super()._compute(data)
         aogm = errors["AOGM"]
         tra = 1 - min(aogm, aogm_0) / aogm_0
-        errors["TRA"] = tra
+        return tra
 
+    def _get_det(self, errors, n_nodes):
         aogmd_0 = n_nodes * self.v_weights["fn"]
         aogmd = get_weighted_vertex_error_sum(
             {
@@ -121,8 +137,29 @@ class CTCMetrics(AOGMMetrics):
             self.v_weights["fn"],
         )
         det = 1 - min(aogmd, aogmd_0) / aogmd_0
-        errors["DET"] = det
-        return errors
+        return det
+
+    def _get_lnk(self, errors, n_edges):
+        if n_edges == 0:
+            warnings.warn(
+                UserWarning("No edges in the GT graph, cannot compute LNK."),
+                stacklevel=1,
+            )
+            return np.nan
+
+        aogma_0 = n_edges * self.e_weights["fn"]
+        aogma = get_weighted_edge_error_sum(
+            {
+                "fp": errors["fp_edges"],
+                "fn": errors["fn_edges"],
+                "ws": errors["ws_edges"],
+            },
+            self.e_weights["fp"],
+            self.e_weights["fn"],
+            self.e_weights["ws"],
+        )
+        lnk = 1 - min(aogma, aogma_0) / aogma_0
+        return lnk
 
 
 def get_weighted_vertex_error_sum(
