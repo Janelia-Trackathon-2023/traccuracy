@@ -35,6 +35,34 @@ The final DET score is therefore:
     DET = 1 - min(AOGM-D, AOGM-D_{0}) / AOGM-D_{0}
 
 
+LNK
+-----------------------
+
+This metric assesses the solution's linking performance only, and therefore only measures
+and annotates edge errors.
+
+Each type of edge error is weighted based on how difficult it would be for a human to correct
+the error by hand. The original Cell Tracking Challenge weights are used for all error types:
+
+* Wrong-Semantic edges are weighted 1
+* False Negative edges are weighted 1.5
+* False Positive edges are weighted 1
+
+See Track Errors for the definition of each error type.
+
+To compute the LNK score for a dataset, the weighted sum of all edge errors in the solution (:math:`AOGM-A`)
+is normalized to a 0-1 value using a maximum potential error. The maximum potential error
+(:math:`AOGM-A_{0}`) is defined as the cost of creating the ground truth edges from scratch i.e. assume all
+edges in the ground truth are False Negative, and compute the weighed sum of errors
+on this graph.
+
+The final LNK score is therefore:
+
+.. math::
+
+    LNK = 1 - min(AOGM-A, AOGM-A_{0}) / AOGM-A_{0}
+
+
 TRA
 -----------------------
 
