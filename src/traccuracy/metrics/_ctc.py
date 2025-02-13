@@ -117,9 +117,6 @@ class CTCMetrics(AOGMMetrics):
             n_nodes (int): The number of nodes in the ground truth graph
             n_edges (int): The number of edges in the ground truth graph
 
-        Raises:
-            RuntimeError: if the AOGM0 is 0
-
         Returns:
             float: the TRA score, computed with the CTC metric weights, or np.nan if
                 the AOGM_0 is 0
