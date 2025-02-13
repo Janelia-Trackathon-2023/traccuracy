@@ -43,7 +43,7 @@ class NodeFlag(str, enum.Enum):
     # Wrong child division. Valid on gt and computed graph.
     WC_DIV = "is_wrong_child_division"
 
-    TRUE_POS = "is tp"
+    TRUE_POS = "is_tp"
     FALSE_POS = "is_fp"
     FALSE_NEG = "is_fn"
 
