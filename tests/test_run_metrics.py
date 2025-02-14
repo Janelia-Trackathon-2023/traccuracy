@@ -57,12 +57,12 @@ def test_run_metrics():
     # One metric
     matcher = DummyMatcher(mapping)
     metric = DummyMetric()
-    results = run_metrics(graph, graph, matcher, [metric])
+    results, matched = run_metrics(graph, graph, matcher, [metric])
     assert len(results) == 1
     assert results[0]["metric"]["name"] == "DummyMetric"
 
     # Duplicate metric with different params
-    results = run_metrics(
+    results, matched = run_metrics(
         graph,
         graph,
         DummyMatcher(mapping),
