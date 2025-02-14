@@ -43,6 +43,10 @@ class NodeFlag(str, enum.Enum):
     # Wrong child division. Valid on gt and computed graph.
     WC_DIV = "is_wrong_child_division"
 
+    TRUE_POS = "is_tp"
+    FALSE_POS = "is_fp"
+    FALSE_NEG = "is_fn"
+
     @classmethod
     def has_value(cls, value):
         """Check if a value is one of the enum's values.
@@ -77,6 +81,9 @@ class EdgeFlag(str, enum.Enum):
     INTERTRACK_EDGE = "is_intertrack_edge"
     # Edges with wrong semantic as defined by CTC. Valid on computed graph.
     WRONG_SEMANTIC = "is_wrong_semantic"
+
+    FALSE_POS = "is_fp"
+    FALSE_NEG = "is_fn"
 
 
 class TrackingGraph:

@@ -98,48 +98,6 @@ class DivisionMetrics(Metric):
             for fb, matched_data in div_annotations.items()
         }
 
-    def _get_precision(self, tp_division_count, pred_div_count) -> float:
-        """Compute precision and return np.nan if there are no pred divisions
-
-        Args:
-            tp_division_count (int): Number of true positive divisions
-            pred_div_count (int): Total number of divisions in prediction
-
-        Returns:
-            float: Precision
-        """
-        if pred_div_count == 0:
-            return np.nan
-        return tp_division_count / pred_div_count
-
-    def _get_recall(self, tp_division_count, gt_div_count) -> float:
-        """Compute recall and return np.nan if there are no gt divisions
-
-        Args:
-            tp_division_count (int): Number of true positive divisions
-            gt_div_count (int): Total number of gt divisions
-
-        Returns:
-            float: Recall
-        """
-        if gt_div_count == 0:
-            return np.nan
-        return tp_division_count / gt_div_count
-
-    def _get_f1(self, precision, recall) -> float:
-        """Compute F1 and return np.nan if precision and recall both equal 0
-
-        Args:
-            precision (float): Precision score
-            recall (float): Recall score
-
-        Returns:
-            float: F1
-        """
-        if precision + recall == 0:
-            return np.nan
-        return 2 * (recall * precision) / (recall + precision)
-
     def _get_mbc(self, gt_div_count, tp_division_count, fp_division_count) -> float:
         """Computes Mitotic Branching Correctness and returns nan if there are no gt
         divisions and no false positives

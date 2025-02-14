@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 from importlib.metadata import version
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from traccuracy.matchers._base import Matched
 
@@ -94,6 +96,48 @@ class Metric(ABC):
     def info(self):
         """Dictionary with Metric name and any parameters"""
         return {"name": self.__class__.__name__, **self.__dict__}
+
+    def _get_precision(self, numerator, denominator) -> float:
+        """Compute precision and return np.nan if denominator is 0
+
+        Args:
+            numerator (int): Typically TP
+            denominator (int): Typically TP + FP
+
+        Returns:
+            float: Precision
+        """
+        if denominator == 0:
+            return np.nan
+        return numerator / denominator
+
+    def _get_recall(self, numerator, denominator) -> float:
+        """Compute recall and return np.nan if denominator is 0
+
+        Args:
+            numerator (int): Typically TP
+            denominator (int): Typically TP + FN
+
+        Returns:
+            float: Recall
+        """
+        if denominator == 0:
+            return np.nan
+        return numerator / denominator
+
+    def _get_f1(self, precision, recall) -> float:
+        """Compute F1 and return np.nan if precision and recall both equal 0
+
+        Args:
+            precision (float): Precision score
+            recall (float): Recall score
+
+        Returns:
+            float: F1
+        """
+        if precision + recall == 0:
+            return np.nan
+        return 2 * (recall * precision) / (recall + precision)
 
 
 class Results:
