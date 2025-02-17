@@ -59,7 +59,10 @@ def test_compute_metrics_gap_close():
     g_gt, g_pred, gt_mapped, g_pred_mapped = get_gap_close_graphs()
     mapper = list(zip(gt_mapped, g_pred_mapped))
     matched = Matched(
-        gt_graph=TrackingGraph(g_gt), pred_graph=TrackingGraph(g_pred), mapping=mapper
+        gt_graph=TrackingGraph(g_gt),
+        pred_graph=TrackingGraph(g_pred),
+        mapping=mapper,
+        matcher_info={"name": "DummyMatcher"},
     )
     CTCMetrics().compute(matched)
 
@@ -69,4 +72,4 @@ def test_compute_metrics_gap_close():
     assert g_pred.nodes["1_2"][NodeFlag.CTC_FALSE_POS]
     # check that correct edge is not annotated with errors
     for error_attr in [EdgeFlag.CTC_FALSE_POS, EdgeFlag.WRONG_SEMANTIC]:
-        assert not g_pred.edges[("2_6", "4_10")][error_attr]
+        assert error_attr not in g_pred.edges[("2_6", "4_10")]

@@ -187,11 +187,9 @@ def test_track_overlap_gap_close():
     g_gt, g_pred, gt_mapped, g_pred_mapped = get_gap_close_graphs()
     mapper = list(zip(gt_mapped, g_pred_mapped))
     matched = Matched(
-        TrackingGraph(g_gt),
-        TrackingGraph(g_pred),
-        mapper,
+        TrackingGraph(g_gt), TrackingGraph(g_pred), mapper, {"name": "DummyMatcher"}
     )
     metric = TrackOverlapMetrics()
     results = metric.compute(matched)
-    assert results["track_purity"] == 7 / 9
-    assert results["target_effectiveness"] == 7 / 8
+    assert results.results["track_purity"] == 7 / 9
+    assert results.results["target_effectiveness"] == 7 / 8

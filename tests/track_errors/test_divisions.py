@@ -257,26 +257,33 @@ def test_evaluate_division_events():
 def test_gap_close_divisions():
     g_gt, g_pred, gt_mapped, pred_mapped = get_division_gap_close_graphs()
     mapper = list(zip(gt_mapped, pred_mapped))
-    matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
+    matched_data = Matched(
+        TrackingGraph(g_gt), TrackingGraph(g_pred), mapper, {"name": "DummyMatcher"}
+    )
     _classify_divisions(matched_data)
 
-    # missing gap close div edge so FN DIV
-    assert g_gt.nodes["1_1"][NodeFlag.FN_DIV]
+    # division occurs but the child (2_3) is wrong
+    assert g_gt.nodes["1_1"][NodeFlag.WC_DIV]
 
     # fix division, assert it's identified correctly
     g_pred.remove_node("2_2")
     g_pred.add_edge("1_1", "2_3")
     # mapper doesn't need to change as removed node was always missing
-    matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
+    matched_data = Matched(
+        TrackingGraph(g_gt), TrackingGraph(g_pred), mapper, {"name": "DummyMatcher"}
+    )
     _classify_divisions(matched_data)
     assert g_gt.nodes["1_1"][NodeFlag.TP_DIV]
     assert g_pred.nodes["1_1"][NodeFlag.TP_DIV]
 
-    g_gt, g_pred, mapper = get_division_gap_close_graphs()
+    g_gt, g_pred, gt_mapped, pred_mapped = get_division_gap_close_graphs()
+    mapper = list(zip(gt_mapped, pred_mapped))
     # remove gt division
     g_gt.remove_edge("1_1", "2_3")
     g_gt.remove_edge("1_1", "3_2")
-    matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
+    matched_data = Matched(
+        TrackingGraph(g_gt), TrackingGraph(g_pred), mapper, {"name": "DummyMatcher"}
+    )
     _classify_divisions(matched_data)
     # assert fp division classified correctly
     assert g_pred.nodes["1_1"][NodeFlag.FP_DIV]
