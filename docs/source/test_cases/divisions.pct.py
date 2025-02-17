@@ -140,3 +140,8 @@ plot_matched(
     [ex_graphs.div_shift_bad_match_pred(), ex_graphs.div_shift_bad_match_daughter()],
     "Insufficient matching for shifted divisions",
 )
+
+# %%
+plot_matched(
+    [ex_graphs.div_parent_gap(), ex_graphs.div_daughter_gap()], "Gap closing divisions"
+)

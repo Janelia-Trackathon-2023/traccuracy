@@ -143,3 +143,13 @@ plot_matched(
 plot_matched(
     [ex_graphs.edge_one_to_two(t) for t in [0, 1]], "One GT edge to 2 pred edges"
 )
+
+# %%
+plot_matched(
+    [
+        ex_graphs.gap_close_gt_edge(),
+        ex_graphs.gap_close_pred_gap(),
+        ex_graphs.gap_close_matched_gap(),
+    ],
+    "Gap closing cases",
+)
