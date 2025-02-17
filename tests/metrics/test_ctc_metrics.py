@@ -86,6 +86,11 @@ def test_get_det():
     errors["ns_nodes"] = 0
     assert metrics._get_det(errors, n_nodes) == 1
 
+    with pytest.warns(
+        UserWarning, match="No nodes in the GT graph, cannot compute DET."
+    ):
+        assert np.isnan(metrics._get_det(errors, 0))
+
 
 def test_get_lnk():
     metrics = CTCMetrics()
@@ -160,5 +165,5 @@ def test_get_tra():
     assert metrics._get_tra(errors, n_nodes, n_edges) == 1
 
     # edge case AOGM_0 is 0
-    with pytest.raises(RuntimeError, match="AOGM0 is 0"):
-        metrics._get_tra(errors, 0, 0)
+    with pytest.warns(UserWarning, match="AOGM0 is 0"):
+        assert np.isnan(metrics._get_tra(errors, 0, 0))
