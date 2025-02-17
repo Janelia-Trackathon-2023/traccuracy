@@ -23,6 +23,9 @@ class AOGMMetrics(Metric):
         edge_fn_weight=1,
         edge_ws_weight=1,
     ):
+        valid_matching_types = ["one-to-one", "many-to-one"]
+        super().__init__(valid_matching_types)
+
         self.v_weights = {
             "ns": vertex_ns_weight,
             "fp": vertex_fp_weight,
@@ -33,12 +36,6 @@ class AOGMMetrics(Metric):
             "fn": edge_fn_weight,
             "ws": edge_ws_weight,
         }
-
-    def _validate_matcher(self, matched: Matched) -> bool:
-        valid_matchers = {"IOUMatcher", "CTCMatcher"}
-        name = matched.matcher_info["name"]
-
-        return name in valid_matchers
 
     def _compute(self, data: Matched):
         evaluate_ctc_events(data)

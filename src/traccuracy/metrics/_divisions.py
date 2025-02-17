@@ -35,7 +35,10 @@ as the late division daughters.
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
+
+import numpy as np
 
 from traccuracy._tracking_graph import NodeFlag
 from traccuracy.matchers._base import Matched
@@ -45,6 +48,8 @@ from ._base import Metric
 
 if TYPE_CHECKING:
     from traccuracy.matchers import Matched
+
+logger = logging.getLogger(__name__)
 
 
 class DivisionMetrics(Metric):
@@ -65,21 +70,10 @@ class DivisionMetrics(Metric):
     """
 
     def __init__(self, max_frame_buffer=0):
+        valid_matching_types = ["one-to-one"]
+        super().__init__(valid_matching_types)
+
         self.frame_buffer = max_frame_buffer
-
-    def _validate_matcher(self, matched: Matched) -> bool:
-        "Matcher must be one to one"
-        name = matched.matcher_info["name"]
-        valid = False
-
-        if name == "IOUMatcher":
-            if matched.matcher_info["one_to_one"]:
-                valid = True
-            # Threshold of greater than 0.5 ensures one to one
-            if matched.matcher_info["iou_threshold"] > 0.5:
-                valid = True
-
-        return valid
 
     def _compute(self, data: Matched):
         """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer
@@ -104,46 +98,47 @@ class DivisionMetrics(Metric):
             for fb, matched_data in div_annotations.items()
         }
 
+    def _get_mbc(self, gt_div_count, tp_division_count, fp_division_count) -> float:
+        """Computes Mitotic Branching Correctness and returns nan if there are no gt
+        divisions and no false positives
+
+        Args:
+            gt_div_count (int): Total number of gt divisions
+            tp_division_count (int): Total number of tp divisions
+            fp_division_count (int): Total number of fp divisions
+
+        Returns:
+            float: Mitotic branching correctness
+        """
+        if gt_div_count + fp_division_count == 0:
+            return np.nan
+        return tp_division_count / (fp_division_count + gt_div_count)
+
     def _calculate_metrics(self, g_gt, g_pred):
+        gt_div_count = len(g_gt.get_divisions())
+        pred_div_count = len(g_pred.get_divisions())
         tp_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.TP_DIV))
         fn_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.FN_DIV))
         fp_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.FP_DIV))
         wc_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.WC_DIV))
 
-        try:
-            recall = tp_division_count / (
-                tp_division_count + fn_division_count + wc_division_count
+        if gt_div_count == 0:
+            logger.warning(
+                "No ground truth divisions present. Metrics may return np.nan"
             )
-        except ZeroDivisionError:
-            recall = 0
 
-        try:
-            precision = tp_division_count / (
-                tp_division_count + fp_division_count + wc_division_count
-            )
-        except ZeroDivisionError:
-            precision = 0
-
-        try:
-            f1 = 2 * (recall * precision) / (recall + precision)
-        except ZeroDivisionError:
-            f1 = 0
-
-        try:
-            mbc = tp_division_count / (
-                tp_division_count
-                + fn_division_count
-                + fp_division_count
-                + wc_division_count
-            )
-        except ZeroDivisionError:
-            mbc = 0
+        recall = self._get_recall(tp_division_count, gt_div_count)
+        precision = self._get_precision(tp_division_count, pred_div_count)
+        f1 = self._get_f1(recall, precision)
+        mbc = self._get_mbc(gt_div_count, tp_division_count, fp_division_count)
 
         return {
             "Division Recall": recall,
             "Division Precision": precision,
             "Division F1": f1,
             "Mitotic Branching Correctness": mbc,
+            "Total GT Divisions": gt_div_count,
+            "Total Predicted Divisions": pred_div_count,
             "True Positive Divisions": tp_division_count,
             "False Positive Divisions": fp_division_count,
             "False Negative Divisions": fn_division_count,

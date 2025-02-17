@@ -21,8 +21,7 @@
    :hidden:
    :caption: Track Errors
 
-   track_errors/nodes
-   track_errors/edges
+   track_errors/basic
    track_errors/divisions
    track_errors/ctc
 
@@ -31,6 +30,7 @@
    :hidden:
    :caption: Metrics
 
+   metrics/basic
    metrics/ctc
    metrics/track_overlap
    metrics/divisions

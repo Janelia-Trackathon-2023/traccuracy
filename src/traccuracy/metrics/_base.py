@@ -5,8 +5,13 @@ from abc import ABC, abstractmethod
 from importlib.metadata import version
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from traccuracy.matchers._base import Matched
+
+
+MATCHING_TYPES = ["one-to-one", "one-to-many", "many-to-one", "many-to-many"]
 
 
 class Metric(ABC):
@@ -16,12 +21,26 @@ class Metric(ABC):
     Kwargs should be specified in the constructor
     """
 
-    @abstractmethod
+    def __init__(self, valid_matches: list):
+        # Check that we have gotten a list of valid match types
+        if len(valid_matches) == 0:
+            raise TypeError("New metrics must provide a list of valid matching types")
+
+        for mtype in valid_matches:
+            if mtype not in MATCHING_TYPES:
+                raise ValueError(
+                    f"Matching type {mtype} is not supported. "
+                    "Choose from {MATCHING_TYPES}."
+                )
+
+        self.valid_match_types = valid_matches
+
     def _validate_matcher(self, matched: Matched) -> bool:
         """Verifies that the matched meets the assumptions of the metric
         Returns True if matcher is valid and False if matcher is not valid"""
-
-        raise NotImplementedError
+        if not hasattr(self, "valid_match_types"):
+            raise AttributeError("Metric subclass does not define valid_match_types")
+        return matched.matching_type in self.valid_match_types
 
     @abstractmethod
     def _compute(self, matched: Matched) -> dict:
@@ -75,8 +94,50 @@ class Metric(ABC):
 
     @property
     def info(self):
-        """Dictionary with Matcher name and any parameters"""
+        """Dictionary with Metric name and any parameters"""
         return {"name": self.__class__.__name__, **self.__dict__}
+
+    def _get_precision(self, numerator, denominator) -> float:
+        """Compute precision and return np.nan if denominator is 0
+
+        Args:
+            numerator (int): Typically TP
+            denominator (int): Typically TP + FP
+
+        Returns:
+            float: Precision
+        """
+        if denominator == 0:
+            return np.nan
+        return numerator / denominator
+
+    def _get_recall(self, numerator, denominator) -> float:
+        """Compute recall and return np.nan if denominator is 0
+
+        Args:
+            numerator (int): Typically TP
+            denominator (int): Typically TP + FN
+
+        Returns:
+            float: Recall
+        """
+        if denominator == 0:
+            return np.nan
+        return numerator / denominator
+
+    def _get_f1(self, precision, recall) -> float:
+        """Compute F1 and return np.nan if precision and recall both equal 0
+
+        Args:
+            precision (float): Precision score
+            recall (float): Recall score
+
+        Returns:
+            float: F1
+        """
+        if precision + recall == 0:
+            return np.nan
+        return 2 * (recall * precision) / (recall + precision)
 
 
 class Results:
