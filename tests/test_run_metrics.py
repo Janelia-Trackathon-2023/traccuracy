@@ -1,21 +1,25 @@
 import pytest
-from traccuracy import run_metrics
-from traccuracy.matchers._base import Matched, Matcher
-from traccuracy.metrics._base import Metric
 
 from tests.test_utils import get_movie_with_graph
+from traccuracy import run_metrics
+from traccuracy.matchers._base import Matcher
+from traccuracy.metrics._base import Metric
 
 
 class DummyMetric(Metric):
-    def compute(self, matched):
+    def __init__(self):
+        super().__init__(["one-to-one"])
+
+    def _compute(self, matched):
         return {}
 
 
 class DummyMetricParam(Metric):
     def __init__(self, param="value"):
+        super().__init__(["one-to-one"])
         self.param = param
 
-    def compute(self, matched):
+    def _compute(self, matched):
         return {}
 
 
@@ -27,7 +31,7 @@ class DummyMatcher(Matcher):
             self.mapping = []
 
     def _compute_mapping(self, gt_graph, pred_graph):
-        return Matched(gt_graph, pred_graph, self.mapping)
+        return self.mapping
 
 
 def test_run_metrics():
@@ -51,13 +55,14 @@ def test_run_metrics():
         run_metrics(graph, graph, DummyMatcher(), [DummyMetric(), "rando"])
 
     # One metric
-    results = run_metrics(graph, graph, DummyMatcher(mapping), [DummyMetric()])
-    assert isinstance(results, list)
+    matcher = DummyMatcher(mapping)
+    metric = DummyMetric()
+    results, matched = run_metrics(graph, graph, matcher, [metric])
     assert len(results) == 1
     assert results[0]["metric"]["name"] == "DummyMetric"
 
     # Duplicate metric with different params
-    results = run_metrics(
+    results, matched = run_metrics(
         graph,
         graph,
         DummyMatcher(mapping),

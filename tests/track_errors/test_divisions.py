@@ -1,7 +1,9 @@
-import networkx as nx
 import numpy as np
 import pytest
-from traccuracy import NodeAttr, TrackingGraph
+
+import tests.examples.graphs as ex_graphs
+from tests.test_utils import get_division_gap_close_graphs, get_division_graphs
+from traccuracy import NodeFlag, TrackingGraph
 from traccuracy.matchers import Matched
 from traccuracy.track_errors.divisions import (
     _classify_divisions,
@@ -11,224 +13,255 @@ from traccuracy.track_errors.divisions import (
     _get_succ_by_t,
 )
 
-from tests.test_utils import get_division_gap_close_graphs, get_division_graphs
 
+class TestStandardsDivisions:
+    """Test _classify_divisions against standard cases
 
-@pytest.fixture
-def g():
+    Tests are written for sparse annotations
     """
-    1_0 -- 1_1 -- 1_2 -- 1_3
-                         3_3
-    2_0 -- 2_1 -- 2_2 -<
-                         4_3
-    """
-    g = nx.DiGraph()
-    g.add_edge("1_0", "1_1")
-    g.add_edge("1_1", "1_2")
-    g.add_edge("1_2", "1_3")
 
-    g.add_edge("2_0", "2_1")
-    g.add_edge("2_1", "2_2")
+    @pytest.mark.parametrize("t_div,div_node", [(0, (1, 6)), (1, (2, 6)), (2, (3, 8))])
+    def test_good_div(self, t_div, div_node):
+        matched = ex_graphs.good_div(t_div)
+        _classify_divisions(matched)
 
-    # node 2 divides into 3 and 4 in frame 3
-    g.add_edge("2_2", "3_3")
-    g.add_edge("2_2", "4_3")
+        assert matched.gt_graph.nodes[div_node[0]].get(NodeFlag.TP_DIV) is True
+        assert matched.pred_graph.nodes[div_node[1]].get(NodeFlag.TP_DIV) is True
 
-    # Set node attributes
-    attrs = {}
-    for node in g.nodes:
-        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
-    nx.set_node_attributes(g, attrs)
+    @pytest.mark.parametrize("t_div,pred_div_node", [(0, 6), (1, 6)])
+    def test_fp_div(self, t_div, pred_div_node):
+        matched = ex_graphs.fp_div(t_div)
+        _classify_divisions(matched)
 
-    return g
+        pred_node_attr = matched.pred_graph.nodes[pred_div_node]
+        assert pred_node_attr.get(NodeFlag.FP_DIV) is True
 
+    @pytest.mark.parametrize("t_div,gt_div_node", [(0, 1), (1, 2)])
+    def test_one_child(self, t_div, gt_div_node):
+        matched = ex_graphs.one_child(t_div)
+        _classify_divisions(matched)
 
-def test_classify_divisions_tp(g):
-    # Define mapper assuming all nodes match
-    mapper = [(n, n) for n in g.nodes]
-    matched_data = Matched(TrackingGraph(g.copy()), TrackingGraph(g.copy()), mapper)
+        gt_node_attr = matched.gt_graph.nodes[gt_div_node]
+        assert gt_node_attr.get(NodeFlag.FN_DIV) is True
 
-    # Test true positive
-    _classify_divisions(matched_data)
+    @pytest.mark.parametrize("t_div,gt_div_node", [(0, 1), (1, 2)])
+    def test_no_children(self, t_div, gt_div_node):
+        matched = ex_graphs.no_children(t_div)
+        _classify_divisions(matched)
 
-    assert len(matched_data.gt_graph.get_nodes_with_flag(NodeAttr.FN_DIV)) == 0
-    assert len(matched_data.pred_graph.get_nodes_with_flag(NodeAttr.FP_DIV)) == 0
-    assert NodeAttr.TP_DIV in matched_data.gt_graph.nodes()["2_2"]
-    assert NodeAttr.TP_DIV in matched_data.pred_graph.nodes()["2_2"]
+        gt_node_attr = matched.gt_graph.nodes[gt_div_node]
+        assert gt_node_attr.get(NodeFlag.FN_DIV) is True
 
-    # Check division flag
-    assert matched_data.gt_graph.division_annotations
-    assert matched_data.pred_graph.division_annotations
+    @pytest.mark.parametrize("t_div,gt_div_node,pred_div_node", [(0, 1, 8), (1, 2, 7)])
+    def test_wrong_child(self, t_div, gt_div_node, pred_div_node):
+        matched = ex_graphs.wrong_child(t_div)
+        _classify_divisions(matched)
 
+        gt_node_attr = matched.gt_graph.nodes[gt_div_node]
+        assert gt_node_attr.get(NodeFlag.WC_DIV) is True
 
-def test_classify_divisions_fp(g):
-    """
-                         5_3
-    1_0 -- 1_1 -- 1_2 -<
-                         1_3
-                         3_3
-    2_0 -- 2_1 -- 2_2 -<
-                         4_3
-    """
-    h = g.copy()
-    # Add false positive division edge
-    h.add_edge("1_2", "5_3")
-    nx.set_node_attributes(h, {"5_3": {"t": 3, "x": 0, "y": 0}})
-    mapper = [(n, n) for n in h.nodes]
+        pred_node_attr = matched.pred_graph.nodes[pred_div_node]
+        assert pred_node_attr.get(NodeFlag.WC_DIV) is True
 
-    matched_data = Matched(TrackingGraph(g), TrackingGraph(h), mapper)
+    @pytest.mark.parametrize("t_div,gt_div_node,pred_div_node", [(0, 1, 6), (1, 2, 6)])
+    def test_wrong_children(self, t_div, gt_div_node, pred_div_node):
+        matched = ex_graphs.wrong_children(t_div)
+        _classify_divisions(matched)
 
-    _classify_divisions(matched_data)
+        gt_node_attr = matched.gt_graph.nodes[gt_div_node]
+        assert gt_node_attr.get(NodeFlag.WC_DIV) is True
 
-    assert len(matched_data.gt_graph.get_nodes_with_flag(NodeAttr.FN_DIV)) == 0
-    assert NodeAttr.FP_DIV in matched_data.pred_graph.nodes()["1_2"]
-    assert NodeAttr.TP_DIV in matched_data.gt_graph.nodes()["2_2"]
-    assert NodeAttr.TP_DIV in matched_data.pred_graph.nodes()["2_2"]
+        pred_node_attr = matched.pred_graph.nodes[pred_div_node]
+        assert pred_node_attr.get(NodeFlag.WC_DIV) is True
 
 
-def test_classify_divisions_fn(g):
-    """
-    1_0 -- 1_1 -- 1_2 -- 1_3
-    2_0 -- 2_1 -- 2_2
-    """
-    # Remove daughters to create false negative
-    h = g.copy()
-    h.remove_nodes_from(["3_3", "4_3"])
-    mapper = [(n, n) for n in h.nodes]
+class Test_get_pred_by_t:
+    g = ex_graphs.basic_graph()
 
-    matched_data = Matched(TrackingGraph(g), TrackingGraph(h), mapper)
+    def test_predecessor_available(self):
+        start_node = 3
+        delta = 2
+        node = _get_pred_by_t(self.g, start_node, delta)
+        assert node == 1
 
-    _classify_divisions(matched_data)
-
-    assert len(matched_data.pred_graph.get_nodes_with_flag(NodeAttr.FP_DIV)) == 0
-    assert len(matched_data.gt_graph.get_nodes_with_flag(NodeAttr.TP_DIV)) == 0
-    assert NodeAttr.FN_DIV in matched_data.gt_graph.nodes()["2_2"]
+    def test_no_predecessor(self):
+        start_node = 2
+        delta = 2
+        node = _get_pred_by_t(self.g, start_node, delta)
+        assert node is None
 
 
-@pytest.fixture
-def straight_graph():
-    g = nx.DiGraph()
-    for t in range(2, 10):
-        g.add_edge(f"1_{t}", f"1_{t+1}")
+class Test_get_succ_by_t:
+    g = ex_graphs.basic_division(2)
 
-    # Set node attributes
-    attrs = {}
-    for node in g.nodes:
-        attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
-    nx.set_node_attributes(g, attrs)
+    def across_division(self):
+        # Return none if looking across division
+        start_node = 3
+        delta = 2
+        succ = _get_succ_by_t(self.g, start_node, delta)
+        assert succ is None
 
-    return g
+    def valid_succ(self):
+        # Find 2 frames forward with valid node
+        start_node = 1
+        delta = 2
+        succ = _get_succ_by_t(self.g, start_node, delta)
+        assert succ == 3
 
-
-def test__get_pred_by_t(straight_graph):
-    # Linear graph with node id 1 from frame 2-10
-    g = TrackingGraph(straight_graph)
-
-    # Predecessor available
-    start_frame = 10
-    target_frame = 5
-    node = _get_pred_by_t(g, f"1_{start_frame}", start_frame - target_frame)
-    assert node == f"1_{target_frame}"
-
-    # Predecessor does not exist
-    start_frame = 10
-    target_frame = 1
-    node = _get_pred_by_t(g, f"1_{start_frame}", start_frame - target_frame)
-    assert node is None
+    def no_succ(self):
+        # Forward without valid node returns None
+        start_node = 4
+        delta = 1
+        succ = _get_succ_by_t(self.g, start_node, delta)
+        assert succ is None
 
 
-def test__get_succ_by_t():
-    _, g2, _ = get_division_graphs()
-    g2 = TrackingGraph(g2)
+class TestStandardShifted:
+    """Test correct_shifted_divisions against standard shifted cases"""
 
-    # Find 2 frames forward correctly
-    start_node = "2_2"
-    delta_t = 2
-    end_node = "2_4"
-    node = _get_succ_by_t(g2, start_node, delta_t)
-    assert node == end_node
+    @pytest.mark.parametrize("n_frames", [1, 2])
+    @pytest.mark.parametrize(
+        "matched, gt_node, pred_node",
+        [(ex_graphs.div_1early_end(), 2, 9), (ex_graphs.div_1early_mid(), 3, 9)],
+        ids=["div_1early_end", "div_1early_mid"],
+    )
+    def test_div_1early(self, n_frames, matched, gt_node, pred_node):
+        _classify_divisions(matched)
+        shifted = _correct_shifted_divisions(matched, n_frames=n_frames)
 
-    # 3 frames forward returns None
-    start_node = "2_2"
-    delta_t = 3
-    end_node = None
-    node = _get_succ_by_t(g2, start_node, delta_t)
-    assert node == end_node
+        attrs = shifted.gt_graph.nodes[gt_node]
+        assert attrs.get(NodeFlag.TP_DIV) is True
+        assert NodeFlag.FN_DIV not in attrs
 
+        attrs = shifted.pred_graph.nodes[pred_node]
+        assert attrs.get(NodeFlag.TP_DIV) is True
+        assert NodeFlag.FP_DIV not in attrs
 
-class Test_correct_shifted_divisions:
-    def test_no_change(self):
-        # Early division in gt
-        g_pred, g_gt, mapper = get_division_graphs()
-        g_gt.nodes["1_1"][NodeAttr.FN_DIV] = True
-        g_pred.nodes["1_3"][NodeAttr.FP_DIV] = True
+    @pytest.mark.parametrize("n_frames", [1, 3])
+    @pytest.mark.parametrize(
+        "matched, gt_node, pred_node",
+        [(ex_graphs.div_2early_end(), 3, 8), (ex_graphs.div_2early_mid(), 4, 8)],
+        ids=["div_2early_end", "div_2early_mid"],
+    )
+    def test_div_2early(self, n_frames, matched, gt_node, pred_node):
+        _classify_divisions(matched)
+        shifted = _correct_shifted_divisions(matched, n_frames=n_frames)
 
-        matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
+        if n_frames == 1:  # Not corrected
+            attrs = shifted.gt_graph.nodes[gt_node]
+            assert attrs.get(NodeFlag.FN_DIV) is True
 
-        # buffer of 1, no change
-        new_matched = _correct_shifted_divisions(matched_data, n_frames=1)
-        ng_pred = new_matched.pred_graph
-        ng_gt = new_matched.gt_graph
+            attrs = shifted.pred_graph.nodes[pred_node]
+            assert attrs.get(NodeFlag.FP_DIV) is True
+        elif n_frames == 3:  # corrected
+            attrs = shifted.gt_graph.nodes[gt_node]
+            assert attrs.get(NodeFlag.TP_DIV) is True
+            assert NodeFlag.FN_DIV not in attrs
 
-        assert ng_pred.nodes()["1_3"][NodeAttr.FP_DIV] is True
-        assert ng_gt.nodes()["1_1"][NodeAttr.FN_DIV] is True
-        assert len(ng_gt.get_nodes_with_flag(NodeAttr.TP_DIV)) == 0
+            attrs = shifted.pred_graph.nodes[pred_node]
+            assert attrs.get(NodeFlag.TP_DIV) is True
+            assert NodeFlag.FP_DIV not in attrs
 
-    def test_fn_early(self):
-        # Early division in gt
-        g_pred, g_gt, mapper = get_division_graphs()
-        g_gt.nodes["1_1"][NodeAttr.FN_DIV] = True
-        g_pred.nodes["1_3"][NodeAttr.FP_DIV] = True
+    @pytest.mark.parametrize("n_frames", [1, 2])
+    @pytest.mark.parametrize(
+        "matched, gt_node, pred_node",
+        [(ex_graphs.div_1late_end(), 1, 11), (ex_graphs.div_1late_mid(), 2, 11)],
+        ids=["div_1late_end", "div_1late_mid"],
+    )
+    def test_div_1late(self, n_frames, matched, gt_node, pred_node):
+        _classify_divisions(matched)
+        shifted = _correct_shifted_divisions(matched, n_frames=n_frames)
 
-        matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
+        attrs = shifted.gt_graph.nodes[gt_node]
+        assert attrs.get(NodeFlag.TP_DIV) is True
+        assert NodeFlag.FN_DIV not in attrs
 
-        # buffer of 3, corrections
-        new_matched = _correct_shifted_divisions(matched_data, n_frames=3)
-        ng_pred = new_matched.pred_graph
-        ng_gt = new_matched.gt_graph
+        attrs = shifted.pred_graph.nodes[pred_node]
+        assert attrs.get(NodeFlag.TP_DIV) is True
+        assert NodeFlag.FP_DIV not in attrs
 
-        assert ng_pred.nodes()["1_3"][NodeAttr.FP_DIV] is False
-        assert ng_gt.nodes()["1_1"][NodeAttr.FN_DIV] is False
-        assert ng_pred.nodes()["1_3"][NodeAttr.TP_DIV] is True
-        assert ng_gt.nodes()["1_1"][NodeAttr.TP_DIV] is True
+    @pytest.mark.parametrize("n_frames", [1, 3])
+    @pytest.mark.parametrize(
+        "matched, gt_node, pred_node",
+        [(ex_graphs.div_2late_end(), 1, 12), (ex_graphs.div_2late_mid(), 2, 12)],
+        ids=["div_2late_end", "div_2late_mid"],
+    )
+    def test_div_2late(self, n_frames, matched, gt_node, pred_node):
+        _classify_divisions(matched)
+        shifted = _correct_shifted_divisions(matched, n_frames=n_frames)
 
-    def test_fp_early(self):
-        # Early division in pred
-        g_gt, g_pred, mapper = get_division_graphs()
-        g_pred.nodes["1_1"][NodeAttr.FP_DIV] = True
-        g_gt.nodes["1_3"][NodeAttr.FN_DIV] = True
+        if n_frames == 1:  # Not corrected
+            attrs = shifted.gt_graph.nodes[gt_node]
+            assert attrs.get(NodeFlag.FN_DIV) is True
 
-        matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
+            attrs = shifted.pred_graph.nodes[pred_node]
+            assert attrs.get(NodeFlag.FP_DIV) is True
+        elif n_frames == 3:  # corrected
+            attrs = shifted.gt_graph.nodes[gt_node]
+            assert attrs.get(NodeFlag.TP_DIV) is True
+            assert NodeFlag.FN_DIV not in attrs
 
-        # buffer of 3, corrections
-        new_matched = _correct_shifted_divisions(matched_data, n_frames=3)
-        ng_pred = new_matched.pred_graph
-        ng_gt = new_matched.gt_graph
+            attrs = shifted.pred_graph.nodes[pred_node]
+            assert attrs.get(NodeFlag.TP_DIV) is True
+            assert NodeFlag.FP_DIV not in attrs
 
-        assert ng_pred.nodes()["1_1"][NodeAttr.FP_DIV] is False
-        assert ng_gt.nodes()["1_3"][NodeAttr.FN_DIV] is False
-        assert ng_pred.nodes()["1_1"][NodeAttr.TP_DIV] is True
-        assert ng_gt.nodes()["1_3"][NodeAttr.TP_DIV] is True
+    def test_minimal_matching(self):
+        matched = ex_graphs.div_shift_min_match()
+        _classify_divisions(matched)
+        shifted = _correct_shifted_divisions(matched, n_frames=1)
+
+        attrs = shifted.gt_graph.nodes[2]
+        assert attrs.get(NodeFlag.TP_DIV) is True
+        assert NodeFlag.FN_DIV not in attrs
+
+        attrs = shifted.pred_graph.nodes[11]
+        assert attrs.get(NodeFlag.TP_DIV) is True
+        assert NodeFlag.FP_DIV not in attrs
+
+    @pytest.mark.parametrize(
+        "matched",
+        [
+            ex_graphs.div_shift_bad_match_pred(),
+            ex_graphs.div_shift_bad_match_daughter(),
+        ],
+        ids=["pred", "daughters"],
+    )
+    def test_bad_matching(self, matched):
+        _classify_divisions(matched)
+        shifted = _correct_shifted_divisions(matched, n_frames=1)
+
+        # No correction of shifted divisions b/c matching criteria not met
+        attrs = shifted.gt_graph.nodes[2]
+        assert attrs.get(NodeFlag.TP_DIV) is None
+        assert attrs.get(NodeFlag.FN_DIV) is True
+
+        attrs = shifted.pred_graph.nodes[11]
+        assert attrs.get(NodeFlag.TP_DIV) is None
+        assert attrs.get(NodeFlag.FP_DIV) is True
 
 
 def test_evaluate_division_events():
-    g_gt, g_pred, mapper = get_division_graphs()
-    frame_buffer = (0, 1, 2)
+    g_gt, g_pred, map_gt, map_pred = get_division_graphs()
+    mapper = list(zip(map_gt, map_pred))
+    frame_buffer = 2
 
-    matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
+    matched_data = Matched(
+        TrackingGraph(g_gt), TrackingGraph(g_pred), mapper, {"name": "DummyMatcher"}
+    )
 
-    results = _evaluate_division_events(matched_data, frame_buffer=frame_buffer)
+    results = _evaluate_division_events(matched_data, max_frame_buffer=frame_buffer)
 
     assert np.all([isinstance(k, int) for k in results.keys()])
 
 
 def test_gap_close_divisions():
-    g_gt, g_pred, mapper = get_division_gap_close_graphs()
+    g_gt, g_pred, gt_mapped, pred_mapped = get_division_gap_close_graphs()
+    mapper = list(zip(gt_mapped, pred_mapped))
     matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
     _classify_divisions(matched_data)
 
     # missing gap close div edge so FN DIV
-    assert g_gt.nodes["1_1"][NodeAttr.FN_DIV]
+    assert g_gt.nodes["1_1"][NodeFlag.FN_DIV]
 
     # fix division, assert it's identified correctly
     g_pred.remove_node("2_2")
@@ -236,8 +269,8 @@ def test_gap_close_divisions():
     # mapper doesn't need to change as removed node was always missing
     matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
     _classify_divisions(matched_data)
-    assert g_gt.nodes["1_1"][NodeAttr.TP_DIV]
-    assert g_pred.nodes["1_1"][NodeAttr.TP_DIV]
+    assert g_gt.nodes["1_1"][NodeFlag.TP_DIV]
+    assert g_pred.nodes["1_1"][NodeFlag.TP_DIV]
 
     g_gt, g_pred, mapper = get_division_gap_close_graphs()
     # remove gt division
@@ -246,4 +279,4 @@ def test_gap_close_divisions():
     matched_data = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper)
     _classify_divisions(matched_data)
     # assert fp division classified correctly
-    assert g_pred.nodes["1_1"][NodeAttr.FP_DIV]
+    assert g_pred.nodes["1_1"][NodeFlag.FP_DIV]

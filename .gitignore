@@ -1,3 +1,6 @@
+docs/dest
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -65,6 +68,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/jupyter_execute
 
 # PyBuilder
 target/

@@ -1,8 +1,15 @@
+import glob
 import os
+from pathlib import Path
 
+import numpy as np
 import pandas as pd
+import pytest
+import tifffile
+from numpy.testing import assert_array_equal
+
 from traccuracy._tracking_graph import TrackingGraph
-from traccuracy.loaders import _ctc
+from traccuracy.loaders import _ctc, _load_tiffs
 
 
 def test_ctc_to_graph():
@@ -102,3 +109,20 @@ def test_load_data_no_track_path():
     track_data = _ctc.load_ctc_data(data_dir)
     assert isinstance(track_data, TrackingGraph)
     assert len(track_data.segmentation) == 92
+
+
+def test_load_tiffs_float_data(tmp_path):
+    test_dir = os.path.abspath(__file__)
+    data_dir = os.path.abspath(
+        os.path.join(test_dir, "../../../examples/sample-data/Fluo-N2DL-HeLa/01_RES/")
+    )
+
+    files = glob.glob(f"{data_dir}/*.tif*")
+    for file in files:
+        arr = tifffile.imread(file).astype(np.float64)
+        tifffile.imwrite(tmp_path / Path(file).name, arr)
+    with pytest.warns(UserWarning, match="Segmentation has float64: casting to uint64"):
+        casted_seg = _load_tiffs(tmp_path)
+    orig_seg = _load_tiffs(data_dir)
+    assert casted_seg.dtype == np.uint64
+    assert_array_equal(casted_seg.astype(orig_seg.dtype), orig_seg)

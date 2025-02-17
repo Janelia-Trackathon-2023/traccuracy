@@ -32,17 +32,24 @@ as the parent node of the early division. We repeat the process for finding daug
 of the early division, by advancing along the graph to find nodes in the same frame
 as the late division daughters.
 """
+
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
-from traccuracy._tracking_graph import NodeAttr
+import numpy as np
+
+from traccuracy._tracking_graph import NodeFlag
+from traccuracy.matchers._base import Matched
 from traccuracy.track_errors.divisions import _evaluate_division_events
 
 from ._base import Metric
 
 if TYPE_CHECKING:
     from traccuracy.matchers import Matched
+
+logger = logging.getLogger(__name__)
 
 
 class DivisionMetrics(Metric):
@@ -57,16 +64,18 @@ class DivisionMetrics(Metric):
         3, 734559 (2021).
 
     Args:
-        frame_buffer (tuple(int), optional): Tuple of integers. Value used as n_frames
-            to tolerate in correct_shifted_divisions. Defaults to (0).
+        max_frame_buffer (int, optional): Maximum value of frame buffer to use in correcting
+            shifted divisions. Divisions will be evaluated for all integer values of frame
+            buffer between 0 and max_frame_buffer
     """
 
-    needs_one_to_one = True
+    def __init__(self, max_frame_buffer=0):
+        valid_matching_types = ["one-to-one"]
+        super().__init__(valid_matching_types)
 
-    def __init__(self, frame_buffer=(0,)):
-        self.frame_buffer = frame_buffer
+        self.frame_buffer = max_frame_buffer
 
-    def compute(self, data: Matched):
+    def _compute(self, data: Matched):
         """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer
 
         Args:
@@ -78,7 +87,7 @@ class DivisionMetrics(Metric):
         """
         div_annotations = _evaluate_division_events(
             data,
-            frame_buffer=self.frame_buffer,
+            max_frame_buffer=self.frame_buffer,
         )
 
         return {
@@ -89,45 +98,49 @@ class DivisionMetrics(Metric):
             for fb, matched_data in div_annotations.items()
         }
 
+    def _get_mbc(self, gt_div_count, tp_division_count, fp_division_count) -> float:
+        """Computes Mitotic Branching Correctness and returns nan if there are no gt
+        divisions and no false positives
+
+        Args:
+            gt_div_count (int): Total number of gt divisions
+            tp_division_count (int): Total number of tp divisions
+            fp_division_count (int): Total number of fp divisions
+
+        Returns:
+            float: Mitotic branching correctness
+        """
+        if gt_div_count + fp_division_count == 0:
+            return np.nan
+        return tp_division_count / (fp_division_count + gt_div_count)
+
     def _calculate_metrics(self, g_gt, g_pred):
-        tp_division_count = len(
-            g_gt.get_nodes_with_attribute(NodeAttr.TP_DIV, lambda x: x)
-        )
-        fn_division_count = len(
-            g_gt.get_nodes_with_attribute(NodeAttr.FN_DIV, lambda x: x)
-        )
-        fp_division_count = len(
-            g_pred.get_nodes_with_attribute(NodeAttr.FP_DIV, lambda x: x)
-        )
+        gt_div_count = len(g_gt.get_divisions())
+        pred_div_count = len(g_pred.get_divisions())
+        tp_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.TP_DIV))
+        fn_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.FN_DIV))
+        fp_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.FP_DIV))
+        wc_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.WC_DIV))
 
-        try:
-            recall = tp_division_count / (tp_division_count + fn_division_count)
-        except ZeroDivisionError:
-            recall = 0
-
-        try:
-            precision = tp_division_count / (tp_division_count + fp_division_count)
-        except ZeroDivisionError:
-            precision = 0
-
-        try:
-            f1 = 2 * (recall * precision) / (recall + precision)
-        except ZeroDivisionError:
-            f1 = 0
-
-        try:
-            mbc = tp_division_count / (
-                tp_division_count + fn_division_count + fp_division_count
+        if gt_div_count == 0:
+            logger.warning(
+                "No ground truth divisions present. Metrics may return np.nan"
             )
-        except ZeroDivisionError:
-            mbc = 0
+
+        recall = self._get_recall(tp_division_count, gt_div_count)
+        precision = self._get_precision(tp_division_count, pred_div_count)
+        f1 = self._get_f1(recall, precision)
+        mbc = self._get_mbc(gt_div_count, tp_division_count, fp_division_count)
 
         return {
             "Division Recall": recall,
             "Division Precision": precision,
             "Division F1": f1,
             "Mitotic Branching Correctness": mbc,
+            "Total GT Divisions": gt_div_count,
+            "Total Predicted Divisions": pred_div_count,
             "True Positive Divisions": tp_division_count,
             "False Positive Divisions": fp_division_count,
             "False Negative Divisions": fn_division_count,
+            "Wrong Children Divisions": wc_division_count,
         }

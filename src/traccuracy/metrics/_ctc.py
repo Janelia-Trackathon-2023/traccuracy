@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from traccuracy._tracking_graph import EdgeAttr, NodeAttr
+from traccuracy._tracking_graph import EdgeFlag, NodeFlag
+from traccuracy.matchers._base import Matched
 from traccuracy.track_errors._ctc import evaluate_ctc_events
 
 from ._base import Metric
@@ -12,7 +13,6 @@ if TYPE_CHECKING:
 
 
 class AOGMMetrics(Metric):
-    supports_many_to_one = True
 
     def __init__(
         self,
@@ -23,6 +23,9 @@ class AOGMMetrics(Metric):
         edge_fn_weight=1,
         edge_ws_weight=1,
     ):
+        valid_matching_types = ["one-to-one", "many-to-one"]
+        super().__init__(valid_matching_types)
+
         self.v_weights = {
             "ns": vertex_ns_weight,
             "fp": vertex_fp_weight,
@@ -34,18 +37,18 @@ class AOGMMetrics(Metric):
             "ws": edge_ws_weight,
         }
 
-    def compute(self, data: Matched):
+    def _compute(self, data: Matched):
         evaluate_ctc_events(data)
 
         vertex_error_counts = {
-            "ns": len(data.pred_graph.get_nodes_with_flag(NodeAttr.NON_SPLIT)),
-            "fp": len(data.pred_graph.get_nodes_with_flag(NodeAttr.FALSE_POS)),
-            "fn": len(data.gt_graph.get_nodes_with_flag(NodeAttr.FALSE_NEG)),
+            "ns": len(data.pred_graph.get_nodes_with_flag(NodeFlag.NON_SPLIT)),
+            "fp": len(data.pred_graph.get_nodes_with_flag(NodeFlag.CTC_FALSE_POS)),
+            "fn": len(data.gt_graph.get_nodes_with_flag(NodeFlag.CTC_FALSE_NEG)),
         }
         edge_error_counts = {
-            "ws": len(data.pred_graph.get_edges_with_flag(EdgeAttr.WRONG_SEMANTIC)),
-            "fp": len(data.pred_graph.get_edges_with_flag(EdgeAttr.FALSE_POS)),
-            "fn": len(data.gt_graph.get_edges_with_flag(EdgeAttr.FALSE_NEG)),
+            "ws": len(data.pred_graph.get_edges_with_flag(EdgeFlag.WRONG_SEMANTIC)),
+            "fp": len(data.pred_graph.get_edges_with_flag(EdgeFlag.CTC_FALSE_POS)),
+            "fn": len(data.gt_graph.get_edges_with_flag(EdgeFlag.CTC_FALSE_NEG)),
         }
         error_sum = get_weighted_error_sum(
             vertex_error_counts,
@@ -86,7 +89,7 @@ class CTCMetrics(AOGMMetrics):
             edge_ws_weight=edge_weight_ws,
         )
 
-    def compute(self, data: Matched):
+    def _compute(self, data: Matched):
         # AOGM-0 is the cost of creating the gt graph from scratch
         gt_graph = data.gt_graph.graph
         n_nodes = gt_graph.number_of_nodes()
@@ -98,7 +101,7 @@ class CTCMetrics(AOGMMetrics):
                 + f" {n_edges} edges with {self.v_weights['fn']} vertex FN weight and"
                 + f" {self.e_weights['fn']} edge FN weight"
             )
-        errors = super().compute(data)
+        errors = super()._compute(data)
         aogm = errors["AOGM"]
         tra = 1 - min(aogm, aogm_0) / aogm_0
         errors["TRA"] = tra

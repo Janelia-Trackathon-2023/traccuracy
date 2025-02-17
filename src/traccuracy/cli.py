@@ -57,7 +57,7 @@ def run_ctc(
             f"Only cell tracking challenge (ctc) loader is available, but {loader} was passed."
         )
     gt_data, pred_data = load_all_ctc(gt_dir, pred_dir, gt_track_path, pred_track_path)
-    result = run_metrics(gt_data, pred_data, CTCMatcher(), [CTCMetrics()])
+    result, matched = run_metrics(gt_data, pred_data, CTCMatcher(), [CTCMetrics()])
     with open(out_path, "w") as fp:
         json.dump(result, fp)
     logger.info(f'TRA: {result[0]["results"]["TRA"]}')
@@ -117,7 +117,7 @@ def run_aogm(
             f"Only cell tracking challenge (ctc) loader is available, but {loader} was passed."
         )
     gt_data, pred_data = load_all_ctc(gt_dir, pred_dir, gt_track_path, pred_track_path)
-    result = run_metrics(
+    result, matched = run_metrics(
         gt_data,
         pred_data,
         CTCMatcher(),
@@ -183,11 +183,11 @@ def run_divisions_on_iou(
         )
     gt_data, pred_data = load_all_ctc(gt_dir, pred_dir, gt_track_path, pred_track_path)
     frame_buffer_tuple = tuple(range(0, frame_buffer + 1))
-    result = run_metrics(
+    result, matched = run_metrics(
         gt_data,
         pred_data,
         IOUMatcher(iou_threshold=match_threshold),
-        [DivisionMetrics(frame_buffer=frame_buffer_tuple)],
+        [DivisionMetrics(max_frame_buffer=frame_buffer_tuple)],
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)
@@ -238,11 +238,11 @@ def run_divisions_on_ctc(
         )
     gt_data, pred_data = load_all_ctc(gt_dir, pred_dir, gt_track_path, pred_track_path)
     frame_buffer_tuple = tuple(range(0, frame_buffer + 1))
-    result = run_metrics(
+    result, matched = run_metrics(
         gt_data,
         pred_data,
         CTCMatcher(),
-        [DivisionMetrics(frame_buffer=frame_buffer_tuple)],
+        [DivisionMetrics(max_frame_buffer=frame_buffer_tuple)],
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)

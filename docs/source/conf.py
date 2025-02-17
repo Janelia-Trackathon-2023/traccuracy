@@ -53,6 +53,7 @@ extensions = [
     "nbsphinx",  # add notebooks to docs
     "nbsphinx_link",  # add notebooks to docs
     "sphinx_click",  # auto document cli
+    "jupyter_sphinx",  # executable code blocks in rst
 ]
 
 napoleon_google_docstring = True
@@ -83,9 +84,16 @@ autoapi_ignore = ["*/cli.py"]
 
 # -- Nbsphinx extension ------------------------------------------------------
 
-# Disable nbsphinx extension from running notebooks
-nbsphinx_execute = "never"
+nbsphinx_execute = "auto"
 exclude_patterns = ["_build", "**.ipynb_checkpoints"]
+
+nbsphinx_custom_formats = {
+    ".pct.py": ["jupytext.reads", {"fmt": "py:percent"}],
+}
+
+# Import Matplotlib to avoid this message in notebooks:
+# "Matplotlib is building the font cache; this may take a moment."
+import matplotlib.pyplot  # noqa
 
 # -- Options for HTML output -------------------------------------------------
 

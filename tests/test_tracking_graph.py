@@ -1,8 +1,10 @@
 from collections import Counter
 
 import networkx as nx
+import numpy as np
 import pytest
-from traccuracy import EdgeAttr, NodeAttr, TrackingGraph
+
+from traccuracy import EdgeFlag, NodeFlag, TrackingGraph
 
 
 @pytest.fixture
@@ -124,84 +126,62 @@ def test_constructor(nx_comp1):
 
     # raise AssertionError if frame key not present or ValueError if overlaps
     # with reserved values
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match=r"Frame key .* not present for node .*."):
         TrackingGraph(nx_comp1, frame_key="f")
     with pytest.raises(ValueError):
-        TrackingGraph(nx_comp1, frame_key=NodeAttr.FALSE_NEG)
+        TrackingGraph(nx_comp1, frame_key=NodeFlag.CTC_FALSE_NEG)
     with pytest.raises(AssertionError):
         TrackingGraph(nx_comp1, location_keys=["x", "y", "z"])
     with pytest.raises(ValueError):
-        TrackingGraph(nx_comp1, location_keys=["x", NodeAttr.FALSE_NEG])
+        TrackingGraph(nx_comp1, location_keys=["x", NodeFlag.CTC_FALSE_NEG])
+
+
+def test_constructor_seg(nx_comp1):
+    # empty segmentation for now, until we get paired seg and graph examples
+    segmentation = np.zeros(shape=(5, 5, 5), dtype=np.uint16)
+    tracking_graph = TrackingGraph(nx_comp1, segmentation=segmentation)
+    assert tracking_graph.start_frame == 0
+    assert tracking_graph.end_frame == 4
+    assert tracking_graph.nodes_by_frame == {
+        0: {"1_0"},
+        1: {"1_1"},
+        2: {"1_2", "1_3"},
+        3: {"1_4"},
+    }
+
+    # check that it fails on non-int values
+    segmentation = segmentation.astype(np.float32)
+    with pytest.raises(
+        TypeError, match="Segmentation must have integer dtype, found float32"
+    ):
+        TrackingGraph(nx_comp1, segmentation=segmentation)
 
 
 def test_get_cells_by_frame(simple_graph):
-    assert simple_graph.get_nodes_in_frame(0) == ["1_0"]
-    assert Counter(simple_graph.get_nodes_in_frame(2)) == Counter(["1_2", "1_3"])
-    assert simple_graph.get_nodes_in_frame(5) == []
-
-
-def test_get_nodes_by_roi(simple_graph):
-    assert simple_graph.get_nodes_by_roi(t=(0, 1)) == ["1_0"]
-    assert Counter(simple_graph.get_nodes_by_roi(x=(1, None))) == Counter(
-        ["1_0", "1_1", "1_3", "1_4"]
-    )
-    assert Counter(simple_graph.get_nodes_by_roi(x=(None, 2), t=(1, None))) == Counter(
-        ["1_1", "1_2"]
-    )
-
-
-def test_get_location(nx_comp1):
-    graph1 = TrackingGraph(nx_comp1, location_keys=["x", "y"])
-    assert graph1.get_location("1_2") == [0, 1]
-    assert graph1.get_location("1_4") == [2, 1]
-    graph2 = TrackingGraph(nx_comp1, location_keys=["y", "x"])
-    assert graph2.get_location("1_2") == [1, 0]
-    assert graph2.get_location("1_4") == [1, 2]
+    assert Counter(simple_graph.nodes_by_frame[0]) == Counter({"1_0"})
+    assert Counter(simple_graph.nodes_by_frame[2]) == Counter(["1_2", "1_3"])
+    # Test non-existent frame
+    assert Counter(simple_graph.nodes_by_frame[5]) == Counter([])
 
 
 def test_get_nodes_with_flag(simple_graph):
-    assert simple_graph.get_nodes_with_flag(NodeAttr.TP_DIV) == ["1_1"]
-    assert simple_graph.get_nodes_with_flag(NodeAttr.FP_DIV) == []
+    assert Counter(simple_graph.get_nodes_with_flag(NodeFlag.TP_DIV)) == Counter(
+        ["1_1"]
+    )
+    assert Counter(simple_graph.get_nodes_with_flag(NodeFlag.FP_DIV)) == Counter([])
     with pytest.raises(ValueError):
         assert simple_graph.get_nodes_with_flag("is_tp_division")
 
 
 def test_get_edges_with_flag(simple_graph):
-    assert simple_graph.get_edges_with_flag(EdgeAttr.TRUE_POS) == [("1_0", "1_1")]
-    assert simple_graph.get_edges_with_flag(EdgeAttr.FALSE_NEG) == []
+    assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.TRUE_POS)) == Counter(
+        [("1_0", "1_1")]
+    )
+    assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.CTC_FALSE_NEG)) == Counter(
+        []
+    )
     with pytest.raises(ValueError):
         assert simple_graph.get_nodes_with_flag("is_tp")
-
-
-def test_get_nodes_with_attribute(simple_graph):
-    assert simple_graph.get_nodes_with_attribute("is_tp_division") == ["1_1"]
-    assert simple_graph.get_nodes_with_attribute("null") == []
-    assert simple_graph.get_nodes_with_attribute(
-        "is_tp_division", criterion=lambda x: x
-    ) == ["1_1"]
-    assert (
-        simple_graph.get_nodes_with_attribute(
-            "is_tp_division", criterion=lambda x: not x
-        )
-        == []
-    )
-    assert simple_graph.get_nodes_with_attribute("x", criterion=lambda x: x > 1) == [
-        "1_3",
-        "1_4",
-    ]
-    assert simple_graph.get_nodes_with_attribute(
-        "x", criterion=lambda x: x > 1, limit_to=["1_3"]
-    ) == [
-        "1_3",
-    ]
-    assert (
-        simple_graph.get_nodes_with_attribute(
-            "x", criterion=lambda x: x > 1, limit_to=["1_0"]
-        )
-        == []
-    )
-    with pytest.raises(KeyError):
-        simple_graph.get_nodes_with_attribute("x", limit_to=["5"])
 
 
 def test_get_divisions(complex_graph):
@@ -210,23 +190,6 @@ def test_get_divisions(complex_graph):
 
 def test_get_merges(merge_graph):
     assert merge_graph.get_merges() == ["3_2"]
-
-
-def test_get_preds(simple_graph, merge_graph):
-    # Division graph
-    assert simple_graph.get_preds("1_0") == []
-    assert simple_graph.get_preds("1_1") == ["1_0"]
-    assert simple_graph.get_preds("1_2") == ["1_1"]
-
-    # Merge graph
-    assert merge_graph.get_preds("3_3") == ["3_2"]
-    assert merge_graph.get_preds("3_2") == ["3_1", "3_5"]
-
-
-def test_get_succs(simple_graph):
-    assert simple_graph.get_succs("1_0") == ["1_1"]
-    assert Counter(simple_graph.get_succs("1_1")) == Counter(["1_2", "1_3"])
-    assert simple_graph.get_succs("1_2") == []
 
 
 def test_get_connected_components(complex_graph, nx_comp1, nx_comp2):
@@ -244,7 +207,26 @@ def test_get_connected_components(complex_graph, nx_comp1, nx_comp2):
     assert track2.graph.edges == nx_comp2.edges
 
 
-def test_get_and_set_node_attributes(simple_graph):
+def test_get_subgraph(simple_graph):
+    target_nodes = ("1_0", "1_1")
+    subgraph = simple_graph.get_subgraph(target_nodes)
+    assert len(subgraph.nodes) == 2
+    assert len(subgraph.edges) == 1
+    # test that nodes_by_flag dicts are maintained
+    assert Counter(subgraph.nodes_by_flag[NodeFlag.TP_DIV]) == Counter(["1_1"])
+    assert Counter(subgraph.edges_by_flag[EdgeFlag.TRUE_POS]) == Counter(
+        [("1_0", "1_1")]
+    )
+    # test that start and end frame are updated
+    assert subgraph.start_frame == 0
+    assert subgraph.end_frame == 2
+
+    # test empty target nodes
+    empty_graph = simple_graph.get_subgraph([])
+    assert Counter(empty_graph.nodes) == Counter([])
+
+
+def test_set_flag_on_node(simple_graph):
     assert simple_graph.nodes()["1_0"] == {"id": "1_0", "t": 0, "y": 1, "x": 1}
     assert simple_graph.nodes()["1_1"] == {
         "id": "1_1",
@@ -254,26 +236,106 @@ def test_get_and_set_node_attributes(simple_graph):
         "is_tp_division": True,
     }
 
-    simple_graph.set_node_attribute("1_0", NodeAttr.FALSE_POS, value=False)
+    simple_graph.set_flag_on_node("1_0", NodeFlag.CTC_FALSE_POS, value=True)
     assert simple_graph.nodes()["1_0"] == {
         "id": "1_0",
         "t": 0,
         "y": 1,
         "x": 1,
-        NodeAttr.FALSE_POS: False,
+        NodeFlag.CTC_FALSE_POS: True,
     }
+    assert "1_0" in simple_graph.nodes_by_flag[NodeFlag.CTC_FALSE_POS]
+
+    simple_graph.set_flag_on_node("1_0", NodeFlag.CTC_FALSE_POS, value=False)
+    assert simple_graph.nodes()["1_0"] == {
+        "id": "1_0",
+        "t": 0,
+        "y": 1,
+        "x": 1,
+        NodeFlag.CTC_FALSE_POS: False,
+    }
+    assert "1_0" not in simple_graph.nodes_by_flag[NodeFlag.CTC_FALSE_POS]
+
+    simple_graph.set_flag_on_all_nodes(NodeFlag.CTC_FALSE_POS, value=True)
+    for node in simple_graph.nodes:
+        assert simple_graph.nodes[node][NodeFlag.CTC_FALSE_POS] is True
+    assert Counter(simple_graph.nodes_by_flag[NodeFlag.CTC_FALSE_POS]) == Counter(
+        list(simple_graph.nodes())
+    )
+
+    simple_graph.set_flag_on_all_nodes(NodeFlag.CTC_FALSE_POS, value=False)
+    for node in simple_graph.nodes:
+        assert simple_graph.nodes[node][NodeFlag.CTC_FALSE_POS] is False
+    assert not simple_graph.nodes_by_flag[NodeFlag.CTC_FALSE_POS]
+
     with pytest.raises(ValueError):
-        simple_graph.set_node_attribute("1_0", "x", 2)
+        simple_graph.set_flag_on_node("1_0", "x", 2)
 
 
-def test_get_and_set_edge_attributes(simple_graph):
-    print(simple_graph.edges())
-    assert EdgeAttr.TRUE_POS not in simple_graph.edges()[("1_1", "1_3")]
+def test_remove_flag_from_node(simple_graph):
+    flag = NodeFlag.CTC_FALSE_POS
+    simple_graph.set_flag_on_all_nodes(flag)
 
-    simple_graph.set_edge_attribute(("1_1", "1_3"), EdgeAttr.TRUE_POS, value=False)
-    assert simple_graph.edges()[("1_1", "1_3")][EdgeAttr.TRUE_POS] is False
+    simple_graph.remove_flag_from_node("1_3", flag)
+    assert flag not in simple_graph.graph.nodes["1_3"]
+    assert flag not in simple_graph.nodes_by_flag[flag]
+
+    # Check that other nodes were unaffected
+    for node in ["1_0", "1_1", "1_2", "1_4"]:
+        assert flag in simple_graph.graph.nodes[node]
+        assert node in simple_graph.nodes_by_flag[flag]
+
+    # Error if flag not present
+    with pytest.raises(KeyError, match=r".* not present on node .*"):
+        simple_graph.remove_flag_from_node("1_3", NodeFlag.CTC_TRUE_POS)
+
+
+def test_set_flag_on_edge(simple_graph):
+    edge_id = ("1_1", "1_3")
+    assert EdgeFlag.TRUE_POS not in simple_graph.edges()[edge_id]
+
+    simple_graph.set_flag_on_edge(edge_id, EdgeFlag.TRUE_POS, value=True)
+    assert simple_graph.edges()[edge_id][EdgeFlag.TRUE_POS] is True
+    assert edge_id in simple_graph.edges_by_flag[EdgeFlag.TRUE_POS]
+
+    simple_graph.set_flag_on_edge(edge_id, EdgeFlag.TRUE_POS, value=False)
+    assert simple_graph.edges()[edge_id][EdgeFlag.TRUE_POS] is False
+    assert edge_id not in simple_graph.edges_by_flag[EdgeFlag.TRUE_POS]
+
+    simple_graph.set_flag_on_all_edges(EdgeFlag.CTC_FALSE_POS, value=True)
+    for edge in simple_graph.edges:
+        assert simple_graph.edges[edge][EdgeFlag.CTC_FALSE_POS] is True
+    assert Counter(simple_graph.edges_by_flag[EdgeFlag.CTC_FALSE_POS]) == Counter(
+        list(simple_graph.edges)
+    )
+
+    simple_graph.set_flag_on_all_edges(EdgeFlag.CTC_FALSE_POS, value=False)
+    for edge in simple_graph.edges:
+        assert simple_graph.edges[edge][EdgeFlag.CTC_FALSE_POS] is False
+    assert not simple_graph.edges_by_flag[EdgeFlag.CTC_FALSE_POS]
+
     with pytest.raises(ValueError):
-        simple_graph.set_edge_attribute(("1_1", "1_3"), "x", 2)
+        simple_graph.set_flag_on_edge(("1_1", "1_3"), "x", 2)
+
+
+def test_remove_flag_from_edge(simple_graph):
+    flag = EdgeFlag.CTC_FALSE_POS
+    simple_graph.set_flag_on_all_edges(flag)
+
+    # Check basic removal
+    edge = ("1_1", "1_3")
+    simple_graph.remove_flag_from_edge(edge, flag)
+    assert flag not in simple_graph.graph.edges[edge]
+    assert edge not in simple_graph.edges_by_flag[flag]
+
+    # Check other edges uneffected
+    for edge in [("1_0", "1_1"), ("1_1", "1_2"), ("1_3", "1_4")]:
+        assert flag in simple_graph.graph.edges[edge]
+        assert edge in simple_graph.edges_by_flag[flag]
+
+    # Error if flag not present
+    with pytest.raises(KeyError, match=r".* not present on edge .*"):
+        simple_graph.remove_flag_from_edge(("1_0", "1_1"), EdgeFlag.INTERTRACK_EDGE)
 
 
 def test_get_tracklets(simple_graph):

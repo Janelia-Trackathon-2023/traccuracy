@@ -2,14 +2,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import networkx as nx
-import numpy as np
 from tqdm import tqdm
 
 if TYPE_CHECKING:
     from traccuracy._tracking_graph import TrackingGraph
 
-from ._base import Matched, Matcher
+from ._base import Matcher
 from ._compute_overlap import get_labels_with_overlap
 
 
@@ -26,6 +24,9 @@ class CTCMatcher(Matcher):
     for complete details.
     """
 
+    # CTC can return many-to-one or one-to-one
+    _matching_type = None
+
     def _compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph):
         """Run ctc matching
 
@@ -37,7 +38,7 @@ class CTCMatcher(Matcher):
             traccuracy.matchers.Matched: Matched data object containing the CTC mapping
 
         Raises:
-            ValueError: GT and pred segmentations must be the same shape
+            ValueError: if GT and pred segmentations are None or are not the same shape
         """
         gt = gt_graph
         pred = pred_graph
@@ -46,11 +47,17 @@ class CTCMatcher(Matcher):
         G_gt, mask_gt = gt, gt.segmentation
         G_pred, mask_pred = pred, pred.segmentation
 
+        if mask_gt is None or mask_pred is None:
+            raise ValueError("Segmentation is None, cannot perform matching")
+
         if mask_gt.shape != mask_pred.shape:
             raise ValueError("Segmentation shapes must match between gt and pred")
 
-        mapping = []
+        mapping: list[tuple] = []
         # Get overlaps for each frame
+        if gt.start_frame is None or gt.end_frame is None:
+            return mapping
+
         for i, t in enumerate(
             tqdm(
                 range(gt.start_frame, gt.end_frame),
@@ -63,62 +70,33 @@ class CTCMatcher(Matcher):
             pred_frame_nodes = pred.nodes_by_frame[t]
 
             # get the labels for this frame
-            gt_labels = dict(
-                filter(
-                    lambda item: item[0] in gt_frame_nodes,
-                    nx.get_node_attributes(G_gt.graph, gt_label_key).items(),
-                )
-            )
-            gt_label_to_id = {v: k for k, v in gt_labels.items()}
+            gt_label_to_id = {
+                G_gt.graph.nodes[node][gt_label_key]: node
+                for node in gt_frame_nodes
+                if gt_label_key in G_gt.graph.nodes[node]
+            }
 
-            pred_labels = dict(
-                filter(
-                    lambda item: item[0] in pred_frame_nodes,
-                    nx.get_node_attributes(G_pred.graph, pred_label_key).items(),
-                )
-            )
-            pred_label_to_id = {v: k for k, v in pred_labels.items()}
+            pred_label_to_id = {
+                G_pred.graph.nodes[node][pred_label_key]: node
+                for node in pred_frame_nodes
+                if pred_label_key in G_pred.graph.nodes[node]
+            }
 
-            (
-                overlapping_gt_labels,
-                overlapping_pred_labels,
-                intersection,
-            ) = get_labels_with_overlap(gt_frame, pred_frame)
+            frame_map = match_frame_majority(gt_frame, pred_frame)
+            # Switch from segmentation ids to node ids
+            for gt_label, pred_label in frame_map:
+                mapping.append((gt_label_to_id[gt_label], pred_label_to_id[pred_label]))
 
-            for i in range(len(overlapping_gt_labels)):
-                gt_label = overlapping_gt_labels[i]
-                pred_label = overlapping_pred_labels[i]
-                # CTC metrics only match comp IDs to a single GT ID if there is majority overlap
-                if intersection[i] > 0.5:
-                    mapping.append(
-                        (gt_label_to_id[gt_label], pred_label_to_id[pred_label])
-                    )
-
-        return Matched(gt_graph, pred_graph, mapping)
+        return mapping
 
 
-def detection_test(gt_blob: np.ndarray, comp_blob: np.ndarray) -> int:
-    """Check if computed marker overlaps majority of the reference marker.
+def match_frame_majority(gt_frame, pred_frame):
+    mapping = []
+    overlaps = get_labels_with_overlap(gt_frame, pred_frame, overlap="iogt")
 
-    Given a reference marker and computer marker in original coordinates,
-    return True if the computed marker overlaps strictly more than half
-    of the reference marker's pixels, otherwise False.
+    for gt_label, pred_label, iogt in overlaps:
+        # CTC metrics only match comp IDs to a single GT ID if there is majority overlap
+        if iogt > 0.5:
+            mapping.append((gt_label, pred_label))
 
-    Parameters
-    ----------
-    gt_blob : np.ndarray
-        2D or 3D boolean mask representing the pixels of the ground truth
-        marker
-    comp_blob : np.ndarray
-        2D or 3D boolean mask representing the pixels of the computed
-        marker
-
-    Returns
-    -------
-    bool
-        True if computed marker majority overlaps reference marker, else False.
-    """
-    n_gt_pixels = np.sum(gt_blob)
-    intersection = np.logical_and(gt_blob, comp_blob)
-    comp_blob_matches_gt_blob = int(np.sum(intersection) > 0.5 * n_gt_pixels)
-    return comp_blob_matches_gt_blob
+    return mapping

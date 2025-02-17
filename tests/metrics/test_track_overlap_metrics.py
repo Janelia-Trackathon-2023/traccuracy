@@ -2,11 +2,11 @@ from copy import deepcopy
 
 import networkx as nx
 import pytest
-from traccuracy import TrackingGraph
-from traccuracy.matchers import Matched
-from traccuracy.metrics._track_overlap import TrackOverlapMetrics, _mapping_to_dict
 
 from tests.test_utils import get_gap_close_graphs
+from traccuracy import TrackingGraph
+from traccuracy.matchers import Matched
+from traccuracy.metrics._track_overlap import TrackOverlapMetrics
 
 
 def add_frame(tree):
@@ -155,13 +155,11 @@ def test_track_overlap_metrics(data, inverse) -> None:
         mapping = [(b, a) for a, b in mapping]
 
     matched = Matched(
-        TrackingGraph(g_gt),
-        TrackingGraph(g_pred),
-        mapping,
+        TrackingGraph(g_gt), TrackingGraph(g_pred), mapping, {"name": "DummyMatcher"}
     )
 
     metric = TrackOverlapMetrics()
-    results = metric.compute(matched)
+    results = metric._compute(matched)
     assert results
 
     expected = data["results_with_division_edges"]
@@ -173,7 +171,7 @@ def test_track_overlap_metrics(data, inverse) -> None:
     assert results == expected, f"{data['name']} failed with division edges"
 
     metric = TrackOverlapMetrics(include_division_edges=False)
-    results = metric.compute(matched)
+    results = metric._compute(matched)
     assert results
 
     expected = data["results_without_division_edges"]
@@ -186,19 +184,14 @@ def test_track_overlap_metrics(data, inverse) -> None:
 
 
 def test_track_overlap_gap_close():
-    g_gt, g_pred, mapping = get_gap_close_graphs()
+    g_gt, g_pred, gt_mapped, g_pred_mapped = get_gap_close_graphs()
+    mapper = list(zip(gt_mapped, g_pred_mapped))
     matched = Matched(
         TrackingGraph(g_gt),
         TrackingGraph(g_pred),
-        mapping,
+        mapper,
     )
     metric = TrackOverlapMetrics()
     results = metric.compute(matched)
     assert results["track_purity"] == 7 / 9
     assert results["target_effectiveness"] == 7 / 8
-
-
-def test_mapping_to_dict():
-    mapping = [("1", "2"), ("2", "3"), ("1", "3"), ("2", "3")]
-    mapping_dict = _mapping_to_dict(mapping)
-    assert mapping_dict == {"1": ["2", "3"], "2": ["3", "3"]}

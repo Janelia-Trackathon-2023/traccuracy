@@ -1,11 +1,47 @@
+import os
+import urllib.request
+import zipfile
+
 import networkx as nx
 import numpy as np
 import skimage as sk
+
 from traccuracy._tracking_graph import TrackingGraph
+from traccuracy.loaders import load_ctc_data
+
+
+def download_gt_data(url, root_dir):
+    # Download GT data -- look into caching this in github actions
+    data_dir = os.path.join(root_dir, "downloads")
+
+    if not os.path.exists(data_dir):
+        os.mkdir(data_dir)
+
+    filename = url.split("/")[-1]
+    file_path = os.path.join(data_dir, filename)
+
+    if not os.path.exists(file_path):
+        urllib.request.urlretrieve(url, file_path)
+
+        # Unzip the data
+        with zipfile.ZipFile(file_path, "r") as zip_ref:
+            zip_ref.extractall(data_dir)
+
+
+def gt_data(url, root_dir, path):
+    download_gt_data(url, root_dir)
+    return load_ctc_data(
+        os.path.join(root_dir, path),
+        os.path.join(root_dir, path, "man_track.txt"),
+    )
 
 
 def get_annotated_image(img_size=256, num_labels=3, sequential=True, seed=1):
     np.random.seed(seed)
+    if num_labels == 0:
+        im = np.zeros((img_size, img_size))
+        return im.astype("int32")
+
     num_labels_act = False
     trial = 0
     while num_labels != num_labels_act:
@@ -112,9 +148,9 @@ def get_division_graphs():
     1_0 -- 1_1 -- 1_2 -- 1_3 -<
                                 3_4
     G2
-                  2_2 -- 2_3 -- 2_4
-    1_0 -- 1_1 -<
-                  3_2 -- 3_3 -- 3_4
+                  5_2 -- 5_3 -- 5_4
+    4_0 -- 4_1 -<
+                  6_2 -- 6_3 -- 6_4
     """
 
     G1 = nx.DiGraph()
@@ -130,24 +166,25 @@ def get_division_graphs():
     nx.set_node_attributes(G1, attrs)
 
     G2 = nx.DiGraph()
-    G2.add_edge("1_0", "1_1")
-    # Divide to generate 2 lineage
-    G2.add_edge("1_1", "2_2")
-    G2.add_edge("2_2", "2_3")
-    G2.add_edge("2_3", "2_4")
-    # Divide to generate 3 lineage
-    G2.add_edge("1_1", "3_2")
-    G2.add_edge("3_2", "3_3")
-    G2.add_edge("3_3", "3_4")
+    G2.add_edge("4_0", "4_1")
+    # Divide to generate 5 lineage
+    G2.add_edge("4_1", "5_2")
+    G2.add_edge("5_2", "5_3")
+    G2.add_edge("5_3", "5_4")
+    # Divide to generate 6 lineage
+    G2.add_edge("4_1", "6_2")
+    G2.add_edge("6_2", "6_3")
+    G2.add_edge("6_3", "6_4")
 
     attrs = {}
     for node in G2.nodes:
         attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
     nx.set_node_attributes(G2, attrs)
 
-    mapper = [("1_0", "1_0"), ("1_1", "1_1"), ("2_4", "2_4"), ("3_4", "3_4")]
+    mapped_g1 = ["1_0", "1_1", "2_4", "3_4"]
+    mapped_g2 = ["4_0", "4_1", "5_4", "6_4"]
 
-    return G1, G2, mapper
+    return G1, G2, mapped_g1, mapped_g2
 
 
 def get_gap_close_graphs():
@@ -200,20 +237,10 @@ def get_gap_close_graphs():
         attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
     nx.set_node_attributes(G2, attrs)
 
-    # G1, G2 mapper
-    mapper = [
-        ("1_0", "1_0"),
-        ("1_1", "1_1"),
-        ("2_3", "1_3"),
-        ("2_4", "1_4"),
-        ("3_5", "2_5"),
-        ("3_6", "2_6"),
-        ("5_10", "4_10"),
-        ("4_5", "3_5"),
-        ("4_6", "3_6"),
-    ]
+    mapped_g1 = ["1_0", "1_1", "2_3", "2_4", "3_5", "3_6", "5_10", "4_5", "4_6"]
+    mapped_g2 = ["1_0", "1_1", "1_3", "1_4", "2_5", "2_6", "4_10", "3_5", "3_6"]
 
-    return G1, G2, mapper
+    return G1, G2, mapped_g1, mapped_g2
 
 
 def get_division_gap_close_graphs():
@@ -259,13 +286,7 @@ def get_division_gap_close_graphs():
         attrs[node] = {"t": int(node[-1:]), "x": 0, "y": 0}
     nx.set_node_attributes(G2, attrs)
 
-    mapper = [
-        ("1_0", "1_0"),
-        ("1_1", "1_1"),
-        ("2_3", "2_3"),
-        ("2_4", "2_4"),
-        ("3_2", "3_2"),
-        ("3_4", "4_4"),
-    ]
+    mapped_g1 = ["1_0", "1_1", "2_3", "2_4", "3_2", "3_4"]
+    mapped_g2 = ["1_0", "1_1", "2_3", "2_4", "3_2", "4_4"]
 
-    return G1, G2, mapper
+    return G1, G2, mapped_g1, mapped_g2

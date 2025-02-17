@@ -1,4 +1,5 @@
 """package description."""
+
 from importlib.metadata import PackageNotFoundError, version
 
 try:
@@ -7,6 +8,6 @@ except PackageNotFoundError:  # pragma: no cover
     __version__ = "uninstalled"
 
 from ._run_metrics import run_metrics
-from ._tracking_graph import EdgeAttr, NodeAttr, TrackingGraph
+from ._tracking_graph import EdgeFlag, NodeFlag, TrackingGraph
 
-__all__ = ["TrackingGraph", "run_metrics", "NodeAttr", "EdgeAttr"]
+__all__ = ["EdgeFlag", "NodeFlag", "TrackingGraph", "run_metrics"]

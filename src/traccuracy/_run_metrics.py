@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.matchers._base import Matcher
 from traccuracy.metrics._base import Metric
+
+if TYPE_CHECKING:
+    from traccuracy.matchers._base import Matched
 
 
 def run_metrics(
@@ -10,7 +15,7 @@ def run_metrics(
     pred_data: TrackingGraph,
     matcher: Matcher,
     metrics: list[Metric],
-) -> list[dict]:
+) -> tuple[list[dict], Matched]:
     """Compute given metrics on data using the given matcher.
 
     The returned result dictionary will contain all metrics computed by
@@ -25,6 +30,7 @@ def run_metrics(
 
     Returns:
         List[Dict]: List of dictionaries with one dictionary per Metric object
+        Matched: Matched data which includes annotated graphs
     """
     if not isinstance(gt_data, TrackingGraph) or not isinstance(
         pred_data, TrackingGraph
@@ -41,7 +47,5 @@ def run_metrics(
     results = []
     for _metric in metrics:
         result = _metric.compute(matched)
-        metric_dict = _metric.__dict__
-        metric_dict["name"] = _metric.__class__.__name__
-        results.append({"results": result, "metric": metric_dict})
-    return results
+        results.append(result.to_dict())
+    return results, matched
