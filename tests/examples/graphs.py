@@ -233,6 +233,24 @@ def gap_close_matched_gap():
     )
 
 
+def gap_close_offset():
+    gt = basic_graph(node_ids=(1, 2, 3, 4)).graph
+    pred = basic_graph(node_ids=(5, 6, 7, 8), y_offset=-1).graph
+
+    gt.remove_node(2)
+    gt.add_edge(1, 3)
+    pred.remove_node(7)
+    pred.add_edge(6, 8)
+
+    mapping = [(1, 5), (4, 8)]
+    return Matched(
+        TrackingGraph(gt, location_keys=("y")),
+        TrackingGraph(pred, location_keys=("y")),
+        mapping,
+        {},
+    )
+
+
 def get_division_graphs():
     """
     G1
