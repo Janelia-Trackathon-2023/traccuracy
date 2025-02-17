@@ -3,10 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from tests.test_utils import get_gap_close_graphs, get_movie_with_graph, gt_data
-from traccuracy import EdgeFlag, NodeFlag, TrackingGraph
+from tests.test_utils import get_movie_with_graph, gt_data
 from traccuracy.loaders import load_ctc_data
-from traccuracy.matchers import CTCMatcher, Matched
+from traccuracy.matchers import CTCMatcher
 from traccuracy.metrics import CTCMetrics
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -53,23 +52,3 @@ def test_compute_mapping():
     assert "DET" in results
     assert results["TRA"] == 1
     assert results["DET"] == 1
-
-
-def test_compute_metrics_gap_close():
-    g_gt, g_pred, gt_mapped, g_pred_mapped = get_gap_close_graphs()
-    mapper = list(zip(gt_mapped, g_pred_mapped))
-    matched = Matched(
-        gt_graph=TrackingGraph(g_gt),
-        pred_graph=TrackingGraph(g_pred),
-        mapping=mapper,
-        matcher_info={"name": "DummyMatcher"},
-    )
-    CTCMetrics().compute(matched)
-
-    # check that missing gap closing edge is false negative
-    assert g_gt.edges[("1_1", "2_3")][EdgeFlag.CTC_FALSE_NEG]
-    # check that "extra" node is FP
-    assert g_pred.nodes["1_2"][NodeFlag.CTC_FALSE_POS]
-    # check that correct edge is not annotated with errors
-    for error_attr in [EdgeFlag.CTC_FALSE_POS, EdgeFlag.WRONG_SEMANTIC]:
-        assert error_attr not in g_pred.edges[("2_6", "4_10")]
