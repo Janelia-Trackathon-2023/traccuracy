@@ -3,7 +3,7 @@ from copy import deepcopy
 import networkx as nx
 import pytest
 
-# from tests.test_utils import get_gap_close_graphs
+from tests.examples import graphs as ex_graphs
 from traccuracy import TrackingGraph
 from traccuracy.matchers import Matched
 from traccuracy.metrics._track_overlap import TrackOverlapMetrics
@@ -183,13 +183,15 @@ def test_track_overlap_metrics(data, inverse) -> None:
     assert results == expected, f"{data['name']} failed without division edges"
 
 
-# def test_track_overlap_gap_close():
-#     g_gt, g_pred, gt_mapped, g_pred_mapped = get_gap_close_graphs()
-#     mapper = list(zip(gt_mapped, g_pred_mapped))
-#     matched = Matched(
-#         TrackingGraph(g_gt), TrackingGraph(g_pred), mapper, {"name": "DummyMatcher"}
-#     )
-#     metric = TrackOverlapMetrics()
-#     results = metric.compute(matched)
-#     assert results.results["track_purity"] == 7 / 9
-#     assert results.results["target_effectiveness"] == 7 / 8
+def test_track_overlap_gap_close():
+    matched = ex_graphs.gap_close_gt_gap()
+    metric = TrackOverlapMetrics()
+    results = metric.compute(matched)
+    # there are three edges in pred graph, and only one is in GT
+    # because GT edge 1 -> 3 means we expect pred edge 5 -> 7
+    # but pred holds 5 -> 6 -> 7
+    assert results.results["track_purity"] == 1 / 3
+    # there are two edges in GT graph, and only one is in pred
+    # because pred edges 5 -> 6 and 6 -> 7 means we expect GT edges
+    # 1 -> ? and ? -> 3, but GT holds 1 -> 3
+    assert results.results["target_effectiveness"] == 7 / 8
