@@ -194,4 +194,4 @@ def test_track_overlap_gap_close():
     # there are two edges in GT graph, and only one is in pred
     # because pred edges 5 -> 6 and 6 -> 7 means we expect GT edges
     # 1 -> ? and ? -> 3, but GT holds 1 -> 3
-    assert results.results["target_effectiveness"] == 7 / 8
+    assert results.results["target_effectiveness"] == 1 / 2
