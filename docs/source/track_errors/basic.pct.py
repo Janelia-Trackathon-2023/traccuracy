@@ -223,7 +223,7 @@ plot_matched(
 # %%
 plot_matched(
     [
-        ex_graphs.gap_close_matched(),
+        ex_graphs.gap_close_matched_gap(),
         ex_graphs.gap_close_gt_gap(),
         ex_graphs.gap_close_pred_gap(),
     ],
