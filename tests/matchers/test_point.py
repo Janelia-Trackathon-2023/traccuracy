@@ -1,5 +1,6 @@
 import copy
 
+import networkx as nx
 import numpy as np
 import pytest
 
@@ -245,9 +246,25 @@ class TestPointMatcher:
     n_labels = 3
     track_graph = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
 
+    def test_empty(self):
+        data = TrackingGraph(self.track_graph.graph)
+        empty = TrackingGraph(nx.DiGraph())
+        matcher = PointMatcher(threshold=5)
+        matched = matcher.compute_mapping(data, empty)
+        assert matched.matcher_info["name"] == "PointMatcher"
+        assert matched.matcher_info["threshold"] == 5
+        assert len(matched.mapping) == 0
+        # should not need to compute matching type, should be provided since Point Matcher
+        # is always one-to-one
+        assert matched._matching_type == "one-to-one"
+        assert matched.matching_type == "one-to-one"
+
+        # try the other way just to be thorough
+        matched = matcher.compute_mapping(empty, data)
+        assert len(matched.mapping) == 0
+
     def test_no_segmentation(self):
         data = TrackingGraph(self.track_graph.graph)
-        print(data.start_frame, data.end_frame, data.nodes_by_frame)
         matcher = PointMatcher(threshold=5)
         matched = matcher.compute_mapping(data, data)
         assert matched.matcher_info["name"] == "PointMatcher"
