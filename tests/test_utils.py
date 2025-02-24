@@ -123,11 +123,16 @@ def get_movie_with_graph(ndims=3, n_frames=3, n_labels=3):
     # Extend to 3d if needed
     if ndims == 4:
         movie = np.stack([movie, movie, movie], axis=-1)
+        pos_keys = ("x", "y", "z")
+    else:
+        pos_keys = ("x", "y")
 
     # We can assume each object is present and connected across each frame
     G = nx.DiGraph()
     for t in range(n_frames):
-        nodes = nodes_from_segmentation(movie[t], frame=t, _id="label_time")
+        nodes = nodes_from_segmentation(
+            movie[t], frame=t, _id="label_time", pos_keys=pos_keys
+        )
         print(nodes)
         G.add_nodes_from([(_id, data) for _id, data in nodes.items()])
         print(list(G.nodes(data=True)))
