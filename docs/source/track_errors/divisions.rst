@@ -180,7 +180,7 @@ A wrong child division is one where the parent node is correctly matched and ide
     )
 
 Gap-Closing Edges
------------
+-----------------
 
 Gap-closing edges must be identical in the ground truth and predicted graphs to be considered a true positive.
 

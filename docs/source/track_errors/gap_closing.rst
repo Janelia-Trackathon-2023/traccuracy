@@ -1,5 +1,5 @@
 Gap-Closing Edges
-==========
+=================
 
 Gap-closing edges are those which connect a node in frame ``t`` to a node in frame ``t+2`` onwards. They are also called frame-skip edges.
 

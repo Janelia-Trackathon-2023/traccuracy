@@ -193,6 +193,6 @@ After identifying a matched pair of edges from the ground truth and predicted gr
 
 
 Gap-Closing Edges
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
 Gap-closing edges must be identical in the ground truth and predicted graphs in order for no errors to be annotated. Otherwise, the appropriate error is annotated as described above.
