@@ -253,6 +253,7 @@ class TestPointMatcher:
         matched = matcher.compute_mapping(data, empty)
         assert matched.matcher_info["name"] == "PointMatcher"
         assert matched.matcher_info["threshold"] == 5
+        assert matched.matcher_info["scale_factor"] is None
         assert len(matched.mapping) == 0
         # should not need to compute matching type, should be provided since Point Matcher
         # is always one-to-one
@@ -269,6 +270,7 @@ class TestPointMatcher:
         matched = matcher.compute_mapping(data, data)
         assert matched.matcher_info["name"] == "PointMatcher"
         assert matched.matcher_info["threshold"] == 5
+        assert matched.matcher_info["scale_factor"] is None
         # should not need to compute matching type, should be provided since Point Matcher
         # is always one-to-one
         assert matched._matching_type == "one-to-one"
@@ -285,6 +287,7 @@ class TestPointMatcher:
         matched = matcher.compute_mapping(data, data)
         assert matched.matcher_info["name"] == "PointMatcher"
         assert matched.matcher_info["threshold"] == 5
+        assert matched.matcher_info["scale_factor"] is None
         # should not need to compute matching type, should be provided since Point Matcher
         # is always one-to-one
         assert matched._matching_type == "one-to-one"
@@ -306,6 +309,7 @@ class TestPointMatcher:
         matched = matcher.compute_mapping(gt_data, pred_data)
         assert matched.matcher_info["name"] == "PointMatcher"
         assert matched.matcher_info["threshold"] == 5
+        assert matched.matcher_info["scale_factor"] is None
         # should not need to compute matching type, should be provided since Point Matcher
         # is always one-to-one
         assert matched._matching_type == "one-to-one"
@@ -321,9 +325,45 @@ class TestPointMatcher:
         matched = matcher.compute_mapping(gt_data, pred_data)
         assert matched.matcher_info["name"] == "PointMatcher"
         assert matched.matcher_info["threshold"] == 4
+        assert matched.matcher_info["scale_factor"] is None
         # should not need to compute matching type, should be provided since Point Matcher
         # is always one-to-one
         assert matched._matching_type == "one-to-one"
         assert matched.matching_type == "one-to-one"
         # Check for correct number of pairs
         assert len(matched.mapping) == 0
+
+    def test_scale_factor(self):
+        pred_data = self.track_graph
+        gt_data = copy.deepcopy(self.track_graph)
+        for node in gt_data.graph.nodes():
+            gt_data.graph.nodes[node]["x"] = gt_data.graph.nodes[node]["x"] + 5
+
+        # scale in the x dimension
+        matcher = PointMatcher(threshold=5, scale_factor=(2, 1))
+        matched = matcher.compute_mapping(gt_data, pred_data)
+        assert matched.matcher_info["name"] == "PointMatcher"
+        assert matched.matcher_info["threshold"] == 5
+        assert matched.matcher_info["scale_factor"] == (2, 1)
+        # should not need to compute matching type, should be provided since Point Matcher
+        # is always one-to-one
+        assert matched._matching_type == "one-to-one"
+        assert matched.matching_type == "one-to-one"
+        # Check for correct number of pairs
+        assert len(matched.mapping) == 0
+
+        # scale in another dimension
+        matcher = PointMatcher(threshold=5, scale_factor=(1, 2))
+        matched = matcher.compute_mapping(gt_data, pred_data)
+        assert matched.matcher_info["name"] == "PointMatcher"
+        assert matched.matcher_info["threshold"] == 5
+        assert matched.matcher_info["scale_factor"] == (1, 2)
+        # should not need to compute matching type, should be provided since Point Matcher
+        # is always one-to-one
+        assert matched._matching_type == "one-to-one"
+        assert matched.matching_type == "one-to-one"
+        # Check for correct number of pairs
+        assert len(matched.mapping) == self.n_frames * self.n_labels
+        # gt and pred node should be the same
+        for pair in matched.mapping:
+            assert pair[0] == pair[1]

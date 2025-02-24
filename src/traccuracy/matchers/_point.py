@@ -10,15 +10,29 @@ from ._base import Matcher
 
 
 class PointMatcher(Matcher):
-    def __init__(self, threshold: float):
-        """A one-to-one matcher that uses Hungarian matching to minimize global
-        distance of node pairs with a maximum distance threshold beyond which nodes
-        will not be matched
+    """A one-to-one matcher that uses Hungarian matching to minimize global
+    distance of node pairs with a maximum distance threshold beyond which nodes
+    will not be matched.
+    Note: this matcher computes the Euclidean distance based on the location on the
+    points. If the data is not isotropic, the scale parameter can be used to rescale
+    the locations in each dimension to reflect "real-world" distances.
 
-        Args:
-            threshold (float): The maximum distance to allow node matchings (inclusive)
-        """
+    Args:
+        threshold (float): The maximum distance to allow node matchings (inclusive), in
+            (potentially rescaled) pixels.
+        scale_factor (tuple[float, ...] | list[float] | None, optional):  If provided,
+            multiply the node locations by the scale factor in each dimension before
+            computing the distance. Useful if the data is not isotropic to ensure that
+            distances are computed in a space that reflects real world distances.
+    """
+
+    def __init__(
+        self,
+        threshold: float,
+        scale_factor: tuple[float, ...] | list[float] | None = None,
+    ):
         self.threshold = threshold
+        self.scale_factor = scale_factor
         # this matching is always one-to-one
         self._matching_type = "one-to-one"
 
@@ -30,12 +44,27 @@ class PointMatcher(Matcher):
             return mapping
         for frame in range(gt_graph.start_frame, gt_graph.end_frame):
             gt_nodes = list(gt_graph.nodes_by_frame[frame])
+            gt_locations = [gt_graph.get_location(node) for node in gt_nodes]
             pred_nodes = list(pred_graph.nodes_by_frame.get(frame, []))
+            pred_locations = [pred_graph.get_location(node) for node in pred_nodes]
+            if self.scale_factor is not None:
+                assert len(self.scale_factor) == len(gt_locations[0]), (
+                    f"scale factor {self.scale_factor} has different length than "
+                    f"location {gt_locations[0]}"
+                )
+                gt_locations = [
+                    [loc[d] * self.scale_factor[d] for d in range(len(loc))]
+                    for loc in gt_locations
+                ]
+                pred_locations = [
+                    [loc[d] * self.scale_factor[d] for d in range(len(loc))]
+                    for loc in pred_locations
+                ]
             matches = self._match_frame(
                 gt_nodes,
-                [gt_graph.get_location(node) for node in gt_nodes],
+                gt_locations,
                 pred_nodes,
-                [pred_graph.get_location(node) for node in pred_nodes],
+                pred_locations,
             )
             mapping.extend(matches)
         return mapping
