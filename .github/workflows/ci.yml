@@ -196,7 +196,7 @@ jobs:
       - name: Run coverage report
         run: python scripts/test_case_report.py ${{ github.event.pull_request.head.sha }}
 
-      - name: Checkout png branch
+      - name: Checkout branch for stashing pngs
         uses: actions/checkout@v4
         with:
           ref: 'test-case-coverage-report'
