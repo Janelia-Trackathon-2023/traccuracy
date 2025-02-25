@@ -193,18 +193,20 @@ jobs:
           python -m pip install -U pip
           python -m pip install -e .[covreport]
 
-      - name: Run coverage report
-        run: python scripts/test_case_report.py ${{ github.event.pull_request.head.sha }}
+      - name: Run coverage report and stash png
+        run: |
+          python scripts/test_case_report.py ${{ github.event.pull_request.head.sha }}
 
-      - name: Checkout branch for stashing pngs
-        uses: actions/checkout@v4
-        with:
-          ref: 'test-case-coverage-report'
+      - name: Add, stash, switch branch
+        run: |
+          git add ${{ github.event.pull_request.head.sha }}.png
+          git stash
+          git checkout -t origin/test-case-coverage-report
 
       - name: Commit to branch
         uses: EndBug/add-and-commit@v9
         with:
-          add: ${{ github.event.pull_request.head.sha }}.png
+          add: "*.png"
 
 
   deploy:
