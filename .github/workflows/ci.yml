@@ -181,6 +181,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup cml for better commenting
+        uses: iterative/setup-cml@v2
+
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
@@ -196,19 +199,10 @@ jobs:
       - name: Run coverage report
         run: python scripts/test_case_report.py
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        id: artifact-upload-step
-        with:
-          name: 'coverage-plot'
-          path: 'test-case-coverage.png'
-
-      - name: Comment with plot link for non-forks
-        uses: peter-evans/commit-comment@v3
-        if: github.event.pull_request.head.repo.fork == false
-        with:
-          body: |
-            ![](${{ steps.artifact-upload-step.outputs.artifact-url }})
+      - name: Generate comment
+        run: |
+          echo "![](./test-case-coverage.png)" > report.md
+          cml comment create --target=commit/HEAD report.md
 
 
   deploy:
