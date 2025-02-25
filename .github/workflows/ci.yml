@@ -204,7 +204,7 @@ jobs:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         run: |
           echo "![](./test-case-coverage.png)" > report.md
-          cml comment create --target=commit/HEAD report.md
+          cml comment create --target=commit/${{ github.event.pull_request.head.sha }} report.md
 
 
   deploy:
