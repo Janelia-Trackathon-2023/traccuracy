@@ -173,6 +173,41 @@ jobs:
         with:
           body-path: report.md
 
+  test-case-coverage:
+    name: Test case coverage
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache-dependency-path: "pyproject.toml"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e .[covreport]
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        id: artifact-upload-step
+        with:
+          name: 'coverage-plot'
+          path: 'test-case-coverage.png'
+
+      - name: Comment with plot link for non-forks
+        uses: peter-evans/commit-comment@v3
+        if: github.event.pull_request.head.repo.fork == false
+        with:
+          body: |
+            ![](${{ steps.artifact-upload-step.outputs.artifact-url }})
+
+
   deploy:
     name: Deploy
     needs: test
