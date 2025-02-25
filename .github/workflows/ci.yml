@@ -201,7 +201,8 @@ jobs:
         run: |
           git add ${{ github.event.pull_request.head.sha }}.png
           git stash
-          git checkout -t origin/test-case-coverage-report
+          git fetch
+          git checkout test-case-coverage-report
 
       - name: Commit to branch
         uses: EndBug/add-and-commit@v9
