@@ -193,6 +193,9 @@ jobs:
           python -m pip install -U pip
           python -m pip install -e .[covreport]
 
+      - name: Run coverage report
+        run: python scripts/test_case_report.py
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         id: artifact-upload-step
