@@ -1,6 +1,7 @@
 import glob
 import json
 import os
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -88,6 +89,7 @@ def plot_heatmap(df, name, ax):
 
 
 if __name__ == "__main__":
+    output_name = sys.argv[1]
     param_sets = [("track_errors", "graphs"), ("matchers", "segs")]
 
     dfs, maxcols, maxrows = [], [], []
@@ -108,4 +110,4 @@ if __name__ == "__main__":
         plot_heatmap(df, name, ax)
     plt.tight_layout()
 
-    plt.savefig("test-case-coverage.png")
+    plt.savefig(f"{output_name}.png")

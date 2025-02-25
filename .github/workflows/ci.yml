@@ -194,17 +194,17 @@ jobs:
           python -m pip install -e .[covreport]
 
       - name: Run coverage report
-        run: python scripts/test_case_report.py
+        run: python scripts/test_case_report.py ${{ github.event.pull_request.head.sha }}
 
-      - name: Setup cml for better commenting
-        uses: iterative/setup-cml@v2
+      - name: Checkout png branch
+        uses: actions/checkout@v4
+        with:
+          ref: 'test-case-coverage-report'
 
-      - name: Generate comment
-        env:
-          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-        run: |
-          echo "![](./test-case-coverage.png)" > report.md
-          cml comment create --target=commit/${{ github.event.pull_request.head.sha }} report.md
+      - name: Commit to branch
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: ${{ github.event.pull_request.head.sha }}.png
 
 
   deploy:
