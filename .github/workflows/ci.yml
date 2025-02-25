@@ -181,9 +181,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup cml for better commenting
-        uses: iterative/setup-cml@v2
-
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
@@ -199,7 +196,12 @@ jobs:
       - name: Run coverage report
         run: python scripts/test_case_report.py
 
+      - name: Setup cml for better commenting
+        uses: iterative/setup-cml@v2
+
       - name: Generate comment
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         run: |
           echo "![](./test-case-coverage.png)" > report.md
           cml comment create --target=commit/HEAD report.md
