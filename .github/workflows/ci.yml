@@ -203,6 +203,7 @@ jobs:
           git stash
           git fetch
           git checkout test-case-coverage-report
+          git stash pop
 
       - name: Commit to branch
         uses: EndBug/add-and-commit@v9
