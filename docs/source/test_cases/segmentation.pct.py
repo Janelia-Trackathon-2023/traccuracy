@@ -54,8 +54,9 @@ def plot_one(seg, axis, colors):
     axis.set_axis_off()
 
     nodes = ex_segs.nodes_from_segmentation(seg, frame=0)
-    x = [attrs["x"] for _id, attrs in nodes.items()]
-    y = [attrs["y"] for _id, attrs in nodes.items()]
+    # matplotlib and our segmentation perception of axes are flipped
+    x = [attrs["y"] for _id, attrs in nodes.items()]
+    y = [attrs["x"] for _id, attrs in nodes.items()]
     axis.scatter(x, y, color="white")
 
     for xval, yval in zip(x, y):

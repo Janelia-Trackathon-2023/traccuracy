@@ -343,7 +343,7 @@ def nodes_from_segmentation(
         frame (int, optional): The time frame of this array. Used for making node ids and
             for populating the attributes dict. Defaults to 0
         pos_keys (tuple[str], optional): The attribute keys to use to store the positions.
-            Defaults to ("y", "x")
+            Defaults to ("x", "y")
         frame_key (str, optional): The frame key to use in the attributes dict.
             Defaults to "t".
         label_key (str, optional): The label key to use in the attributes dict.
@@ -365,7 +365,7 @@ def nodes_from_segmentation(
         elif _id == "label_time":
             node_id = f"{regionprop.label}_{frame}"
         attrs = {frame_key: frame, label_key: regionprop.label}
-        centroid = regionprop.centroid  # [z,] y, x
+        centroid = regionprop.centroid
         assert len(pos_keys) == len(centroid), (
             f"Number of position keys {pos_keys} does not match number of "
             f"elements in centroid {centroid}"
