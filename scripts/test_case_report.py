@@ -27,6 +27,67 @@ SKIP_FUNCTIONS = [
     "nodes_from_segmentation",
     "sphere",
 ]
+GROUPS = {
+    "track_errors": {
+        "one-to-one": [
+            "empty_gt",
+            "empty_pred",
+            "good_matched",
+            "fn_node_matched",
+            "fn_edge_matched",
+            "fp_node_matched",
+            "fp_edge_matched",
+            "crossover_edge",
+        ],
+        # one gt to many pred
+        "one-to-many": ["node_one_to_two", "edge_one_to_two"],
+        # one pred to many gt
+        "many to one": ["node_two_to_one", "edge_two_to_one"],
+        "divisions": [
+            "empty_pred_div",
+            "empty_gt_div",
+            "good_div",
+            "fp_div",
+            "one_child",
+            "no_children",
+            "wrong_child",
+            "wrong_children",
+        ],
+        "shifted divisions": [
+            "div_1early_end",
+            "div_1early_mid",
+            "div_2early_end",
+            "div_2early_mid",
+            "div_1late_end",
+            "div_1late_mid",
+            "div_2late_end",
+            "div_2late_mid",
+            "div_shift_min_match",
+            "div_shift_bad_match_pred",
+            "div_shift_bad_match_daughter",
+        ],
+    },
+    "matchers": {
+        "2d": [
+            "good_segmentation_2d",
+            "false_negative_segmentation_2d",
+            "false_positive_segmentation_2d",
+            "oversegmentation_2d",
+            "undersegmentation_2d",
+            "no_overlap_2d",
+            "multicell_2d",
+        ],
+        "3d": [
+            "good_segmentation_3d",
+            "false_negative_segmentation_3d",
+            "false_positive_segmentation_3d",
+            "oversegmentation_3d",
+            "undersegmentation_3d",
+            "no_overlap_3d",
+            "multicell_3d",
+        ],
+    },
+}
 
 
 def run_coverage(test_target, ex_module):
@@ -82,9 +143,26 @@ def get_stats_df(target_key):
     return df
 
 
-def plot_heatmap(df, name, ax):
-    sns.heatmap(df, linewidths=1, vmin=0, vmax=100, cmap="copper", ax=ax)
-    plt.xticks(rotation=45, ha="right")
+def plot_heatmap(df, name, ax, groups):
+    # Add empty columns for spacing/grouping
+    for group in groups.keys():
+        df.loc[group] = [None] * len(df.columns)
+
+    sort = []
+    for group, fxns in groups.items():
+        sort.append(group)
+        sort.extend(fxns)
+
+    # Check for any ungrouped functions
+    ungrouped = df.drop(sort)
+    if len(ungrouped) > 0:
+        df.loc["Ungrouped"] = [None] * len(df.columns)
+        sort.append("Ungrouped")
+        sort.extend(ungrouped.index)
+
+    sns.heatmap(
+        df.loc[sort], linewidths=1, vmin=0, vmax=100, cmap="copper", ax=ax, cbar=False
+    )
     ax.set_title(name)
 
 
@@ -107,7 +185,7 @@ if __name__ == "__main__":
         figsize=(len(param_sets) * max(maxcols) * 2, max(maxrows) / 4),
     )
     for df, (name, _), ax in zip(dfs, param_sets, axes):
-        plot_heatmap(df, name, ax)
-    plt.tight_layout()
+        plot_heatmap(df, name, ax, GROUPS[name])
 
+    plt.tight_layout()
     plt.savefig(f"{output_name}.png")
