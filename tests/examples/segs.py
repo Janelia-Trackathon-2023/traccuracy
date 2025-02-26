@@ -328,7 +328,7 @@ def multicell_3d() -> tuple[np.ndarray, np.ndarray]:
 def nodes_from_segmentation(
     seg: np.ndarray,
     frame: int = 0,
-    pos_keys=("x", "y"),
+    pos_keys=("y", "x"),
     frame_key="t",
     label_key="segmentation_id",
     _id="label",
@@ -343,7 +343,7 @@ def nodes_from_segmentation(
         frame (int, optional): The time frame of this array. Used for making node ids and
             for populating the attributes dict. Defaults to 0
         pos_keys (tuple[str], optional): The attribute keys to use to store the positions.
-            Defaults to ("x", "y")
+            Defaults to ("y", "x")
         frame_key (str, optional): The frame key to use in the attributes dict.
             Defaults to "t".
         label_key (str, optional): The label key to use in the attributes dict.

@@ -50,13 +50,15 @@ import examples.segs as ex_segs
 # %% nbsphinx="hidden"
 def plot_one(seg, axis, colors):
     colormap = ListedColormap(colors)
-    axis.imshow(seg, cmap=colormap, vmax=5)
-    axis.set_axis_off()
+    axis.imshow(seg, cmap=colormap, vmax=5, origin="lower")
+    axis.set_xlabel("x")
+    axis.set_ylabel("y")
+    axis.set_xticks([])
+    axis.set_yticks([])
 
     nodes = ex_segs.nodes_from_segmentation(seg, frame=0)
-    # matplotlib and our segmentation perception of axes are flipped
-    x = [attrs["y"] for _id, attrs in nodes.items()]
-    y = [attrs["x"] for _id, attrs in nodes.items()]
+    x = [attrs["x"] for _id, attrs in nodes.items()]
+    y = [attrs["y"] for _id, attrs in nodes.items()]
     axis.scatter(x, y, color="white")
 
     for xval, yval in zip(x, y):
