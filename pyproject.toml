@@ -76,6 +76,10 @@ docs = [
     "jupyter-sphinx",
     "matplotlib"
 ]
+covreport = [
+    "traccuracy[test]",
+    "seaborn"
+]
 
 [project.urls]
 homepage = "https://github.com/Janelia-Trackathon-2023/traccuracy"
