@@ -176,7 +176,7 @@ def get_stats_df(target_key: str) -> pd.DataFrame:
     return df
 
 
-def plot_heatmap(df: pd.Dataframe, name: str, ax: Axes, groups: Dict[str, List[str]]):
+def plot_heatmap(df: pd.DataFrame, name: str, ax: Axes, groups: Dict[str, List[str]]):
     """Plot a heatmap where the functions specified in each group are separated by a blank row
 
     Any functions in df that are not included in groups are collected into a final "Ungrouped"
