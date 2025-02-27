@@ -3,14 +3,17 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Dict, List
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import pytest
 import seaborn as sns
+from matplotlib.axes import Axes
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SKIP_FILES = ["__", "base", "compute_overlap"]
+# Add any utility functions here to keep them out of the report
 SKIP_FUNCTIONS = [
     "basic_graph",
     "get_division_graphs",
@@ -27,6 +30,7 @@ SKIP_FUNCTIONS = [
     "nodes_from_segmentation",
     "sphere",
 ]
+# Ungrouped functions will be displayed in a separate section, but should be added here eventually
 GROUPS = {
     "track_errors": {
         "one-to-one": [
@@ -90,7 +94,16 @@ GROUPS = {
 }
 
 
-def run_coverage(test_target, ex_module):
+def run_coverage(test_target: str, ex_module: str):
+    """Generate the pytest coverage report for a combination of a test module
+    and a tests.examples module
+
+    Will run for each file in the test_target directory that isn't listed in SKIP_FILES
+
+    Args:
+        test_target (str): The module in tests to check for coverage, e.g. track_errors or matchers
+        ex_module (str): The example module to check coverage against, e.g. graphs or segs
+    """
     test_dir = f"{ROOT_DIR}/tests/{test_target}"
     files = os.listdir(test_dir)
 
@@ -109,7 +122,17 @@ def run_coverage(test_target, ex_module):
         pytest.main(args)
 
 
-def get_stats_from_json(json_path):
+def get_stats_from_json(json_path: str) -> pd.DataFrame:
+    """Loads a json coverage report into a pandas dataframe
+
+    Excludes any functions listed in SKIP_FUNCTION
+
+    Args:
+        json_path (str): Path to json coverage report
+
+    Returns:
+        pd.DataFrame: Dataframe where there the index is the function name
+    """
     with open(json_path) as f:
         data = json.load(f)
 
@@ -129,7 +152,17 @@ def get_stats_from_json(json_path):
     return df
 
 
-def get_stats_df(target_key):
+def get_stats_df(target_key: str) -> pd.DataFrame:
+    """Collects multiple json reports for a module specified by target_key
+    and returns a single dataframe
+
+    Args:
+        target_key (str): Module to collect, e.g. track_errors or matchers
+
+    Returns:
+        pd.DataFrame: Dataframe where the function name is the index
+        and there is one column per submodule
+    """
     files = glob.glob(f"{target_key}-*.json")
     dfs = []
     for f in files:
@@ -143,7 +176,19 @@ def get_stats_df(target_key):
     return df
 
 
-def plot_heatmap(df, name, ax, groups):
+def plot_heatmap(df: pd.Dataframe, name: str, ax: Axes, groups: Dict[str, List[str]]):
+    """Plot a heatmap where the functions specified in each group are separated by a blank row
+
+    Any functions in df that are not included in groups are collected into a final "Ungrouped"
+    group
+
+    Args:
+        df (pd.Dataframe): Dataframe where the functions are listed in index
+        name (str): Name used for the plot title
+        ax (Axes): A matplotlib subplot axis to plot onto
+        groups (Dict[str, List[str]]): A dictionary with where the keys are names of the groups
+            and the values are lists of function names
+    """
     # Add empty columns for spacing/grouping
     for group in groups.keys():
         df.loc[group] = [None] * len(df.columns)
