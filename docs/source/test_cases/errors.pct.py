@@ -11,7 +11,8 @@
 # %% [markdown]
 # # Basic Error Test Cases
 
-# %% [markdown] To facilitate testing, we have provided a suite of canonical
+# %% [markdown]
+# To facilitate testing, we have provided a suite of canonical
 # examples that cover the basic, simple scenarios that can occur in segmentation
 # and tracking. Here we describe them and show visualizations of each case.
 #
