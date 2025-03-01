@@ -46,7 +46,7 @@ class PointMatcher(Matcher):
         if gt_graph.start_frame is None or gt_graph.end_frame is None:
             return mapping
         for frame in range(gt_graph.start_frame, gt_graph.end_frame):
-            gt_nodes = list(gt_graph.nodes_by_frame[frame])
+            gt_nodes = list(gt_graph.nodes_by_frame.get(frame, []))
             gt_locations = [gt_graph.get_location(node) for node in gt_nodes]
             pred_nodes = list(pred_graph.nodes_by_frame.get(frame, []))
             pred_locations = [pred_graph.get_location(node) for node in pred_nodes]
