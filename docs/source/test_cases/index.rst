@@ -9,5 +9,5 @@ The following pages include examples and illustrations of each of the test cases
    :maxdepth: 1
 
    Matchers <matchers>
-   Basic Errors <errors>
+   Graph Errors <errors>
    Division Errors <divisions>
