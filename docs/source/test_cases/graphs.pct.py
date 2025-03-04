@@ -129,9 +129,7 @@ plot_matched(
 )
 
 # %%
-plot_matched(
-    [ex_graphs.edge_two_to_one(t) for t in [0, 1]], "Two GT edges to one pred edge"
-)
+plot_matched([ex_graphs.edge_two_to_one(t) for t in [0, 1]], "Two GT edges to one pred edge")
 
 # %%
 plot_matched(
@@ -140,6 +138,4 @@ plot_matched(
 )
 
 # %%
-plot_matched(
-    [ex_graphs.edge_one_to_two(t) for t in [0, 1]], "One GT edge to 2 pred edges"
-)
+plot_matched([ex_graphs.edge_one_to_two(t) for t in [0, 1]], "One GT edge to 2 pred edges")

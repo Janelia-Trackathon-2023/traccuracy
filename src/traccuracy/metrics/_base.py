@@ -29,8 +29,7 @@ class Metric(ABC):
         for mtype in valid_matches:
             if mtype not in MATCHING_TYPES:
                 raise ValueError(
-                    f"Matching type {mtype} is not supported. "
-                    "Choose from {MATCHING_TYPES}."
+                    f"Matching type {mtype} is not supported. " "Choose from {MATCHING_TYPES}."
                 )
 
         self.valid_match_types = valid_matches

@@ -131,9 +131,7 @@ plot_matched([ex_graphs.div_1late_end(), ex_graphs.div_1late_mid()], "1 Frame La
 plot_matched([ex_graphs.div_2late_end(), ex_graphs.div_2late_mid()], "2 Frames Late")
 
 # %%
-plot_matched(
-    [ex_graphs.div_shift_min_match()], "Minimal matching for shifted divisions"
-)
+plot_matched([ex_graphs.div_shift_min_match()], "Minimal matching for shifted divisions")
 
 # %%
 plot_matched(

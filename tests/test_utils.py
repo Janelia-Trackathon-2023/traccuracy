@@ -75,17 +75,13 @@ def get_annotated_image(img_size=256, num_labels=3, sequential=True, seed=1):
     return all_labels.astype("int32")
 
 
-def get_annotated_movie(
-    img_size=256, labels_per_frame=3, frames=3, mov_type="sequential", seed=1
-):
+def get_annotated_movie(img_size=256, labels_per_frame=3, frames=3, mov_type="sequential", seed=1):
     if mov_type in ("sequential", "repeated"):
         sequential = True
     elif mov_type == "random":
         sequential = False
     else:
-        raise ValueError(
-            'mov_type must be one of "sequential", ' '"repeated" or "random"'
-        )
+        raise ValueError('mov_type must be one of "sequential", ' '"repeated" or "random"')
 
     y = []
     while len(y) < frames:
@@ -115,9 +111,7 @@ def get_annotated_movie(
 
 
 def get_movie_with_graph(ndims=3, n_frames=3, n_labels=3):
-    movie = get_annotated_movie(
-        labels_per_frame=n_labels, frames=n_frames, mov_type="repeated"
-    )
+    movie = get_annotated_movie(labels_per_frame=n_labels, frames=n_frames, mov_type="repeated")
 
     # Extend to 3d if needed
     if ndims == 4:

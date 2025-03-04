@@ -157,9 +157,7 @@ def match_iou(gt, pred, threshold=0.6, one_to_one=False):
         ValueError: GT and pred segmentations must be the same shape
     """
     if not isinstance(gt, TrackingGraph) or not isinstance(pred, TrackingGraph):
-        raise ValueError(
-            "Input data must be a TrackingData object with a graph and segmentations"
-        )
+        raise ValueError("Input data must be a TrackingData object with a graph and segmentations")
 
     mapper = []
 
@@ -223,9 +221,7 @@ class IOUMatcher(Matcher):
         """
         # Check that segmentations exist in the data
         if gt_graph.segmentation is None or pred_graph.segmentation is None:
-            raise ValueError(
-                "Segmentation data must be provided for both gt and pred data"
-            )
+            raise ValueError("Segmentation data must be provided for both gt and pred data")
 
         mapping = match_iou(
             gt_graph,

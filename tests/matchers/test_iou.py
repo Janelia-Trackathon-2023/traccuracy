@@ -175,7 +175,6 @@ def test__construct_time_to_seg_id_map():
 
 
 class Test_match_iou:
-
     def test_bad_input(self):
         # Bad input
         with pytest.raises(ValueError):
@@ -185,21 +184,15 @@ class Test_match_iou:
         # shapes don't match
         with pytest.raises(ValueError):
             match_iou(
-                TrackingGraph(
-                    nx.DiGraph(), segmentation=np.zeros((5, 10, 10), dtype=np.uint16)
-                ),
-                TrackingGraph(
-                    nx.DiGraph(), segmentation=np.zeros((5, 10, 5), dtype=np.uint16)
-                ),
+                TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10), dtype=np.uint16)),
+                TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5), dtype=np.uint16)),
             )
 
     def test_end_to_end_2d(self):
         # Test 2d data
         n_frames = 3
         n_labels = 3
-        track_graph = get_movie_with_graph(
-            ndims=3, n_frames=n_frames, n_labels=n_labels
-        )
+        track_graph = get_movie_with_graph(ndims=3, n_frames=n_frames, n_labels=n_labels)
         mapper = match_iou(
             track_graph,
             track_graph,
@@ -215,9 +208,7 @@ class Test_match_iou:
         # Check 3d data
         n_frames = 3
         n_labels = 3
-        track_graph = get_movie_with_graph(
-            ndims=4, n_frames=n_frames, n_labels=n_labels
-        )
+        track_graph = get_movie_with_graph(ndims=4, n_frames=n_frames, n_labels=n_labels)
         mapper = match_iou(
             track_graph,
             track_graph,
@@ -257,9 +248,7 @@ class TestIOUMatched:
 
     def test_e2e_threshold(self):
         matcher = IOUMatcher(iou_threshold=1.0)
-        matched = matcher.compute_mapping(
-            gt_graph=self.track_graph, pred_graph=self.track_graph
-        )
+        matched = matcher.compute_mapping(gt_graph=self.track_graph, pred_graph=self.track_graph)
 
         # Check for correct number of pairs
         assert len(matched.mapping) == self.n_frames * self.n_labels
@@ -269,9 +258,7 @@ class TestIOUMatched:
 
     def test_e2e_one_to_one(self):
         matcher = IOUMatcher(one_to_one=True)
-        matched = matcher.compute_mapping(
-            gt_graph=self.track_graph, pred_graph=self.track_graph
-        )
+        matched = matcher.compute_mapping(gt_graph=self.track_graph, pred_graph=self.track_graph)
 
         # Check for correct number of pairs
         assert len(matched.mapping) == self.n_frames * self.n_labels
