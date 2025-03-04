@@ -26,9 +26,7 @@ def load_all_ctc(
 @app.command()
 def run_ctc(
     gt_dir: str = typer.Argument(..., help="Path to GT tiffs", show_default=False),
-    pred_dir: str = typer.Argument(
-        ..., help="Path to prediction/RES tiffs", show_default=False
-    ),
+    pred_dir: str = typer.Argument(..., help="Path to prediction/RES tiffs", show_default=False),
     gt_track_path: Optional[str] = typer.Option(
         None, help="Path to ctc gt track file", show_default=False
     ),
@@ -67,9 +65,7 @@ def run_ctc(
 @app.command()
 def run_aogm(
     gt_dir: str = typer.Argument(..., help="Path to GT tiffs", show_default=False),
-    pred_dir: str = typer.Argument(
-        ..., help="Path to prediction/RES tiffs", show_default=False
-    ),
+    pred_dir: str = typer.Argument(..., help="Path to prediction/RES tiffs", show_default=False),
     gt_track_path: Optional[str] = typer.Option(
         None, help="Path to ctc gt track file", show_default=False
     ),
@@ -78,21 +74,15 @@ def run_aogm(
     ),
     loader: str = typer.Option("ctc", help="Loader to bring data into memory"),
     out_path: str = typer.Option("aogm_log.json", help="Path to save results"),
-    vertex_ns_weight: float = typer.Option(
-        1, help="Weight to assign to nonsplit vertex errors"
-    ),
+    vertex_ns_weight: float = typer.Option(1, help="Weight to assign to nonsplit vertex errors"),
     vertex_fp_weight: float = typer.Option(
         1, help="Weight to assign to false positive vertex errors"
     ),
     vertex_fn_weight: float = typer.Option(
         1, help="Weight to assign to false negative vertex errors"
     ),
-    edge_fp_weight: float = typer.Option(
-        1, help="Weight to assign to false positive edge errors"
-    ),
-    edge_fn_weight: float = typer.Option(
-        1, help="Weight to assign to false negative edge errors"
-    ),
+    edge_fp_weight: float = typer.Option(1, help="Weight to assign to false positive edge errors"),
+    edge_fn_weight: float = typer.Option(1, help="Weight to assign to false negative edge errors"),
     edge_ws_weight: float = typer.Option(
         1, help="Weight to assign to edges with incorrect semantics"
     ),
@@ -140,9 +130,7 @@ def run_aogm(
 @app.command()
 def run_divisions_on_iou(
     gt_dir: str = typer.Argument(..., help="Path to GT tiffs", show_default=False),
-    pred_dir: str = typer.Argument(
-        ..., help="Path to prediction/RES tiffs", show_default=False
-    ),
+    pred_dir: str = typer.Argument(..., help="Path to prediction/RES tiffs", show_default=False),
     gt_track_path: Optional[str] = typer.Option(
         None, help="Path to ctc gt track file", show_default=False
     ),
@@ -200,9 +188,7 @@ def run_divisions_on_iou(
 @app.command()
 def run_divisions_on_ctc(
     gt_dir: str = typer.Argument(..., help="Path to GT tiffs", show_default=False),
-    pred_dir: str = typer.Argument(
-        ..., help="Path to prediction/RES tiffs", show_default=False
-    ),
+    pred_dir: str = typer.Argument(..., help="Path to prediction/RES tiffs", show_default=False),
     gt_track_path: Optional[str] = typer.Option(
         None, help="Path to ctc gt track file", show_default=False
     ),

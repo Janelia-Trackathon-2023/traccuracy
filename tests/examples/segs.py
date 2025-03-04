@@ -31,9 +31,7 @@ def make_one_cell_2d(
     return im
 
 
-def make_split_cell_2d(
-    labels=(1, 2), arr_shape=(32, 32), center=(16, 16), radius=9
-) -> np.ndarray:
+def make_split_cell_2d(labels=(1, 2), arr_shape=(32, 32), center=(16, 16), radius=9) -> np.ndarray:
     """Create a 2d numpy array with two cells, each half a circle.
 
     Args:
@@ -57,9 +55,7 @@ def make_split_cell_2d(
     return im
 
 
-def sphere(
-    center: tuple[int, int, int], radius: int, shape: tuple[int, int, int]
-) -> np.ndarray:
+def sphere(center: tuple[int, int, int], radius: int, shape: tuple[int, int, int]) -> np.ndarray:
     """Get a mask of a sphere of a given radius
 
     Args:
@@ -77,9 +73,7 @@ def sphere(
     return mask
 
 
-def make_one_cell_3d(
-    label=1, arr_shape=(32, 32, 32), center=(16, 16, 16), radius=7
-) -> np.ndarray:
+def make_one_cell_3d(label=1, arr_shape=(32, 32, 32), center=(16, 16, 16), radius=7) -> np.ndarray:
     """Make a numpy array containing a single (spherical) cell in 3d.
 
     Args:
@@ -99,9 +93,7 @@ def make_one_cell_3d(
     return im
 
 
-def make_split_cell_3d(
-    labels=(1, 2), arr_shape=(32, 32, 32), center=(16, 16, 16), radius=9
-):
+def make_split_cell_3d(labels=(1, 2), arr_shape=(32, 32, 32), center=(16, 16, 16), radius=9):
     """Make a numpy array containing two cells, each half a sphere.
     The pixels with y value less than or equal to the center y value will have
     the first label, and those with y value greater than the center will

@@ -88,9 +88,7 @@ def get_edge_errors(matched_data: Matched):
     for graph in [comp_graph, gt_graph]:
         for parent in graph.get_divisions():
             for daughter in graph.graph.successors(parent):
-                graph.set_flag_on_edge(
-                    (parent, daughter), EdgeFlag.INTERTRACK_EDGE, True
-                )
+                graph.set_flag_on_edge((parent, daughter), EdgeFlag.INTERTRACK_EDGE, True)
 
         for merge in graph.get_merges():
             for parent in graph.graph.predecessors(merge):
@@ -108,9 +106,7 @@ def get_edge_errors(matched_data: Matched):
             comp_graph.set_flag_on_edge(edge, EdgeFlag.CTC_FALSE_POS, True)
         else:
             # check if semantics are correct
-            is_parent_gt = gt_graph.edges[expected_gt_edge].get(
-                EdgeFlag.INTERTRACK_EDGE, False
-            )
+            is_parent_gt = gt_graph.edges[expected_gt_edge].get(EdgeFlag.INTERTRACK_EDGE, False)
             is_parent_comp = comp_graph.edges[edge].get(EdgeFlag.INTERTRACK_EDGE, False)
             if is_parent_gt != is_parent_comp:
                 comp_graph.set_flag_on_edge(edge, EdgeFlag.WRONG_SEMANTIC, True)
@@ -119,9 +115,9 @@ def get_edge_errors(matched_data: Matched):
     for edge in tqdm(gt_graph.edges, "Evaluating FN edges"):
         source, target = edge[0], edge[1]
         # this edge is adjacent to an edge we didn't detect, so it definitely is an fn
-        if gt_graph.nodes[source].get(NodeFlag.CTC_FALSE_NEG, False) or gt_graph.nodes[
-            target
-        ].get(NodeFlag.CTC_FALSE_NEG, False):
+        if gt_graph.nodes[source].get(NodeFlag.CTC_FALSE_NEG, False) or gt_graph.nodes[target].get(
+            NodeFlag.CTC_FALSE_NEG, False
+        ):
             gt_graph.set_flag_on_edge(edge, EdgeFlag.CTC_FALSE_NEG, True)
             continue
 

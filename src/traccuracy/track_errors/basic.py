@@ -39,16 +39,12 @@ def _classify_nodes(matched: Matched):
         pred_graph.set_flag_on_node(pred_id, NodeFlag.TRUE_POS)
 
     # Any node not labeled as TP in prediction is a false positive
-    fp_nodes = set(pred_graph.nodes) - set(
-        pred_graph.get_nodes_with_flag(NodeFlag.TRUE_POS)
-    )
+    fp_nodes = set(pred_graph.nodes) - set(pred_graph.get_nodes_with_flag(NodeFlag.TRUE_POS))
     for node in fp_nodes:
         pred_graph.set_flag_on_node(node, NodeFlag.FALSE_POS)
 
     # Any node not labeled as TP in GT is a false negative
-    fn_nodes = set(gt_graph.nodes) - set(
-        gt_graph.get_nodes_with_flag(NodeFlag.TRUE_POS)
-    )
+    fn_nodes = set(gt_graph.nodes) - set(gt_graph.get_nodes_with_flag(NodeFlag.TRUE_POS))
     for node in fn_nodes:
         gt_graph.set_flag_on_node(node, NodeFlag.FALSE_NEG)
 
@@ -99,9 +95,7 @@ def _classify_edges(matched: Matched):
             pred_graph.set_flag_on_edge((source_pred, target_pred), EdgeFlag.TRUE_POS)
 
     # Any pred edges that aren't marked as TP are FP
-    pred_fp_edges = set(pred_graph.edges) - set(
-        pred_graph.get_edges_with_flag(EdgeFlag.TRUE_POS)
-    )
+    pred_fp_edges = set(pred_graph.edges) - set(pred_graph.get_edges_with_flag(EdgeFlag.TRUE_POS))
     for edge in pred_fp_edges:
         pred_graph.set_flag_on_edge(edge, EdgeFlag.FALSE_POS)
 

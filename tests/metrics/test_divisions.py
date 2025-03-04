@@ -40,9 +40,7 @@ def pred_hela():
 
 
 def test_iou_div_metrics(gt_hela, pred_hela):
-    iou_matched = IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(
-        gt_hela, pred_hela
-    )
+    iou_matched = IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(gt_hela, pred_hela)
     div_results = DivisionMetrics().compute(iou_matched)
 
     assert div_results.results["Frame Buffer 0"]["False Negative Divisions"] == 19
@@ -54,9 +52,7 @@ def test_iou_div_metrics(gt_hela, pred_hela):
 def test_DivisionMetrics():
     g_gt, g_pred, map_gt, map_pred = get_division_graphs()
     mapper = list(zip(map_gt, map_pred))
-    matched = Matched(
-        TrackingGraph(g_gt), TrackingGraph(g_pred), mapper, {"name": "DummyMatcher"}
-    )
+    matched = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapper, {"name": "DummyMatcher"})
     frame_buffer = 2
 
     results = DivisionMetrics(max_frame_buffer=frame_buffer)._compute(matched)
@@ -80,10 +76,7 @@ class TestDivisionMetrics:
     def test_no_divisions(self, caplog):
         matched = ex_graphs.good_matched()
         results = DivisionMetrics()._compute(matched)
-        assert (
-            "No ground truth divisions present. Metrics may return np.nan"
-            in caplog.text
-        )
+        assert "No ground truth divisions present. Metrics may return np.nan" in caplog.text
 
         metrics = [
             "Division Recall",
@@ -95,14 +88,9 @@ class TestDivisionMetrics:
             assert np.isnan(results["Frame Buffer 0"][m])
 
     def test_fp_no_gt(self, caplog):
-        matched = Matched(
-            TrackingGraph(nx.DiGraph()), ex_graphs.basic_division(0), [], {}
-        )
+        matched = Matched(TrackingGraph(nx.DiGraph()), ex_graphs.basic_division(0), [], {})
         results = DivisionMetrics()._compute(matched)["Frame Buffer 0"]
-        assert (
-            "No ground truth divisions present. Metrics may return np.nan"
-            in caplog.text
-        )
+        assert "No ground truth divisions present. Metrics may return np.nan" in caplog.text
 
         # FP so some nan some 0
         assert np.isnan(results["Division Recall"])
@@ -120,12 +108,6 @@ class TestDivisionMetrics:
 
     def test_mbc(self):
         m = DivisionMetrics()
-        assert np.isnan(
-            m._get_mbc(gt_div_count=0, tp_division_count=0, fp_division_count=0)
-        )
-        assert (
-            m._get_mbc(gt_div_count=10, tp_division_count=0, fp_division_count=10) == 0
-        )
-        assert (
-            m._get_mbc(gt_div_count=10, tp_division_count=10, fp_division_count=0) == 1
-        )
+        assert np.isnan(m._get_mbc(gt_div_count=0, tp_division_count=0, fp_division_count=0))
+        assert m._get_mbc(gt_div_count=10, tp_division_count=0, fp_division_count=10) == 0
+        assert m._get_mbc(gt_div_count=10, tp_division_count=10, fp_division_count=0) == 1

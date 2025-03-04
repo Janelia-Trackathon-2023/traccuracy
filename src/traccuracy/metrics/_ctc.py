@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
 
 class AOGMMetrics(Metric):
-
     def __init__(
         self,
         vertex_ns_weight=1,

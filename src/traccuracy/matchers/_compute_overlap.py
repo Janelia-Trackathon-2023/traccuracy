@@ -39,25 +39,19 @@ def get_labels_with_overlap(
     gt_props = regionprops(gt_frame)
     gt_boxes = [np.array(gt_prop.bbox) for gt_prop in gt_props]
     gt_boxes = np.array(gt_boxes).astype(np.float64)
-    gt_box_labels = np.asarray(
-        [int(gt_prop.label) for gt_prop in gt_props], dtype=np.uint16
-    )
+    gt_box_labels = np.asarray([int(gt_prop.label) for gt_prop in gt_props], dtype=np.uint16)
 
     res_props = regionprops(res_frame)
     res_boxes = [np.array(res_prop.bbox) for res_prop in res_props]
     res_boxes = np.array(res_boxes).astype(np.float64)
-    res_box_labels = np.asarray(
-        [int(res_prop.label) for res_prop in res_props], dtype=np.uint16
-    )
+    res_box_labels = np.asarray([int(res_prop.label) for res_prop in res_props], dtype=np.uint16)
     if len(gt_props) == 0 or len(res_props) == 0:
         return []
 
     if gt_frame.ndim == 3:
         overlaps = compute_overlap_3D(gt_boxes, res_boxes)
     else:
-        overlaps = compute_overlap(
-            gt_boxes, res_boxes
-        )  # has the form [gt_bbox, res_bbox]
+        overlaps = compute_overlap(gt_boxes, res_boxes)  # has the form [gt_bbox, res_bbox]
 
     # Find the bboxes that have overlap at all (ind_ corresponds to box number - starting at 0)
     ind_gt, ind_res = np.nonzero(overlaps)
@@ -97,21 +91,12 @@ def compute_overlap(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray:
             query_boxes[k, 3] - query_boxes[k, 1] + 1
         )
         for n in range(N):
-            iw = (
-                min(boxes[n, 2], query_boxes[k, 2])
-                - max(boxes[n, 0], query_boxes[k, 0])
-                + 1
-            )
+            iw = min(boxes[n, 2], query_boxes[k, 2]) - max(boxes[n, 0], query_boxes[k, 0]) + 1
             if iw > 0:
-                ih = (
-                    min(boxes[n, 3], query_boxes[k, 3])
-                    - max(boxes[n, 1], query_boxes[k, 1])
-                    + 1
-                )
+                ih = min(boxes[n, 3], query_boxes[k, 3]) - max(boxes[n, 1], query_boxes[k, 1]) + 1
                 if ih > 0:
                     ua = np.float64(
-                        (boxes[n, 2] - boxes[n, 0] + 1)
-                        * (boxes[n, 3] - boxes[n, 1] + 1)
+                        (boxes[n, 2] - boxes[n, 0] + 1) * (boxes[n, 3] - boxes[n, 1] + 1)
                         + box_area
                         - iw * ih
                     )
@@ -138,17 +123,9 @@ def compute_overlap_3D(boxes: np.ndarray, query_boxes: np.ndarray) -> np.ndarray
             * (query_boxes[k, 5] - query_boxes[k, 2] + 1)
         )
         for n in range(N):
-            id_ = (
-                min(boxes[n, 3], query_boxes[k, 3])
-                - max(boxes[n, 0], query_boxes[k, 0])
-                + 1
-            )
+            id_ = min(boxes[n, 3], query_boxes[k, 3]) - max(boxes[n, 0], query_boxes[k, 0]) + 1
             if id_ > 0:
-                iw = (
-                    min(boxes[n, 4], query_boxes[k, 4])
-                    - max(boxes[n, 1], query_boxes[k, 1])
-                    + 1
-                )
+                iw = min(boxes[n, 4], query_boxes[k, 4]) - max(boxes[n, 1], query_boxes[k, 1]) + 1
                 if iw > 0:
                     ih = (
                         min(boxes[n, 5], query_boxes[k, 5])

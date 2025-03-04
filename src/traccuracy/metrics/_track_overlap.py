@@ -53,9 +53,7 @@ class TrackOverlapMetrics(Metric):
         )
 
         # calculate track purity and target effectiveness
-        track_purity = _calc_overlap_score(
-            pred_tracklets, gt_tracklets, matched.gt_pred_map
-        )
+        track_purity = _calc_overlap_score(pred_tracklets, gt_tracklets, matched.gt_pred_map)
         target_effectiveness = _calc_overlap_score(
             gt_tracklets, pred_tracklets, matched.pred_gt_map
         )

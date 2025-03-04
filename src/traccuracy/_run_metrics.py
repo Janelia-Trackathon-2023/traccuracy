@@ -32,9 +32,7 @@ def run_metrics(
         List[Dict]: List of dictionaries with one dictionary per Metric object
         Matched: Matched data which includes annotated graphs
     """
-    if not isinstance(gt_data, TrackingGraph) or not isinstance(
-        pred_data, TrackingGraph
-    ):
+    if not isinstance(gt_data, TrackingGraph) or not isinstance(pred_data, TrackingGraph):
         raise TypeError("gt_data and pred_data must be TrackingGraph objects")
 
     if not isinstance(matcher, Matcher):

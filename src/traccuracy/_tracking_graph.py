@@ -155,9 +155,7 @@ class TrackingGraph:
                 outputs associated with this object
         """
         if segmentation is not None and segmentation.dtype.kind not in ["i", "u"]:
-            raise TypeError(
-                f"Segmentation must have integer dtype, found {segmentation.dtype}"
-            )
+            raise TypeError(f"Segmentation must have integer dtype, found {segmentation.dtype}")
         self.segmentation = segmentation
 
         if NodeFlag.has_value(frame_key):
@@ -185,9 +183,7 @@ class TrackingGraph:
 
         # construct dictionaries from attributes to nodes/edges for easy lookup
         self.nodes_by_frame: defaultdict[int, set[Hashable]] = defaultdict(set)
-        self.nodes_by_flag: dict[NodeFlag, set[Hashable]] = {
-            flag: set() for flag in NodeFlag
-        }
+        self.nodes_by_flag: dict[NodeFlag, set[Hashable]] = {flag: set() for flag in NodeFlag}
         self.edges_by_flag: dict[EdgeFlag, set[tuple[Hashable, Hashable]]] = {
             flag: set() for flag in EdgeFlag
         }
@@ -197,9 +193,7 @@ class TrackingGraph:
                 self.frame_key in attrs.keys()
             ), f"Frame key {self.frame_key} not present for node {node}."
             for key in self.location_keys:
-                assert (
-                    key in attrs.keys()
-                ), f"Location key {key} not present for node {node}."
+                assert key in attrs.keys(), f"Location key {key} not present for node {node}."
 
             # store node id in nodes_by_frame mapping
             frame = attrs[self.frame_key]
@@ -336,13 +330,13 @@ class TrackingGraph:
                 del new_trackgraph.nodes_by_frame[frame]
 
         for node_flag in NodeFlag:
-            new_trackgraph.nodes_by_flag[node_flag] = self.nodes_by_flag[
-                node_flag
-            ].intersection(nodes)
+            new_trackgraph.nodes_by_flag[node_flag] = self.nodes_by_flag[node_flag].intersection(
+                nodes
+            )
         for edge_flag in EdgeFlag:
-            new_trackgraph.edges_by_flag[edge_flag] = self.edges_by_flag[
-                edge_flag
-            ].intersection(new_trackgraph.edges)
+            new_trackgraph.edges_by_flag[edge_flag] = self.edges_by_flag[edge_flag].intersection(
+                new_trackgraph.edges
+            )
 
         if len(new_trackgraph.nodes_by_frame) == 0:
             new_trackgraph.start_frame = None
@@ -353,9 +347,7 @@ class TrackingGraph:
 
         return new_trackgraph
 
-    def set_flag_on_node(
-        self, _id: Hashable, flag: NodeFlag, value: bool = True
-    ) -> None:
+    def set_flag_on_node(self, _id: Hashable, flag: NodeFlag, value: bool = True) -> None:
         """Set an attribute flag for a single node.
         If the id is not found in the graph, a KeyError will be raised.
         If the flag already exists, the existing value will be overwritten.
@@ -456,9 +448,7 @@ class TrackingGraph:
         else:
             self.edges_by_flag[flag].discard(_id)
 
-    def remove_flag_from_edge(
-        self, _id: tuple[Hashable, Hashable], flag: EdgeFlag
-    ) -> None:
+    def remove_flag_from_edge(self, _id: tuple[Hashable, Hashable], flag: EdgeFlag) -> None:
         """Removes flag from a given edge
 
         Args:
@@ -505,9 +495,7 @@ class TrackingGraph:
         else:
             self.edges_by_flag[flag] = set()
 
-    def get_tracklets(
-        self, include_division_edges: bool = False
-    ) -> list[TrackingGraph]:
+    def get_tracklets(self, include_division_edges: bool = False) -> list[TrackingGraph]:
         """Gets a list of new TrackingGraph objects containing all tracklets of the current graph.
 
         Tracklet is defined as all connected components between divisions (daughter to next

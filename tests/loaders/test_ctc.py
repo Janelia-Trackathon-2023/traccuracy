@@ -26,9 +26,7 @@ def test_ctc_to_graph():
         df, pd.DataFrame({"segmentation_id": [], "x": [], "y": [], "z": [], "t": []})
     )
     for d in data:
-        node_ids = [
-            "{}_{}".format(d["Cell_ID"], t) for t in range(d["Start"], d["End"] + 1)
-        ]
+        node_ids = ["{}_{}".format(d["Cell_ID"], t) for t in range(d["Start"], d["End"] + 1)]
 
         for node_id in node_ids:
             assert node_id in G

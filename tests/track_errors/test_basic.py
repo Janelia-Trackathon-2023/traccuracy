@@ -6,7 +6,6 @@ from traccuracy.track_errors.basic import _classify_edges, _classify_nodes
 
 
 class TestStandardNode:
-
     def test_empty_gt(self):
         matched = ex_graphs.empty_gt()
         _classify_nodes(matched)
@@ -34,9 +33,7 @@ class TestStandardNode:
 
         # Check that it doesn't run a second time
         _classify_nodes(matched)
-        assert (
-            "Node errors already calculated. Skipping graph annotation" in caplog.text
-        )
+        assert "Node errors already calculated. Skipping graph annotation" in caplog.text
 
     @pytest.mark.parametrize("t", [0, 1, 2])
     def test_fn_node(self, t):
@@ -119,7 +116,6 @@ class TestStandardNode:
 
 
 class TestStandardEdge:
-
     def test_empty_gt(self):
         matched = ex_graphs.empty_gt()
         _classify_edges(matched)
@@ -146,9 +142,7 @@ class TestStandardEdge:
 
         # Check that it doesn't run a second time
         _classify_edges(matched)
-        assert (
-            "Edge errors already calculated. Skipping graph annotation" in caplog.text
-        )
+        assert "Edge errors already calculated. Skipping graph annotation" in caplog.text
 
     def test_fn_node_end(self):
         matched = ex_graphs.fn_node_matched(0)
