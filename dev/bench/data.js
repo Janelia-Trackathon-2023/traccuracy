@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1741116465229,
+  "lastUpdate": 1741211330642,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -7049,6 +7049,149 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0",
             "extra": "mean: 2.186878573000058 sec\nrounds: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "msschwartz21@gmail.com",
+            "name": "Morgan Schwartz",
+            "username": "msschwartz21"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6ae081c913f41696e9c90903fd6952ea4032f15c",
+          "message": "Replace black with ruff-format in precommit (#221)\n\n* Replace black with ruff-format in precommit\n\n* style(pre-commit.ci): auto fixes [...]\n\n* Fix warnings about ruff config in pyproject.toml\n\n* Bump ruff target version to 3.9 since we still support it\n\n* style(pre-commit.ci): auto fixes [...]\n\n* Run ruff on the scripts directory\n\n* Remove remaining strict=true\n\n---------\n\nCo-authored-by: pre-commit-ci[bot] <66853113+pre-commit-ci[bot]@users.noreply.github.com>\nCo-authored-by: Caroline Malin-Mayor <malinmayorc@janelia.hhmi.org>",
+          "timestamp": "2025-03-05T16:39:46-05:00",
+          "tree_id": "91f4ad62c6a65a722d160e91a2ac0716a25b2216",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/6ae081c913f41696e9c90903fd6952ea4032f15c"
+        },
+        "date": 1741211330230,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[2d]",
+            "value": 0.17178698206499277,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 5.821162860999948 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[3d]",
+            "value": 0.05715188556991673,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 17.49723548100002 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_ctc_data[2d]",
+            "value": 0.9137287996107142,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.0944166369999948 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[2d]",
+            "value": 1.329876849527105,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0029764408375029224",
+            "extra": "mean: 751.9493255000214 msec\nrounds: 2"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[3d]",
+            "value": 0.1036490805476582,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 9.647938936999992 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[2d]",
+            "value": 0.6653271980159237,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.5030198719999817 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[3d]",
+            "value": 0.05901406334140753,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 16.94511347599996 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[2d]",
+            "value": 3.759989959623611,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 265.958157 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[3d]",
+            "value": 0.1513188904785852,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 6.608560219000026 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[2d]",
+            "value": 0.6367368457154289,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.5705075129999955 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[3d]",
+            "value": 0.055427015890021136,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 18.041743433999955 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_point_matcher[2d]",
+            "value": 8.00671257160993,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 124.89520399992671 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_point_matcher[3d]",
+            "value": 0.7063567547689744,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.4157152080000515 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[2d]",
+            "value": 186.49399312038648,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 5.362103000038587 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[3d]",
+            "value": 65.65573468079944,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 15.23096199991869 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_basic_metrics[2d]",
+            "value": 3.4521019933614467,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 289.6785789999967 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_basic_metrics[3d]",
+            "value": 0.5155332649877972,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.9397390390000737 sec\nrounds: 1"
           }
         ]
       }
