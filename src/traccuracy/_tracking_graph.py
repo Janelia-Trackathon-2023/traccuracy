@@ -191,9 +191,9 @@ class TrackingGraph:
         }
         for node, attrs in self.graph.nodes.items():
             # check that every node has the time frame and location specified
-            assert (
-                self.frame_key in attrs.keys()
-            ), f"Frame key {self.frame_key} not present for node {node}."
+            assert self.frame_key in attrs.keys(), (
+                f"Frame key {self.frame_key} not present for node {node}."
+            )
             for key in self.location_keys:
                 assert key in attrs.keys(), f"Location key {key} not present for node {node}."
 

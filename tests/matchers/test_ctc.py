@@ -30,7 +30,7 @@ class TestCTCMatcher:
         g = nx.DiGraph()
         for t in range(n_frames - 1):
             for i in range(1, n_labels + 1):
-                g.add_edge(f"{i}_{t}", f"{i}_{t+1}")
+                g.add_edge(f"{i}_{t}", f"{i}_{t + 1}")
 
         attrs = {}
         for t in range(n_frames):

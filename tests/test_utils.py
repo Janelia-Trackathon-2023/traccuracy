@@ -82,7 +82,7 @@ def get_annotated_movie(img_size=256, labels_per_frame=3, frames=3, mov_type="se
     elif mov_type == "random":
         sequential = False
     else:
-        raise ValueError('mov_type must be one of "sequential", ' '"repeated" or "random"')
+        raise ValueError('mov_type must be one of "sequential", "repeated" or "random"')
 
     y = []
     while len(y) < frames:
