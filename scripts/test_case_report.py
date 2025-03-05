@@ -3,7 +3,6 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -176,7 +175,7 @@ def get_stats_df(target_key: str) -> pd.DataFrame:
     return df
 
 
-def plot_heatmap(df: pd.DataFrame, name: str, ax: Axes, groups: Dict[str, List[str]]):
+def plot_heatmap(df: pd.DataFrame, name: str, ax: Axes, groups: dict[str, list[str]]):
     """Plot a heatmap where the functions specified in each group are separated by a blank row
 
     Any functions in df that are not included in groups are collected into a final "Ungrouped"
