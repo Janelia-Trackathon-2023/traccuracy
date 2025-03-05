@@ -111,6 +111,8 @@ include = ['traccuracy*']
 [tool.ruff]
 line-length = 100
 target-version = "py38"
+
+[tool.ruff.lint]
 # https://beta.ruff.rs/docs/rules/
 extend-select = [
     "E",    # style errors
@@ -142,10 +144,10 @@ extend-ignore = [
     "D416", # Section name should end with a colon
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*.py" = ["D", "S"]
 "setup.py" = ["D"]
 "docs/source/*/*.pct.py" = ["E402", "B006"]
