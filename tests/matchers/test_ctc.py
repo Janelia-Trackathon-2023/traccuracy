@@ -17,20 +17,14 @@ class TestCTCMatcher:
         # shapes don't match
         with pytest.raises(ValueError):
             self.matcher.compute_mapping(
-                TrackingGraph(
-                    nx.DiGraph(), segmentation=np.zeros((5, 10, 10), dtype=np.uint16)
-                ),
-                TrackingGraph(
-                    nx.DiGraph(), segmentation=np.zeros((5, 10, 5), dtype=np.uint16)
-                ),
+                TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10), dtype=np.uint16)),
+                TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5), dtype=np.uint16)),
             )
 
     def test_end_to_end(self):
         n_labels = 3
         n_frames = 3
-        movie = get_annotated_movie(
-            labels_per_frame=n_labels, frames=n_frames, mov_type="repeated"
-        )
+        movie = get_annotated_movie(labels_per_frame=n_labels, frames=n_frames, mov_type="repeated")
 
         # We can assume each object is present and connected across each frame
         g = nx.DiGraph()
