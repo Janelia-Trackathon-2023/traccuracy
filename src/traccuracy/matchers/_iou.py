@@ -15,7 +15,9 @@ if TYPE_CHECKING:
     from collections.abc import Hashable
 
 
-def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
+def _match_nodes(
+    gt: np.ndarray, res: np.ndarray, threshold: float = 0.5, one_to_one: bool = False
+) -> tuple[np.ndarray, np.ndarray]:
     """Identify overlapping objects according to IoU and a threshold for minimum overlap.
 
     QUESTION: Does this rely on sequential segmentation labels
@@ -30,8 +32,8 @@ def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
             linear assignment on the thresholded iou array. Default False.
 
     Returns:
-        gtcells (np arr): Array of overlapping ids in the gt frame.
-        rescells (np arr): Array of overlapping ids in the res frame.
+        gtcells (np.ndarray): Array of overlapping ids in the gt frame.
+        rescells (np.ndarray): Array of overlapping ids in the res frame.
     """
     if threshold == 0.0 and not one_to_one:
         raise ValueError("Threshold of 0 is not valid unless one_to_one is True")
