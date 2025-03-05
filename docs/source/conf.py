@@ -48,12 +48,11 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "IPython.sphinxext.ipython_console_highlighting",  # code highlighting in notebooks
-    "myst_parser",  # include md files in rst files
     "autoapi.extension",  # autobuild api docs
-    "nbsphinx",  # add notebooks to docs
-    "nbsphinx_link",  # add notebooks to docs
+    # "nbsphinx",  # add notebooks to docs
+    # "nbsphinx_link",  # add notebooks to docs
     "sphinx_click",  # auto document cli
-    "jupyter_sphinx",  # executable code blocks in rst
+    "myst_nb",  # Execute and render myst md
 ]
 
 napoleon_google_docstring = True
@@ -63,7 +62,7 @@ templates_path = ["../_templates"]
 
 default_role = "py:obj"
 
-source_suffix = [".rst", ".md"]
+source_suffix = [".md", ".rst"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -82,14 +81,8 @@ autoapi_options = [
 ]
 autoapi_ignore = ["*/cli.py"]
 
-# -- Nbsphinx extension ------------------------------------------------------
-
-nbsphinx_execute = "auto"
-exclude_patterns = ["_build", "**.ipynb_checkpoints"]
-
-nbsphinx_custom_formats = {
-    ".pct.py": ["jupytext.reads", {"fmt": "py:percent"}],
-}
+# -- Myst NB -----------------------------------------------------------------
+nb_execution_raise_on_error = True
 
 # Import Matplotlib to avoid this message in notebooks:
 # "Matplotlib is building the font cache; this may take a moment."

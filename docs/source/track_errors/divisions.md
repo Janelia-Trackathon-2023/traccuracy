@@ -1,3 +1,6 @@
+---
+file_format: mystnb
+---
 # Division Errors
 
 Note: These flags are annotated on the parent nodes.
@@ -7,7 +10,7 @@ Note: These flags are annotated on the parent nodes.
 tags: [hide-cell]
 ---
 import sys
-sys.path.append('../../tests')
+sys.path.append('../../../tests')
 
 import matplotlib.pyplot as plt
 import networkx as nx

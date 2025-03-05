@@ -1,3 +1,6 @@
+---
+file_format: mystnb
+---
 # Basic Errors
 
 This set of node and edge errors applies only to graphs with a one-to-one matching.

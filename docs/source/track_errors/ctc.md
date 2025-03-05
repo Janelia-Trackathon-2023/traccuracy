@@ -1,3 +1,6 @@
+---
+file_format: mystnb
+---
 # CTC Errors
 
 These node and edge error annotations are used to calculate the CTC metrics TRA and DET as well as the basic AOGM metric as described in {doc}`../metrics/ctc`.
@@ -8,7 +11,7 @@ tags: [hide-cell]
 ---
 
 import sys
-sys.path.append('../../tests')
+sys.path.append('../../../tests')
 
 import matplotlib.pyplot as plt
 import networkx as nx

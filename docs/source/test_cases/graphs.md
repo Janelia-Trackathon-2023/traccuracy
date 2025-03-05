@@ -1,3 +1,6 @@
+---
+file_format: mystnb
+---
 # Graph Test Cases
 
 To facilitate testing, we have provided a suite of canonical
