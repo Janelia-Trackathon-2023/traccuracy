@@ -132,9 +132,9 @@ def _construct_time_to_seg_id_map(
         time = data[graph.frame_key]
         seg_id = data[graph.label_key]
         seg_id_to_node_id_map = time_to_seg_id_map.get(time, {})
-        assert (
-            seg_id not in seg_id_to_node_id_map
-        ), f"Segmentation ID {seg_id} occurred twice in frame {time}."
+        assert seg_id not in seg_id_to_node_id_map, (
+            f"Segmentation ID {seg_id} occurred twice in frame {time}."
+        )
         seg_id_to_node_id_map[seg_id] = node_id
         time_to_seg_id_map[time] = seg_id_to_node_id_map
     return time_to_seg_id_map
