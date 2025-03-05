@@ -4,9 +4,12 @@ import logging
 import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import Any, Hashable
+from typing import TYPE_CHECKING, Any
 
 from traccuracy._tracking_graph import TrackingGraph
+
+if TYPE_CHECKING:
+    from collections.abc import Hashable
 
 logger = logging.getLogger(__name__)
 
@@ -20,11 +23,9 @@ class Matcher(ABC):
     """
 
     # Set explicitly only if the matching type is guaranteed by the matcher
-    _matching_type = None
+    _matching_type: str | None = None
 
-    def compute_mapping(
-        self, gt_graph: TrackingGraph, pred_graph: TrackingGraph
-    ) -> Matched:
+    def compute_mapping(self, gt_graph: TrackingGraph, pred_graph: TrackingGraph) -> Matched:
         """Run the matching on a given set of gt and pred TrackingGraph and returns a Matched object
         with a new copy of each TrackingGraph
 
@@ -38,9 +39,7 @@ class Matcher(ABC):
         Raises:
             ValueError: gt and pred must be a TrackingGraph object
         """
-        if not isinstance(gt_graph, TrackingGraph) or not isinstance(
-            pred_graph, TrackingGraph
-        ):
+        if not isinstance(gt_graph, TrackingGraph) or not isinstance(pred_graph, TrackingGraph):
             raise ValueError(
                 "Input data must be a TrackingData object with a graph and segmentations"
             )
@@ -124,13 +123,11 @@ class Matched:
     def matching_type(self):
         """Determines the matching type from gt to pred:
         one-to-one, one-to-many, many-to-one, many-to-many"""
-        if len(self.mapping) == 0:
-            warnings.warn(
-                "Mapping is empty. Defaulting to type of one-to-one", stacklevel=2
-            )
-
         if self._matching_type is not None:
             return self._matching_type
+
+        if len(self.mapping) == 0:
+            warnings.warn("Mapping is empty. Defaulting to type of one-to-one", stacklevel=2)
 
         pred_type = "one"
         for matches in self.gt_pred_map.values():
