@@ -23,7 +23,7 @@ This command should download the data (alternatively run `pixi run getdata`) and
 
 `traccuracy` tests are built around a set of standard test cases available in `tests.examples`. To check coverage of matcher and error modules against standard tests cases, run
 ```
-pixi run covreport
+pixi run test-case-report
 ```
 
 ### Style
