@@ -103,6 +103,10 @@ benchmark = { cmd = "pytest tests/bench.py", depends-on = ["getdata"] }
 [tool.pixi.feature.covreport.tasks]
 covreport = "python scripts/test_case_report.py local"
 
+[tool.pixi.feature.docs.tasks]
+kernel-config = { cmd = "python -m ipykernel install --user --name=\"traccuracy-docs\" "}
+docs = { cmd = "sphinx-build . ../_build -D jupyter_execute_default_kernel=\"traccuracy-docs\" -D nbsphinx_kernel_name=\"traccuracy-docs\"", cwd="docs/source", depends-on=["kernel-config"]}
+
 [project.urls]
 homepage = "https://github.com/Janelia-Trackathon-2023/traccuracy"
 repository = "https://github.com/Janelia-Trackathon-2023/traccuracy"
