@@ -110,7 +110,7 @@ include = ['traccuracy*']
 # https://github.com/charliermarsh/ruff
 [tool.ruff]
 line-length = 100
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 # https://beta.ruff.rs/docs/rules/
@@ -142,6 +142,9 @@ extend-ignore = [
     "D401", # First line should be in imperative mood
     "D413", # Missing blank line after last section
     "D416", # Section name should end with a colon
+]
+unfixable = [
+    "B905", # currently adds strict=False to zips, should add strict=True manually
 ]
 
 [tool.ruff.lint.pydocstyle]

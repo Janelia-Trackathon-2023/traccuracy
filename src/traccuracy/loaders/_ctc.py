@@ -241,7 +241,7 @@ def load_ctc_data(data_dir, track_path=None, name=None, run_checks=True):
         track_paths = list(glob.glob(os.path.join(data_dir, "*_track.txt")))
         if not track_paths:
             raise ValueError(
-                "No track_path passed and a *_track.txt file could not be found in" f" {data_dir}"
+                f"No track_path passed and a *_track.txt file could not be found in {data_dir}"
             )
         if len(track_paths) > 1:
             raise ValueError(

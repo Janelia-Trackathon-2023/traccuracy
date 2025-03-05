@@ -4,11 +4,13 @@ import copy
 import enum
 import logging
 from collections import defaultdict
-from typing import TYPE_CHECKING, Hashable, Iterable
+from typing import TYPE_CHECKING
 
 import networkx as nx
 
 if TYPE_CHECKING:
+    from collections.abc import Hashable, Iterable
+
     import numpy as np
     from networkx.classes.reportviews import NodeView, OutEdgeView
 

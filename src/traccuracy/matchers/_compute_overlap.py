@@ -6,13 +6,11 @@ Licensed under The MIT License [see LICENSE for details]
 Copyright (c) 2015 Microsoft
 """
 
-from typing import Tuple
-
 import numpy as np
 from skimage.measure import regionprops
 
 
-def _union_slice(a: Tuple[slice], b: Tuple[slice]):
+def _union_slice(a: tuple[slice], b: tuple[slice]):
     """returns the union of slice tuples a and b"""
     starts = tuple(min(_a.start, _b.start) for _a, _b in zip(a, b))
     stops = tuple(max(_a.stop, _b.stop) for _a, _b in zip(a, b))

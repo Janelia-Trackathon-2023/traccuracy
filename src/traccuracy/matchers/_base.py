@@ -4,9 +4,12 @@ import logging
 import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import Any, Hashable
+from typing import TYPE_CHECKING, Any
 
 from traccuracy._tracking_graph import TrackingGraph
+
+if TYPE_CHECKING:
+    from collections.abc import Hashable
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Hashable
+from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -10,6 +10,9 @@ from traccuracy._tracking_graph import TrackingGraph
 
 from ._base import Matcher
 from ._compute_overlap import get_labels_with_overlap
+
+if TYPE_CHECKING:
+    from collections.abc import Hashable
 
 
 def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
@@ -179,7 +182,7 @@ def match_iou(gt, pred, threshold=0.6, one_to_one=False):
             one_to_one=one_to_one,
         )
         # Construct node id tuple for each match
-        for gt_seg_id, pred_seg_id in zip(*matches):
+        for gt_seg_id, pred_seg_id in zip(*matches, strict=True):
             # Find node id based on time and segmentation label
             gt_node = gt_time_to_seg_id_map[t][gt_seg_id]
             pred_node = pred_time_to_seg_id_map[t][pred_seg_id]
