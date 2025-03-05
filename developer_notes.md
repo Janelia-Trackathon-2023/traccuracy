@@ -1,27 +1,35 @@
 # Traccuracy Developer Notes
 
+We recommend using `pixi` for environment management while developing `traccuracy`. See the [pixi docs](https://pixi.sh/dev/) for installation instructions. The following instructions will be focused on pixi-based development, but all of the same tasks can be completed with pip and another environment manager.
+
 ## Development
 For local development, clone the repo and install in editable mode.
 ```
 git clone https://github.com/Janelia-Trackathon-2023/traccuracy.git
-cd traccuracy
-pip install -e ".[dev]"
+pixi install
 ```
 
 ### Testing
-Install testing requirements
+To run basic tests
 ```
-pip install -e ".[test]"
+pixi run test
 ```
-Run tests
+
+We run benchmarking on every commit into main to keep track of any potential performance regression. To run benchmarking locally:
 ```
-python -m pytest tests
+pixi run benchmark
 ```
+This command should download the data (alternatively run `pixi run getdata`) and then run benchmarking.
+
+`traccuracy` tests are built around a set of standard test cases available in `tests.examples`. To check coverage of matcher and error modules against standard tests cases, run
+```
+pixi run covreport
+```
+
 ### Style
 We utilize `pre-commit` with black (formatting) and ruff (linting). If you would like to run `pre-commit` locally:
 ```
-pip install -e ".[dev]"
-pre-commit install
+pixi run -e dev pre-commit install
 ```
 Alternatively [pre-commit.ci](https://pre-commit.ci/), will run and commit changes on any open PRs.
 
