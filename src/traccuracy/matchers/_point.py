@@ -56,8 +56,7 @@ class PointMatcher(Matcher):
                     f"location {gt_locations[0]}"
                 )
                 gt_locations = [
-                    [loc[d] * self.scale_factor[d] for d in range(len(loc))]
-                    for loc in gt_locations
+                    [loc[d] * self.scale_factor[d] for d in range(len(loc))] for loc in gt_locations
                 ]
                 pred_locations = [
                     [loc[d] * self.scale_factor[d] for d in range(len(loc))]

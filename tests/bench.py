@@ -62,16 +62,12 @@ def ctc_matched_3d(gt_data_3d, pred_data_3d):
 
 @pytest.fixture(scope="function")
 def iou_matched_2d(gt_data_2d, pred_data_2d):
-    return IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(
-        gt_data_2d, pred_data_2d
-    )
+    return IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(gt_data_2d, pred_data_2d)
 
 
 @pytest.fixture(scope="function")
 def iou_matched_3d(gt_data_3d, pred_data_3d):
-    return IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(
-        gt_data_3d, pred_data_3d
-    )
+    return IOUMatcher(iou_threshold=0.1, one_to_one=True).compute_mapping(gt_data_3d, pred_data_3d)
 
 
 @pytest.mark.parametrize(

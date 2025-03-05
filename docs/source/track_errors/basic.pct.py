@@ -20,9 +20,7 @@ def get_loc(graph, node):
     return graph.graph.nodes[node]["t"], graph.graph.nodes[node]["y"]
 
 
-def plot_graph(
-    ax, graph: TrackingGraph, color="black", annotations={}, ann_color="red"
-):
+def plot_graph(ax, graph: TrackingGraph, color="black", annotations={}, ann_color="red"):
     if graph.graph.number_of_nodes() == 0:
         return [0, 0], [0, 0]
     ids = list(graph.graph.nodes)
@@ -34,9 +32,7 @@ def plot_graph(
         # Plot annotation if available
         ann = annotations.get(_id)
         if ann:
-            ax.text(
-                _x - 0.1, _y - 0.25, ann, color="purple", horizontalalignment="right"
-            )
+            ax.text(_x - 0.1, _y - 0.25, ann, color="purple", horizontalalignment="right")
 
     for u, v in graph.graph.edges():
         xs = [graph.graph.nodes[u]["t"], graph.graph.nodes[v]["t"]]
@@ -75,17 +71,11 @@ def plot_matched(examples, annotations, suptitle, titles):
     else:
         yheight = 2
 
-    fig, ax = plt.subplots(
-        1, len(examples) + 1, figsize=(3 * len(examples) + 1, yheight)
-    )
+    fig, ax = plt.subplots(1, len(examples) + 1, figsize=(3 * len(examples) + 1, yheight))
     for i, (matched, anns, title) in enumerate(zip(examples, annotations, titles)):
         axis = ax[i]
-        xbounds, ybounds = plot_graph(
-            axis, matched.gt_graph, color=gt_color, annotations=anns
-        )
-        bounds = plot_graph(
-            axis, matched.pred_graph, color=pred_color, annotations=anns
-        )
+        xbounds, ybounds = plot_graph(axis, matched.gt_graph, color=gt_color, annotations=anns)
+        bounds = plot_graph(axis, matched.pred_graph, color=pred_color, annotations=anns)
         xbounds.extend(bounds[0])
         ybounds.extend(bounds[1])
         plot_matching(axis, matched, color=mapping_color)

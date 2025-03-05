@@ -151,9 +151,7 @@ def test_constructor_seg(nx_comp1):
 
     # check that it fails on non-int values
     segmentation = segmentation.astype(np.float32)
-    with pytest.raises(
-        TypeError, match="Segmentation must have integer dtype, found float32"
-    ):
+    with pytest.raises(TypeError, match="Segmentation must have integer dtype, found float32"):
         TrackingGraph(nx_comp1, segmentation=segmentation)
 
 
@@ -165,21 +163,15 @@ def test_get_cells_by_frame(simple_graph):
 
 
 def test_get_nodes_with_flag(simple_graph):
-    assert Counter(simple_graph.get_nodes_with_flag(NodeFlag.TP_DIV)) == Counter(
-        ["1_1"]
-    )
+    assert Counter(simple_graph.get_nodes_with_flag(NodeFlag.TP_DIV)) == Counter(["1_1"])
     assert Counter(simple_graph.get_nodes_with_flag(NodeFlag.FP_DIV)) == Counter([])
     with pytest.raises(ValueError):
         assert simple_graph.get_nodes_with_flag("is_tp_division")
 
 
 def test_get_edges_with_flag(simple_graph):
-    assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.TRUE_POS)) == Counter(
-        [("1_0", "1_1")]
-    )
-    assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.CTC_FALSE_NEG)) == Counter(
-        []
-    )
+    assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.TRUE_POS)) == Counter([("1_0", "1_1")])
+    assert Counter(simple_graph.get_edges_with_flag(EdgeFlag.CTC_FALSE_NEG)) == Counter([])
     with pytest.raises(ValueError):
         assert simple_graph.get_nodes_with_flag("is_tp")
 
@@ -214,9 +206,7 @@ def test_get_subgraph(simple_graph):
     assert len(subgraph.edges) == 1
     # test that nodes_by_flag dicts are maintained
     assert Counter(subgraph.nodes_by_flag[NodeFlag.TP_DIV]) == Counter(["1_1"])
-    assert Counter(subgraph.edges_by_flag[EdgeFlag.TRUE_POS]) == Counter(
-        [("1_0", "1_1")]
-    )
+    assert Counter(subgraph.edges_by_flag[EdgeFlag.TRUE_POS]) == Counter([("1_0", "1_1")])
     # test that start and end frame are updated
     assert subgraph.start_frame == 0
     assert subgraph.end_frame == 2

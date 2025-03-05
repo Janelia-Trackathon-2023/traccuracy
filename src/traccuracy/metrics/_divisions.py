@@ -123,9 +123,7 @@ class DivisionMetrics(Metric):
         wc_division_count = len(g_pred.get_nodes_with_flag(NodeFlag.WC_DIV))
 
         if gt_div_count == 0:
-            logger.warning(
-                "No ground truth divisions present. Metrics may return np.nan"
-            )
+            logger.warning("No ground truth divisions present. Metrics may return np.nan")
 
         recall = self._get_recall(tp_division_count, gt_div_count)
         precision = self._get_precision(tp_division_count, pred_div_count)
