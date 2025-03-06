@@ -68,9 +68,7 @@ def test_get_det():
         "fn_edges": 20,
         "ws_edges": 4,
     }
-    weighted_sum = (
-        1 * errors["fp_nodes"] + 10 * errors["fn_nodes"] + 5 * errors["ns_nodes"]
-    )
+    weighted_sum = 1 * errors["fp_nodes"] + 10 * errors["fn_nodes"] + 5 * errors["ns_nodes"]
     det_aogm0 = n_nodes * 10
     exp_det = 1 - weighted_sum / det_aogm0
     assert metrics._get_det(errors, n_nodes) == exp_det
@@ -86,9 +84,7 @@ def test_get_det():
     errors["ns_nodes"] = 0
     assert metrics._get_det(errors, n_nodes) == 1
 
-    with pytest.warns(
-        UserWarning, match="No nodes in the GT graph, cannot compute DET."
-    ):
+    with pytest.warns(UserWarning, match="No nodes in the GT graph, cannot compute DET."):
         assert np.isnan(metrics._get_det(errors, 0))
 
 
@@ -122,9 +118,7 @@ def test_get_lnk():
     assert metrics._get_lnk(errors, n_edges) == 1
 
     # no edges warns and returns nan
-    with pytest.warns(
-        UserWarning, match="No edges in the GT graph, cannot compute LNK."
-    ):
+    with pytest.warns(UserWarning, match="No edges in the GT graph, cannot compute LNK."):
         assert np.isnan(metrics._get_lnk(errors, 0))
 
 

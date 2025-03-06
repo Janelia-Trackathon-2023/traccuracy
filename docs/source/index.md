@@ -19,6 +19,14 @@ cli
 ```
 
 ```{toctree}
+:maxdepth: 2
+:hidden: true
+:caption: Matchers
+
+matchers/matchers
+```
+
+```{toctree}
 :caption: Track Errors
 :hidden: true
 :maxdepth: 2

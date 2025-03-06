@@ -53,7 +53,5 @@ def test_weighted_error_sum():
     )
     assert error_sum == 33
 
-    error_sum = get_weighted_error_sum(
-        vertex_error_counts, edge_error_counts, 0.5, 0.5, 0.5
-    )
+    error_sum = get_weighted_error_sum(vertex_error_counts, edge_error_counts, 0.5, 0.5, 0.5)
     assert error_sum == 30.5
