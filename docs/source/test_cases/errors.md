@@ -1,40 +1,39 @@
-# ---
-# jupyter:
-#   jupytext:
-#     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
-#       jupytext_version: 1.16.6
-# ---
+---
+file_format: mystnb
+---
+# Graph Error Test Cases (Non-Dividing)
 
-# %% [markdown]
-# # Graph Error Test Cases (Non-Dividing)
+To facilitate testing, we have provided a suite of canonical
+examples that cover the basic, simple scenarios that can occur in segmentation
+and tracking. Here we describe them and show visualizations of each case.
 
-# %% [markdown]
-# To facilitate testing, we have provided a suite of canonical
-# examples that cover the basic, simple scenarios that can occur in segmentation
-# and tracking. Here we describe them and show visualizations of each case.
-#
-# Metrics should test all the graph and division error cases that are possible with
-# the matchers that the metric supports. For example, if the metric requires a
-# one-to-one matching, it is not necessary to test the two-to-one or one-to-two
-# cases.
+Metrics should test all the graph and division error cases that are possible with
+the matchers that the metric supports. For example, if the metric requires a
+one-to-one matching, it is not necessary to test the two-to-one or one-to-two
+cases.
 
-# %% nbsphinx="hidden"
+
+```{code-cell} ipython3
+---
+tags: [hide-cell]
+---
 import sys
 
 sys.path.append("../../../tests")
+```
 
-# %%
+```{code-cell} ipython3
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 
 import examples.graphs as ex_graphs
 from traccuracy import TrackingGraph
+```
 
-
-# %% nbsphinx="hidden"
+```{code-cell} ipython3
+---
+tags: [hide-cell]
+---
 def get_loc(graph, node):
     return graph.graph.nodes[node]["t"], graph.graph.nodes[node]["y"]
 
@@ -97,46 +96,72 @@ def plot_matched(examples, title):
     ax[-1].set_axis_off()
     plt.tight_layout()
     fig.suptitle(title, y=1.05)
+```
 
-
-# %%
+```{code-cell} ipython3
 plot_matched([ex_graphs.empty_gt()], "Empty Ground Truth")
+```
 
-# %%
+```{code-cell} ipython3
 plot_matched([ex_graphs.empty_pred()], "Empty Prediction")
+```
 
-# %%
+```{code-cell} ipython3
 plot_matched([ex_graphs.good_matched()], "Good Matching")
+```
 
-# %%
+```{code-cell} ipython3
 plot_matched([ex_graphs.fn_node_matched(t) for t in [0, 1, 2]], "False Negative Node")
+```
 
-# %%
+```{code-cell} ipython3
 plot_matched([ex_graphs.fn_edge_matched(t) for t in [0, 1]], "False Negative Edge")
+```
 
-# %%
+```{code-cell} ipython3
 plot_matched([ex_graphs.fp_node_matched(t) for t in [0, 1, 2]], "False Positive Node")
+```
 
-# %%
+```{code-cell} ipython3
 plot_matched([ex_graphs.fp_edge_matched(t) for t in [0, 1]], "False Positive Edge")
+```
 
-# %%
+```{code-cell} ipython3
 plot_matched([ex_graphs.crossover_edge()], "Crossover False Positive")
+```
 
-# %%
+```{code-cell} ipython3
 plot_matched(
     [ex_graphs.node_two_to_one(t) for t in [0, 1, 2]],
     "Two GT nodes to one pred node",
 )
+```
 
+<<<<<<<< HEAD:docs/source/test_cases/graphs.md
+```{code-cell} ipython3
+plot_matched(
+    [ex_graphs.edge_two_to_one(t) for t in [0, 1]], "Two GT edges to one pred edge"
+)
+```
+========
 # %%
 plot_matched([ex_graphs.edge_two_to_one(t) for t in [0, 1]], "Two GT edges to one pred edge")
+>>>>>>>> origin/main:docs/source/test_cases/errors.pct.py
 
-# %%
+```{code-cell} ipython3
 plot_matched(
     [ex_graphs.node_one_to_two(t) for t in [0, 1, 2]],
     "One GT node to two pred nodes",
 )
+```
 
+<<<<<<<< HEAD:docs/source/test_cases/graphs.md
+```{code-cell} ipython3
+plot_matched(
+    [ex_graphs.edge_one_to_two(t) for t in [0, 1]], "One GT edge to 2 pred edges"
+)
+```
+========
 # %%
 plot_matched([ex_graphs.edge_one_to_two(t) for t in [0, 1]], "One GT edge to 2 pred edges")
+>>>>>>>> origin/main:docs/source/test_cases/errors.pct.py
