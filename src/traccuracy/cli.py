@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import json
 import logging
-from typing import Optional
 
 import typer
 
@@ -15,8 +16,8 @@ app = typer.Typer()
 def load_all_ctc(
     gt_dir: str,
     pred_dir: str,
-    gt_track_path: Optional[str] = None,
-    pred_track_path: Optional[str] = None,
+    gt_track_path: str | None = None,
+    pred_track_path: str | None = None,
 ):
     gt_data = load_ctc_data(gt_dir, gt_track_path)
     pred_data = load_ctc_data(pred_dir, pred_track_path)
@@ -26,13 +27,11 @@ def load_all_ctc(
 @app.command()
 def run_ctc(
     gt_dir: str = typer.Argument(..., help="Path to GT tiffs", show_default=False),
-    pred_dir: str = typer.Argument(
-        ..., help="Path to prediction/RES tiffs", show_default=False
-    ),
-    gt_track_path: Optional[str] = typer.Option(
+    pred_dir: str = typer.Argument(..., help="Path to prediction/RES tiffs", show_default=False),
+    gt_track_path: str | None = typer.Option(
         None, help="Path to ctc gt track file", show_default=False
     ),
-    pred_track_path: Optional[str] = typer.Option(
+    pred_track_path: str | None = typer.Option(
         None, help="Path to predicted track file", show_default=False
     ),
     loader: str = typer.Option("ctc", help="Loader to bring data into memory"),
@@ -60,39 +59,31 @@ def run_ctc(
     result, matched = run_metrics(gt_data, pred_data, CTCMatcher(), [CTCMetrics()])
     with open(out_path, "w") as fp:
         json.dump(result, fp)
-    logger.info(f'TRA: {result[0]["results"]["TRA"]}')
-    logger.info(f'DET: {result[0]["results"]["DET"]}')
+    logger.info(f"TRA: {result[0]['results']['TRA']}")
+    logger.info(f"DET: {result[0]['results']['DET']}")
 
 
 @app.command()
 def run_aogm(
     gt_dir: str = typer.Argument(..., help="Path to GT tiffs", show_default=False),
-    pred_dir: str = typer.Argument(
-        ..., help="Path to prediction/RES tiffs", show_default=False
-    ),
-    gt_track_path: Optional[str] = typer.Option(
+    pred_dir: str = typer.Argument(..., help="Path to prediction/RES tiffs", show_default=False),
+    gt_track_path: str | None = typer.Option(
         None, help="Path to ctc gt track file", show_default=False
     ),
-    pred_track_path: Optional[str] = typer.Option(
+    pred_track_path: str | None = typer.Option(
         None, help="Path to predicted track file", show_default=False
     ),
     loader: str = typer.Option("ctc", help="Loader to bring data into memory"),
     out_path: str = typer.Option("aogm_log.json", help="Path to save results"),
-    vertex_ns_weight: float = typer.Option(
-        1, help="Weight to assign to nonsplit vertex errors"
-    ),
+    vertex_ns_weight: float = typer.Option(1, help="Weight to assign to nonsplit vertex errors"),
     vertex_fp_weight: float = typer.Option(
         1, help="Weight to assign to false positive vertex errors"
     ),
     vertex_fn_weight: float = typer.Option(
         1, help="Weight to assign to false negative vertex errors"
     ),
-    edge_fp_weight: float = typer.Option(
-        1, help="Weight to assign to false positive edge errors"
-    ),
-    edge_fn_weight: float = typer.Option(
-        1, help="Weight to assign to false negative edge errors"
-    ),
+    edge_fp_weight: float = typer.Option(1, help="Weight to assign to false positive edge errors"),
+    edge_fn_weight: float = typer.Option(1, help="Weight to assign to false negative edge errors"),
     edge_ws_weight: float = typer.Option(
         1, help="Weight to assign to edges with incorrect semantics"
     ),
@@ -134,19 +125,17 @@ def run_aogm(
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)
-    logger.info(f'AOGM: {result[0]["results"]["AOGM"]}')
+    logger.info(f"AOGM: {result[0]['results']['AOGM']}")
 
 
 @app.command()
 def run_divisions_on_iou(
     gt_dir: str = typer.Argument(..., help="Path to GT tiffs", show_default=False),
-    pred_dir: str = typer.Argument(
-        ..., help="Path to prediction/RES tiffs", show_default=False
-    ),
-    gt_track_path: Optional[str] = typer.Option(
+    pred_dir: str = typer.Argument(..., help="Path to prediction/RES tiffs", show_default=False),
+    gt_track_path: str | None = typer.Option(
         None, help="Path to ctc gt track file", show_default=False
     ),
-    pred_track_path: Optional[str] = typer.Option(
+    pred_track_path: str | None = typer.Option(
         None, help="Path to predicted track file", show_default=False
     ),
     loader: str = typer.Option("ctc", help="Loader to bring data into memory"),
@@ -193,20 +182,18 @@ def run_divisions_on_iou(
         json.dump(result, fp)
     res_str = ""
     for frame_buffer, res_dict in result[0]["results"].items():
-        res_str += f'{frame_buffer} F1: {res_dict["Division F1"]}\n'
+        res_str += f"{frame_buffer} F1: {res_dict['Division F1']}\n"
     logger.info(res_str)
 
 
 @app.command()
 def run_divisions_on_ctc(
     gt_dir: str = typer.Argument(..., help="Path to GT tiffs", show_default=False),
-    pred_dir: str = typer.Argument(
-        ..., help="Path to prediction/RES tiffs", show_default=False
-    ),
-    gt_track_path: Optional[str] = typer.Option(
+    pred_dir: str = typer.Argument(..., help="Path to prediction/RES tiffs", show_default=False),
+    gt_track_path: str | None = typer.Option(
         None, help="Path to ctc gt track file", show_default=False
     ),
-    pred_track_path: Optional[str] = typer.Option(
+    pred_track_path: str | None = typer.Option(
         None, help="Path to predicted track file", show_default=False
     ),
     loader: str = typer.Option("ctc", help="Loader to bring data into memory"),
@@ -248,7 +235,7 @@ def run_divisions_on_ctc(
         json.dump(result, fp)
     res_str = ""
     for frame_buffer, res_dict in result[0]["results"].items():
-        res_str += f'{frame_buffer} F1: {res_dict["Division F1"]}\n'
+        res_str += f"{frame_buffer} F1: {res_dict['Division F1']}\n"
     logger.info(res_str)
 
 

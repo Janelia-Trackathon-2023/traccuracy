@@ -57,9 +57,7 @@ def _detections_from_image(stack, idx):
     Returns:
         pd.DataFrame: The dataframe of track data for one time step (specified by idx)
     """
-    props = regionprops_table(
-        np.asarray(stack[idx, ...]), properties=("label", "centroid")
-    )
+    props = regionprops_table(np.asarray(stack[idx, ...]), properties=("label", "centroid"))
     props["t"] = np.full(props["label"].shape, idx)
     return pd.DataFrame(props)
 
@@ -141,9 +139,7 @@ def ctc_to_graph(df, detections):
 
     # Store position attributes on nodes
     detections["node_id"] = (
-        detections["segmentation_id"].astype("str")
-        + "_"
-        + detections["t"].astype("str")
+        detections["segmentation_id"].astype("str") + "_" + detections["t"].astype("str")
     )
     detections = detections.set_index("node_id")
 
@@ -156,9 +152,7 @@ def ctc_to_graph(df, detections):
 
     # Create graph
     edges = pd.concat(edges)
-    G = nx.from_pandas_edgelist(
-        edges, source="source", target="target", create_using=nx.DiGraph
-    )
+    G = nx.from_pandas_edgelist(edges, source="source", target="target", create_using=nx.DiGraph)
 
     # Add all isolates to graph
     for cell_id in single_nodes:
@@ -199,9 +193,7 @@ def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame, masks: np.ndarray
     for _, row in tracks.iterrows():
         if row["Parent_ID"] != 0:
             if row["Parent_ID"] not in tracks["Cell_ID"].values:
-                raise ValueError(
-                    f"Parent_ID {row['Parent_ID']} is not present in tracks."
-                )
+                raise ValueError(f"Parent_ID {row['Parent_ID']} is not present in tracks.")
             parent_end = tracks[tracks["Cell_ID"] == row["Parent_ID"]]["End"].iloc[0]
             if parent_end >= row["Start"]:
                 raise ValueError(
@@ -211,16 +203,12 @@ def _check_ctc(tracks: pd.DataFrame, detections: pd.DataFrame, masks: np.ndarray
                 )
 
     for t in range(tracks["Start"].min(), tracks["End"].max()):
-        track_ids = set(
-            tracks[(tracks["Start"] <= t) & (tracks["End"] >= t)]["Cell_ID"]
-        )
+        track_ids = set(tracks[(tracks["Start"] <= t) & (tracks["End"] >= t)]["Cell_ID"])
         det_ids = set(detections[(detections["t"] == t)]["segmentation_id"])
         if not track_ids.issubset(det_ids):
             raise ValueError(f"Missing IDs in masks at t={t}: {track_ids - det_ids}")
         if not det_ids.issubset(track_ids):
-            raise ValueError(
-                f"IDs {det_ids - track_ids} at t={t} not represented in tracks file."
-            )
+            raise ValueError(f"IDs {det_ids - track_ids} at t={t} not represented in tracks file.")
 
     for t, frame in enumerate(masks):
         _, n_components = label(frame, return_num=True)
@@ -253,8 +241,7 @@ def load_ctc_data(data_dir, track_path=None, name=None, run_checks=True):
         track_paths = list(glob.glob(os.path.join(data_dir, "*_track.txt")))
         if not track_paths:
             raise ValueError(
-                "No track_path passed and a *_track.txt file could not be found in"
-                f" {data_dir}"
+                f"No track_path passed and a *_track.txt file could not be found in {data_dir}"
             )
         if len(track_paths) > 1:
             raise ValueError(

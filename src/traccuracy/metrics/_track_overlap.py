@@ -54,9 +54,7 @@ class TrackOverlapMetrics(Metric):
         )
 
         # calculate track purity and target effectiveness
-        track_purity = _calc_overlap_score(
-            pred_tracklets, gt_tracklets, matched.pred_gt_map
-        )
+        track_purity = _calc_overlap_score(pred_tracklets, gt_tracklets, matched.pred_gt_map)
         target_effectiveness = _calc_overlap_score(
             gt_tracklets, pred_tracklets, matched.gt_pred_map
         )
@@ -84,9 +82,7 @@ def _calc_overlap_score(
     max_overlap = 0
     total_count = 0
     overlap_edge_to_tid = {
-        edge: i
-        for i in range(len(overlap_tracklets))
-        for edge in overlap_tracklets[i].edges()
+        edge: i for i in range(len(overlap_tracklets)) for edge in overlap_tracklets[i].edges()
     }
     for reference_tracklet in reference_tracklets:
         tracklet_length = len(reference_tracklet.edges())

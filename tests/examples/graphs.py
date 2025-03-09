@@ -343,9 +343,7 @@ def longer_division(t_div, start_id=1, y_offset=0, frame_key="t", location_keys=
         if t < t_div:
             edges.append((start_id + t, start_id + t + 1))
         elif t == t_div:
-            edges.extend(
-                [(start_id + t, start_id + t + 1), (start_id + t, start_id + t + 2)]
-            )
+            edges.extend([(start_id + t, start_id + t + 1), (start_id + t, start_id + t + 2)])
         else:
             delta = start_id + t_div + 2 * (t - t_div) - 1
             edges.extend([(delta, delta + 2), (delta + 1, delta + 3)])
