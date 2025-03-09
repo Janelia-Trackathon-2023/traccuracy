@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Hashable
+from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -11,8 +11,13 @@ from traccuracy._tracking_graph import TrackingGraph
 from ._base import Matcher
 from ._compute_overlap import get_labels_with_overlap
 
+if TYPE_CHECKING:
+    from collections.abc import Hashable
 
-def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
+
+def _match_nodes(
+    gt: np.ndarray, res: np.ndarray, threshold: float = 0.5, one_to_one: bool = False
+) -> tuple[np.ndarray, np.ndarray]:
     """Identify overlapping objects according to IoU and a threshold for minimum overlap.
 
     QUESTION: Does this rely on sequential segmentation labels
@@ -27,8 +32,8 @@ def _match_nodes(gt, res, threshold=0.5, one_to_one=False):
             linear assignment on the thresholded iou array. Default False.
 
     Returns:
-        gtcells (np arr): Array of overlapping ids in the gt frame.
-        rescells (np arr): Array of overlapping ids in the res frame.
+        gtcells (np.ndarray): Array of overlapping ids in the gt frame.
+        rescells (np.ndarray): Array of overlapping ids in the res frame.
     """
     if threshold == 0.0 and not one_to_one:
         raise ValueError("Threshold of 0 is not valid unless one_to_one is True")
@@ -127,9 +132,9 @@ def _construct_time_to_seg_id_map(
         time = data[graph.frame_key]
         seg_id = data[graph.label_key]
         seg_id_to_node_id_map = time_to_seg_id_map.get(time, {})
-        assert (
-            seg_id not in seg_id_to_node_id_map
-        ), f"Segmentation ID {seg_id} occurred twice in frame {time}."
+        assert seg_id not in seg_id_to_node_id_map, (
+            f"Segmentation ID {seg_id} occurred twice in frame {time}."
+        )
         seg_id_to_node_id_map[seg_id] = node_id
         time_to_seg_id_map[time] = seg_id_to_node_id_map
     return time_to_seg_id_map
@@ -157,9 +162,7 @@ def match_iou(gt, pred, threshold=0.6, one_to_one=False):
         ValueError: GT and pred segmentations must be the same shape
     """
     if not isinstance(gt, TrackingGraph) or not isinstance(pred, TrackingGraph):
-        raise ValueError(
-            "Input data must be a TrackingData object with a graph and segmentations"
-        )
+        raise ValueError("Input data must be a TrackingData object with a graph and segmentations")
 
     mapper = []
 
@@ -223,9 +226,7 @@ class IOUMatcher(Matcher):
         """
         # Check that segmentations exist in the data
         if gt_graph.segmentation is None or pred_graph.segmentation is None:
-            raise ValueError(
-                "Segmentation data must be provided for both gt and pred data"
-            )
+            raise ValueError("Segmentation data must be provided for both gt and pred data")
 
         mapping = match_iou(
             gt_graph,

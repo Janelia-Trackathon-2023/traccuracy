@@ -69,9 +69,7 @@ class TestMetric:
                 return {"success": True}
 
         graph = TrackingGraph(nx.DiGraph())
-        matched = Matched(
-            graph, graph, [(1, 2), (1, 3)], {"matching type": "many-to-many"}
-        )
+        matched = Matched(graph, graph, [(1, 2), (1, 3)], {"matching type": "many-to-many"})
 
         metric = DummyMetric()
 

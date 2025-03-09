@@ -173,6 +173,54 @@ jobs:
         with:
           body-path: report.md
 
+  test-case-coverage:
+    name: Test case coverage
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache-dependency-path: "pyproject.toml"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -e .[covreport]
+
+      - name: Store target commit hash
+        id: hash
+        run: echo "commit=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: Run coverage report
+        run: |
+          python scripts/test_case_report.py ${{ github.event.pull_request.head.sha }}
+
+      - name: Add, stash, switch branch
+        run: |
+          git add ${{ github.event.pull_request.head.sha }}.png
+          git stash
+          git fetch
+          git checkout test-case-coverage-report
+          git stash pop
+
+      - name: Commit to branch
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: "*.png"
+
+      - name: Comment with image link
+        uses: peter-evans/commit-comment@v3
+        with:
+          body: |
+            ![coverage plot](https://github.com/Janelia-Trackathon-2023/traccuracy/blob/test-case-coverage-report/${{ steps.hash.outputs.commit }}.png?raw=True)
+
+
   deploy:
     name: Deploy
     needs: test
