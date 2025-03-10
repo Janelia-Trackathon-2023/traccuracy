@@ -154,9 +154,7 @@ def test_track_overlap_metrics(data, inverse) -> None:
         g_gt, g_pred = g_pred, g_gt
         mapping = [(b, a) for a, b in mapping]
 
-    matched = Matched(
-        TrackingGraph(g_gt), TrackingGraph(g_pred), mapping, {"name": "DummyMatcher"}
-    )
+    matched = Matched(TrackingGraph(g_gt), TrackingGraph(g_pred), mapping, {"name": "DummyMatcher"})
 
     metric = TrackOverlapMetrics()
     results = metric._compute(matched)

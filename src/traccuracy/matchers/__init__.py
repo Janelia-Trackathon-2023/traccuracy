@@ -1,4 +1,4 @@
-""" Subpackage for matching ground truth and prediction tracks
+"""Subpackage for matching ground truth and prediction tracks
 
 This subpackage contains functions that match nodes and edges
 of a ground truth and predicted tracking solution.
@@ -30,5 +30,12 @@ from ._base import Matched
 from ._compute_overlap import get_labels_with_overlap
 from ._ctc import CTCMatcher
 from ._iou import IOUMatcher
+from ._point import PointMatcher
 
-__all__ = ["CTCMatcher", "IOUMatcher", "Matched", "get_labels_with_overlap"]
+__all__ = [
+    "CTCMatcher",
+    "IOUMatcher",
+    "Matched",
+    "PointMatcher",
+    "get_labels_with_overlap",
+]
