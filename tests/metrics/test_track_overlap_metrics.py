@@ -6,6 +6,112 @@ import pytest
 from traccuracy import TrackingGraph
 from traccuracy.matchers import Matched
 from traccuracy.metrics._track_overlap import TrackOverlapMetrics
+import tests.examples.graphs as ex_graphs
+import numpy as np
+
+class TestStandardOverlapMetrics:
+    tp = "track_purity"
+    te = "target_effectiveness"
+
+    @pytest.mark.parametrize("incl_div_edges", [True, False])
+    def test_empty_gt(self, incl_div_edges):
+        matched = ex_graphs.empty_gt()
+        metric = TrackOverlapMetrics(include_division_edges=incl_div_edges)
+        results = metric._compute(matched)
+        assert results[self.tp] == 0
+        assert np.isnan(results[self.te])
+
+    @pytest.mark.parametrize("incl_div_edges", [True, False])
+    def test_empty_pred(self, incl_div_edges):
+        matched = ex_graphs.empty_pred()
+        metric = TrackOverlapMetrics(include_division_edges=incl_div_edges)
+        results = metric._compute(matched)
+        assert np.isnan(results[self.tp])
+        assert results[self.te] == 0
+
+    @pytest.mark.parametrize("incl_div_edges", [True, False])
+    def test_good_match(self, incl_div_edges):
+        matched = ex_graphs.good_matched()
+        metric = TrackOverlapMetrics(include_division_edges=incl_div_edges)
+        results = metric._compute(matched)
+        assert results[self.tp] == 1
+        assert results[self.te] == 1
+
+    @pytest.mark.parametrize(
+        ("t", "incl_div_edges", "tp", "te"), 
+        [(0, True, 1, 0.5), (0, False, 1, 0.5),
+         (1, True, 0, 0), (1, False, 0, 0),
+         (2, True, 1, 0.5), (2, False, 1, 0.5)
+        ]
+    )
+    def test_fn_node(self, t, incl_div_edges, tp, te):
+        matched = ex_graphs.fn_node_matched(t)
+        metric = TrackOverlapMetrics(include_division_edges=incl_div_edges)
+        results = metric._compute(matched)
+
+        assert results[self.tp] == tp
+        assert results[self.te] == te
+    
+    @pytest.mark.parametrize(
+        ("edge_er", "incl_div_edges", "tp", "te"), 
+        [(0, True, 1, 0.5), (0, False, 1, 0.5),
+         (1, True, 1, 0.5), (1, False, 1, 0.5),
+        ]
+    )
+    def test_fn_edge(self, edge_er, incl_div_edges, tp, te):
+        matched = ex_graphs.fn_edge_matched(edge_er)
+        metric = TrackOverlapMetrics(include_division_edges=incl_div_edges)
+        results = metric._compute(matched)
+        assert results[self.tp] == tp
+        assert results[self.te] == te
+
+    @pytest.mark.parametrize(
+        ("t", "incl_div_edges", "tp", "te"), 
+        [(0, True, 0.75, 1), (0, False, 0.75, 1),
+         (1, True, 0.75, 1), (1, False, 0.75, 1),
+         (2, True, 0.75, 1), (2, False, 0.75, 1),
+        ]
+    )
+    def test_fp_node(self, t, incl_div_edges, tp, te):
+        matched = ex_graphs.fp_node_matched(t)
+        metric = TrackOverlapMetrics(include_division_edges=incl_div_edges)
+        results = metric._compute(matched)
+        results = metric._compute(matched)
+        assert results[self.tp] == tp
+        assert results[self.te] == te
+    
+    @pytest.mark.parametrize(
+        ("edge_er", "incl_div_edges", "tp", "te"), 
+        [(0, True, 2/3, 1), (0, False, 2/3, 1),
+         (1, True, 2/3, 1), (1, False, 2/3, 1),
+        ]
+    )
+    def test_fp_edge(self, edge_er, incl_div_edges, tp, te):
+        matched = ex_graphs.fp_edge_matched(edge_er)
+        metric = TrackOverlapMetrics(include_division_edges=incl_div_edges)
+        results = metric._compute(matched)
+        results = metric._compute(matched)
+        assert results[self.tp] == tp
+        assert results[self.te] == te
+    
+    @pytest.mark.parametrize(
+        ("incl_div_edges", "tp", "te"), 
+        [(True, 0.5, 0.25), (False, 0.5, 0.25)]
+    )
+    def test_crossover(self, incl_div_edges, tp, te):
+        matched = ex_graphs.crossover_edge()
+        metric = TrackOverlapMetrics(include_division_edges=incl_div_edges)
+        results = metric._compute(matched)
+        results = metric._compute(matched)
+        assert results[self.tp] == tp
+        assert results[self.te] == te
+
+    # Skipping the following cases because they are not one to one
+    # ex_graphs.node_two_to_one
+    # ex_graphs.edge_two_to_one
+    # ex_graphs.node_one_to_two
+    # ex_graphs.edge_one_to_two
+
 
 
 def add_frame(tree):
