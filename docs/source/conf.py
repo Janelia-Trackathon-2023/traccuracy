@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath("../../src"))
 # -- Project information -----------------------------------------------------
 
 project = "Traccuracy"
-copyright = "2023"  # noqa
+copyright = "2025"  # noqa
 author = "Morgan Schwartz, Draga Doncila Pop, and Caroline Malin-Mayor"
 
 
