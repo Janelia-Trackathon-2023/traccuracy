@@ -49,8 +49,8 @@ extensions = [
     "sphinx.ext.viewcode",
     "IPython.sphinxext.ipython_console_highlighting",  # code highlighting in notebooks
     "autoapi.extension",  # autobuild api docs
-    # "nbsphinx",  # add notebooks to docs
-    # "nbsphinx_link",  # add notebooks to docs
+    "nbsphinx",  # add notebooks to docs
+    "nbsphinx_link",  # add notebooks to docs
     "sphinx_click",  # auto document cli
     "myst_nb",  # Execute and render myst md
 ]
@@ -87,6 +87,11 @@ nb_execution_raise_on_error = True
 # Import Matplotlib to avoid this message in notebooks:
 # "Matplotlib is building the font cache; this may take a moment."
 import matplotlib.pyplot  # noqa
+
+# -- Nbsphinx extension ------------------------------------------------------
+
+nbsphinx_execute = "auto"
+exclude_patterns = ["_build", "**.ipynb_checkpoints"]
 
 # -- Options for HTML output -------------------------------------------------
 
