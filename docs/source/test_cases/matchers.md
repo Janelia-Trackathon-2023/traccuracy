@@ -17,14 +17,12 @@ of precision.
 
 ```{code-cell} ipython3
 ---
-tags: [hide-cell]
+tags: [remove-input]
 ---
 import sys
 
 sys.path.append("../../../tests")
-```
 
-```{code-cell} ipython3
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import ListedColormap
@@ -38,7 +36,7 @@ Each example that is illustrated here in 2D is also implemented in 3d.
 
 ```{code-cell} ipython3
 ---
-tags: [hide-cell]
+tags: [remove-input]
 ---
 def plot_one(seg, axis, colors):
     colormap = ListedColormap(colors)

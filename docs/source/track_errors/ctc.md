@@ -7,7 +7,7 @@ These node and edge error annotations are used to calculate the CTC metrics TRA 
 
 ```{code-cell} ipython3
 ---
-tags: [hide-cell]
+tags: [remove-input]
 ---
 
 import sys
@@ -121,7 +121,7 @@ Non-split nodes are annotated on the predicted graph and correspond to a node in
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched([ex_graphs.node_two_to_one(t) for t in [0, 1]], [{4: "NS"}, {5: "NS"}], "Non-Split Nodes")
@@ -136,7 +136,7 @@ False positive edges are annotated on the predicted graph. An edge is considered
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched([ex_graphs.crossover_edge()], [{(7,8): "FP"}], "")
@@ -150,7 +150,7 @@ False negative edges are annotated on the ground truth graph. An edge is conside
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched([ex_graphs.fn_node_matched(0)], [{1: "FN", (1, 2): "FN"}], "")
@@ -160,7 +160,7 @@ plot_matched([ex_graphs.fn_node_matched(0)], [{1: "FN", (1, 2): "FN"}], "")
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched([ex_graphs.fn_edge_matched(0)], [{(1, 2): "FN"}], "")
@@ -170,7 +170,7 @@ plot_matched([ex_graphs.fn_edge_matched(0)], [{(1, 2): "FN"}], "")
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched([ex_graphs.node_two_to_one(t) for t in [0, 1]], [{4: "NS", (1, 2): "FN"}, {5: "NS", (1, 7): "FN", (2, 3): "FN"}], "")
@@ -182,7 +182,7 @@ Intertrack edges connect two nodes with different track IDs, most commonly paren
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 div_graph = ex_graphs.basic_division(1)
@@ -197,7 +197,7 @@ After identifying a matched pair of edges from the ground truth and predicted gr
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched(

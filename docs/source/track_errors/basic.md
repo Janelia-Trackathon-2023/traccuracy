@@ -7,7 +7,7 @@ This set of node and edge errors applies only to graphs with a one-to-one matchi
 
 ```{code-cell} ipython3
 ---
-tags: [hide-cell]
+tags: [remove-input]
 ---
 import sys
 
@@ -158,7 +158,7 @@ fails to meet the criteria for a true positive.
 
 ```{code-cell} ipython3
 ---
-tags: [hide-cell]
+tags: [remove-input]
 ---
 def fp_node_match():
     matched = ex_graphs.good_matched()

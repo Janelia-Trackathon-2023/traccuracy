@@ -7,7 +7,7 @@ Note: These flags are annotated on the parent nodes.
 
 ```{code-cell} ipython3
 ---
-tags: [hide-cell]
+tags: [remove-input]
 ---
 import sys
 sys.path.append('../../../tests')
@@ -106,7 +106,7 @@ A true positive division is a division event in which the parent and both daught
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched([ex_graphs.good_div(1)], [{2: "TP", 6: "TP"}], "", [""])
@@ -118,7 +118,7 @@ For the given ground truth graph, the subsequent predicted graphs show examples 
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched(
@@ -131,7 +131,7 @@ plot_matched(
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched(
@@ -152,7 +152,7 @@ Given the ground truth graph below, each of the subsequent prediction graphs wou
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched(
@@ -170,7 +170,7 @@ A false positive division is any division event in the predicted graph that does
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched(
@@ -187,7 +187,7 @@ A wrong child division is one where the parent node is correctly matched and ide
 
 ```{code-cell} ipython3
 ---
-tags: [hide-input]
+tags: [remove-input]
 ---
 
 plot_matched(

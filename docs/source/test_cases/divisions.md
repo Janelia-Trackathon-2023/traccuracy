@@ -13,14 +13,12 @@ functions in the `tests/examples/` directory.
 
 ```{code-cell} ipython3
 ---
-tags: [hide-cell]
+tags: [remove-input]
 ---
 import sys
 
 sys.path.append("../../../tests")
-```
 
-```{code-cell} ipython3
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 
@@ -30,7 +28,7 @@ from traccuracy import TrackingGraph
 
 ```{code-cell} ipython3
 ---
-tags: [hide-cell]
+tags: [remove-input]
 ---
 def get_loc(graph, node):
     return graph.graph.nodes[node]["t"], graph.graph.nodes[node]["y"]
