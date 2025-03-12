@@ -2,23 +2,6 @@
 ```
 
 ```{toctree}
-:caption: 'Examples:'
-:hidden: true
-:maxdepth: 2
-
-examples/ctc
-```
-
-```{toctree}
-:caption: 'Traccuracy API:'
-:hidden: true
-:maxdepth: 2
-
-autoapi/index
-cli
-```
-
-```{toctree}
 :maxdepth: 2
 :hidden: true
 :caption: Matchers
@@ -48,9 +31,19 @@ metrics/divisions
 ```
 
 ```{toctree}
-:caption: Development
+:caption: 'Examples'
 :hidden: true
 :maxdepth: 2
 
+examples/ctc
+```
+
+```{toctree}
+:caption: Developer
+:hidden: true
+:maxdepth: 2
+
+autoapi/index
+cli
 test_cases/index
 ```
