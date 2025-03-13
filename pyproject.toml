@@ -9,7 +9,7 @@ requires = ["wheel", "setuptools>=40.8.0", "setuptools_scm"]
 name = "traccuracy"
 description = "Utilities for computing common accuracy metrics on cell tracking challenge solutions with ground truth"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "BSD 3-Clause License" }
 authors = [
     { email = "draga.doncilapop1@monash.edu", name = "Draga Doncila Pop" },
@@ -21,7 +21,6 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Typing :: Typed",
@@ -134,7 +133,7 @@ include = ['traccuracy*']
 # https://github.com/charliermarsh/ruff
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 # https://beta.ruff.rs/docs/rules/
@@ -167,9 +166,6 @@ extend-ignore = [
     "D413", # Missing blank line after last section
     "D416", # Section name should end with a colon
 ]
-unfixable = [
-    "B905", # currently adds strict=False to zips, should add strict=True manually
-]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -177,7 +173,7 @@ convention = "google"
 [tool.ruff.lint.per-file-ignores]
 "tests/*.py" = ["D", "S"]
 "setup.py" = ["D"]
-"docs/source/*/*.pct.py" = ["E402", "B006"]
+"docs/source/*/*.pct.py" = ["E402", "B006", "B905"]
 # Ignore typer functions in function definitions
 "src/traccuracy/cli.py" = ["B008"]
 
