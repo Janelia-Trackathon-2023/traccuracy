@@ -168,9 +168,6 @@ extend-ignore = [
     "D413", # Missing blank line after last section
     "D416", # Section name should end with a colon
 ]
-unfixable = [
-    "B905", # currently adds strict=False to zips, should add strict=True manually
-]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
