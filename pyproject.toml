@@ -178,7 +178,7 @@ convention = "google"
 [tool.ruff.lint.per-file-ignores]
 "tests/*.py" = ["D", "S"]
 "setup.py" = ["D"]
-"docs/source/*/*.pct.py" = ["E402", "B006"]
+"docs/source/*/*.pct.py" = ["E402", "B006", "B905"]
 # Ignore typer functions in function definitions
 "src/traccuracy/cli.py" = ["B008"]
 
