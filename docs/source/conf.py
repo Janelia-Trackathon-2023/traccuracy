@@ -88,6 +88,11 @@ autoapi_ignore = ["*/cli.py"]
 # -- Myst NB -----------------------------------------------------------------
 nb_execution_raise_on_error = True
 
+myst_enable_extensions = [
+    "dollarmath",
+    "colon_fence",
+]
+
 # Import Matplotlib to avoid this message in notebooks:
 # "Matplotlib is building the font cache; this may take a moment."
 import matplotlib.pyplot  # noqa
