@@ -69,6 +69,10 @@ source_suffix = [".md", ".rst"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# Suppress error about unnpickable config value 'nbsphinx_custom_formats'
+# https://github.com/sphinx-doc/sphinx/issues/12300
+suppress_warnings = ["config.cache"]
+
 # -- AutoAPI configuration ---------------------------------------------------
 autoapi_dirs = ["../../src/traccuracy"]
 autoapi_type = "python"
