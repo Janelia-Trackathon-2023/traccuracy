@@ -23,6 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Typing :: Typed",
 ]
 dynamic = ["version"]
@@ -36,7 +37,7 @@ dependencies = [
     "tqdm",
     "typer",
     # numba technically optional, will still work without it
-    "numba; python_version != '3.11'",
+    "numba",
     "pyarrow",
 ]
 
