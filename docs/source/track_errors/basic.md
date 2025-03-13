@@ -1,14 +1,13 @@
 ---
 file_format: mystnb
+mystnb:
+    remove_code_source: True
 ---
 # Basic Errors
 
 This set of node and edge errors applies only to graphs with a one-to-one matching.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
 import sys
 
 sys.path.append("../../../tests")
@@ -157,9 +156,6 @@ fails to meet the criteria for a true positive.
 
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
 def fp_node_match():
     matched = ex_graphs.good_matched()
     matched.gt_graph.graph.remove_edge(2, 3)

@@ -1,15 +1,13 @@
 ---
 file_format: mystnb
+mystnb:
+    remove_code_source: True
 ---
 # CTC Errors
 
 These node and edge error annotations are used to calculate the CTC metrics TRA and DET as well as the basic AOGM metric as described in {doc}`../metrics/ctc`.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 import sys
 sys.path.append('../../../tests')
 
@@ -120,10 +118,6 @@ False negative nodes are annotated on the ground truth graph and correspond to a
 Non-split nodes are annotated on the predicted graph and correspond to a node in the prediction that has been matched to more than one node in the ground truth graph.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched([ex_graphs.node_two_to_one(t) for t in [0, 1]], [{4: "NS"}, {5: "NS"}], "Non-Split Nodes")
 
 ```
@@ -135,10 +129,6 @@ plot_matched([ex_graphs.node_two_to_one(t) for t in [0, 1]], [{4: "NS"}, {5: "NS
 False positive edges are annotated on the predicted graph. An edge is considered a false positive if both nodes are true positive nodes, but the edge does not match to any edge in the ground truth graph. In the example below, edge (7, 8) is a false positive.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched([ex_graphs.crossover_edge()], [{(7,8): "FP"}], "")
 ```
 
@@ -149,30 +139,18 @@ False negative edges are annotated on the ground truth graph. An edge is conside
 1. Either node is annotated as a false negative node
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched([ex_graphs.fn_node_matched(0)], [{1: "FN", (1, 2): "FN"}], "")
 ```
 
 2. The corresponding edge in the predicted graph does not exist between two true positive nodes
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched([ex_graphs.fn_edge_matched(0)], [{(1, 2): "FN"}], "")
 ```
 
 3. Either node matches to a non-split node in the predicted graph
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched([ex_graphs.node_two_to_one(t) for t in [0, 1]], [{4: "NS", (1, 2): "FN"}, {5: "NS", (1, 7): "FN", (2, 3): "FN"}], "")
 ```
 
@@ -181,10 +159,6 @@ plot_matched([ex_graphs.node_two_to_one(t) for t in [0, 1]], [{4: "NS", (1, 2): 
 Intertrack edges connect two nodes with different track IDs, most commonly parent cells to daughter cells, or two cells in non-consecutive frames. Note that intertrack edges are not errors, but support the annotation of Wrong Semantic edges, as detailed below.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 div_graph = ex_graphs.basic_division(1)
 matched = Matched(div_graph, TrackingGraph(nx.DiGraph()), [], {})
 plot_matched([matched], [{(2, 3): "IT", (2, 4): "IT"}], "")
@@ -196,10 +170,6 @@ plot_matched([matched], [{(2, 3): "IT", (2, 4): "IT"}], "")
 After identifying a matched pair of edges from the ground truth and predicted graphs, the predicted edge is annotated as wrong semantic if the ground truth and predicted edge have different intertrack edge annotations.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched(
     [ex_graphs.fp_div(1), ex_graphs.one_child(1)],
     [{(6, 7): "WS"}, {(2, 3): "WS"}],

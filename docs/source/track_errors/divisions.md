@@ -1,14 +1,13 @@
 ---
 file_format: mystnb
+mystnb:
+    remove_code_source: True
 ---
 # Division Errors
 
 Note: These flags are annotated on the parent nodes.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
 import sys
 sys.path.append('../../../tests')
 
@@ -105,10 +104,6 @@ def plot_matched(examples, annotations, suptitle, titles):
 A true positive division is a division event in which the parent and both daughters match between the ground truth and predicted graphs. True positive divisions are annotated on the parent node on both the ground truth and predicted graphs.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched([ex_graphs.good_div(1)], [{2: "TP", 6: "TP"}], "", [""])
 ```
 
@@ -117,10 +112,6 @@ The `frame_buffer` parameter allows for divisions to be classified as true posit
 For the given ground truth graph, the subsequent predicted graphs show examples of true positive divisions events with different `frame_buffer` specifications.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched(
     [ex_graphs.div_1early_mid(), ex_graphs.div_1late_mid()],
     [{9: "TP", 3: "TP"}, {2: "TP", 11: "TP"}],
@@ -130,10 +121,6 @@ plot_matched(
 ```
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched(
     [ex_graphs.div_2early_mid(), ex_graphs.div_2late_mid()],
     [{8: "TP", 4: "TP"}, {2: "TP", 12: "TP"}],
@@ -151,10 +138,6 @@ A false negative division is any division event in the ground truth that is not 
 Given the ground truth graph below, each of the subsequent prediction graphs would be classified as a false negative division.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched(
     [ex_graphs.one_child(1), ex_graphs.no_children(1)],
     [{2: "FN"}, {2: "FN"}],
@@ -169,10 +152,6 @@ plot_matched(
 A false positive division is any division event in the predicted graph that does not correspond to a division in the ground truth graph. False positive divisions are annotated on the predicted graph.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched(
     [ex_graphs.fp_div(1)],
     [{6: "FP"}],
@@ -186,10 +165,6 @@ plot_matched(
 A wrong child division is one where the parent node is correctly matched and identified as a division, but either one or both daughters do not match. This error is annotated on both the ground truth and the predicted graph.
 
 ```{code-cell} ipython3
----
-tags: [remove-input]
----
-
 plot_matched(
     [ex_graphs.wrong_child(1), ex_graphs.wrong_children(1)],
     [{2: "WC", 7: "WC"}, {2: "WC", 6: "WC"}],
