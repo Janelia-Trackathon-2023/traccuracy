@@ -117,7 +117,7 @@ class PointMatcher(Matcher):
 
         row_ind, col_ind = linear_sum_assignment(cost_matrix)
         # go back to matched node ids from matrix indices
-        for row, col in zip(row_ind, col_ind):
+        for row, col in zip(row_ind, col_ind, strict=True):
             # it said they were sorted by row index, so we only want the top left corner
             if row >= num_gt:
                 break
