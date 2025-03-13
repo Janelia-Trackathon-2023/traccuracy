@@ -184,7 +184,7 @@ def match_iou(gt, pred, threshold=0.6, one_to_one=False):
             one_to_one=one_to_one,
         )
         # Construct node id tuple for each match
-        for gt_seg_id, pred_seg_id in zip(*matches):
+        for gt_seg_id, pred_seg_id in zip(*matches, strict=True):
             # Find node id based on time and segmentation label
             gt_node = gt_time_to_seg_id_map[t][gt_seg_id]
             pred_node = pred_time_to_seg_id_map[t][pred_seg_id]

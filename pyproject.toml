@@ -135,7 +135,7 @@ include = ['traccuracy*']
 # https://github.com/charliermarsh/ruff
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 # https://beta.ruff.rs/docs/rules/

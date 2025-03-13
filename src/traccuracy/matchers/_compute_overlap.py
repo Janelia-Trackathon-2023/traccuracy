@@ -12,9 +12,9 @@ from skimage.measure import regionprops
 
 def _union_slice(a: tuple[slice], b: tuple[slice]):
     """returns the union of slice tuples a and b"""
-    starts = tuple(min(_a.start, _b.start) for _a, _b in zip(a, b))
-    stops = tuple(max(_a.stop, _b.stop) for _a, _b in zip(a, b))
-    return tuple(slice(start, stop) for start, stop in zip(starts, stops))
+    starts = tuple(min(_a.start, _b.start) for _a, _b in zip(a, b, strict=True))
+    stops = tuple(max(_a.stop, _b.stop) for _a, _b in zip(a, b, strict=True))
+    return tuple(slice(start, stop) for start, stop in zip(starts, stops, strict=True))
 
 
 def get_labels_with_overlap(
@@ -55,7 +55,7 @@ def get_labels_with_overlap(
     ind_gt, ind_res = np.nonzero(overlaps)
 
     overlaps = []
-    for i, j in zip(ind_gt, ind_res):
+    for i, j in zip(ind_gt, ind_res, strict=True):
         sslice = _union_slice(gt_props[i].slice, res_props[j].slice)
         gt_mask = gt_frame[sslice] == gt_box_labels[i]
         res_mask = res_frame[sslice] == res_box_labels[j]
