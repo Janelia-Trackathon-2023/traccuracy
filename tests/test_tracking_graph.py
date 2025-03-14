@@ -331,9 +331,9 @@ def test_remove_flag_from_edge(simple_graph):
 def test_get_tracklets(simple_graph):
     tracklets = simple_graph.get_tracklets()
     for tracklet in tracklets:
-        start_nodes = [n for n, d in tracklet.graph.in_degree() if d == 0]
+        start_nodes = [n for n, d in tracklet.in_degree() if d == 0]
         assert len(start_nodes) == 1
-        end_nodes = [n for n, d in tracklet.graph.out_degree() if d == 0]
+        end_nodes = [n for n, d in tracklet.out_degree() if d == 0]
         assert len(end_nodes)
 
         if start_nodes[0] == "1_0":
