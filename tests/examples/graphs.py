@@ -419,7 +419,7 @@ def good_div(t_div):
     gt = basic_division(t_div)
     start_id = max(gt.graph.nodes) + 1
     pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
-    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
+    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2), strict=False))
     return Matched(gt, pred, mapping, {})
 
 
@@ -429,7 +429,7 @@ def fp_div(t_div):
     gt = basic_division(t_div)
     start_id = max(gt.graph.nodes) + 1
     pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
-    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
+    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2), strict=False))
     if t_div == 0:
         gt.graph.remove_edge(1, 2)
     elif t_div == 1:
@@ -443,7 +443,7 @@ def one_child(t_div):
     gt = basic_division(t_div)
     start_id = max(gt.graph.nodes) + 1
     pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
-    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
+    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2), strict=False))
     pred.graph.remove_edge(6, 7)
     return Matched(gt, pred, mapping, {})
 
@@ -454,7 +454,7 @@ def no_children(t_div):
     gt = basic_division(t_div)
     start_id = max(gt.graph.nodes) + 1
     pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
-    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
+    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2), strict=False))
     pred.graph.remove_edge(6, 7)
     pred.graph.remove_edge(6, 8)
     return Matched(gt, pred, mapping, {})
@@ -480,7 +480,7 @@ def wrong_child(t_div):
     pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
 
     # mapping of the two basic div graphs
-    mapping = list(zip(range(1, child_start_id + 1), range(start_id, start_id * 2)))
+    mapping = list(zip(range(1, child_start_id + 1), range(start_id, start_id * 2), strict=False))
     # remove mapping to one of the correct daughters and add to wrong daughter
     if t_div == 0:
         mapping.remove((3, 10))
@@ -501,7 +501,7 @@ def wrong_children(t_div):
     pred = basic_division(t_div, start_id=start_id, y_offset=0.5)
 
     # mapping of the two basic div graphs
-    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2)))
+    mapping = list(zip(range(1, start_id), range(start_id, start_id * 2), strict=False))
     # remove mapping between daughters
     if t_div == 0:
         mapping.remove((3, 8))

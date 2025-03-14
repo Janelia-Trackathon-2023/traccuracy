@@ -281,7 +281,7 @@ class TestGapCloseDivisions:
 
 def test_evaluate_division_events():
     g_gt, g_pred, map_gt, map_pred = get_division_graphs()
-    mapper = list(zip(map_gt, map_pred))
+    mapper = list(zip(map_gt, map_pred, strict=False))
     frame_buffer = 2
 
     matched_data = Matched(
