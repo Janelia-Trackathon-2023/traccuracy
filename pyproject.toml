@@ -60,18 +60,16 @@ dev = [
     "traccuracy[docs]"
 ]
 docs = [
-    "ipython==8.17.1",
-    "myst-parser==2.0.0",
+    "myst-nb >=1.2.0, <2",
+    "sphinx-autoapi==3.0.0",
+    "sphinx-click >=6.0.0, <7",
+    "sphinx-rtd-theme >=3.0.1, <4",
+    "sphinx >=7.4.7, <8",
+    "matplotlib",
+    "jupytext >=1.16.7, <2",
     "nbsphinx-link==1.3.0",
     "nbsphinx==0.9.3",
-    "sphinx-autoapi==3.0.0",
-    "sphinx-click==5.0.1",
-    "sphinx-rtd-theme==1.3.0",
-    "Sphinx==7.2.6",
-    "jupytext",
-    "ipykernel",
-    "jupyter-sphinx",
-    "matplotlib"
+    "docutils==0.20.*"
 ]
 covreport = [
     "traccuracy[test]",
@@ -83,7 +81,7 @@ channels = ["conda-forge"]
 platforms = ["osx-arm64", "win-64", "linux-64"]
 
 [tool.pixi.dependencies]
-python = "3.10.*"
+python = "3.11.*"
 
 [tool.pixi.pypi-dependencies]
 traccuracy = { path = ".", editable = true }
@@ -103,8 +101,8 @@ benchmark = { cmd = "pytest tests/bench.py", depends-on = ["getdata"] }
 test-case-report = "python scripts/test_case_report.py test-case-report && rm matchers*.json track_errors*.json"
 
 [tool.pixi.feature.docs.tasks]
-kernel-config = { cmd = "python -m ipykernel install --user --name=\"traccuracy-docs\" "}
-docs = { cmd = "sphinx-build . ../_build -D jupyter_execute_default_kernel=\"traccuracy-docs\" -D nbsphinx_kernel_name=\"traccuracy-docs\"", cwd="docs/source", depends-on=["kernel-config"]}
+kernel-config = { cmd = "python -m ipykernel install --user --name=\"traccuracy-docs\""}
+docs = { cmd = "sphinx-build docs/source docs/_build", depends-on = ["kernel-config"]}
 
 [project.urls]
 homepage = "https://github.com/Janelia-Trackathon-2023/traccuracy"
