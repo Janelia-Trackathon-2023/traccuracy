@@ -53,7 +53,7 @@ def _match_nodes(
 
     # Catch the case where there are no overlaps
     if len(pairs) < 2:
-        gtcells, rescells = [], []
+        gtcells, rescells = np.array([]), np.array([])
     else:
         gtcells, rescells = pairs[0], pairs[1]
 

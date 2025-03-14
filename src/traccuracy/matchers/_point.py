@@ -81,7 +81,7 @@ class PointMatcher(Matcher):
         pred_kdtree = KDTree(pred_locations)
         # indices correspond to indices in the gt_nodes, pred_nodes lists
         sdm: dict[tuple[Any, Any], float] = gt_kdtree.sparse_distance_matrix(
-            pred_kdtree, max_distance=self.threshold
+            pred_kdtree, max_distance=self.threshold, output_type="dict"
         )
         # unmapped cost has to be higher than the max distance so if something can
         # be matched it will
