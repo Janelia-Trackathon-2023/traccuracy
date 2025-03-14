@@ -22,7 +22,8 @@ from traccuracy.matchers._base import Matched
 from ._base import Metric
 
 if TYPE_CHECKING:
-    from traccuracy._tracking_graph import TrackingGraph
+    import networkx as nx
+
     from traccuracy.matchers import Matched
 
 
@@ -45,7 +46,7 @@ class TrackOverlapMetrics(Metric):
         super().__init__(valid_match_types)
         self.include_division_edges = include_division_edges
 
-    def _compute(self, matched: Matched) -> dict:
+    def _compute(self, matched: Matched) -> dict[str, float]:
         gt_tracklets = matched.gt_graph.get_tracklets(
             include_division_edges=self.include_division_edges
         )
@@ -65,10 +66,10 @@ class TrackOverlapMetrics(Metric):
 
 
 def _calc_overlap_score(
-    reference_tracklets: list[TrackingGraph],
-    overlap_tracklets: list[TrackingGraph],
+    reference_tracklets: list[nx.DiGraph],
+    overlap_tracklets: list[nx.DiGraph],
     overlap_reference_mapping: dict[Any, list[Any]],
-):
+) -> float:
     """Calculate weighted sum of the length of the longest overlap tracklet
     for each reference tracklet.
 

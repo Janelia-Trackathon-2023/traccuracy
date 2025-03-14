@@ -11,12 +11,12 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def classify_basic_errors(matched: Matched):
+def classify_basic_errors(matched: Matched) -> None:
     _classify_nodes(matched)
     _classify_edges(matched)
 
 
-def _classify_nodes(matched: Matched):
+def _classify_nodes(matched: Matched) -> None:
     """Classify a pair of GT/pred nodes as true positives if the match to only
     one other node. Supports one-to-one
 
@@ -52,7 +52,7 @@ def _classify_nodes(matched: Matched):
     pred_graph.node_errors = True
 
 
-def _classify_edges(matched: Matched):
+def _classify_edges(matched: Matched) -> None:
     """Assign edges as true positives if both the source and target nodes are true positives
     in the gt graph and the corresponding edge exists in the predicted graph. Supports one-to-one
     matching.

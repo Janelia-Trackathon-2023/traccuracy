@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class BasicMetrics(Metric):
     """Generates basic statistics describing node and edge errors"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         valid_matching_types = ["one-to-one"]
         super().__init__(valid_matching_types)
 
@@ -29,7 +29,7 @@ class BasicMetrics(Metric):
 
         return {**node_stats, **edge_stats}
 
-    def _compute_stats(self, feature_type: str, matched: Matched):
+    def _compute_stats(self, feature_type: str, matched: Matched) -> dict[str, int | float]:
         # Get counts
         if feature_type == "node":
             tp = len(matched.gt_graph.get_nodes_with_flag(NodeFlag.TRUE_POS))
