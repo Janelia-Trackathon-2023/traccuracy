@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1741887473819,
+  "lastUpdate": 1741912599828,
   "repoUrl": "https://github.com/Janelia-Trackathon-2023/traccuracy",
   "entries": {
     "Python Benchmark with pytest-benchmark": [
@@ -7764,6 +7764,163 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0",
             "extra": "mean: 2.197257862000015 sec\nrounds: 1"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "17995243+DragaDoncila@users.noreply.github.com",
+            "name": "Draga Doncila Pop",
+            "username": "DragaDoncila"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e48b01b1fcaddb59d113b2f94f7dba097a34ff6d",
+          "message": "Improve runtime of `TrackOverlap` metrics (#218)\n\nCloses #132.\n\nImprove runtime performance of `TrackOverlap` metrics by leveraging our already computed node matching to avoid checking completely unrelated tracklets.\n\nPrior to this PR, we were maintaining a list of all possibly overlapping mapped edges, and using a set intersect on each reference tracklet to get the actual number of overlapping edges.\n\nIn this PR, I use the knowledge that only edges in a reference tracklet with **both endpoints present in the node matching** could possibly result in an overlapping edge. Rather than keeping a list of all possibly mapped edges, we immediately check whether a proposed overlapping edge of the reference tracklet is present in any of the overlap tracklets (this check is O(1) because I build a dictionary mapping `edge -> tracklet id` in a linear pass over the tracklets). If the edge is present, we increment the overlap count of the given tracklet ID for that reference tracklet. After we've checked all edges of the reference tracklet, I get the maximum count of all tracklet IDs that have any overlap with the reference tracklet.\n\nSince the metric supports `many-to-one` matching, an unhappy path for this metric remains, when many overlap nodes are mapped to both the source and target of a given reference edge e.g. for reference edge `uv` we have 10 nodes mapped to `u` and 10 nodes mapped to `v`. In this case we'd be checking 100 \"possible\" edges for presence in the overlap graph. I think this is highly improbable. We will most of the time have `one-to-one` mapping, or maybe a handful of nodes mapped.\n\n---------\n\nCo-authored-by: Draga Doncila <ddon0001@student.monash.edu>\nCo-authored-by: pre-commit-ci[bot] <66853113+pre-commit-ci[bot]@users.noreply.github.com>\nCo-authored-by: Caroline Malin-Mayor <cmalinmayor@gmail.com>",
+          "timestamp": "2025-03-14T11:29:23+11:00",
+          "tree_id": "137b212b05d7654ae25a2ac67749ea3a6eb38803",
+          "url": "https://github.com/Janelia-Trackathon-2023/traccuracy/commit/e48b01b1fcaddb59d113b2f94f7dba097a34ff6d"
+        },
+        "date": 1741912599382,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[2d]",
+            "value": 0.18164763674920567,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 5.505163831999994 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_gt_ctc_data[3d]",
+            "value": 0.05563164897625975,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 17.975379454000006 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_load_pred_ctc_data[2d]",
+            "value": 0.9239051477547274,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.0823621910000156 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[2d]",
+            "value": 1.3665487398876288,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0002807666469835449",
+            "extra": "mean: 731.770460000007 msec\nrounds: 2"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_checks[3d]",
+            "value": 0.10143419850058653,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 9.858607992000032 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[2d]",
+            "value": 0.6337652675589771,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.577871258000016 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_matcher[3d]",
+            "value": 0.057291663372992685,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 17.45454645800004 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[2d]",
+            "value": 3.744585100588737,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 267.05228299999817 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_ctc_metrics[3d]",
+            "value": 0.22694055283821635,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 4.406440309999994 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[2d]",
+            "value": 0.6195229605180427,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.6141451789999905 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_matcher[3d]",
+            "value": 0.053815153800257615,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 18.58212658299999 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_point_matcher[2d]",
+            "value": 9.218385025412983,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 108.47887099998843 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_point_matcher[3d]",
+            "value": 0.6708993604445611,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 1.4905365230000598 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[2d]",
+            "value": 197.0376958709997,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 5.075171000044065 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_iou_div_metrics[3d]",
+            "value": 63.598311032454355,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 15.72368799998003 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_basic_metrics[2d]",
+            "value": 3.1599467596997304,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 316.4610280000488 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_basic_metrics[3d]",
+            "value": 0.47257972718432373,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 2.1160450659999697 sec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_overlap_metrics[2d]",
+            "value": 2.2208473992369946,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 450.27857399998084 msec\nrounds: 1"
+          },
+          {
+            "name": "tests/bench.py::test_overlap_metrics[3d]",
+            "value": 1.2092419995914312,
+            "unit": "iter/sec",
+            "range": "stddev: 0",
+            "extra": "mean: 826.9643300000098 msec\nrounds: 1"
           }
         ]
       }
