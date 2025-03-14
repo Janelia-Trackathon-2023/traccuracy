@@ -2,11 +2,15 @@ from __future__ import annotations
 
 import json
 import logging
+from typing import TYPE_CHECKING
 
 import typer
 
 from traccuracy import run_metrics
 from traccuracy.loaders import load_ctc_data
+
+if TYPE_CHECKING:
+    from traccuracy import TrackingGraph
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +22,7 @@ def load_all_ctc(
     pred_dir: str,
     gt_track_path: str | None = None,
     pred_track_path: str | None = None,
-):
+) -> tuple[TrackingGraph, TrackingGraph]:
     gt_data = load_ctc_data(gt_dir, gt_track_path)
     pred_data = load_ctc_data(pred_dir, pred_track_path)
     return gt_data, pred_data
@@ -36,7 +40,7 @@ def run_ctc(
     ),
     loader: str = typer.Option("ctc", help="Loader to bring data into memory"),
     out_path: str = typer.Option("ctc_log.json", help="Path to save results"),
-):
+) -> None:
     """
     Run TRA and DET metric on gt and pred data using CTC matching.
 
@@ -87,7 +91,7 @@ def run_aogm(
     edge_ws_weight: float = typer.Option(
         1, help="Weight to assign to edges with incorrect semantics"
     ),
-):
+) -> None:
     """Run general AOGM measure on gt and pred data using CTC matching.
 
     If gt_track_path and pred_track_path are not passed, we find ``*_track.txt``
@@ -150,7 +154,7 @@ def run_divisions_on_iou(
         help="Number of frames to use for division tolerance."
         " Numbers greater than 0 will produce metrics for 0...n inclusive.",
     ),
-):
+) -> None:
     """Run division metrics on gt and pred data using IOU matching.
 
     If --gt_track_path and --pred_track_path are not passed, we find ``*_track.txt``
@@ -203,7 +207,7 @@ def run_divisions_on_ctc(
         help="Number of frames to use for division tolerance."
         " Numbers greater than 0 will produce metrics for 0...n inclusive.",
     ),
-):
+) -> None:
     """Run division metrics on gt and pred data using CTC matching.
 
     If --gt_track_path and --pred_track_path are not passed, we find ``*_track.txt``
@@ -242,5 +246,5 @@ def run_divisions_on_ctc(
 typer_click_object = typer.main.get_command(app)
 
 
-def main():
+def main() -> None:
     app()
