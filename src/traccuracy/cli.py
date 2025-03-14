@@ -175,12 +175,11 @@ def run_divisions_on_iou(
             f"Only cell tracking challenge (ctc) loader is available, but {loader} was passed."
         )
     gt_data, pred_data = load_all_ctc(gt_dir, pred_dir, gt_track_path, pred_track_path)
-    frame_buffer_tuple = tuple(range(0, frame_buffer + 1))
     result, matched = run_metrics(
         gt_data,
         pred_data,
         IOUMatcher(iou_threshold=match_threshold),
-        [DivisionMetrics(max_frame_buffer=frame_buffer_tuple)],
+        [DivisionMetrics(max_frame_buffer=frame_buffer)],
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)
@@ -228,12 +227,11 @@ def run_divisions_on_ctc(
             f"Only cell tracking challenge (ctc) loader is available, but {loader} was passed."
         )
     gt_data, pred_data = load_all_ctc(gt_dir, pred_dir, gt_track_path, pred_track_path)
-    frame_buffer_tuple = tuple(range(0, frame_buffer + 1))
     result, matched = run_metrics(
         gt_data,
         pred_data,
         CTCMatcher(),
-        [DivisionMetrics(max_frame_buffer=frame_buffer_tuple)],
+        [DivisionMetrics(max_frame_buffer=frame_buffer)],
     )
     with open(out_path, "w") as fp:
         json.dump(result, fp)

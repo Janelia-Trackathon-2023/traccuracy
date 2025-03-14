@@ -46,7 +46,7 @@ class TrackOverlapMetrics(Metric):
         super().__init__(valid_match_types)
         self.include_division_edges = include_division_edges
 
-    def _compute(self, matched: Matched) -> dict:
+    def _compute(self, matched: Matched) -> dict[str, float]:
         gt_tracklets = matched.gt_graph.get_tracklets(
             include_division_edges=self.include_division_edges
         )
@@ -69,7 +69,7 @@ def _calc_overlap_score(
     reference_tracklets: list[nx.DiGraph],
     overlap_tracklets: list[nx.DiGraph],
     overlap_reference_mapping: dict[Any, list[Any]],
-):
+) -> float:
     """Calculate weighted sum of the length of the longest overlap tracklet
     for each reference tracklet.
 

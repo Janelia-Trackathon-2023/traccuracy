@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 if TYPE_CHECKING:
+    from typing import Any
+
     from traccuracy.matchers._base import Matched
 
 
@@ -92,11 +94,11 @@ class Metric(ABC):
         return results
 
     @property
-    def info(self):
+    def info(self) -> dict[str, Any]:
         """Dictionary with Metric name and any parameters"""
         return {"name": self.__class__.__name__, **self.__dict__}
 
-    def _get_precision(self, numerator, denominator) -> float:
+    def _get_precision(self, numerator: int, denominator: int) -> float:
         """Compute precision and return np.nan if denominator is 0
 
         Args:
@@ -110,7 +112,7 @@ class Metric(ABC):
             return np.nan
         return numerator / denominator
 
-    def _get_recall(self, numerator, denominator) -> float:
+    def _get_recall(self, numerator: int, denominator: int) -> float:
         """Compute recall and return np.nan if denominator is 0
 
         Args:
@@ -124,7 +126,7 @@ class Metric(ABC):
             return np.nan
         return numerator / denominator
 
-    def _get_f1(self, precision, recall) -> float:
+    def _get_f1(self, precision: float, recall: float) -> float:
         """Compute F1 and return np.nan if precision and recall both equal 0
 
         Args:
@@ -170,7 +172,7 @@ class Results:
         """Return current traccuracy version"""
         return version("traccuracy")
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         """Returns all attributes that are not None as a dictionary
 
         Returns:

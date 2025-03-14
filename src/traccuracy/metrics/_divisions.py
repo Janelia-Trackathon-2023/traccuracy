@@ -47,6 +47,7 @@ from traccuracy.track_errors.divisions import _evaluate_division_events
 from ._base import Metric
 
 if TYPE_CHECKING:
+    from traccuracy import TrackingGraph
     from traccuracy.matchers import Matched
 
 logger = logging.getLogger(__name__)
@@ -69,13 +70,13 @@ class DivisionMetrics(Metric):
             buffer between 0 and max_frame_buffer
     """
 
-    def __init__(self, max_frame_buffer=0):
+    def __init__(self, max_frame_buffer: int = 0) -> None:
         valid_matching_types = ["one-to-one"]
         super().__init__(valid_matching_types)
 
         self.frame_buffer = max_frame_buffer
 
-    def _compute(self, data: Matched):
+    def _compute(self, data: Matched) -> dict[str, dict[str, float]]:
         """Runs `_evaluate_division_events` and calculates summary metrics for each frame buffer
 
         Args:
@@ -98,7 +99,7 @@ class DivisionMetrics(Metric):
             for fb, matched_data in div_annotations.items()
         }
 
-    def _get_mbc(self, gt_div_count, tp_division_count, fp_division_count) -> float:
+    def _get_mbc(self, gt_div_count: int, tp_division_count: int, fp_division_count: int) -> float:
         """Computes Mitotic Branching Correctness and returns nan if there are no gt
         divisions and no false positives
 
@@ -114,7 +115,7 @@ class DivisionMetrics(Metric):
             return np.nan
         return tp_division_count / (fp_division_count + gt_div_count)
 
-    def _calculate_metrics(self, g_gt, g_pred):
+    def _calculate_metrics(self, g_gt: TrackingGraph, g_pred: TrackingGraph) -> dict[str, float]:
         gt_div_count = len(g_gt.get_divisions())
         pred_div_count = len(g_pred.get_divisions())
         tp_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.TP_DIV))

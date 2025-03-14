@@ -50,7 +50,7 @@ class NodeFlag(str, enum.Enum):
     FALSE_NEG = "is_fn"
 
     @classmethod
-    def has_value(cls, value):
+    def has_value(cls, value: str) -> bool:
         """Check if a value is one of the enum's values.
         This can be used to check if other graph annotation strings are
         colliding with our reserved strings.
