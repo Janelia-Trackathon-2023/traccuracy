@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING
 from traccuracy._tracking_graph import NodeFlag
 
 if TYPE_CHECKING:
+    from collections.abc import Hashable, Iterable
+
     from traccuracy.matchers import Matched
 
 logger = logging.getLogger(__name__)
@@ -155,6 +157,9 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
 
     fp_divs = g_pred.get_nodes_with_flag(NodeFlag.FP_DIV)
     fn_divs = g_gt.get_nodes_with_flag(NodeFlag.FN_DIV)
+
+    fn_succ: Iterable[Hashable]
+    fp_succ: Iterable[Hashable]
 
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
