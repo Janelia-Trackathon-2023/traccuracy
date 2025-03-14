@@ -69,6 +69,14 @@ GROUPS = {
             "div_shift_bad_match_pred",
             "div_shift_bad_match_daughter",
         ],
+        "gap closing": [
+            "gap_close_gt_gap",
+            "gap_close_pred_gap",
+            "gap_close_matched_gap",
+            "gap_close_offset",
+            "div_parent_gap",
+            "div_daughter_gap",
+        ],
     },
     "matchers": {
         "2d": [

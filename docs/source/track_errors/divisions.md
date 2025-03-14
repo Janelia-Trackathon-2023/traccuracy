@@ -172,3 +172,24 @@ plot_matched(
     ["One wrong daughter", "Two wrong daughters"]
 )
 ```
+
+
+## Gap-Closing Edges
+
+Gap-closing edges must be identical in the ground truth and predicted graphs to be considered a true positive.
+
+If the parent node with outgoing gap-closing edges is mismatched to the parent node in the ground truth graph, this will be a False Positive/False Negative division pair,
+even if the daughter nodes are correctly identified.
+
+If the parent node with outgoing gap-closing edges is correctly matched to the parent node in the ground truth graph, this will be a Wrong Child division.
+
+The above is independent of the frame buffer parameter.
+
+```{code-cell} ipython3
+plot_matched(
+    [ex_graphs.div_parent_gap(), ex_graphs.div_daughter_gap()],
+    [{3: "FN", 9: "FP"}, {10: "WC"}],
+    "",
+    ["FP/FN Pair", "Wrong Child"]
+)
+```
