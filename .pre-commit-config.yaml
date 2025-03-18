@@ -28,8 +28,7 @@ repos:
         files: "^src/"
         # you have to add the things you want to type check against here
         additional_dependencies:
-          - networkx
-          - scipy
-          - pandas
-          - tqdm
-          - numpy
+          - types-networkx
+          - scipy-stubs
+          - pandas-stubs
+          - types-tqdm
