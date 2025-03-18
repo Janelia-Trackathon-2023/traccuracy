@@ -52,11 +52,7 @@ def _match_nodes(
         # np.where returns and.arrays which an additional int type
         pairs = cast("tuple[np.ndarray, np.ndarray]", np.where(iou))
 
-    # Catch the case where there are no overlaps
-    if len(pairs) < 2:
-        gtcells, rescells = np.array([]), np.array([])
-    else:
-        gtcells, rescells = pairs[0], pairs[1]
+    gtcells, rescells = pairs[0], pairs[1]
 
     return gtcells, rescells
 
