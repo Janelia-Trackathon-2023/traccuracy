@@ -177,15 +177,27 @@ def test__construct_time_to_seg_id_map():
 class Test_match_iou:
     def test_bad_input(self):
         # Bad input
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError,
+            match="Input data must be a TrackingData object with a graph and segmentations",
+        ):
             match_iou("not tracking data", "not tracking data")
 
     def test_bad_shapes(self):
         # shapes don't match
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Segmentation shapes must match between gt and pred"):
             match_iou(
                 TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 10), dtype=np.uint16)),
                 TrackingGraph(nx.DiGraph(), segmentation=np.zeros((5, 10, 5), dtype=np.uint16)),
+            )
+
+    def test_no_segmentation(self):
+        with pytest.raises(
+            ValueError, match="TrackingGraph must contain a segmentation array for IoU matching"
+        ):
+            match_iou(
+                TrackingGraph(nx.DiGraph()),
+                TrackingGraph(nx.DiGraph()),
             )
 
     def test_end_to_end_2d(self):
