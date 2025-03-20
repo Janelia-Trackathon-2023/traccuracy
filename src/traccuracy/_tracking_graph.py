@@ -96,6 +96,9 @@ class TrackingGraph:
     location (defaults to 'x' and 'y'). As in networkx, every cell must have a unique id, but these
     can be of any (hashable) type.
 
+    Edges typically connect nodes across consecutive frames, but gap closing or frame
+    skipping edges are valid, which connect nodes in frame t to nodes in frames beyond t+1.
+
     We provide common functions for accessing parts of the track graph, for example
     all nodes in a certain frame, or all previous or next edges for a given node.
     Additional functionality can be accessed by querying the stored networkx graph
@@ -508,24 +511,31 @@ class TrackingGraph:
 
         """
 
-        graph_copy = self.graph.copy()
-
         # Remove all intertrack edges from a copy of the original graph
-        removed_edges = []
-        for parent in self.get_divisions():
-            for daughter in self.graph.successors(parent):
-                graph_copy.remove_edge(parent, daughter)
-                removed_edges.append((parent, daughter))
+        non_div_edges = []
+        div_edges = []
+        for edge in self.graph.edges:
+            if not (self.graph.out_degree(edge[0]) > 1):
+                non_div_edges.append(edge)
+            else:
+                div_edges.append(edge)
+        no_div_subgraph = self.graph.edge_subgraph(non_div_edges)
 
         # Extract subgraphs (aka tracklets) and return as new track graphs
-        tracklets = nx.weakly_connected_components(graph_copy)
+        tracklets = nx.weakly_connected_components(no_div_subgraph)
+
+        # if a daughter had no successors, it would not be part of the
+        # subgraph, so we need to add it back in as its own lonely tracklet
+        tracklets = list(tracklets)
+        for node in self.graph.nodes:
+            if node not in no_div_subgraph.nodes:
+                tracklets.append({node})
 
         if include_division_edges:
-            tracklets = list(tracklets)
             # Add back intertrack edges
             for tracklet in tracklets:
-                for parent, daughter in removed_edges:
+                for parent, daughter in div_edges:
                     if daughter in tracklet:
                         tracklet.add(parent)
 
-        return [self.get_subgraph(g) for g in tracklets]
+        return [self.graph.subgraph(g) for g in tracklets]
