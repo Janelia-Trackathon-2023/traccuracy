@@ -17,6 +17,7 @@ matchers/matchers
 track_errors/basic
 track_errors/divisions
 track_errors/ctc
+track_errors/gap_closing
 ```
 
 ```{toctree}
