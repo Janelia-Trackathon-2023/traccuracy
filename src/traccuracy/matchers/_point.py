@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -9,6 +9,9 @@ from scipy.spatial import KDTree
 from ._base import Matcher
 
 if TYPE_CHECKING:
+    from collections.abc import Hashable
+    from typing import Any
+
     from traccuracy._tracking_graph import TrackingGraph
 
 
@@ -72,7 +75,11 @@ class PointMatcher(Matcher):
         return mapping
 
     def _match_frame(
-        self, gt_nodes, gt_locations, pred_nodes, pred_locations
+        self,
+        gt_nodes: list[Hashable],
+        gt_locations: list[list[float]],
+        pred_nodes: list[Hashable],
+        pred_locations: list[list[float]],
     ) -> list[tuple[Any, Any]]:
         mapping: list[tuple[Any, Any]] = []
         if len(gt_nodes) == 0 or len(pred_nodes) == 0:
@@ -81,7 +88,7 @@ class PointMatcher(Matcher):
         pred_kdtree = KDTree(pred_locations)
         # indices correspond to indices in the gt_nodes, pred_nodes lists
         sdm: dict[tuple[Any, Any], float] = gt_kdtree.sparse_distance_matrix(
-            pred_kdtree, max_distance=self.threshold
+            pred_kdtree, max_distance=self.threshold, output_type="dict"
         )
         # unmapped cost has to be higher than the max distance so if something can
         # be matched it will

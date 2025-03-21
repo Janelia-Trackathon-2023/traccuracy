@@ -9,12 +9,15 @@ from typing import TYPE_CHECKING
 from traccuracy._tracking_graph import NodeFlag
 
 if TYPE_CHECKING:
+    from collections.abc import Hashable, Iterable
+
+    from traccuracy import TrackingGraph
     from traccuracy.matchers import Matched
 
 logger = logging.getLogger(__name__)
 
 
-def _classify_divisions(matched_data: Matched):
+def _classify_divisions(matched_data: Matched) -> None:
     """Identify each division as a true positive, false positive or false negative
 
     This function only works on node mappers that are one-to-one
@@ -80,13 +83,13 @@ def _classify_divisions(matched_data: Matched):
     g_pred.division_annotations = True
 
 
-def _get_pred_by_t(g, node, delta_frames):
-    """For a given graph and node, traverses back by predecessor until target_frame
+def _get_pred_by_t(g: TrackingGraph, node: Hashable, delta_frames: int) -> Hashable:
+    """For a given graph and node, traverses back by predecessor until delta_frames
 
     Args:
         G (TrackingGraph): TrackingGraph to search on
         node (hashable): Key of starting node
-        target_frame (int): Frame of the predecessor target node
+        delta_frames (int): Frame of the predecessor target node
 
     Raises:
         ValueError: Cannot operate on graphs with merges
@@ -107,7 +110,7 @@ def _get_pred_by_t(g, node, delta_frames):
     return node
 
 
-def _get_succ_by_t(g, node, delta_frames):
+def _get_succ_by_t(g: TrackingGraph, node: Hashable, delta_frames: int) -> Hashable:
     """For a given node, find the successors after delta frames
 
     If a division event is discovered, returns None
@@ -115,7 +118,7 @@ def _get_succ_by_t(g, node, delta_frames):
     Args:
         G (TrackingGraph): TrackingGraph to search on
         node (hashable): Key of starting node
-        target_frame (int): Frame of the successor target node
+        delta_frames (int): Frame of the successor target node
 
     Returns:
         hashable: Node id of successor
@@ -130,7 +133,7 @@ def _get_succ_by_t(g, node, delta_frames):
     return node
 
 
-def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
+def _correct_shifted_divisions(matched_data: Matched, n_frames: int = 1) -> Matched:
     """Allows for divisions to occur within a frame buffer and still be correct
 
     This implementation asserts that the parent lineages and daughter lineages must match.
@@ -155,6 +158,9 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
 
     fp_divs = g_pred.get_nodes_with_flag(NodeFlag.FP_DIV)
     fn_divs = g_gt.get_nodes_with_flag(NodeFlag.FN_DIV)
+
+    fn_succ: Iterable[Hashable]
+    fp_succ: Iterable[Hashable]
 
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
@@ -223,7 +229,9 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames=1):
     return new_matched
 
 
-def _evaluate_division_events(matched_data: Matched, max_frame_buffer=0):
+def _evaluate_division_events(
+    matched_data: Matched, max_frame_buffer: int = 0
+) -> dict[int, Matched]:
     """Classify division errors and correct shifted divisions according to frame_buffer
 
     Note: A copy of matched_data will be created for each frame_buffer other than 0.
