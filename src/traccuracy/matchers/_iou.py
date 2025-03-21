@@ -49,7 +49,9 @@ def _match_nodes(
     if one_to_one:
         pairs = _one_to_one_assignment(iou)
     else:
-        # np.where returns and.arrays which an additional int type
+        # np.where returns tuple[ndarray[Any, dtype[signedinteger[Any]]], ...]
+        # this is functionally equivalent to a normal tuple of arrays so we need
+        # to cast to match the return type of _one_to_one_assignment
         pairs = cast("tuple[np.ndarray, np.ndarray]", np.where(iou))
 
     gtcells, rescells = pairs[0], pairs[1]
