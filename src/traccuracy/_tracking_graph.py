@@ -4,7 +4,7 @@ import copy
 import enum
 import logging
 from collections import defaultdict
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import networkx as nx
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from collections.abc import Hashable, Iterable
 
     import numpy as np
-    from networkx.classes.reportviews import NodeView, OutEdgeView
+    from networkx.classes.reportviews import DiDegreeView, NodeView, OutEdgeView
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class NodeFlag(str, enum.Enum):
     FALSE_NEG = "is_fn"
 
     @classmethod
-    def has_value(cls, value):
+    def has_value(cls, value: str) -> bool:
         """Check if a value is one of the enum's values.
         This can be used to check if other graph annotation strings are
         colliding with our reserved strings.
@@ -123,7 +123,7 @@ class TrackingGraph:
 
     def __init__(
         self,
-        graph: nx.DiGraph,
+        graph: nx.DiGraph[Hashable],
         segmentation: np.ndarray | None = None,
         frame_key: str = "t",
         label_key: str = "segmentation_id",
@@ -294,7 +294,8 @@ class TrackingGraph:
         Returns:
             list of hashable: a list of node ids for nodes that have more than one child
         """
-        return [node for node, degree in self.graph.out_degree() if degree >= 2]
+        out_degree: DiDegreeView = self.graph.out_degree()  # type: ignore
+        return [node for node, degree in out_degree if degree >= 2]
 
     def get_merges(self) -> list[Hashable]:
         """Get all nodes that have at least two incoming edges from the previous time frame
@@ -302,7 +303,8 @@ class TrackingGraph:
         Returns:
             list of hashable: a list of node ids for nodes that have more than one parent
         """
-        return [node for node, degree in self.graph.in_degree() if degree >= 2]
+        in_degree: DiDegreeView = self.graph.in_degree()  # type: ignore
+        return [node for node, degree in in_degree if degree >= 2]
 
     def get_connected_components(self) -> list[TrackingGraph]:
         """Get a list of TrackingGraphs, each corresponding to one track
@@ -323,7 +325,8 @@ class TrackingGraph:
         Args:
             nodes (list): A list of node ids to use in constructing the subgraph
         """
-        new_graph = self.graph.subgraph(nodes).copy()
+        # nx.DiGraph.subgraph is typed as a nx.Graph so we need to cast to nx.DiGraph
+        new_graph = cast(nx.DiGraph, self.graph.subgraph(nodes).copy())
 
         new_trackgraph = copy.deepcopy(self)
         new_trackgraph.graph = new_graph
@@ -418,7 +421,8 @@ class TrackingGraph:
                 f"Provided  flag {flag} is not of type NodeFlag. "
                 "Please use the enum instead of passing string values."
             )
-        nx.set_node_attributes(self.graph, value, name=flag)
+        # Networkx typing seems to be incorrect for this function
+        nx.set_node_attributes(self.graph, value, name=flag)  # type: ignore
         if value:
             self.nodes_by_flag[flag].update(self.graph.nodes)
         else:
@@ -494,14 +498,15 @@ class TrackingGraph:
                 "Please use the enum instead of passing string values, "
                 "and add new attributes to the class to avoid key collision."
             )
-        nx.set_edge_attributes(self.graph, value, name=flag)
+        # Networkx typing seems to be incorrect for this function
+        nx.set_edge_attributes(self.graph, value, name=flag)  # type: ignore
         if value:
             self.edges_by_flag[flag].update(self.graph.edges)
         else:
             self.edges_by_flag[flag] = set()
 
-    def get_tracklets(self, include_division_edges: bool = False) -> list[TrackingGraph]:
-        """Gets a list of new TrackingGraph objects containing all tracklets of the current graph.
+    def get_tracklets(self, include_division_edges: bool = False) -> list[nx.DiGraph]:
+        """Gets a list of new nx.DiGraph objects containing all tracklets of the current graph.
 
         Tracklet is defined as all connected components between divisions (daughter to next
         parent). Tracklets can also start or end with a non-dividing cell.
@@ -515,18 +520,19 @@ class TrackingGraph:
         non_div_edges = []
         div_edges = []
         for edge in self.graph.edges:
-            if not (self.graph.out_degree(edge[0]) > 1):
+            # When passing in a single node, output will be int
+            out_degree = cast(int, self.graph.out_degree(edge[0]))
+            if not (out_degree > 1):
                 non_div_edges.append(edge)
             else:
                 div_edges.append(edge)
         no_div_subgraph = self.graph.edge_subgraph(non_div_edges)
 
         # Extract subgraphs (aka tracklets) and return as new track graphs
-        tracklets = nx.weakly_connected_components(no_div_subgraph)
+        tracklets = list(nx.weakly_connected_components(no_div_subgraph))
 
         # if a daughter had no successors, it would not be part of the
         # subgraph, so we need to add it back in as its own lonely tracklet
-        tracklets = list(tracklets)
         for node in self.graph.nodes:
             if node not in no_div_subgraph.nodes:
                 tracklets.append({node})
@@ -538,4 +544,5 @@ class TrackingGraph:
                     if daughter in tracklet:
                         tracklet.add(parent)
 
-        return [self.graph.subgraph(g) for g in tracklets]
+        # nx.DiGraph.subgraph is typed as a nx.Graph so we need to cast to nx.DiGraph
+        return [cast(nx.DiGraph, self.graph.subgraph(g)) for g in tracklets]

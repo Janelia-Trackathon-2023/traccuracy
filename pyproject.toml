@@ -54,12 +54,12 @@ test = [
 ]
 dev = [
     "ipython",
-    "mypy",
     "pdbpp",
     "pre-commit",
     "ruff",
     "traccuracy[test]",
-    "traccuracy[docs]"
+    "traccuracy[docs]",
+    "traccuracy[typing]"
 ]
 docs = [
     "myst-nb >=1.2.0, <2",
@@ -77,6 +77,13 @@ covreport = [
     "traccuracy[test]",
     "seaborn"
 ]
+typing = [
+    "mypy",
+    "types-networkx",
+    "scipy-stubs",
+    "pandas-stubs",
+    "types-tqdm",
+]
 
 [tool.pixi.project]
 channels = ["conda-forge"]
@@ -90,7 +97,7 @@ traccuracy = { path = ".", editable = true }
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
-dev = { features = ["dev", "docs", "test", "covreport"], solve-group = "default" }
+dev = { features = ["dev", "docs", "test", "covreport", "typing"], solve-group = "default" }
 
 [tool.pixi.tasks]
 getdata = "python scripts/download_test_data.py"
@@ -200,12 +207,11 @@ disallow_any_generics = false
 disallow_subclassing_any = false
 show_error_codes = true
 pretty = true
+disallow_untyped_defs = true
 
-# # module specific overrides
-# [[tool.mypy.overrides]]
-# module = ["numpy.*",]
-# ignore_errors = true
-
+[[tool.mypy.overrides]]
+module = ["numba"]
+ignore_missing_imports = true
 
 # https://coverage.readthedocs.io/en/6.4/config.html
 [tool.coverage.report]
