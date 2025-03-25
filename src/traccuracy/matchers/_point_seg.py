@@ -14,6 +14,13 @@ if TYPE_CHECKING:
 
 
 class PointSegMatcher(Matcher):
+    """A matcher that constructs a mapping from a set of points to a segmentation
+    array by determining if a point falls within a segmentation label.
+
+    Either the predicted data or the ground truth can contain a segmentation array,
+    but not both. The matcher will map many points to a single segmentation label.
+    """
+
     def _compute_mapping(
         self, gt_graph: TrackingGraph, pred_graph: TrackingGraph
     ) -> list[tuple[Any, Any]]:
