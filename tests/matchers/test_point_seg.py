@@ -1,4 +1,5 @@
 import networkx as nx
+import numpy as np
 import pytest
 
 import tests.examples.segs as ex_segs
@@ -184,3 +185,10 @@ class TestPointSegMatcher:
         # gt and pred node should be the same after removing p prefix
         for pair in matched.mapping:
             assert pair[0] == pair[1][2:]
+
+    def test_empty(self):
+        point_empty = TrackingGraph(nx.DiGraph())
+        seg_empty = TrackingGraph(nx.DiGraph(), segmentation=np.ndarray(shape=(), dtype="int64"))
+
+        matched = self.matcher.compute_mapping(point_empty, seg_empty)
+        assert len(matched.mapping) == 0
