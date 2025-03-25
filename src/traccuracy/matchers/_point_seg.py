@@ -93,7 +93,7 @@ def match_point_to_seg(
     node_to_segid = {}
     for node, loc in zip(node_ids, locs, strict=False):
         # Check if loc is inside of segmentation after casting to int for indexing
-        seg_val = seg[*[int(x) for x in loc]]
+        seg_val = seg[tuple([int(x) for x in loc])]
         if seg_val != 0:
             node_to_segid[node] = seg_val
 
