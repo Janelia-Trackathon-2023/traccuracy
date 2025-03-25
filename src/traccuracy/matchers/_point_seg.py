@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, cast
 
 from ._base import Matcher
@@ -22,12 +21,9 @@ class PointSegMatcher(Matcher):
         # s data has seg, p data has points
         # If both have segmentations then default to gt -> pred, but warn
         if gt_graph.segmentation is not None and pred_graph.segmentation is not None:
-            seg_source = "pred"
-            s_graph = pred_graph
-            p_graph = gt_graph
-            warnings.warn(
-                "Both GT and Pred have segmentations. Matching GT points to Pred segmentations",
-                stacklevel=1,
+            raise ValueError(
+                "Both datasets have segmentations. "
+                "Please provide only one dataset with segmentations."
             )
         elif gt_graph.segmentation is not None:
             seg_source = "gt"

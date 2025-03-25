@@ -155,8 +155,9 @@ class TestPointSegMatcher:
 
     def test_both_seg(self):
         with pytest.raises(
-            UserWarning,
-            match="Both GT and Pred have segmentations. Matching GT points to Pred segmentations",
+            ValueError,
+            match="Both datasets have segmentations. "
+            "Please provide only one dataset with segmentations.",
         ):
             self.matcher._compute_mapping(self.track_graph, self.track_graph)
 
