@@ -269,4 +269,11 @@ def load_ctc_data(
             "Consider setting `run_checks=True` for detailed error message."
         ) from e
 
-    return TrackingGraph(G, segmentation=masks, name=name)
+    # Check dimensionality of segmentation data to set the location keys
+    loc_keys: tuple[str, ...]
+    if len(masks.shape) == 4:
+        loc_keys = ("z", "y", "x")
+    else:
+        loc_keys = ("y", "x")
+
+    return TrackingGraph(G, segmentation=masks, name=name, location_keys=loc_keys)
