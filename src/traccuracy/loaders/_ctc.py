@@ -72,20 +72,27 @@ def _get_node_attributes(masks: np.ndarray) -> pd.DataFrame:
         pd.DataFrame: Dataframe with one detection per row. Columns
             segmentation_id, x, y, z, t
     """
+    if len(masks.shape) == 4:
+        columns = {
+            "label": "segmentation_id",
+            "centroid-2": "x",
+            "centroid-1": "y",
+            "centroid-0": "z",
+        }
+    else:
+        columns = {
+            "label": "segmentation_id",
+            "centroid-1": "x",
+            "centroid-0": "y",
+        }
+
     data_df = pd.concat(
         [
             _detections_from_image(masks, idx)
             for idx in tqdm(range(masks.shape[0]), desc="Computing node attributes")
         ],
     ).reset_index(drop=True)
-    data_df = data_df.rename(
-        columns={
-            "label": "segmentation_id",
-            "centroid-2": "z",
-            "centroid-1": "y",
-            "centroid-0": "x",
-        }
-    )
+    data_df = data_df.rename(columns=columns)
     data_df["segmentation_id"] = data_df["segmentation_id"].astype(int)
     data_df["t"] = data_df["t"].astype(int)
     return data_df
