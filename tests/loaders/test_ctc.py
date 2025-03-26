@@ -8,6 +8,7 @@ import pytest
 import tifffile
 from numpy.testing import assert_array_equal
 
+from tests.examples.segs import multicell_3d
 from traccuracy._tracking_graph import TrackingGraph
 from traccuracy.loaders import _ctc, _load_tiffs
 
@@ -124,3 +125,20 @@ def test_load_tiffs_float_data(tmp_path):
     orig_seg = _load_tiffs(data_dir)
     assert casted_seg.dtype == np.uint64
     assert_array_equal(casted_seg.astype(orig_seg.dtype), orig_seg)
+
+
+def test_3d_data(tmpdir):
+    nframes = 3
+    gt, _ = multicell_3d()
+    seg_array = np.repeat(gt[np.newaxis], repeats=nframes, axis=0)
+    for frame in range(nframes):
+        tifffile.imwrite(tmpdir / f"mask00{frame}.tif", seg_array[frame])
+
+    # Save tracking data
+    df = pd.DataFrame({"Cell_ID": [1, 2], "Start": [0, 0], "End": [2, 2], "Parent_ID": [0, 0]})
+    df.to_csv(os.path.join(tmpdir, "res_track.txt"), header=None, sep=" ", index=False)
+
+    track_graph = _ctc.load_ctc_data(tmpdir)
+
+    # Check that when we get the location we get all 3 dims
+    assert len(track_graph.get_location("1_0")) == 3
