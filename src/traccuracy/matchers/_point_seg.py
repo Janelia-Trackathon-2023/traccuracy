@@ -26,7 +26,7 @@ class PointSegMatcher(Matcher):
     ) -> list[tuple[Any, Any]]:
         # Identify which data has segmentations
         # s data has seg, p data has points
-        # If both have segmentations then default to gt -> pred, but warn
+        # Fail if both have segmentations or segmentations missing
         if gt_graph.segmentation is not None and pred_graph.segmentation is not None:
             raise ValueError(
                 "Both datasets have segmentations. "

@@ -19,6 +19,6 @@ they can produce, and a brief description of behavior and any hyperparameters.
 | Matcher | Matching Type(s) | Description |
 ----------|------------------|-------------
 | Point | `one-to-one`  |  Given a maximum distance threshold, the matcher will perform hungarian matching on the points in each frame of the ground truth and predicted graphs, minimizing the overall distance while never matching any points with distance greater than the threshold. |
-| Point to Seg| `one-to-one`, `many-to-one`, `one-to-many` | Given one dataset with segmentation data, this matcher will identify points that fall within a non-zero segmentation label. |
+| Point to Seg| `one-to-one`, `many-to-one`, `one-to-many` | Given one dataset with segmentation data, this matcher will match nodes from the points-only graph to nodes from the segmentation graph if and only if the point location is within the the segmentation label. |
 | IOU | `one-to-one`, `many-to-one`, `one-to-many` | Given a minimum overlap threshold, will match the segmentations in each frame of the ground truth and predicted tracks with  intersection-over-union greater than or equal to the given threshold. If the one-to-one flag is true, will produce a one-to-one matching by running linear assignment/hungarian matching on the thresholded iou array. |
 | CTC | `one-to-one`, `many-to-one` | A predicted node is matched to a reference node if the computed segmentation covers a majority of the reference segmentation. See https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0144959 for complete details. |
