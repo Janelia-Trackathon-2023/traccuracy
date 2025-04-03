@@ -117,7 +117,7 @@ class TrackingGraph:
         frame_key: str
             The name of the node attribute that corresponds to the frame of
             the node. Defaults to "t".
-        location_key: tuple of str | str
+        location_keys: tuple of str | str
             Keys used to access the location of the cell in space.
     """
 
