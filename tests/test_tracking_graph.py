@@ -158,7 +158,7 @@ def test_constructor_and_get_location(graph_name, location_key, request):
         2: {"1_2", "1_3"},
         3: {"1_4"},
     }
-    assert tracking_graph.get_location("1_0") == [1, 1]
+    assert tracking_graph.get_location("1_3") == [1, 2]
 
 
 def test_invalid_constructor(nx_comp1):
