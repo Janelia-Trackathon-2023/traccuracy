@@ -118,7 +118,7 @@ class TrackingGraph:
             The name of the node attribute that corresponds to the frame of
             the node. Defaults to "t".
         location_keys: tuple of str | str
-            Keys used to access the location of the cell in space.
+            Key(s) used to access the location of the cell in space.
     """
 
     def __init__(
@@ -153,9 +153,10 @@ class TrackingGraph:
                 'segmentation_id'. Pass `None` if there is not a label
                 attribute on the graph.
             location_key (str | tuple, optional): The key or list of keys on each node
-                in graph that contains the spatial location of the node. Every
+                in graph that contains the spatial location of the node, in the order
+                needed to index the segmentation, if applicable. Every
                 node must have a value stored at each of these provided keys.
-                If a single string, it is assume that the location is stored as a list
+                If a single string, it is assumed that the location is stored as a list
                 on each node in a single attribute. Defaults to ('x', 'y').
             name (str, optional): User specified name that will be included in result
                 outputs associated with this object
