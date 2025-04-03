@@ -65,6 +65,24 @@ class NodeFlag(str, enum.Enum):
         return value in cls.__members__.values()
 
 
+def _check_valid_key_name(key: str, name: str) -> None:
+    """Check if the provided key conflicts with the reserved NodeFlag values and raise
+    a ValueError if so.
+
+    Args:
+        key (str): The key to check if it conflicts with the reserved values
+        name (str): The name of key to use in the error message
+
+    Raises:
+        ValueError: if the provided key conflicts with the NodeFlag values
+    """
+    if NodeFlag.has_value(key):
+        raise ValueError(
+            f"Specified {name} key {key} is reserved for graph"
+            f"annotation. Please change the {name} key."
+        )
+
+
 @enum.unique
 class EdgeFlag(str, enum.Enum):
     """An enum containing standard flags that are used to
@@ -171,13 +189,6 @@ class TrackingGraph:
                 "annotation. Please change the frame key."
             )
         self.frame_key = frame_key
-
-        def _check_valid_key_name(key: str, name: str) -> None:
-            if NodeFlag.has_value(key):
-                raise ValueError(
-                    f"Specified {name} key {key} is reserved for graph"
-                    f"annotation. Please change the {name} key."
-                )
 
         if label_key is not None:
             _check_valid_key_name(label_key, "label")
