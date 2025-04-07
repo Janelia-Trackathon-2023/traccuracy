@@ -92,13 +92,13 @@ class DivisionMetrics(Metric):
         )
 
         return self._calculate_metrics(data.gt_graph, data.pred_graph)
-        return {
-            f"Frame Buffer {fb}": self._calculate_metrics(
-                matched_data.gt_graph,
-                matched_data.pred_graph,
-            )
-            for fb, matched_data in div_annotations.items()
-        }
+        # return {
+        #     f"Frame Buffer {fb}": self._calculate_metrics(
+        #         matched_data.gt_graph,
+        #         matched_data.pred_graph,
+        #     )
+        #     for fb, matched_data in div_annotations.items()
+        # }
 
     def _get_mbc(self, gt_div_count: int, tp_division_count: int, fp_division_count: int) -> float:
         """Computes Mitotic Branching Correctness and returns nan if there are no gt
