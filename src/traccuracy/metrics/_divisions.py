@@ -86,11 +86,12 @@ class DivisionMetrics(Metric):
         Returns:
             dict: Returns a nested dictionary with one dictionary per frame buffer value
         """
-        div_annotations = _evaluate_division_events(
+        data = _evaluate_division_events(
             data,
             max_frame_buffer=self.frame_buffer,
         )
 
+        return self._calculate_metrics(data.gt_graph, data.pred_graph)
         return {
             f"Frame Buffer {fb}": self._calculate_metrics(
                 matched_data.gt_graph,
@@ -131,7 +132,8 @@ class DivisionMetrics(Metric):
         f1 = self._get_f1(recall, precision)
         mbc = self._get_mbc(gt_div_count, tp_division_count, fp_division_count)
 
-        return {
+        res_dict = {}
+        res_dict["Frame Buffer 0"] = {
             "Division Recall": recall,
             "Division Precision": precision,
             "Division F1": f1,
@@ -143,3 +145,34 @@ class DivisionMetrics(Metric):
             "False Negative Divisions": fn_division_count,
             "Wrong Children Divisions": wc_division_count,
         }
+        for fb in range(1, self.frame_buffer + 1):
+            new_tp_div_count = 0
+            for node in g_pred.graph.nodes:
+                node_info = g_pred.graph.nodes[node]
+                if (
+                    node_info.get("min_buffer_correct", np.nan) is not np.nan
+                    and node_info["min_buffer_correct"] <= fb
+                ):
+                    new_tp_div_count += 1
+            new_fp_div_count = fp_division_count - new_tp_div_count
+            new_fn_div_count = fn_division_count - new_tp_div_count
+            new_tp_div_count += tp_division_count
+            recall = self._get_recall(new_tp_div_count, gt_div_count)
+            precision = self._get_precision(new_tp_div_count, pred_div_count)
+            f1 = self._get_f1(recall, precision)
+            mbc = self._get_mbc(gt_div_count, tp_division_count, new_fp_div_count)
+
+            res_dict[f"Frame Buffer {fb}"] = {
+                "Division Recall": recall,
+                "Division Precision": precision,
+                "Division F1": f1,
+                "Mitotic Branching Correctness": mbc,
+                "Total GT Divisions": gt_div_count,
+                "Total Predicted Divisions": pred_div_count,
+                "True Positive Divisions": new_tp_div_count,
+                "False Positive Divisions": new_fp_div_count,
+                "False Negative Divisions": new_fn_div_count,
+                "Wrong Children Divisions": wc_division_count,
+            }
+
+        return res_dict
