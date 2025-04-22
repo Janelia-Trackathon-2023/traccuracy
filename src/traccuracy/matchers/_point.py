@@ -49,9 +49,12 @@ class PointMatcher(Matcher):
         if gt_graph.start_frame is None or gt_graph.end_frame is None:
             return mapping
         for frame in range(gt_graph.start_frame, gt_graph.end_frame):
+            # Sorting node ids to ensure deterministic solution when there are ties
+            # Ignoring typing because technically "Hashable" node ids are not
+            # always sortable, but we don't anticipate non-sortable types
             gt_nodes = sorted(gt_graph.nodes_by_frame.get(frame, []))  # type: ignore
-            gt_locations = [gt_graph.get_location(node) for node in gt_nodes]
             pred_nodes = sorted(pred_graph.nodes_by_frame.get(frame, []))  # type: ignore
+            gt_locations = [gt_graph.get_location(node) for node in gt_nodes]
             pred_locations = [pred_graph.get_location(node) for node in pred_nodes]
             if self.scale_factor is not None:
                 assert len(self.scale_factor) == len(gt_locations[0]), (
