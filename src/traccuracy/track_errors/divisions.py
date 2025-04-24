@@ -134,25 +134,21 @@ def _get_succ_by_t(g: TrackingGraph, node: Hashable, delta_frames: int) -> Hasha
     return node
 
 
-def _correct_shifted_divisions(matched_data: Matched, n_frames: int = 1) -> Matched:
+def _correct_shifted_divisions(matched_data: Matched, n_frames: int = 1) -> None:
     """Allows for divisions to occur within a frame buffer and still be correct
 
     This implementation asserts that the parent lineages and daughter lineages must match.
     Matching is determined based on the provided mapper
     Does not support merges
 
-    Copies matched_data before modifying node annotations and returns the new versions
+    Annotations are made directly on the matched data object.
 
     Args:
         matched_data (Matched): Matched data object containing gt and pred graphs
             with their associated mapping
         n_frames (int): Number of frames to include in the frame buffer
 
-    Returns:
-        Matched: copy of matched_data with corrected division annotations
     """
-    # Create copies of the graphs to modify during correction of divisions
-    # new_matched = copy.deepcopy(matched_data)
     g_gt = matched_data.gt_graph
     g_pred = matched_data.pred_graph
     mapper = matched_data.mapping
@@ -239,12 +235,8 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames: int = 1) -> Matc
             g_gt.graph.nodes[fn_node]["min_buffer_correct"] = n_frames
             g_pred.graph.nodes[fp_node]["min_buffer_correct"] = n_frames
 
-    # return matched_data
 
-
-def _evaluate_division_events(
-    matched_data: Matched, max_frame_buffer: int = 0
-) -> dict[int, Matched]:
+def _evaluate_division_events(matched_data: Matched, max_frame_buffer: int = 0) -> Matched:
     """Classify division errors and correct shifted divisions according to frame_buffer
 
     Note: A copy of matched_data will be created for each frame_buffer other than 0.
@@ -258,27 +250,25 @@ def _evaluate_division_events(
             buffer between 0 and max_frame_buffer
 
     Returns:
-        dict {frame_buffer: matched_data}: A dictionary where each key corresponds to a frame
-            buffer with a tuple of the corresponding ground truth and predicted TrackingGraphs
-            after division annotations and correction by frame buffer
+        matched_data (Matched): Matched data object with annotated FP, FN and TP
+        divisions, with a `min_buffer_correct` attribute indicating the minimum frame
+        buffer value that corrects this division, if applicable.
     """
-    # div_annotations = {}
 
     # Baseline division classification
     _classify_divisions(matched_data)
     gt_graph = matched_data.gt_graph
     pred_graph = matched_data.pred_graph
+
     # mark all FP divisions with NaN "min_buffer_correct" value
     # mark all FN divisions with NaN "min_buffer_correct" value
     for node in gt_graph.get_nodes_with_flag(NodeFlag.FN_DIV):
         gt_graph.graph.nodes[node]["min_buffer_correct"] = np.nan
     for node in pred_graph.get_nodes_with_flag(NodeFlag.FP_DIV):
         pred_graph.graph.nodes[node]["min_buffer_correct"] = np.nan
-    # div_annotations[0] = matched_data
 
-    # Correct shifted divisions for each nonzero value in frame_buffer
+    # Annotated divisions that would be corrected by frame buffer
     for delta in range(1, max_frame_buffer + 1):
         _correct_shifted_divisions(matched_data, n_frames=delta)
-        # div_annotations[delta] = corrected_matched
 
     return matched_data

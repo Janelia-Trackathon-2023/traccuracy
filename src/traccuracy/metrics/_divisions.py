@@ -86,19 +86,12 @@ class DivisionMetrics(Metric):
         Returns:
             dict: Returns a nested dictionary with one dictionary per frame buffer value
         """
-        data = _evaluate_division_events(
+        _evaluate_division_events(
             data,
             max_frame_buffer=self.frame_buffer,
         )
 
         return self._calculate_metrics(data.gt_graph, data.pred_graph)
-        # return {
-        #     f"Frame Buffer {fb}": self._calculate_metrics(
-        #         matched_data.gt_graph,
-        #         matched_data.pred_graph,
-        #     )
-        #     for fb, matched_data in div_annotations.items()
-        # }
 
     def _get_mbc(self, gt_div_count: int, tp_division_count: int, fp_division_count: int) -> float:
         """Computes Mitotic Branching Correctness and returns nan if there are no gt
@@ -116,7 +109,9 @@ class DivisionMetrics(Metric):
             return np.nan
         return tp_division_count / (fp_division_count + gt_div_count)
 
-    def _calculate_metrics(self, g_gt: TrackingGraph, g_pred: TrackingGraph) -> dict[str, float]:
+    def _calculate_metrics(
+        self, g_gt: TrackingGraph, g_pred: TrackingGraph
+    ) -> dict[str, dict[str, float]]:
         gt_div_count = len(g_gt.get_divisions())
         pred_div_count = len(g_pred.get_divisions())
         tp_division_count = len(g_gt.get_nodes_with_flag(NodeFlag.TP_DIV))
