@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Optional, cast
 
 import networkx as nx
 import pandas as pd
@@ -8,7 +8,7 @@ from traccuracy._tracking_graph import TrackingGraph
 
 def load_point_data(
     path: str | None = None,
-    df: pd.DataFrame | None = None,
+    df: Optional[pd.DataFrame] = None,  # noqa: UP007, bar syntax breaks docks build
     parent_column: str = "parent",
     id_column: str | None = None,
     pos_columns: tuple[str, ...] = ("z", "y", "x"),
