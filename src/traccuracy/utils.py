@@ -2,8 +2,8 @@ import copy
 
 import numpy as np
 
-from traccuracy import NodeFlag, TrackingGraph
-from traccuracy.matchers import Matched
+from traccuracy._tracking_graph import NodeFlag, TrackingGraph
+from traccuracy.matchers._base import Matched
 
 
 def get_corrected_division_graphs_with_delta(
