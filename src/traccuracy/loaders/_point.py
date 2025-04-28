@@ -1,6 +1,7 @@
 from typing import Optional, cast
 
 import networkx as nx
+import numpy as np
 import pandas as pd
 
 from traccuracy._tracking_graph import TrackingGraph
@@ -16,14 +17,14 @@ def load_point_data(
     seg_id_column: str | None = None,
     name: str | None = None,
     sep: str | None = None,
-    no_parent_val: int | None = -1,
 ) -> TrackingGraph:
     """Load point-based tracking data into a TrackingGraph from a csv-like file
 
     Assumes each row contains:
     - time
     - position, e.g. three columns 'z', 'y', 'x'
-    - parent, a reference to the node in the previous time frame
+    - parent, a reference to the node in the previous time frame.
+        A node without a parent can be indicated by either -1 or NaN
 
     Args:
         path (str | None, optional): Path to the csv-like file to load. Defaults to None.
@@ -40,8 +41,6 @@ def load_point_data(
             label id. Defaults to None.
         name (str | None, optional): Optional string to name/describe the dataset. Defaults to None.
         sep (str | None, optional): Passed to pd.read_csv to set the sep kwarg. Defaults to None.
-        no_parent_val (str | None, optional): The value used to indicate that a node
-            does not have a parent. Defaults to -1.
 
     Raises:
         ValueError: Must provide either a path or a dataframe
@@ -90,7 +89,7 @@ def load_point_data(
         node_id = row[id_column]
         nodes.append((node_id, row[node_attr_cols].to_dict()))
 
-        if row[parent_column] != no_parent_val:
+        if row[parent_column] != -1 and not np.isnan(row[parent_column]):
             edges.append((row[parent_column], node_id))
 
     G: nx.DiGraph = nx.DiGraph()
