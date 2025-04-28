@@ -21,10 +21,11 @@ def load_point_data(
     """Load point-based tracking data into a TrackingGraph from a csv-like file
 
     Assumes each row contains:
+
     - time
     - position, e.g. three columns 'z', 'y', 'x'
     - parent, a reference to the node in the previous time frame.
-        A node without a parent can be indicated by either -1 or NaN
+      A node without a parent can be indicated by either -1 or NaN
 
     Args:
         path (str | None, optional): Path to the csv-like file to load. Defaults to None.
