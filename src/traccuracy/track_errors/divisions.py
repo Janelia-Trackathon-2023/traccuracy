@@ -141,7 +141,9 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames: int = 1) -> None
     Matching is determined based on the provided mapper
     Does not support merges
 
-    Annotations are made directly on the matched data object.
+    Annotations are made directly on the matched data object. FP/FN divisions store
+    a `min_buffer_correct` attribute that indicates the minimum frame buffer value
+    that would correct the division.
 
     Args:
         matched_data (Matched): Matched data object containing gt and pred graphs
@@ -158,9 +160,6 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames: int = 1) -> None
 
     fn_succ: Iterable[Hashable]
     fp_succ: Iterable[Hashable]
-
-    if n_frames == 2:
-        print("Investigating frame buffer 2")
 
     # Compare all pairs of fp and fn
     for fp_node, fn_node in itertools.product(fp_divs, fn_divs):
@@ -227,10 +226,6 @@ def _correct_shifted_divisions(matched_data: Matched, n_frames: int = 1) -> None
             correct = True
 
         if correct:
-            # # Remove error annotations from pred graph
-            # g_pred.remove_flag_from_node(fp_node, NodeFlag.FP_DIV)
-            # g_gt.remove_flag_from_node(fn_node, NodeFlag.FN_DIV)
-
             # set the current frame buffer as the minimum correct frame
             g_gt.graph.nodes[fn_node]["min_buffer_correct"] = n_frames
             g_pred.graph.nodes[fp_node]["min_buffer_correct"] = n_frames
@@ -260,14 +255,14 @@ def _evaluate_division_events(matched_data: Matched, max_frame_buffer: int = 0) 
     gt_graph = matched_data.gt_graph
     pred_graph = matched_data.pred_graph
 
-    # mark all FP divisions with NaN "min_buffer_correct" value
     # mark all FN divisions with NaN "min_buffer_correct" value
     for node in gt_graph.get_nodes_with_flag(NodeFlag.FN_DIV):
         gt_graph.graph.nodes[node]["min_buffer_correct"] = np.nan
+    # mark all FP divisions with NaN "min_buffer_correct" value
     for node in pred_graph.get_nodes_with_flag(NodeFlag.FP_DIV):
         pred_graph.graph.nodes[node]["min_buffer_correct"] = np.nan
 
-    # Annotated divisions that would be corrected by frame buffer
+    # Annotate divisions that would be corrected by frame buffer
     for delta in range(1, max_frame_buffer + 1):
         _correct_shifted_divisions(matched_data, n_frames=delta)
 

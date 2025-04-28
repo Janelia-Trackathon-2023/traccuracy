@@ -20,7 +20,7 @@ def get_corrected_division_graphs_with_delta(
         frame_buffer (int): Maximum frame buffer to use for division correction
 
     Returns:
-        tuple[TrackingGraph, TrackingGraph]: Tuple of corrected GT and Pred division graphs
+        tuple[TrackingGraph, TrackingGraph]: Tuple of corrected GT and Pred graphs
     """
     corrected_gt_graph = copy.deepcopy(matched.gt_graph)
     corrected_pred_graph = copy.deepcopy(matched.pred_graph)
