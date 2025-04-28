@@ -15,6 +15,7 @@ class Test_load_point_data:
                 "x": range(nrows),
                 "y": range(nrows),
                 "z": range(nrows),
+                "node_id": range(nrows),
             }
         )
         return df
@@ -34,9 +35,10 @@ class Test_load_point_data:
         # Bad id column
         data = {"parent": range(nrows)}
         with pytest.raises(ValueError, match="Specified id_column *"):
-            load_point_data(df=pd.DataFrame(data), id_column="node_id")
+            load_point_data(df=pd.DataFrame(data))
 
         # All pos columns missing
+        data = {**data, "node_id": range(nrows)}
         with pytest.raises(ValueError, match="Specified pos_columns *"):
             load_point_data(df=pd.DataFrame(data))
 
@@ -49,6 +51,10 @@ class Test_load_point_data:
         data = {**data, "z": range(nrows)}
         with pytest.raises(ValueError, match="Specified time_column *"):
             load_point_data(df=pd.DataFrame(data))
+
+        data = {**data, "t": range(nrows)}
+        with pytest.raises(ValueError, match="Specified seg_id_column *"):
+            load_point_data(df=pd.DataFrame(data), seg_id_column="seg_label")
 
     def test_load_from_dataframe(self):
         # Make a valid dataframe using defaults
@@ -76,6 +82,13 @@ class Test_load_point_data:
         track_graph = load_point_data(df=df_mod, time_column="time")
         assert track_graph.frame_key == "time"
         assert "time" in track_graph.graph.nodes[0]
+
+        # Check seg_label
+        seg_id_col = "seg_id"
+        df[seg_id_col] = range(nrows)
+        track_graph = load_point_data(df=df, seg_id_column=seg_id_col)
+        assert track_graph.label_key == seg_id_col
+        assert seg_id_col in track_graph.graph.nodes[0]
 
         # Change id default
         df["node_id"] = range(10, 10 + nrows)

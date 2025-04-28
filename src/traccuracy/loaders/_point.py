@@ -10,11 +10,13 @@ def load_point_data(
     path: str | None = None,
     df: Optional[pd.DataFrame] = None,  # noqa: UP007, bar syntax breaks docks build
     parent_column: str = "parent",
-    id_column: str | None = None,
+    id_column: str = "node_id",
     pos_columns: tuple[str, ...] = ("z", "y", "x"),
     time_column: str = "t",
+    seg_id_column: str | None = None,
     name: str | None = None,
     sep: str | None = None,
+    no_parent_val: int | None = -1,
 ) -> TrackingGraph:
     """Load point-based tracking data into a TrackingGraph from a csv-like file
 
@@ -29,13 +31,17 @@ def load_point_data(
             Defaults to None.
         parent_column (str | None, optional): A reference to the parent node in the previous
             time frame. Defaults to "parent".
-        id_column (str | None, optional): Optional column used to specify node ids.
-            Defaults to None and the row index is used as the id
+        id_column (str, optional): Optional column used to specify node ids.
+            Defaults to "node_id"
         pos_columns (tuple[str], optional): A tuple of columns to use for position.
             Defaults to ("z", "y", "x").
         time_column (str, optional): The column to use for time. Defaults to "t".
+        seg_id_column (str | None, optional): Name of an optional column containing a segmentation
+            label id. Defaults to None.
         name (str | None, optional): Optional string to name/describe the dataset. Defaults to None.
         sep (str | None, optional): Passed to pd.read_csv to set the sep kwarg. Defaults to None.
+        no_parent_val (str | None, optional): The value used to indicate that a node
+            does not have a parent. Defaults to -1.
 
     Raises:
         ValueError: Must provide either a path or a dataframe
@@ -43,6 +49,7 @@ def load_point_data(
         ValueError: id_column not present in data
         ValueError: pos_columns not present in data
         ValueError: time_column not present in data
+        ValueError: seg_id_column not present in data
 
     Returns:
         TrackingGraph
@@ -62,7 +69,7 @@ def load_point_data(
     if parent_column not in df.columns:
         raise ValueError(f"Specified parent_column {parent_column} not present")
 
-    if id_column and id_column not in df.columns:
+    if id_column not in df.columns:
         raise ValueError(f"Specified id_column {id_column} not present")
 
     if not all(c in df.columns for c in pos_columns):
@@ -71,20 +78,27 @@ def load_point_data(
     if time_column not in df.columns:
         raise ValueError(f"Specified time_column {time_column} not present")
 
+    if seg_id_column and seg_id_column not in df.columns:
+        raise ValueError(f"Specified seg_id_column {seg_id_column} not present")
+
+    node_attr_cols = [time_column, *pos_columns]
+    if seg_id_column:
+        node_attr_cols.append(seg_id_column)
+
     nodes, edges = [], []
-    for idx, row in df.iterrows():
-        if id_column is None:
-            node_id = idx
-        else:
-            node_id = row[id_column]
+    for _, row in df.iterrows():
+        node_id = row[id_column]
+        nodes.append((node_id, row[node_attr_cols].to_dict()))
 
-        nodes.append((node_id, row[[time_column, *pos_columns]].to_dict()))
-
-        if row[parent_column] != -1:
+        if row[parent_column] != no_parent_val:
             edges.append((row[parent_column], node_id))
 
     G: nx.DiGraph = nx.DiGraph()
     G.add_nodes_from(nodes)
     G.add_edges_from(edges)
 
+    if seg_id_column:
+        return TrackingGraph(
+            G, frame_key=time_column, location_keys=pos_columns, label_key=seg_id_column, name=name
+        )
     return TrackingGraph(G, frame_key=time_column, location_keys=pos_columns, name=name)
