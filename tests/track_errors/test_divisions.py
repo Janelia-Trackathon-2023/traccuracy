@@ -11,6 +11,19 @@ from traccuracy.track_errors.divisions import (
     _get_pred_by_t,
     _get_succ_by_t,
 )
+from traccuracy.utils import get_corrected_division_graphs_with_delta
+
+
+def assert_corrected_graphs(matched, gt_node, pred_node, n_frames):
+    corrected_gt, corrected_pred = get_corrected_division_graphs_with_delta(matched, n_frames)
+
+    attrs = corrected_gt.nodes[gt_node]
+    assert NodeFlag.FN_DIV not in attrs
+    assert NodeFlag.TP_DIV in attrs
+
+    attrs = corrected_pred.nodes[pred_node]
+    assert NodeFlag.FP_DIV not in attrs
+    assert NodeFlag.TP_DIV in attrs
 
 
 class TestStandardsDivisions:
@@ -136,6 +149,8 @@ class TestStandardShifted:
         assert NodeFlag.FP_DIV in attrs
         assert attrs.get("min_buffer_correct") == 1
 
+        assert_corrected_graphs(matched, gt_node, pred_node, n_frames)
+
     @pytest.mark.parametrize("n_frames", [1, 3])
     @pytest.mark.parametrize(
         "matched, gt_node, pred_node",
@@ -158,6 +173,8 @@ class TestStandardShifted:
             attrs = matched.pred_graph.nodes[pred_node]
             assert attrs.get("min_buffer_correct") == 3
 
+            assert_corrected_graphs(matched, gt_node, pred_node, n_frames)
+
     @pytest.mark.parametrize("n_frames", [1, 2])
     @pytest.mark.parametrize(
         "matched, gt_node, pred_node",
@@ -175,6 +192,8 @@ class TestStandardShifted:
         attrs = matched.pred_graph.nodes[pred_node]
         assert attrs.get(NodeFlag.FP_DIV) is True
         assert attrs.get("min_buffer_correct") == 1
+
+        assert_corrected_graphs(matched, gt_node, pred_node, n_frames)
 
     @pytest.mark.parametrize("n_frames", [1, 3])
     @pytest.mark.parametrize(
@@ -202,6 +221,8 @@ class TestStandardShifted:
             assert NodeFlag.FP_DIV in attrs
             assert attrs.get("min_buffer_correct") == 3
 
+            assert_corrected_graphs(matched, gt_node, pred_node, n_frames)
+
     def test_minimal_matching(self):
         matched = ex_graphs.div_shift_min_match()
         _classify_divisions(matched)
@@ -214,6 +235,8 @@ class TestStandardShifted:
         attrs = matched.pred_graph.nodes[11]
         assert NodeFlag.FP_DIV in attrs
         assert attrs.get("min_buffer_correct") == 1
+
+        assert_corrected_graphs(matched, 2, 11, 1)
 
     @pytest.mark.parametrize(
         "matched",
