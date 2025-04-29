@@ -130,6 +130,7 @@ def test_load_points(benchmark, tmpdir):
             "y": range(nrows),
             "z": range(nrows),
             "parent": range(-1, nrows - 1),
+            "node_id": range(nrows),
         }
     )
     filepath = os.path.join(tmpdir, "test.csv")
