@@ -172,6 +172,7 @@ jobs:
         if: github.event.pull_request.head.repo.fork == false
         with:
           body-path: report.md
+          token: ${{ secrets.COMMIT_MESSAGE_PAT }}
 
   test-case-coverage:
     name: Test case coverage
@@ -219,6 +220,7 @@ jobs:
         with:
           body: |
             ![coverage plot](https://github.com/Janelia-Trackathon-2023/traccuracy/blob/test-case-coverage-report/${{ steps.hash.outputs.commit }}.png?raw=True)
+          token: ${{ secrets.COMMIT_MESSAGE_PAT }}
 
 
   deploy:
